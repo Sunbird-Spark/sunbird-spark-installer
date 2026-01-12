@@ -18,6 +18,10 @@ spec:
       volumes:
       - name: shared-volume
         emptyDir: {}
+      - name: scripts-volume
+        hostPath:
+          path: /scripts
+          type: Directory
       initContainers:
       - name: wait-for-yugabyte
         image: busybox
@@ -36,12 +40,14 @@ spec:
         - |
           set -ex
           cd /opt/shared-volume
-          export migration_branch={{ default "main" .Values.yugabyte_migration_version }}
-          git clone --depth 1 --branch "$migration_branch" https://github.com/chethann007/sunbird-yugabyte-migrations.git /opt/shared-volume/sunbird-yugabyte-migrations
-          chmod -R 777 /opt/shared-volume
+          # Copy local migration files
+          cp -r /scripts/sunbird-yugabyte-migrations /opt/shared-volume/
+          chmod -R 777 /opt/shared-volume/sunbird-yugabyte-migrations
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
+        - name: scripts-volume
+          mountPath: /scripts
       containers:
       - name: migration
         image: yugabytedb/yugabyte:latest
@@ -55,7 +61,7 @@ spec:
           export YCQLSH_PORT={{ .Values.global.yugabyte.port }}
           export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
           export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
-          # run migrations from cloned repo
+          # run migrations from local scripts folder
           cd /opt/shared-volume/sunbird-yugabyte-migrations/sunbird-knowlg
           chmod +x execute_migrations.sh || true
           ./execute_migrations.sh $ENV
