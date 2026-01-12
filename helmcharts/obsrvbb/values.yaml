@@ -1,0 +1,72 @@
+replicaCount: 1
+fullname: obsrvbb
+
+provisioningAnnotations: &provisioningAnnotations
+  "helm.sh/hook-weight": "-4"
+
+zookeeper: &zookeeper
+  fullnameOverride: zookeeper
+  nameOverride: zookeeper
+  host: "zookeeper"
+  port: 2181
+  persistence:
+    size: 25Gi
+
+kafka: &kafka
+  zookeeper: *zookeeper
+  enabled: true
+  nameOverride: "kafka"
+  fullnameOverride: "kafka"
+  clientProtocol: PLAINTEXT
+  host: "kafka"
+  port: 9092
+  image:
+    registry: sunbirded.azurecr.io
+    repository: kafka
+    tag: 3.3.1-debian-11-r25
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+  persistence:
+    size: 25Gi
+  provisioning:
+    nameOverride: "provisioning"
+    fullnameOverride: "provisioning"
+    annotations:
+      "helm.sh/hook-weight": "-4"
+    replicationFactor: 1
+    numPartitions: 1
+    topics:
+    - name: "{{ .Values.global.env }}.nlweb.ingest"
+    - name: "{{ .Values.global.env }}.telemetry.ingest"
+    parallel: 1
+
+redis: &redis
+  enabled: true
+  nameOverride: "redis"
+  fullnameOverride: "redis"
+  auth:
+    enabled: false
+  host: "redis-master"
+  port: 6379
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+  replica:
+    replicaCount: 0
+  master:
+    persistence:
+      size: 25Gi
+      
+superset:
+  enabled: true
+  image:
+    repository: sunbirded.azurecr.io/superset
+    tag: release-7.0.0
+    pullPolicy: Always
+
+env: &env
+default: "dev"
+global:
+  redis: *redis
+  zookeeper: *zookeeper
+  kafka: *kafka
+

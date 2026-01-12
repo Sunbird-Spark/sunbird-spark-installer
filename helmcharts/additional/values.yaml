@@ -1,0 +1,93 @@
+velero:
+  enabled: true
+  credentials:
+    useSecret: true
+    secretContents:
+      cloud: |
+        AZURE_STORAGE_ACCOUNT_NAME: {{ .Values.global.cloud_storage_access_key }}
+        AZURE_STORAGE_ACCOUNT_KEY: {{ .Values.global.cloud_storage_secret_key }}
+  configuration:
+    backupStorageLocation:
+      - name: default
+        provider: "azure"
+        bucket: backups
+        config:
+          storageAccount: 
+          storageAccountKeyEnvVar: AZURE_STORAGE_ACCOUNT_KEY
+    volumeSnapshotLocation:
+      - name: default
+        provider: "azure"
+  schedules:
+    edcluster-backup:
+      disabled: false
+      schedule: "0 0 * * *"
+      useOwnerReferencesInBackup: false
+      template:
+        ttl: "240h"
+        includedNamespaces:
+          - "sunbird"
+        snapshotVolumes: true  
+
+# This section is for the Velero configuration for database backup. To enable DB backup, set disabled to false
+    database-backup:
+      disabled: true
+      schedule: "0 0 * * *"
+      useOwnerReferencesInBackup: false
+      template:
+        ttl: "240h"
+        includedNamespaces:
+          - "sunbird"
+        labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - cassandra
+                - neo4j
+                - redis
+                - postgresql
+        snapshotVolumes: true
+
+
+volume-autoscaler:
+  enabled: false
+  registry: "docker.io"
+  repository: devopsnirvana/kubernetes-volume-autoscaler
+  tag: 1.0.5
+  # How much full the disk must be before considering scaling
+  scale_above_percent: "80"
+  # How much to scale disks up by, as a percentage of their current size
+  scale_up_percent: "40"
+  # An minimum amount of bytes to scale up by (typically because providers like AWS only support 100GB increments in disk size)
+  scale_up_min_increment: "5368709120"  # 5 GB in bytes
+  # An maximum amount of bytes to scale up by (helps prevent large disks from growing too fast/exponentially).  Set to 16TB by default, which basically means this is disabled
+  scale_up_max_increment: ""
+  # The maximum size of disks to scale up to.  By default on AWS using EBS volumes this is set to 16TB as that is the EBS Max disk size.
+  scale_up_max_size: ""     
+
+nlwebflink:
+  enabled: false
+  namespace: nlweb
+  image:
+    repository: sunbirded.azurecr.io/flink-nlweb
+    tag: 0.0.1
+  kafka:
+    topic: "{{ .Values.global.env }}.nlweb.ingest"
+    bootstrapServers: kafka.sunbird.svc.cluster.local:9092  
+
+
+nlweb:
+  enabled: false
+  namespace: nlweb
+  image:
+    repository: sanketikahub/nlweb
+    tag: 0.0.1
+  port: 8000
+  static:
+    enabled: true
+  envSecret:
+    enabled: true
+  qdrant:
+    image: qdrant/qdrant:v1.15.1
+    port: 6333
+    storage: 10Gi
