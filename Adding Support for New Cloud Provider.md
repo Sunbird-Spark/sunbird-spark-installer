@@ -30,13 +30,13 @@ Create the following buckets:
 ## Steps to Add a New Cloud Provider
 
 ### Step 1: Create a New Folder
-- Navigate to the `terraform` directory and create a folder for the new cloud provider.
-  Example: `terraform/gcp/`
+- Navigate to the `opentofu` directory and create a folder for the new cloud provider.
+  Example: `opentofu/gcp/`
 
 ### Step 2: Recommended Folder Structure
 Organize the folder as follows:
 ```plaintext
-terraform/<cloud_provider>/
+opentofu/<cloud_provider>/
 ├── _common
 │   ├── kubernetescluster.hcl
 │   ├── keys.hcl
@@ -76,7 +76,7 @@ terraform/<cloud_provider>/
 ### Step 3: Copy Template Files
 Copy the template files from the Azure configuration:
 ```sh
-cp sunbird-ed-installer/terraform/azure/template/{global-values.yaml,install.sh} sunbird-ed-installer/terraform/gcp/template/
+cp sunbird-ed-installer/opentofu/azure/template/{global-values.yaml,install.sh} sunbird-ed-installer/opentofu/gcp/template/
 In global-values.yaml, add this variable:
 cloud_provider: "REPLACE_ME" # for configuring GCP and AWS installations
 ```

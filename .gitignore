@@ -2,7 +2,7 @@
 .idea
 terragrunt.iml
 vendor
-.terraform
+.opentofu
 .vscode
 *.tfstate
 *.tfstate.backup
