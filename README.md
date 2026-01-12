@@ -20,7 +20,7 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 1. [jq](https://jqlang.github.io/jq/download/)
 2. [yq](https://github.com/mikefarah/yq#install) (for YAML processing)
 3. [rclone](https://rclone.org/)
-4. [Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+4. [OpenTofu](https://opentofu.org/docs/intro/install/)
 5. [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
 6. Linux / MacOS / GitBash (Windows)
 7. Python 3 
@@ -29,7 +29,7 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 10. [helm](https://helm.sh/docs/intro/quickstart/#install-helm)
 11. [Postman CLI](https://learning.postman.com/docs/getting-started/installation/installation-and-updates/)
 12. For cloud-specific tools, follow the instructions in the respective README file based on your provider.  
-    Example for Azure: [terraform/azure/README.md](terraform/azure/README.md)
+    Example for Azure: [opentofu/azure/README.md](opentofu/azure/README.md)
 
 ### Notes
 - Existing files in the following locations will be backed up with a `.bak` extension, and the files will be overwritten:
@@ -45,12 +45,12 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
      ```
 2. Copy the template directory:
      ```bash
-     cd terraform/<cloud-provider>   # Replace <cloud-provider> with your cloud provider (e.g., azure, aws, gcp)
+     cd opentofu/<cloud-provider>   # Replace <cloud-provider> with your cloud provider (e.g., azure, aws, gcp)
      cp -r template demo
      cd demo
      ```
 3. Fill in the variables in `demo/global-values.yaml`.
-   take reference from  [terraform/azure/README.md]
+   take reference from  [opentofu/azure/README.md]
 
 4. Controlling DIAL Services and Flink Jobs
 
@@ -98,7 +98,7 @@ This installation setup creates the following default users with different roles
 
 ##  Destorying the sunbird instance
 ```bash
-cd terraform/<cloud-provider>/<env>
+cd opentofu/<cloud-provider>/<env>
 time ./install.sh destroy_tf_resources
 ```
 
@@ -136,7 +136,7 @@ When `lets_encrypt_ssl` is enabled:
 Once the renewal completes:
 
 1. Fetch the renewed keys from the ConfigMap.
-2. Update your `terraform/<cloud-provider>/<env>/global-values.yaml` file with the new values:
+2. Update your `opentofu/<cloud-provider>/<env>/global-values.yaml` file with the new values:
 
 ```yaml
 proxy_private_key: |
