@@ -38,4 +38,3 @@ dependencies:
     repository: https://charts.yugabyte.com
     version: 2025.2.0   # Chart version
     condition: yugabyte.enabled
- 

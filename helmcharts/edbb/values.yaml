@@ -60,8 +60,7 @@ yugabyte: &yugabyte
   replicas:
     master: 3
     tserver: 3
-  username: "yugabyte"
-  password: "yugabyte"  
+  
 
 
 zookeeper: &zookeeper

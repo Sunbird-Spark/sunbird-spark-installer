@@ -6,10 +6,10 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 17.8.3
 - name: kafka
-  repository: https://charts.bitnami.com/bitnami
-  version: 20.0.2
+  repository: ""
+  version: 32.2.15
 - name: yugabyte
   repository: https://charts.yugabyte.com
-  version: 2025.2.0  
-digest: sha256:b58587093240b8d6005314af318d4cbfecdca635dc7d8066d495a24fbed191f9
-generated: "2024-01-12T11:37:46.219743493+01:00"
+  version: 2025.2.0    
+digest: sha256:eac514e60f0a7c07ef51027f3782fe346934dce5483ddb34802d8030a84a72cd
+generated: "2026-01-13T16:53:27.472202+05:30"

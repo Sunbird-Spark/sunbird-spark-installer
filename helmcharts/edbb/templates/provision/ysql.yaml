@@ -35,8 +35,8 @@ spec:
             export devops_branch={{ .Values.devops_release_branch }}
             export PGHOST={{.Values.global.yugabyte.host}}
             export PGPORT={{.Values.global.yugabyte.postgresql_port}}
-            export PGUSER=yugabyte
-            export PGPASSWORD=yugabyte
+            export PGUSER={{ .Values.global.yugabyte.ysql.user }}
+            export PGPASSWORD={{.Values.global.yugabyte.ysql.password}}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             # Ensure ysqlsh is available in the image

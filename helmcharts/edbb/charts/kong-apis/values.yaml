@@ -4,7 +4,7 @@ fullnameOverride: ""
 image:
   repository: sunbirded.azurecr.io/kong-scripts
   tag: "0.1.8"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   pullSecrets: []
 
 kong_admin_url: kong
@@ -12,36 +12,9 @@ kong_admin_port: 8001
 
 statsd_pulgin:
   name: statsd
-  config.host: "statsd-service"
-  config.port: "9125"
-  config.metrics:
-  - name: request_count
-    sample_rate: 1
-    stat_type: counter
-  - name: latency
-    stat_type: timer
-  - name: request_size
-    stat_type: timer
-  - name: status_count
-    sample_rate: 1
-    stat_type: counter
-  - name: response_size
-    stat_type: timer
-  - consumer_identifier: username
-    name: unique_users
-    stat_type: set
-  - consumer_identifier: username
-    name: request_per_user
-    sample_rate: 1
-    stat_type: counter
-  - name: upstream_latency
-    stat_type: timer
-  - name: kong_latency
-    stat_type: timer
-  - consumer_identifier: username
-    name: status_count_per_user
-    sample_rate: 1
-    stat_type: counter
+  config:
+    host: "statsd-service"
+    port: 9125
 
 # Default Rate limits
 small_rate_limit_per_hour: 100

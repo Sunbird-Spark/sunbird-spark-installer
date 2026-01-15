@@ -1,4 +1,3 @@
----
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -26,7 +25,36 @@ spec:
           args:
             - |
               echo "Starting migrations..."
+              
+              # Set longer timeout for migrations
+              export KONG_PG_TIMEOUT=60000
+              export KONG_PG_CONNECT_TIMEOUT=60000
+              
+              # Force finish any pending migrations first
+              echo "Finishing any pending migrations..."
+              kong migrations finish --yes || echo "No pending migrations to finish"
+              
+              # Wait for DDL transactions to complete
+              echo "Waiting for DDL transactions to complete..."
+              sleep 10
+              
+              # Reset database with force flag
+              echo "Resetting database..."
+              kong migrations reset --yes --force || echo "Database reset failed, continuing..."
+              
+              # Wait for reset to complete
+              sleep 5
+              
+              echo "Bootstrapping database..."
+              kong migrations bootstrap
+              
+              echo "Running migrations..."
               kong migrations up --v
+              
+              echo "Finishing migrations..."
+              kong migrations finish
+              
+              echo "Migration completed successfully!"
           env:
             - name: KONG_DATABASE
               value: {{ .Values.kong_database }}
@@ -37,9 +65,9 @@ spec:
             - name: KONG_PG_PORT
               value: {{ .Values.global.yugabyte.postgresql_port | quote }}
             - name: KONG_PG_PASSWORD
-              value: {{ .Values.global.yugabyte.password }}
+              value: {{ .Values.global.yugabyte.ysql.password }}
             - name: KONG_PG_USER
-              value: {{ .Values.global.yugabyte.username }}
+              value: {{ .Values.global.yugabyte.ysql.user }}
             - name: KONG_PG_SSL
               value: {{ .Values.kong_pg_ssl | quote }}
             - name: KONG_PROXY_ACCESS_LOG

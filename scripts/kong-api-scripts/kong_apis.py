@@ -1,9 +1,16 @@
-import urllib2, argparse, json
+try:
+    # Python 3
+    import urllib.request as urllib2
+except ImportError:
+    # Python 2
+    import urllib2
 
-from common import get_apis, json_request, get_api_plugins
+import argparse, json, time
+
+from common import get_apis, json_request, get_api_plugins, retrying_urlopen
 
 def save_apis(kong_admin_api_url, input_apis):
-    apis_url = "{}/apis".format(kong_admin_api_url)
+    apis_url = "{}/services".format(kong_admin_api_url)
     saved_apis = get_apis(kong_admin_api_url)
 
     print("Number of input APIs : {}".format(len(input_apis)))
@@ -21,13 +28,22 @@ def save_apis(kong_admin_api_url, input_apis):
 
     for input_api in input_apis_to_be_created:
         print("Adding API {}".format(input_api["name"]))
-        json_request("POST", apis_url, _sanitized_api_data(input_api))
+        service_response = json_request("POST", apis_url, _sanitized_api_data(input_api))
+        service_data = json.loads(service_response.read())
+        
+        # Create route for the service if uris are specified
+        if 'uris' in input_api:
+            _create_route_for_service(kong_admin_api_url, service_data['id'], input_api)
 
     for input_api in input_apis_to_be_updated:
         print("Updating API {}".format(input_api["name"]))
         saved_api_id = [saved_api["id"] for saved_api in saved_apis if saved_api["name"] == input_api["name"]][0]
         input_api["id"] = saved_api_id
         json_request("PATCH", apis_url + "/" + saved_api_id, _sanitized_api_data(input_api))
+        
+        # Update routes if uris are specified
+        if 'uris' in input_api:
+            _update_routes_for_service(kong_admin_api_url, saved_api_id, input_api)
 
     for saved_api in saved_api_to_be_deleted:
         print("Deleting API {}".format(saved_api["name"]));
@@ -36,11 +52,71 @@ def save_apis(kong_admin_api_url, input_apis):
     for input_api in input_apis:
         _save_plugins_for_api(kong_admin_api_url, input_api)
 
+def _create_route_for_service(kong_admin_api_url, service_id, input_api):
+    """Create routes for a service in Kong 3.9.1"""
+    routes_url = "{}/routes".format(kong_admin_api_url)
+    
+    route_data = {
+        "service": {"id": service_id},
+        "name": input_api["name"] + "-route-" + service_id[:8] + "-" + str(int(time.time()))[-4:]  # Make name truly unique with timestamp
+    }
+    
+    # Add paths if uris are specified (Kong 3.9.1 uses 'paths' not 'uris')
+    if 'uris' in input_api:
+        uris = input_api["uris"]
+        if isinstance(uris, list):
+            route_data["paths"] = uris
+        else:
+            route_data["paths"] = [uris]
+    
+    # Note: strip_uri is not supported in Kong 3.9.1 Routes
+    # Path stripping should be handled by upstream service or plugins
+    
+    print("Creating route for service {}: {}".format(service_id, route_data))
+    json_request("POST", routes_url, route_data)
+
+def _update_routes_for_service(kong_admin_api_url, service_id, input_api):
+    """Update routes for a service in Kong 3.9.1"""
+    routes_url = "{}/routes".format(kong_admin_api_url)
+    
+    # Get existing routes for this service
+    existing_routes = json.loads(retrying_urlopen("{}?service.id={}".format(routes_url, service_id)).read())
+    
+    if isinstance(existing_routes, dict) and 'data' in existing_routes:
+        existing_routes = existing_routes['data']
+    elif not isinstance(existing_routes, list):
+        existing_routes = []
+    
+    route_data = {
+        "service": {"id": service_id},
+        "name": input_api["name"] + "-route-" + service_id[:8] + "-" + str(int(time.time()))[-4:]  # Make name truly unique with timestamp
+    }
+    
+    # Add paths if uris are specified (Kong 3.9.1 uses 'paths' not 'uris')
+    if 'uris' in input_api:
+        uris = input_api["uris"]
+        if isinstance(uris, list):
+            route_data["paths"] = uris
+        else:
+            route_data["paths"] = [uris]
+    
+    # Note: strip_uri is not supported in Kong 3.9.1 Routes
+    
+    if existing_routes:
+        # Update existing route
+        route_id = existing_routes[0]['id']
+        print("Updating route {} for service {}: {}".format(route_id, service_id, route_data))
+        json_request("PATCH", "{}/{}".format(routes_url, route_id), route_data)
+    else:
+        # Create new route
+        print("Creating new route for service {}: {}".format(service_id, route_data))
+        json_request("POST", routes_url, route_data)
+
 def _save_plugins_for_api(kong_admin_api_url, input_api_details):
-    get_plugins_max_page_size = 2000
+    get_plugins_max_page_size = 1000
     api_name = input_api_details["name"]
     input_plugins = input_api_details["plugins"]
-    api_pugins_url = "{}/apis/{}/plugins".format(kong_admin_api_url, api_name)
+    api_pugins_url = "{}/services/{}/plugins".format(kong_admin_api_url, api_name)
     saved_plugins_including_consumer_overrides = get_api_plugins(kong_admin_api_url, api_name)
     saved_plugins_without_consumer_overrides = [plugin for plugin in saved_plugins_including_consumer_overrides if not plugin.get('consumer_id')]
 
@@ -60,7 +136,15 @@ def _save_plugins_for_api(kong_admin_api_url, input_api_details):
         print("Updating plugin {} for API {}".format(input_plugin["name"], api_name));
         saved_plugin_id = [saved_plugin["id"] for saved_plugin in saved_plugins if saved_plugin["name"] == input_plugin["name"]][0]
         input_plugin["id"] = saved_plugin_id
-        json_request("PATCH", api_pugins_url + "/" + saved_plugin["id"], input_plugin)
+        
+        # Special handling for JWT plugin - delete and recreate instead of update
+        if input_plugin["name"] == "jwt":
+            print("Deleting existing JWT plugin {} for API {} before recreating".format(saved_plugin_id, api_name));
+            json_request("DELETE", api_pugins_url + "/" + saved_plugin_id, "")
+            print("Creating new JWT plugin for API {}".format(api_name));
+            json_request("POST", api_pugins_url, input_plugin)
+        else:
+            json_request("PATCH", api_pugins_url + "/" + saved_plugin_id, input_plugin)
 
     for saved_plugin in saved_plugins_to_be_deleted:
         print("Deleting plugin {} for API {}".format(saved_plugin["name"], api_name));
@@ -69,7 +153,58 @@ def _save_plugins_for_api(kong_admin_api_url, input_api_details):
 def _sanitized_api_data(input_api):
     keys_to_ignore = ['plugins']
     sanitized_api_data = dict((key, input_api[key]) for key in input_api if key not in keys_to_ignore)
-    return sanitized_api_data
+    
+    # Kong 3.9.1 Service schema mapping
+    # Old API fields -> New Service fields
+    service_data = {}
+    
+    # Required field: host (from upstream_url or host) - NO PORT ALLOWED
+    if 'upstream_url' in sanitized_api_data:
+        # Extract host from upstream_url if it's a URL
+        import re
+        upstream_url = sanitized_api_data['upstream_url']
+        if '://' in upstream_url:
+            # Parse URL to get host and port separately
+            match = re.match(r'https?://([^:/]+)(?::(\d+))?', upstream_url)
+            if match:
+                service_data['host'] = match.group(1)
+                if match.group(2):  # Port was specified
+                    service_data['port'] = int(match.group(2))
+            else:
+                # If no port in URL, use the whole thing as host
+                service_data['host'] = upstream_url.replace('http://', '').replace('https://', '').split(':')[0]
+        else:
+            # Handle Kubernetes service names with ports
+            if ':' in upstream_url:
+                parts = upstream_url.split(':')
+                service_data['host'] = parts[0]
+                service_data['port'] = int(parts[1])
+            else:
+                service_data['host'] = upstream_url
+    elif 'host' in sanitized_api_data:
+        service_data['host'] = sanitized_api_data['host']
+    
+    # Map uris to routes (will be handled separately)
+    # For now, create basic service
+    if 'name' in sanitized_api_data:
+        service_data['name'] = sanitized_api_data['name']
+    
+    # Add protocol if specified
+    if 'protocol' in sanitized_api_data:
+        service_data['protocol'] = sanitized_api_data['protocol']
+    else:
+        service_data['protocol'] = 'http'
+    
+    # Add port if specified (and not already set from upstream_url)
+    if 'port' in sanitized_api_data and 'port' not in service_data:
+        service_data['port'] = sanitized_api_data['port']
+    
+    # Add path if specified
+    if 'path' in sanitized_api_data:
+        service_data['path'] = sanitized_api_data['path']
+    
+    print("DEBUG: service_data = {}".format(service_data))
+    return service_data
 
 if  __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Configure kong apis')

@@ -81,7 +81,6 @@ yugabyte: &yugabyte
     - name: "userorg"
     - name: "enc-keys"
     - name: "registry"
-
   image:
     registry: yugabytedb
     repository: yugabyte
@@ -96,8 +95,6 @@ yugabyte: &yugabyte
   replicas:
     master: 3
     tserver: 3
-  username: yugabyte  
-  password: yugabyte
 
 zookeeper: &zookeeper
   fullnameOverride: zookeeper

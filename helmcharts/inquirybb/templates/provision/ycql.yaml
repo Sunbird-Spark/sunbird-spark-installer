@@ -39,8 +39,8 @@ spec:
           export ENV={{ .Values.global.env | default "dev" }}
           export YCQLSH_HOST={{ .Values.global.yugabyte.host }}
           export YCQLSH_PORT={{ .Values.global.yugabyte.port }}
-          export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
-          export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
+          export YCQLSH_USERNAME="{{ .Values.global.yugabyte.ycql.user }}"
+          export YCQLSH_PASSWORD="{{ .Values.global.yugabyte.ycql.password }}"
           # run migrations directly from embedded scripts
           cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-inquiry
           chmod +x execute_migrations.sh || true

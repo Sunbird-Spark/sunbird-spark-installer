@@ -5,4 +5,4 @@ jwt
 logging
 cryptography 
 PyJWT
-PyYAML
+PyYAML==5.3.1

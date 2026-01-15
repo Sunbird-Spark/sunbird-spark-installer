@@ -4,6 +4,7 @@ default_passwords:
   keycloak_password: &keycloak-password "admin"
   superset_admin_password: &superset-admin-password "admin"
   postgresql_password: &postgresql-password "postgres"
+  yugabyte_password: &yugabyte-password "yugabyte
 kube-prometheus-stack:
   grafana:
     adminUser: admin
@@ -18,6 +19,14 @@ postgresql:
   postgresqlPassword: *postgresql-password
 kong:
   kong_pg_password: *postgresql-password
+# yugabyte:
+#   authCredentials:
+#     ysql:
+#       user: "yugabyte"
+#       password: *yugabyte_password
+#     ycql:
+#       user: "yugabyte"
+#       password: *yugabyte_password    
 global:
   building_block: "" # building block name
   env: "" 
@@ -51,7 +60,17 @@ global:
     postgresqlUsername: postgres
     postgresqlPassword: *postgresql-password
   superset:
-        password: *superset-admin-password  
+    init:
+      adminUser:
+        username: admin
+        password: *superset-admin-password
+  yugabyte:
+    ysql:
+      user: "yugabyte"
+      password: "yugabyte"
+    ycql:
+      user: "cassandra"
+      password: "cassandra"      
   keycloak:
    keycloak_user: admin
    keycloak_password: *keycloak-password  

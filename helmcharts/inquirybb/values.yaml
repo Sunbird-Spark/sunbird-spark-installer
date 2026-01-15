@@ -106,8 +106,6 @@ yugabyte: &yugabyte
   replicas:
     master: 3
     tserver: 3
-  username: yugabyte  
-  password: yugabyte
 
 kafka: &kafka
   zookeeper: *zookeeper

@@ -3,3 +3,4 @@ default_passwords:
     superset_admin_password: &superset-admin-password "${superset_admin_password}"
     keycloak_password: &keycloak-password "${keycloak_password}"
     postgresql_password: &postgresql-password "${postgresql_password}"
+    yugabyte_password: &yugabyte-password "${yugabyte_password}"

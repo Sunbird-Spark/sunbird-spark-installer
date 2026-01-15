@@ -55,8 +55,8 @@ spec:
             set -e
             export PGHOST={{.Values.global.yugabyte.host}}
             export PGPORT={{.Values.global.postgresql_port}}
-            export PGUSER={{.Values.global.yugabyte.username}}
-            export PGPASSWORD={{.Values.global.yugabyte.password}}
+            export PGUSER={{.Values.global.yugabyte.ysql.user}}
+            export PGPASSWORD={{.Values.global.yugabyte.ysql.password}}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then
