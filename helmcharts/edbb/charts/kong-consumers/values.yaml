@@ -4,7 +4,7 @@ fullnameOverride: ""
 image:
   repository: sunbirded.azurecr.io/kong-scripts
   tag: "0.1.8"
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   pullSecrets: []
 
 kong_admin_url: kong

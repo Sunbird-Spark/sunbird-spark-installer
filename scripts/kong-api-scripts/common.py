@@ -62,8 +62,17 @@ def json_request(method, url, data=None):
     if data:
         request.add_header('Content-Type', 'application/json')
     request.get_method = lambda: method
-    response = retrying_urlopen(request)
-    return response
+    try:
+        response = retrying_urlopen(request)
+        return response
+    except urllib2.HTTPError as e:
+        error_body = ""
+        try:
+            error_body = e.read()
+            print("ERROR: HTTP {} {} - Response: {}".format(e.code, e.reason, error_body))
+        except:
+            print("ERROR: HTTP {} {} - Could not read response body".format(e.code, e.reason))
+        raise
 
 @retry(exceptions=urllib2.URLError, tries=5, delay=2, backoff=2)
 def retrying_urlopen(*args, **kwargs):
