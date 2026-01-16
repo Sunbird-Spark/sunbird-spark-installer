@@ -183,5 +183,5 @@ global:
   provisioningAnnotations: *provisioningAnnotations
 
 migration:
- migration:
+ yugabyte:
    waitTime: 120

@@ -105,18 +105,16 @@ class CeleryConfig:
   result_backend = CELERY_REDIS_URL
 
 CELERY_CONFIG = CeleryConfig
-RESULTS_BACKEND = RedisCache(
-      host=env('REDIS_HOST'),
-      {{- if .Values.supersetNode.connections.redis_password }}
-      password=env('REDIS_PASSWORD'),
-      {{- end }}
-      port=env('REDIS_PORT'),
-      key_prefix='superset_results',
-      {{- if .Values.supersetNode.connections.redis_ssl.enabled }}
-      ssl=True,
-      ssl_cert_reqs=env('REDIS_SSL_CERT_REQS'),
-      {{- end }}
-)
+# Simple file-based cache (no Redis)
+CACHE_CONFIG = {
+      'CACHE_TYPE':('SimpleCache'),
+      'CACHE_DEFAULT_TIMEOUT':300,
+      'CACHE_KEY_PREFIX': 'superset_',
+}
+DATA_CACHE_CONFIG = CACHE_CONFIG
+
+# Disable Redis-based results(bE)kd n Rdi is not used
+#RESULTS_BACKEND=RedisCache(...
 
 {{ if .Values.configOverrides }}
 # Overrides

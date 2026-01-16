@@ -439,7 +439,7 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "release-8.1.0_rc1_e7ac747"
+    tag: "spark-v0.1_b7e896f"
 
   learnflink:
     registry: "chethann07"

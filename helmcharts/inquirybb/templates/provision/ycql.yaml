@@ -28,23 +28,9 @@ spec:
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
-      - name: clone-migrations
-        image: alpine/git
-        imagePullPolicy: IfNotPresent
-        command: ['sh', '-c']
-        args:
-        - |
-          set -ex
-          cd /opt/shared-volume
-          export migration_branch={{ default "main" .Values.yugabyte_migration_version }}
-          git clone --depth 1 --branch "$migration_branch" https://github.com/chethann007/sunbird-yugabyte-migrations.git /opt/shared-volume/sunbird-yugabyte-migrations
-          chmod -R 777 /opt/shared-volume
-        volumeMounts:
-        - name: shared-volume
-          mountPath: /opt/shared-volume
       containers:
       - name: migration
-        image: yugabytedb/yugabyte:latest
+        image: sunbirded.azurecr.io/yugabytecql:v1.0.0
         imagePullPolicy: IfNotPresent
         command: ['bash', '-c']
         args:
@@ -55,8 +41,8 @@ spec:
           export YCQLSH_PORT={{ .Values.global.yugabyte.port }}
           export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
           export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
-          # run migrations from cloned repo
-          cd /opt/shared-volume/sunbird-yugabyte-migrations/sunbird-inquiry
+          # run migrations directly from embedded scripts
+          cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-inquiry
           chmod +x execute_migrations.sh || true
           ./execute_migrations.sh $ENV
         volumeMounts:
