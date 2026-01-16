@@ -65,7 +65,7 @@ images:
     tag: v1.12.1
 
   discussion_mw: &discussion_mw
-    repository: "sunbirded.azurecr.io/discussion-middleware"
+    repository: "ghcr.io/sunbird-lern/discussions-middleware"
     tag: "release-8.1.0_rc2-e7360ec-2"
 
   echo: &echo
@@ -85,12 +85,12 @@ images:
     tag: "0.14.1"
 
   kong_apis: &kong_apis
-    repository: "sunbirded.azurecr.io/kong-apis"
-    tag: "0.14.1"
+    repository: "sunbirded.azurecr.io/kong-scripts"
+    tag: "0.1.8"
 
   kong_consumer: &kong_consumer
-    repository: "sunbirded.azurecr.io/kong-consumer"
-    tag: "0.14.1"
+    repository: "sunbirded.azurecr.io/kong-scripts"
+    tag: "0.1.8"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -98,7 +98,7 @@ images:
 
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
-    tag: "release-7.0.0_8e6b2db_2345"
+    tag: "release-7.0.0_8e6b2db_23"
 
   nginx_public_ingress: &nginx_public_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -130,7 +130,7 @@ images:
 
   groups: &groups
     repository: "ghcr.io/sunbird-lern/groups-service"
-    tag: "release-8.1.0_rc1_48a145b_8"
+    tag: "spark-v0.1_014341b_9"
 
   keycloak: &keycloak
     repository: "sunbirded.azurecr.io/keycloak"
@@ -142,11 +142,11 @@ images:
 
   lms: &lms
     repository: "ghcr.io/sunbird-lern/lms-service"
-    tag: "release-8.1.0_rc2_144d90d_10"
+    tag: "spark-v0.1_6a20586_14"
 
   notification: &notification
     repository: "ghcr.io/sunbird-lern/notification-service"
-    tag: "release-8.1.0_rc3_eaf6c11_8"
+    tag: "spark-v0.1_fe4e9e9_9"
 
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -155,39 +155,24 @@ images:
   userorg: &userorg
     registry: "sunbirded.azurecr.io"
     repository: "ghcr.io/sunbird-lern/userorg-service"
-    tag: "release-8.1.0_rc2_3dd81ea_13"
-
-  content: &content
-    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/content-service"
-    tag: "release-8.1.0_rc4_5712381"
+    tag: "spark-v0.1_04057c0_16"
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v0.4_1ca81c3"
+    tag: "spark-v0.5_b821db4"
 
   dial: &dial
     repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
     tag: "release-8.1.0_rc1_8fbeab3"
 
-  learning: &learning
-    repository: "sunbirded.azurecr.io/learning-service"
-    tag: "latest"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "release-8.1.0_rc4_5712381"
-
-  taxonomy: &taxonomy
-    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/taxonomy-api"
-    tag: "release-8.1.0_rc4_5712381"
-
-  assessment: &assessment
-    repository: "ghcr.io/sunbird-inquiry/inquiry-api-service"
-    tag: "release-8.1.0_rc4_62371b1_4"
+    tag: "spark-v0.3_a8b48cb"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
-    tag: "release-8.0.0_rc3_f082527_4"
+    tag: "spark-v0.1_8b8e877_5"
 
   superset: &superset
     repository: sanketikahub/superset
@@ -253,7 +238,12 @@ internal: &internal
   alloy:
     image: *alloy
     imagePullSecrets:
-      - name: "registry-secret-name"    
+      - name: "registry-secret-name"   
+
+  knowlg:
+    image: *knowlg
+    imagePullSecrets:
+      - name: "registry-secret-name"      
 
   discussionmw:
     image: *discussion_mw
@@ -274,6 +264,7 @@ internal: &internal
     image: *router
     imagePullSecrets:
       - name: "registry-secret-name"
+
 
   kong:
     image: *kong
@@ -375,18 +366,9 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  content:
-    image: *content
-    imagePullSecrets:
-      - name: "registry-secret-name"
 
   dial:
     image: *dial
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  learning:
-    image: *learning
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -395,15 +377,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  taxonomy:
-    image: *taxonomy
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  assessment:
-    image: *assessment
-    imagePullSecrets:
-      - name: "registry-secret-name"
 
   telemetry:
     image: *telemetry
@@ -437,9 +410,9 @@ global:
     tag: "spark-v0.1_b7e896f"
 
   learnflink:
-    registry: "chethann07"
+    registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "yugabyte_migration_v4"
+    tag: "spark-v0.1_c16eb9a"
 
   inquiryflink:
     registry: "sunbirded.azurecr.io"

@@ -354,7 +354,7 @@ flink_jobs:
     job_classname: org.sunbird.job.transaction.task.TransactionEventProcessorStreamTask
 
   asset-enrichment:
-    enabled: {{ .Values.global.enable_asset_enrichment }}
+    enabled: false
     serviceMonitor: *serviceMonitor
     config: |+
       include file("/data/flink/conf/base-config.conf")
