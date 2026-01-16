@@ -4,8 +4,8 @@ dependencies:
 - name: common
   repository: https://nimbushubin.github.io/helmcharts
   version: 0.1.0
-description: A production-ready Helm chart for Content
+description: A production-ready Helm chart for Knowlg
 maintainers:
 - name: NimbusHub.in
-name: content
+name: knowlg
 version: 0.1.0

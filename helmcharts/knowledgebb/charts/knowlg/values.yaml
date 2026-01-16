@@ -1,16 +1,14 @@
-nameOverride: "content"
-fullnameOverride: "content"
+nameOverride: "knowlg"
+fullnameOverride: "knowlg"
 replicaCount: 1
 
 image:
-  repository: ghcr.io/sunbird-knowlg/knowledge-platform/content-service
-  tag: "release-8.0.0_rc3_09d6e64"
+  repository: ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service
+  tag: "spark-v0.2_6974db4"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
-ingress: {}
 podAnnotations: {}
-commonLabels: {}
 
 podSecurityContext: {}
   # runAsNonRoot: true
@@ -27,9 +25,11 @@ service:
   type: ClusterIP
   protocol: TCP
   ports:
-    - name: http-content
+    - name: http-knowlg
       port: 9000
       targetPort: 9000
+
+ingress: {}
 
 resources:
   requests:
@@ -82,26 +82,28 @@ affinity: {}
 
 configmap:
   enabled: true
-  mountPath: /home/sunbird/content-service-1.0-SNAPSHOT/config
+  mountPath: /home/sunbird/knowlg-service-1.0-SNAPSHOT/config
 
 commonAnnotations:
   reloader.stakater.com/auto: "true"
-
 
 serviceAccount:
   create: true
 
 serviceMonitor:
-  enabled: true
+  enabled: false
   interval: 30s
   scrapeTimeout: 10s
-  labels:
-    release: monitoring
+  labels: {} # additional labels e.g. release: prometheus
   honorLabels: true
   jobLabel: "app.kubernetes.io/name"
 
+framework:
+  keyspace: "{{ .Values.global.env }}_hierarchy_store"
+  hierarchy_table: framework_hierarchy
+  categories_cached: '["subject", "medium", "gradeLevel", "board"]'
 
-cloud_storage:
+cloud_storage: 
   type: "azure"
 
 content:
@@ -111,8 +113,8 @@ content:
 
 composite_search_url: "http://search-service:9000"
 dialservice_base_url: "http://dial-service:9000"
-taxonomy_base_url: "http://taxonomy-service:9000"
-content_base_url: "http://content-service:9000"
+taxonomy_base_url: "http://knowlg-service:9000"
+content_base_url: "http://knowlg-service:9000"
 
 kafka_topics_instruction: "{{ .Values.global.env }}.knowlg.learning.job.request"
 kafka_publish_request_topic: "{{ .Values.global.env }}.knowlg.publish.job.request"
@@ -141,49 +143,42 @@ cloudstorage_metadata_list: '["appIcon", "artifactUrl", "posterImage", "previewU
 cloudstorage_write_base_path: '["https://{{ .Values.global.object_storage_endpoint }}"]'
 cloudstorage_read_base_path: "https://{{ .Values.global.object_storage_endpoint }}"
 
-envoy_probes:
-  failureThreshold: 2
-  httpGet:
-    path: /ready
-    port: 10000
-    scheme: HTTP
-  initialDelaySeconds: 5
-  periodSeconds: 15
-  timeoutSeconds: 5
 
-opa_probes:
-  failureThreshold: 3
-  httpGet:
-    path: /health?plugins
-    port: 8282
-    scheme: HTTP
-  initialDelaySeconds: 5
-  periodSeconds: 15
-  timeoutSeconds: 5
+inquiry:
+  assessment:
+    publish_kafka_topic: "{{ .Values.global.env }}.knowlg.publish.job.request"
+    import_kafka_topic: "{{ .Values.global.env }}.object.import.request"
+    copy_origin_data: '["name", "author", "license", "organisation"]'
+    copy_props_to_remove: '["downloadUrl", "artifactUrl", "variants",
+      "createdOn", "collections", "children", "lastUpdatedOn", "SYS_INTERNAL_LAST_UPDATED_ON",
+      "versionKey", "s3Key", "status", "pkgVersion", "toc_url", "mimeTypesCount",
+      "contentTypesCount", "leafNodesCount", "childNodes", "prevState", "lastPublishedOn",
+      "flagReasons", "compatibilityLevel", "size", "publishChecklist", "publishComment",
+      "LastPublishedBy", "rejectReasons", "rejectComment", "gradeLevel", "subject",
+      "medium", "board", "topic", "purpose", "subtopic", "contentCredits",
+      "owner", "collaborators", "creators", "contributors", "badgeAssertions", "dialcodes",
+      "concepts", "keywords", "reservedDialcodes", "dialcodeRequired", "leafNodes", "sYS_INTERNAL_LAST_UPDATED_ON", "prevStatus", "lastPublishedBy", "streamingUrl"]'
+    item:
+      keyspace: "{{ .Values.global.env }}_content_store"
+      table: "question_data"
+  required_props: '["name", "code", "mimeType", "framework", "channel"]'
+  cloudstorage_metadata_list: '["appIcon", "artifactUrl", "posterImage", "previewUrl", "thumbnail", "assetsMap", "certTemplate", "itemSetPreviewUrl", "grayScaleAppIcon", "sourceURL", "variants", "downloadUrl", "streamingUrl", "toc_url", "data", "question", "solutions", "editorState", "media", "pdfUrl", "transcripts"]'
+  cloudstorage_relative_path_prefix: CONTENT_STORAGE_BASE_PATH
+  cloudstorage_base_path: "https://{{ .Values.global.object_storage_endpoint }}"
+  valid_cloudstorage_base_urls: '["https://{{ .Values.global.object_storage_endpoint }}","https://obj.dev.sunbird.org"]'
+  search_service_base_url: http://search-service:9000/v3/search
+  question_list_limit: 20
+  # V5 API Configurations
+  v5_supported_qumlVersions: '[1.1]'
+  v5_default_qumlVersion: 1.1
+  # Assessment Configuration
+  assessment_skip_validation: false
+  assessment_default_framework: "NCF"
+  assessment_item_mime_type: "application/vnd.ekstep.ecml-archive"
+  assessment_media_resolution: "low"
+  # Neo4j Configuration
+  neo4j_objecttypes_enabled: '["Question"]'
 
-envoy_resources:
-  requests:
-    cpu: "100m"
-    memory: "100Mi"
-  limits:
-    cpu: "1"
-    memory: "1024Mi"
-
-opa_resources:
-  requests:
-    cpu: "100m"
-    memory: "100Mi"
-  limits:
-    cpu: "1"
-    memory: "1024Mi"
-
-init_container_resources:
-  requests:
-    cpu: "100m"
-    memory: "100Mi"
-  limits:
-    cpu: "1"
-    memory: "1024Mi"
 
 javaenv:
   javaoptions: -Xms500m -Xmx500m
@@ -246,3 +241,4 @@ init_container_resources:
 
 opa:
   enabled: true
+

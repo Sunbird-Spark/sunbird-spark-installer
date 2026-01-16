@@ -164,6 +164,10 @@ images:
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/content-service"
     tag: "release-8.1.0_rc4_5712381"
 
+  knowlg: &knowlg
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
+    tag: "spark-v0.4_1ca81c3"
+
   dial: &dial
     repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
     tag: "release-8.1.0_rc1_8fbeab3"
