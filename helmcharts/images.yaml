@@ -183,8 +183,8 @@ images:
     tag: "0.0.1"
 
   nlwebflink: &nlwebflink
-    repository: "sunbirded.azurecr.io/flink-nlweb"
-    tag: "v1.0.0"
+    repository: "divyagovindaiah123/flink-nlweb-job"
+    tag: "checkpointsupport1"
 
   yugabyte: &yugabyte  
     registry: yugabytedb
@@ -417,9 +417,9 @@ global:
     tag: "spark-v0.1_b7e896f"
 
   learnflink:
-    registry: "ghcr.io/sunbird-lern"
+    registry: "chethann07"
     repository: "data-pipeline"
-    tag: "spark-v0.1_c16eb9a"
+    tag: "merge_jobs_v2"
 
   inquiryflink:
     registry: "sunbirded.azurecr.io"

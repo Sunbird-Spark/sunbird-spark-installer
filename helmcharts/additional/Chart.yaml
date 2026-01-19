@@ -17,6 +17,6 @@ dependencies:
     repository: "file://./charts/nlweb"
     condition: nlweb.enabled
   - name: nlwebflink
-    version: 0.0.1
+    version: 0.1.0
     repository: "file://./charts/nlwebflink"
     condition: nlwebflink.enabled         
