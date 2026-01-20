@@ -89,6 +89,7 @@ commonAnnotations:
 
 serviceAccount:
   create: true
+  name: "content-service-sa"
 
 serviceMonitor:
   enabled: false

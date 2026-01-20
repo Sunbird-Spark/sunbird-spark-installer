@@ -48,6 +48,11 @@ resource "azurerm_role_assignment" "aks_sp_assignment" {
     dns_prefix          = "${local.environment_name}"
     #Uncomment the below line to create a private cluster
     # private_cluster_enabled = true
+    
+    # Enable Workload Identity for managed identity integration
+    oidc_issuer_enabled       = true
+    workload_identity_enabled = true
+    
     default_node_pool {
       name           = var.big_nodepool_name
       node_count     = var.big_node_count

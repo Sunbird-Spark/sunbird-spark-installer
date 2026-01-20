@@ -19,7 +19,7 @@ spec:
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
     spec:
-      serviceAccountName: {{ include "common.names.fullname" . }}
+      serviceAccountName: {{ .Values.serviceAccount.name | default "content-service-sa" }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.image.pullSecrets }}
@@ -61,6 +61,12 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          env:
+          # Azure Workload Identity - Client ID for managed identity
+          {{- if .Values.global.content_service_client_id }}
+          - name: AZURE_CLIENT_ID
+            value: "{{ .Values.global.content_service_client_id }}"
+          {{- end }}
           envFrom:
           - configMapRef:
               name: {{ include "common.names.fullname" . }}-env

@@ -76,3 +76,14 @@ variable "velero_container_name" {
   type        = string
   default     = ""
 }
+variable "content_service_client_id" {
+  description = "Client ID of the content service managed identity"
+  type        = string
+  default     = ""
+}
+
+variable "content_service_sa_name" {
+  description = "Name of the Kubernetes service account for content service"
+  type        = string
+  default     = "content-service-sa"
+}

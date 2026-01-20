@@ -14,6 +14,9 @@ global:
   object_storage_endpoint: ${azure_storage_account_name}.blob.core.windows.net
   storage_class: managed-premium
   cloud_storage_provider:  ${cloud_storage_provider}
+  # Content Service Managed Identity Configuration
+  content_service_client_id: ${content_service_client_id}
+  content_service_sa_name: ${content_service_sa_name}
   serviceAccount: 
     create: false
 
