@@ -414,7 +414,7 @@ global:
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v0.1_c16eb9a"
+    tag: "spark-v0.2_7258208"
 
   inquiryflink:
     registry: "sunbirded.azurecr.io"
