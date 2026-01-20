@@ -15,7 +15,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["/bin/sh", "-c"]
         args:
-        - "timeout 300 sh -c 'until nc -z kong 8000; do echo waiting for kong; sleep 10; done'"
+        - "timeout 300 sh -c 'until nc -z {{ .Values.kong_admin_url }} {{ .Values.kong_admin_port }}; do echo waiting for kong; sleep 10; done'"
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

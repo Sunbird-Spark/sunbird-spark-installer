@@ -13,12 +13,13 @@ except NameError:
 def _consumer_exists(kong_admin_api_url, username):
     consumers_url = "{}/consumers".format(kong_admin_api_url)
     try:
-        retrying_urlopen("{}/{}".format(consumers_url, username))
+        response = retrying_urlopen("{}/{}".format(consumers_url, username))
         return True
     except Exception as e:
         if hasattr(e, 'code') and e.code == 404:
             return False
         else:
+            print("Error checking consumer {}: {}".format(username, str(e)))
             raise
 
 def _get_consumer(kong_admin_api_url, username):
@@ -41,7 +42,13 @@ def _ensure_consumer_exists(kong_admin_api_url, consumer):
     if not _consumer_exists(kong_admin_api_url, username):
         print("Adding consumer {}".format(username))
         consumer_data = {'username': username}
-        json_request("POST", consumers_url, consumer_data)
+        try:
+            json_request("POST", consumers_url, consumer_data)
+        except Exception as e:
+            print("Error creating consumer {}: {}".format(username, str(e)))
+            raise
+    else:
+        print("Consumer {} already exists".format(username))
 
 # ---------------- JWT helpers ----------------
 def _get_first_or_create_jwt_credential(kong_admin_api_url, consumer):
@@ -50,7 +57,14 @@ def _get_first_or_create_jwt_credential(kong_admin_api_url, consumer):
     credential_iss = consumer.get('credential_iss')
     consumer_jwt_credentials_url = "{}/consumers/{}/jwt".format(kong_admin_api_url, username)
 
-    saved_credentials = json.loads(retrying_urlopen(consumer_jwt_credentials_url).read())["data"]
+    try:
+        saved_credentials = json.loads(retrying_urlopen(consumer_jwt_credentials_url).read())["data"]
+    except Exception as e:
+        if hasattr(e, 'code') and e.code == 404:
+            print("JWT credentials endpoint not found for consumer {}. Creating new credential.".format(username))
+            saved_credentials = []
+        else:
+            raise
 
     # HS256 without credential_iss: patch first HS256 credential
     if credential_algorithm == 'HS256' and not credential_iss:

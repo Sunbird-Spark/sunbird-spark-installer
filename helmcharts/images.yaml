@@ -81,16 +81,16 @@ images:
     tag: "release-3.9.0_RC1_01339f9_07941f0_1_router"
 
   kong: &kong
-    repository: "sunbirded.azurecr.io/kong"
-    tag: "0.14.1"
+    repository: "docker.io/kong"
+    tag: "3.9.1"
 
   kong_apis: &kong_apis
     repository: "sunbirded.azurecr.io/kong-apis"
-    tag: "0.14.1"
+    tag: "3.9.1"
 
   kong_consumer: &kong_consumer
-    repository: "sunbirded.azurecr.io/kong-consumer"
-    tag: "0.14.1"
+    repository: "sunbirded.azurecr.io/kong-apis"
+    tag: "3.9.1"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
