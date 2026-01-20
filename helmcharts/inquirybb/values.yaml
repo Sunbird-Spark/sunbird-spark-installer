@@ -33,14 +33,6 @@ redis: &redis
     persistence:
       size: 25Gi
 
-zookeeper: &zookeeper
-  fullnameOverride: zookeeper
-  nameOverride: zookeeper
-  host: "zookeeper"
-  port: 2181
-  persistence:
-    size: 2Gi
-
 elasticsearch: &es
   enabled: true
   fullnameOverride: "elasticsearch"
@@ -108,7 +100,6 @@ yugabyte: &yugabyte
     tserver: 3
 
 kafka: &kafka
-  zookeeper: *zookeeper
   enabled: true
   nameOverride: "kafka"
   fullnameOverride: "kafka"
@@ -170,7 +161,6 @@ installation: &installation
 global:
   redis: *redis
   neo4j: *neo4j
-  zookeeper: *zookeeper
   kafka: *kafka
   play_http: *play_http
   schema: *schema

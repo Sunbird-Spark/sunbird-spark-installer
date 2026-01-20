@@ -62,28 +62,7 @@ yugabyte: &yugabyte
     tserver: 3
   
 
-
-zookeeper: &zookeeper
-  fullnameOverride: zookeeper
-  nameOverride: zookeeper
-  image:
-    registry: sunbirded.azurecr.io
-    repository: zookeeper
-    tag: 3.8.1-debian-11-r6
-  host: "zookeeper"
-  port: 2181
-  persistence:
-    size: 2Gi
-  resources:
-    limits:
-      cpu: 256m
-      memory: 512Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi 
-
 kafka: &kafka
-  zookeeper: *zookeeper
   enabled: true
   nameOverride: kafka
   fullnameOverride: kafka
@@ -169,7 +148,6 @@ postgresql: &postgresql
 
 global:
   redis: *redis
-  zookeeper: *zookeeper
   kafka: *kafka
   yugabyte: *yugabyte
   postgresql: *postgresql

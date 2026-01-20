@@ -4,16 +4,7 @@ fullname: obsrvbb
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
 
-zookeeper: &zookeeper
-  fullnameOverride: zookeeper
-  nameOverride: zookeeper
-  host: "zookeeper"
-  port: 2181
-  persistence:
-    size: 25Gi
-
 kafka: &kafka
-  zookeeper: *zookeeper
   enabled: true
   nameOverride: "kafka"
   fullnameOverride: "kafka"
@@ -91,7 +82,6 @@ yugabyte: &yugabyte
 env: &env
 default: "dev"
 global:
-  zookeeper: *zookeeper
   kafka: *kafka
   yugabyte: *yugabyte
 

@@ -102,16 +102,7 @@ yugabyte: &yugabyte
   username: yugabyte
   password: "yugabyte"    
 
-zookeeper: &zookeeper
-  fullnameOverride: zookeeper
-  nameOverride: zookeeper
-  host: "zookeeper"
-  port: 2181
-  persistence:
-    size: 2Gi
-
 kafka: &kafka
-  zookeeper: *zookeeper
   enabled: true
   nameOverride: "kafka"
   fullnameOverride: "kafka"
@@ -205,7 +196,6 @@ global:
   elasticsearch: *es
   neo4j: *neo4j
   yugabyte: *yugabyte
-  zookeeper: *zookeeper
   kafka: *kafka
   # play_http: *play_http
   schema: *schema

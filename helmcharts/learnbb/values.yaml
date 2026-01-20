@@ -96,16 +96,7 @@ yugabyte: &yugabyte
     master: 3
     tserver: 3
 
-zookeeper: &zookeeper
-  fullnameOverride: zookeeper
-  nameOverride: zookeeper
-  host: "zookeeper"
-  port: 2181
-  persistence:
-    size: 2Gi
-
 kafka: &kafka
-  zookeeper: *zookeeper
   enabled: true
   fullnameOverride: "kafka"
   clientProtocol: PLAINTEXT
@@ -189,7 +180,6 @@ global:
   redis: *redis
   elasticsearch: *es
   yugabyte: *yugabyte
-  zookeeper: *zookeeper
   postgresql: *postgresql
   kafka: *kafka
   druid: *druid
