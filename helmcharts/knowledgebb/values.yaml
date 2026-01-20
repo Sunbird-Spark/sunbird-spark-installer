@@ -199,7 +199,6 @@ channel: &channel
   default: "in.ekstep"
 objectcategorydefinition: &objectcategorydefinition
   keyspace: "{{ .Values.global.env }}_category_store"
-enable_asset_enrichment: &enable_asset_enrichment "false"
 
 global:
   redis: *redis
@@ -217,7 +216,6 @@ global:
   provisioningAnnotations: *provisioningAnnotations
   keycloak_kid_keys_configmap: keycloak-kids-keys
   kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
-  enable_asset_enrichment: *enable_asset_enrichment
 
 content:
   opa_enabled: true

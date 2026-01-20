@@ -8,7 +8,11 @@ image:
   pullPolicy: IfNotPresent
   pullSecrets: []
 
+ingress: {}
+
 podAnnotations: {}
+
+commonLabels: {}
 
 podSecurityContext: {}
   # runAsNonRoot: true
@@ -28,8 +32,6 @@ service:
     - name: http-knowlg
       port: 9000
       targetPort: 9000
-
-ingress: {}
 
 resources:
   requests:
@@ -91,10 +93,11 @@ serviceAccount:
   create: true
 
 serviceMonitor:
-  enabled: false
+  enabled: true
   interval: 30s
   scrapeTimeout: 10s
-  labels: {} # additional labels e.g. release: prometheus
+  labels:
+    release: monitoring
   honorLabels: true
   jobLabel: "app.kubernetes.io/name"
 
@@ -142,6 +145,7 @@ cloudstorage_relative_path_prefix_content: CONTENT_STORAGE_BASE_PATH
 cloudstorage_metadata_list: '["appIcon", "artifactUrl", "posterImage", "previewUrl", "thumbnail", "assetsMap", "certTemplate", "itemSetPreviewUrl", "grayScaleAppIcon", "sourceURL", "variants", "downloadUrl", "streamingUrl", "toc_url", "data", "question", "solutions", "editorState", "media", "pdfUrl", "transcripts"]'
 cloudstorage_write_base_path: '["https://{{ .Values.global.object_storage_endpoint }}"]'
 cloudstorage_read_base_path: "https://{{ .Values.global.object_storage_endpoint }}"
+redisMaxConnections: 128
 
 
 inquiry:
