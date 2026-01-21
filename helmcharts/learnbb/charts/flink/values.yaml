@@ -352,6 +352,7 @@ base_config: |
         max-request-size = 1572864
         batch.size = 98304
         linger.ms = 10
+        zookeeper = ""
       }
     }
     job {
@@ -438,6 +439,8 @@ flink_jobs:
         output.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_activity_agg_failed "context" $) }}"
         output.certissue.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_request "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_activity_agg "context" $) }}"
+        zookeeper = ""
+
       }
       task {
         window.shards = "{{ .Values.activity_agg_window_shards }}"
@@ -496,6 +499,8 @@ flink_jobs:
       kafka {
         input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_content_publish_request "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_relation_cache_updater "context" $) }}"
+        zookeeper = ""
+
       }
       task {
         consumer.parallelism = "{{ .Values.relation_cache_updater_consumer_parallelism }}"
@@ -534,6 +539,8 @@ flink_jobs:
         output.cert.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_generate_certificate_failed "context" $) }}"
         output.audit.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_telemetry_raw "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_certificate_generator "context" $) }}"
+        zookeeper = ""
+
       }
       task {
         restart-strategy.attempts = "{{ .Values.restart_attempts }}" # max 3 restart attempts
@@ -550,8 +557,8 @@ flink_jobs:
       }
       lms-cassandra {
         keyspace = "{{ .Values.middleware_course_keyspace }}"
-        user_enrolments.table = "{{ .Values.middleware_user_enrolments_table }}"
-        course_batch.table = "{{ .Values.middleware_course_batch_table }}"
+        user_enrolments.table = "user_enrolments"
+        course_batch.table = "course_batch"
         sbkeyspace = "{{ .Values.registry_sunbird_keyspace }}"
         assessment_aggregator.table = "{{ .Values.middleware_cassandra_assessment_aggregator_table}}"
         user_activity_agg.table = "{{ .Values.middleware_cassandra_user_activity_agg_table }}"
@@ -603,6 +610,8 @@ flink_jobs:
         failed.topic= "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_assessment_failed "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_assessment_aggregator "context" $) }}"
         output.certissue.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_request "context" $) }}"
+        zookeeper = ""
+
       }
       task {
         consumer.parallelism = "{{ .Values.assessaggregator_consumer_parallelism }}"
@@ -645,7 +654,8 @@ flink_jobs:
       kafka {
         input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_lms_notification "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_lms_notification "context" $) }}"
-      }
+        zookeeper = ""
+        }
       task {
         restart-strategy.attempts = "{{ .Values.restart_attempts }}" # max 3 restart attempts
         restart-strategy.delay = 240000 # in milli-seconds # on max restarts (3) within 4 min the job will fail.
@@ -677,6 +687,8 @@ flink_jobs:
       kafka {
         input.topic = "{{ .Values.global.env }}.delete.user"
         groupId = "{{ .Values.global.env }}-delete-user-group"
+        zookeeper = ""
+
       }
       task {
         user.deletion.cleanup.parallelism = "{{ .Values.user_deletion_cleanup_job_parallelism }}"

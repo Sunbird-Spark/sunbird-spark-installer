@@ -17,20 +17,6 @@ bot:
       cpu: 1000m
       memory: 1024Mi
 
-<<<<<<< HEAD
-=======
-cassandra:
-  persistence:
-    size: 25Gi
-  resources:
-    requests:
-      cpu: 520m
-      memory: 3Gi
-    limits:
-      cpu: 750m
-      memory: 10Gi 
-
->>>>>>> origin/kafka-upgrade
 echo:
   resources:
     requests:

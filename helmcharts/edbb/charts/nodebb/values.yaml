@@ -94,7 +94,7 @@ configmap:
   mountPath: /config
 
 serviceAccount:
-  create: true
+  create: false
   name: ""
 
 serviceMonitor:

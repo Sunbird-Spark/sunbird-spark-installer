@@ -90,7 +90,7 @@ commonAnnotations:
   reloader.stakater.com/auto: "true"
 
 serviceAccount:
-  create: true
+  create: false
 
 serviceMonitor:
   enabled: true

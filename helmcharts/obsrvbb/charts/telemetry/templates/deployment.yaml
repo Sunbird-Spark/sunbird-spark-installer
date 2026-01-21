@@ -21,7 +21,9 @@ spec:
       labels:
         app: {{ include "common.names.name" . }}
     spec:
+       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "common.names.fullname" . }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.image.pullSecrets }}

@@ -139,7 +139,7 @@ images:
 
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
-    tag: "release-5.1.0_ece7ed3_14"
+    tag: "sparkv0.0.13.1"
 
   userorg: &userorg
     registry: "sunbirded.azurecr.io"
