@@ -153,8 +153,6 @@ log4j_console_properties: |
   logger.kafka.level = ERROR
   logger.hadoop.name = org.apache.hadoop
   logger.hadoop.level = ERROR
-  logger.zookeeper.name = org.apache.zookeeper
-  logger.zookeeper.level = ERROR
 
   # Log all infos to the console
   appender.console.name = ConsoleAppender
@@ -171,7 +169,6 @@ base_config: |
     broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
     producer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
     consumer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
-    zookeeper = "{{ .Values.global.zookeeper.host }}:{{ .Values.global.zookeeper.port }}"
     producer {
       max-request-size = 1572864
       batch.size = 98304
@@ -224,8 +221,8 @@ base_config: |
       }
   }
   lms-cassandra {
-  host = "{{ .Values.global.cassandra.host }}"
-  port = "{{ .Values.global.cassandra.port }}"
+  host = "{{ .Values.global.yugabyte.host }}"
+  port = "{{ .Values.global.yugabyte.port }}"
   }
 
   neo4j {
@@ -354,7 +351,7 @@ flink_jobs:
     job_classname: org.sunbird.job.transaction.task.TransactionEventProcessorStreamTask
 
   asset-enrichment:
-    enabled: {{ .Values.global.enable_asset_enrichment }}
+    enabled: false
     serviceMonitor: *serviceMonitor
     config: |+
       include file("/data/flink/conf/base-config.conf")

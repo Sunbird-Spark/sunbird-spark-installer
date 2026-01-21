@@ -140,7 +140,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "max(container_memory_usage_bytes{container_label_com_docker_swarm_service_name=~\"content-service\"})",
+          "expr": "max(container_memory_usage_bytes{container_label_com_docker_swarm_service_name=~\"knowlg-service\"})",
           "format": "time_series",
           "intervalFactor": 2,
           "refId": "A",
@@ -151,7 +151,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "content-service",
+      "title": "knowlg-service",
       "tooltip": {
         "shared": true,
         "sort": 0,

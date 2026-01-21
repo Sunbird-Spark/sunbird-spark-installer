@@ -4253,8 +4253,8 @@ prometheus-blackbox-exporter:
       - name: certregistry
         url: "http://cert-registry-service:9000/service/health"
         module: http_2xx
-      - name: content
-        url: "http://content-service:9000/service/health"
+      - name: knowlg
+        url: "http://knowlg-service:9000/service/health"
         module: http_2xx
       - name: report
         url: "http://report-service:3030/service/health"
@@ -4265,14 +4265,8 @@ prometheus-blackbox-exporter:
       - name: analytics
         url: "http://analytics-service:9000/health"
         module: http_2xx
-      - name: taxonomy
-        url: "http://taxonomy-service:9000/health"
-        module: http_2xx
       - name: discussionmw
         url: "http://discussionmw-service:3002/health"
-        module: http_2xx
-      - name: assessment
-        url: "http://assessment-service:9000/service/health"
         module: http_2xx
       - name: notification
         url: "http://notification-service:9000/health"
