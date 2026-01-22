@@ -19,7 +19,11 @@ spec:
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name | default "content-service-sa" }}
+      {{- if and .Values.cloud_storage (eq .Values.cloud_storage.type "azure") }}
+      serviceAccountName: {{ .Values.global.content_service_sa_name }}
+      {{- else }}
+      serviceAccountName: {{ include "common.names.fullname" . }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.image.pullSecrets }}
