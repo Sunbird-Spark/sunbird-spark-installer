@@ -5,6 +5,7 @@ locals {
   building_block  = local.global_vars.global.building_block
   subscription_id = local.global_vars.global.subscription_id
   location        = local.global_vars.global.cloud_storage_region
+  service_account_name = try(local.global_vars.global.service_account_name, "azure-workload-sa")
 }
 
 terraform {
@@ -14,7 +15,7 @@ terraform {
 dependency "storage" {
   config_path = "../storage"
   mock_outputs = {
-    azurerm_storage_account_id = "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/dummy/providers/Microsoft.Storage/storageAccounts/dummy"
+    azurerm_storage_account_id = "dummy-storage-account-id"
   }
 }
 
@@ -28,7 +29,7 @@ dependency "network" {
 dependency "aks" {
   config_path = "../aks"
   mock_outputs = {
-    oidc_issuer_url = "https://dummy.oidc.issuer.url"
+    oidc_issuer_url = "dummy-oidc-issuer-url"
   }
 }
 
@@ -41,6 +42,6 @@ inputs = {
   storage_account_id     = dependency.storage.outputs.azurerm_storage_account_id
   oidc_issuer_url        = dependency.aks.outputs.oidc_issuer_url
   kubernetes_namespace   = "sunbird"
-  service_account_name   = "content-service-sa"
+  service_account_name   = local.service_account_name
 }
 

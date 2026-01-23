@@ -19,8 +19,8 @@ spec:
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
     spec:
-      {{- if and .Values.cloud_storage (eq .Values.cloud_storage.type "azure") }}
-      serviceAccountName: {{ .Values.global.content_service_sa_name }}
+      {{- if and .Values.global.cloud_storage (eq .Values.global.cloud_storage.type "azure") }}
+      serviceAccountName: {{ .Values.global.service_account_name }}
       {{- else }}
       serviceAccountName: {{ include "common.names.fullname" . }}
       {{- end }}
@@ -67,9 +67,9 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           env:
           # Azure Workload Identity - Client ID for managed identity
-          {{- if .Values.global.content_service_client_id }}
+          {{- if .Values.global.client_id }}
           - name: AZURE_CLIENT_ID
-            value: "{{ .Values.global.content_service_client_id }}"
+            value: "{{ .Values.global.client_id }}"
           {{- end }}
           envFrom:
           - configMapRef:

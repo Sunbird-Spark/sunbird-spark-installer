@@ -30,8 +30,8 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
     encryption_string               = var.encryption_string,
     random_string                   = var.random_string,
     cloud_storage_provider          = var.cloud_storage_provider,
-    content_service_client_id       = var.content_service_client_id,
-    content_service_sa_name         = var.content_service_sa_name
+    client_id                       = var.client_id,
+    service_account_name            = var.service_account_name
   })
   filename = local.global_values_cloud_file
 }

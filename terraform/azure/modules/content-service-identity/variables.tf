@@ -41,7 +41,7 @@ variable "kubernetes_namespace" {
 
 variable "service_account_name" {
   type        = string
-  description = "Name of the Kubernetes service account"
-  default     = "content-service-sa"
+  description = "Name of the Kubernetes service account for Azure workload identity"
+  default     = "azure-workload-sa"
 }
 

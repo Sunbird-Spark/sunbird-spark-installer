@@ -42,7 +42,7 @@ dependency "keys" {
 dependency "content-service-identity" {
     config_path = "../content-service-identity"
     mock_outputs = {
-      content_service_client_id = "12345678-1234-1234-1234-123456789012"
+      client_id = "dummy-client-id"
     }
 }
 
@@ -61,7 +61,7 @@ inputs = {
   dial_state_container_public        = dependency.storage.outputs.azurerm_dial_state_container_public
   velero_container_name              = dependency.storage.outputs.azurerm_velero_container_name
   cloud_storage_provider             = local.cloud_storage_provider
-  content_service_client_id          = dependency.content-service-identity.outputs.content_service_client_id
-  content_service_sa_name            = "content-service-sa"  # Static value, created by Helm
+  client_id                          = dependency.content-service-identity.outputs.client_id
+  service_account_name               = "azure-workload-sa"  # Static value, created by Helm
 
 }
