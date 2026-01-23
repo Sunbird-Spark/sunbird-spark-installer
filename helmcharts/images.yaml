@@ -147,8 +147,8 @@ images:
     tag: "spark-v0.1_04057c0_16"
 
   knowlg: &knowlg
-    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v0.5_b821db4"
+    repository: "aimansharief/knowlg-service"
+    tag: "spark-v1.6"
 
   dial: &dial
     repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"

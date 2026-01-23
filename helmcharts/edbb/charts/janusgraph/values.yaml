@@ -170,7 +170,6 @@ extraJanusgraphProperties: |
   storage.cql.keyspace=janusgraph
   # Transaction Log Configuration (Required for CDC)
   tx.log.tx.enabled=true
-  tx.log.tx.instance-id=janusgraph-instance-1
 ## @param janusgraphProperties Override the content of the janusgraph.properties file.
 ## NOTE: By providing the content of janusgraph.properties, other settings provided using values may be ignored.
 ##
@@ -321,13 +320,12 @@ podSecurityContext:
 ##
 containerSecurityContext:
   enabled: true
-  seLinuxOptions: {}
   runAsUser: 1001
   runAsGroup: 1001
   runAsNonRoot: true
-  privileged: false
   allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false
+  privileged: false
   capabilities:
     drop: ["ALL"]
   seccompProfile:
@@ -448,10 +446,16 @@ extraEnvVarsCM: ""
 extraEnvVarsSecret: ""
 ## @param extraVolumes Optionally specify extra list of additional volumes for the JanusGraph pod(s)
 ##
-extraVolumes: []
+extraVolumes:
+  - name: etc-passwd
+    emptyDir: {}
+
 ## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts for the JanusGraph container(s)
 ##
-extraVolumeMounts: []
+extraVolumeMounts:
+  - name: etc-passwd
+    mountPath: /etc
+
 ## @param sidecars Add additional sidecar containers to the JanusGraph pod(s)
 ## e.g:
 ## sidecars:
@@ -472,7 +476,19 @@ sidecars: []
 ##    imagePullPolicy: Always
 ##    command: ['sh', '-c', 'echo "hello world"']
 ##
-initContainers: []
+initContainers:
+  - name: fix-user
+    image: busybox:1.36
+    command:
+      - sh
+      - -c
+      - |
+        echo "root:x:0:0:root:/root:/bin/bash" > /etc/passwd
+        echo "janus:x:1001:1001:janus:/home/janus:/sbin/nologin" >> /etc/passwd
+    volumeMounts:
+      - name: etc-passwd
+        mountPath: /etc
+
 
 ## @section Autoscaling
 ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
@@ -687,7 +703,7 @@ metrics:
     seLinuxOptions: {}
     runAsUser: 1001
     runAsGroup: 1001
-    readOnlyRootFilesystem: true
+    readOnlyRootFilesystem: false
     allowPrivilegeEscalation: false
     capabilities:
       drop: ["ALL"]
