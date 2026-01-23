@@ -41,7 +41,6 @@ inputs = {
   environment            = local.environment
   storage_account_id     = dependency.storage.outputs.azurerm_storage_account_id
   oidc_issuer_url        = dependency.aks.outputs.oidc_issuer_url
-  kubernetes_namespace   = "sunbird"
   service_account_name   = local.service_account_name
 }
 

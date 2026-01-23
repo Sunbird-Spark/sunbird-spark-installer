@@ -62,6 +62,6 @@ inputs = {
   velero_container_name              = dependency.storage.outputs.azurerm_velero_container_name
   cloud_storage_provider             = local.cloud_storage_provider
   client_id                          = dependency.content-service-identity.outputs.client_id
-  service_account_name               = "azure-workload-sa"  # Static value, created by Helm
+  service_account_name               = "azure-workload-sa"
 
 }
