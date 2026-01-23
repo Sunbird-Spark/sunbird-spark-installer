@@ -88,7 +88,7 @@ configmap:
   mountPath: /home/sunbird/search-service-1.0-SNAPSHOT/config
 
 serviceAccount:
-  create: true
+  create: false
 
 serviceMonitor:
   enabled: false

@@ -92,7 +92,7 @@ htpasswd:
   defaultMode: 420
 
 serviceAccount:
-  create: true
+  create: false
   name: ""
 
 serviceMonitor: {}

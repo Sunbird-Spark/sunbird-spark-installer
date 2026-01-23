@@ -91,7 +91,7 @@ configmap:
   mountPath: /home/sunbird/lms/lms-service-1.0-SNAPSHOT/config
 
 serviceAccount:
-  create: true
+  create: false
 
 serviceMonitor:
   enabled: true

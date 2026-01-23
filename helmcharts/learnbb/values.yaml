@@ -131,39 +131,6 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
-druid: &druid
-  enabled: true
-  fullnameOverride: "druid"
-  host: druid-raw-routers
-  port: 8888
-  coordinatorhost: druid-raw-coordinators
-  coordinatorport: 8081
-  overlordhost:  druid-raw-overlords
-  overlordport: 8090
-  brokerhost: druid-raw-brokers
-  brokerport: 8082
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  persistence:
-    size: 25Gi
-
-postgresql: &postgresql
-  enabled: true
-  fullnameOverride: "postgresql"
-  image:
-    registry: "sunbirded.azurecr.io"
-    repository: postgresql
-    tag: 11.14.0
-  host: postgresql
-  port: 5432
-  postgresqlUsername: postgres
-  postgresqlPassword: postgres
-  provisioning:
-    annotations: *provisioningAnnotations
-  persistence:
-    size: 25Gi
-  databases:
-  - name: "registry"
 
 neo4j: &neo4j
   enabled: true
@@ -183,9 +150,7 @@ global:
   redis: *redis
   elasticsearch: *es
   yugabyte: *yugabyte
-  postgresql: *postgresql
   kafka: *kafka
-  druid: *druid
   neo4j: *neo4j
   provisioningAnnotations: *provisioningAnnotations
   keycloak_kid_keys_configmap: keycloak-kids-keys

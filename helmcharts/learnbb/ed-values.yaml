@@ -4,11 +4,5 @@ redis:
   enabled: false
 neo4j:
   enabled: false
-druid-operator:
-  enabled: false
-druid-raw-cluster:
-  enabled: false
 yugabyte:
-  enabled: false
-postgresql:
   enabled: false

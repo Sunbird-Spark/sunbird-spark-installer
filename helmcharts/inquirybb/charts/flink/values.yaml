@@ -273,6 +273,7 @@ flink_jobs:
       kafka {
         input.topic = "{{- include "common.tplvalues.render" (dict "value" .Values.user_pii_updater_kafka_topic_name "context" $) }}"
         groupId = "{{- include "common.tplvalues.render" (dict "value" .Values.user_pii_updater_group "context" $) }}"
+        zookeeper = ""
       }
       task {
         consumer.parallelism = 1
