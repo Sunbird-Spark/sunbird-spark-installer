@@ -1,0 +1,488 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* Split Screen Layout */
+.login-main {
+    min-height: 100vh;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.login-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background-color: rgb(74, 140, 140);
+}
+.login-wrapper::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 40%;
+    left: 0;
+    bottom: 0;
+    background-image: url('../img/wave-background1.svg');
+    background-size: 100% 100%;
+    background-position: bottom left;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+}
+.login-wrapper::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 40%;
+    left: 0;
+    bottom: 0;
+    background-image: url('../img/wave-background2.svg');
+    background-size: 100% 100%;
+    background-position: bottom left;
+    background-repeat: no-repeat;
+    opacity: 0.2;
+}
+
+/* Utility classes requested */
+.opacity-30 { opacity: 0.3; }
+.w-full { width: 100%; }
+.left-0 { left: 0px; }
+.bottom-0 { bottom: 0px; }
+
+.login-split-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 64rem;
+    min-height: 520px;
+    margin: 40px auto;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+    background-color: rgb(74, 140, 140);
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+}
+
+@media (min-width: 768px) {
+    .login-split-container {
+        flex-direction: row;
+    }
+}
+
+/* Left Panel - transparent to use wrapper background */
+.login-left-panel {
+    flex: 1 1 50%;
+    background: transparent;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    overflow: hidden;
+    background-color: rgb(74, 140, 140);
+}
+
+.login-left-panel-container{
+    box-sizing: border-box;
+    border-style: solid;
+    border-color: rgba(184, 199, 214, 0.35);
+    border-width: 2px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    align-self: stretch;
+    border-radius: 24px;
+    padding: 8px;
+}
+
+.background-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('../img/wave.svg');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 8px;
+    background-origin: content-box;
+    background-clip: content-box;
+    border-radius: 12px;
+}
+
+.left-panel-content {
+    position: absolute;
+    z-index: 2;
+    left: 24px;
+    bottom: 24px;
+    max-width: calc(100% - 48px);
+}
+
+.left-panel-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: white;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Right Panel - Login Card */
+.login-right-panel {
+    flex: 1 1 50%;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.login-card {
+    width: 100%;
+    position: relative;
+    background: #fff;
+    border-radius: 0 24px 24px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    padding: 48px;
+}
+
+/* Close Button */
+.close-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    color: #999;
+    transition: color 0.2s ease;
+    z-index: 10;
+}
+
+.close-button:hover {
+    color: #333;
+}
+
+.close-button svg {
+    display: block;
+}
+
+/* Container Adjustments for Split Layout */
+#kc-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#kc-container-wrapper {
+    width: 100%;
+    padding: 0;
+}
+
+#kc-header {
+    margin-bottom: 0;
+}
+
+/* Container and Card Layout */
+#kc-content-wrapper {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* Login Header Styles */
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.sunbird-logo {
+    margin-bottom: 20px;
+}
+
+.sunbird-logo img {
+    height: 40px;
+    width: auto;
+}
+
+.welcome-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+}
+
+.welcome-subtitle {
+    font-size: 14px;
+    color: hsl(210 11% 45%);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Google Sign In Button */
+#kc-social-providers-top {
+    margin-bottom: 20px;
+}
+
+.google-signin-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: white;
+    color: #374151;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.google-signin-btn:hover {
+    background: #f8f8f8;
+    border-color: #ccc;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.google-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+}
+
+/* OR Divider */
+.or-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    color: #999;
+    font-size: 14px;
+}
+
+.or-divider::before,
+.or-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #ddd;
+}
+
+.or-divider span {
+    padding: 0 12px;
+}
+
+/* Password Wrapper and Toggle */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 45px !important;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s ease;
+}
+
+.password-toggle:hover {
+    opacity: 0.7;
+}
+
+.password-toggle svg {
+    display: block;
+}
+
+/* Forgot Password Link */
+.forgot-password {
+    text-align: right;
+    margin-top: 8px;
+    margin-bottom: 20px;
+}
+
+.forgot-password a {
+    font-size: 14px;
+    color: #ac5039;
+    text-decoration: none;
+}
+
+.forgot-password a:hover {
+    color: #ac5039;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* Login Button */
+.login-button {
+    background-color: #ac5039 !important;
+    border-color: #ac5039 !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: white !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    padding: 12px 24px !important;
+    border-radius: 16px !important;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.login-button:hover {
+    background-color: #8d3f2d !important;
+    border-color: #8d3f2d !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Registration Link */
+.registration-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+.registration-link a {
+    color: #ac5039;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.registration-link a:hover {
+    text-decoration: underline;
+}
+
+/* Form Input Styling */
+input[type="text"],
+input[type="password"] {
+    border-radius: 16px !important;
+    border: 1px solid #ddd !important;
+    padding: 12px 16px !important;
+    height: 48px !important;
+    font-size: 14px !important;
+    width: 100%;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: #ac5039 !important;
+    outline: none !important;
+    background: white !important;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #ac5039 !important;
+    border-radius: 16px !important;
+}
+
+/* Apply the same precise double-border effect on hover for consistency */
+input[type="text"]:hover,
+input[type="password"]:hover {
+    border-color: #A73A24 !important;
+    background: white !important;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #A73A24 !important;
+    border-radius: 16px !important;
+}
+
+label {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #333 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+/* Form Group Spacing */
+.form-group,
+div[class*="kcFormGroupClass"] {
+    margin-bottom: 20px !important;
+}
+
+/* Adjust specific form spacing */
+#kc-form-login>div:first-of-type {
+    margin-bottom: 20px;
+}
+
+#kc-form-login>div:nth-of-type(2) {
+    margin-bottom: 8px;
+}
+
+/* Ensure the double-border only applies on focus, not just hover within active form */
+#kc-form-login:focus-within input[type="text"]:hover:not(:focus),
+#kc-form-login:focus-within input[type="password"]:hover:not(:focus) {
+    box-shadow: none !important;
+    border-color: #E2E8F0 !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .login-right-panel {
+        flex: 1 1 50%;
+    }
+
+    .left-panel-title {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 768px) {
+    .login-split-container {
+        flex-direction: column;
+    }
+
+    .login-left-panel {
+        min-height: 200px;
+        padding: 40px 20px;
+    }
+
+    .left-panel-title {
+        font-size: 28px;
+        text-align: center;
+    }
+
+    .login-right-panel {
+        flex: 1;
+        padding: 30px 20px;
+    }
+
+    .login-card {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-title {
+        font-size: 22px;
+    }
+
+    .left-panel-title {
+        font-size: 24px;
+    }
+
+    .login-right-panel {
+        padding: 20px 15px;
+    }
+}
