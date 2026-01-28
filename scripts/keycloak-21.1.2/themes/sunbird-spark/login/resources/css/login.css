@@ -27,6 +27,7 @@ body {
     min-height: 100vh;
     background-color: rgb(74, 140, 140);
 }
+
 .login-wrapper::before {
     content: '';
     position: absolute;
@@ -40,6 +41,7 @@ body {
     background-repeat: no-repeat;
     opacity: 0.3;
 }
+
 .login-wrapper::after {
     content: '';
     position: absolute;
@@ -55,10 +57,21 @@ body {
 }
 
 /* Utility classes requested */
-.opacity-30 { opacity: 0.3; }
-.w-full { width: 100%; }
-.left-0 { left: 0px; }
-.bottom-0 { bottom: 0px; }
+.opacity-30 {
+    opacity: 0.3;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.left-0 {
+    left: 0px;
+}
+
+.bottom-0 {
+    bottom: 0px;
+}
 
 .login-split-container {
     display: flex;
@@ -72,7 +85,7 @@ body {
     position: relative;
     z-index: 10;
     background-color: rgb(74, 140, 140);
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 @media (min-width: 768px) {
@@ -94,7 +107,7 @@ body {
     background-color: rgb(74, 140, 140);
 }
 
-.login-left-panel-container{
+.login-left-panel-container {
     box-sizing: border-box;
     border-style: solid;
     border-color: rgba(184, 199, 214, 0.35);
@@ -154,7 +167,7 @@ body {
     position: relative;
     background: #fff;
     border-radius: 0 24px 24px 0;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     padding: 48px;
 }
 
@@ -484,5 +497,167 @@ div[class*="kcFormGroupClass"] {
 
     .login-right-panel {
         padding: 20px 15px;
+    }
+}
+
+/* Appended Styles from login1.css for Reset Password Page */
+
+:root {
+    --primary-color: #A73A24;
+    --primary-hover: #8E311F;
+    --teal-bg: #4F8A8B;
+    --card-bg: #ffffff;
+    --text-color: #2D3748;
+    --text-secondary: #718096;
+    --border-color: #E2E8F0;
+    --font-family: 'Inter', sans-serif;
+}
+
+.sunbird-logo-wrapper {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.sunbird-logo-text {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #A73A24;
+    letter-spacing: -1.5px;
+}
+
+.sunbird-logo-text span {
+    color: #333;
+}
+
+.sunbird-logo-img {
+    width: auto;
+    height: 40px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+    text-align: center;
+}
+
+.page-subtitle {
+    font-size: 0.9rem;
+    /* Slightly smaller subtext */
+    color: #718096;
+    margin: 0 0 30px 0;
+    /* Reduced margin */
+    text-align: center;
+    line-height: 1.5;
+    padding: 0 20px;
+}
+
+.kc-form-group {
+    margin-bottom: 24px;
+}
+
+.kc-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4A5568;
+    margin-bottom: 10px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.kc-input {
+    width: 100%;
+    padding: 14px 22px;
+    /* Slightly more breathing room */
+    border: 1.5px solid #E2E8F0;
+    border-radius: 16px;
+    /* Matched to image curvature */
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    background: #ffffff;
+}
+
+.kc-input:hover,
+.kc-input:focus {
+    outline: none;
+    border-color: #A73A24;
+    background: white;
+    /* Precise double border: Main Border -> White Gap -> Second Border */
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #A73A24;
+    border-radius: 16px;
+}
+
+/* Ensure hover effects on other fields are hidden when one field is focused */
+#kc-reset-password-form:focus-within input[type="text"]:hover:not(:focus),
+#kc-reset-password-form:focus-within input[type="password"]:hover:not(:focus) {
+    box-shadow: none !important;
+    border-color: #E2E8F0 !important;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 18px;
+    cursor: pointer;
+    color: #718096;
+    display: flex;
+    padding: 5px;
+}
+
+.kc-button {
+    width: 100%;
+    padding: 18px;
+    background: #A73A24;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    /* Consistent with input rounding */
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 15px;
+    box-shadow: 0 6px 15px rgba(167, 58, 36, 0.3);
+}
+
+.kc-button:hover {
+    background: #8E311F;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(167, 58, 36, 0.4);
+}
+
+.alert {
+    padding: 14px;
+    border-radius: 10px;
+    margin-bottom: 25px;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.alert-error {
+    background-color: #FFF5F5;
+    color: #C53030;
+    border: 1px solid #FEB2B2;
+}
+
+@media (max-width: 900px) {
+    #kc-content-wrapper {
+        border-radius: 0;
+        flex-direction: column;
+    }
+
+    .spark-visual-pane {
+        display: none;
+    }
+
+    .spark-form-pane {
+        flex: 1;
+        padding: 60px 24px;
     }
 }
