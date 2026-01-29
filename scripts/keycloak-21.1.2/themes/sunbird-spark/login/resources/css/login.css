@@ -653,3 +653,68 @@ div[class*="kcFormGroupClass"] {
         padding: 60px 24px;
     }
 }
+
+/* OTP Validation Styles */
+.otp-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px; /* Reduced gap for better fit */
+    margin-bottom: 24px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.otp-input {
+    width: 45px !important; /* Fixed width */
+    height: 50px !important;
+    text-align: center;
+    font-size: 1.25rem !important;
+    padding: 0 !important;
+    border-radius: 8px !important;
+    border: 1px solid #E2E8F0 !important;
+    background: #fff !important;
+}
+
+.otp-input:focus {
+    border-color: #A73A24 !important;
+    box-shadow: 0 0 0 2px rgba(167, 58, 36, 0.2) !important;
+    outline: none !important;
+}
+
+.otp-validity-text {
+    font-size: 0.85rem;
+    color: #4A5568;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.resend-otp-container {
+    margin-bottom: 24px;
+    font-size: 0.875rem;
+    color: #4A5568;
+}
+
+.resend-otp-container a {
+    color: #A73A24;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.resend-otp-container a:hover {
+    text-decoration: underline;
+}
+
+/* Helpers */
+.text-center {
+    text-align: center;
+}
+
+.block {
+    display: block;
+    width: 100%;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
