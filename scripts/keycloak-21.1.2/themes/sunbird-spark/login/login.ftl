@@ -17,7 +17,7 @@
             <div id="kc-social-providers-top">
                 <#list social.providers as p>
                     <#if p.providerId == "google">
-                        <a href="${p.loginUrl}" id="google-login-button" class="google-signin-btn">
+                        <a href="${p.loginUrl}" id="google-login-button" class="google-signin-btn" onclick="navigate('google'); return false;">
                             <img src="${url.resourcesPath}/img/google-icon.svg" alt="Google" class="google-icon" />
                             <span>Sign in with Google</span>
                         </a>
@@ -58,12 +58,12 @@
 
                 <div class="forgot-password">
                     <#if realm.resetPasswordAllowed>
-                        <a tabindex="3" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a>
+                        <a id="fgtKeycloakFlow" tabindex="3" onclick="createTelemetryEvent(event); storeForgotPasswordLocation(event);" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a>
                     </#if>
                 </div>
 
                 <div id="kc-form-buttons" class="${properties.kcFormGroupClass!}">
-                    <input tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} login-button" name="login" id="kc-login" type="submit" value="Login"/>
+                    <input tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} login-button" name="login" id="kc-login" onclick="doLogin(event)" type="submit" value="Login"/>
                 </div>
             </form>
         </#if>
