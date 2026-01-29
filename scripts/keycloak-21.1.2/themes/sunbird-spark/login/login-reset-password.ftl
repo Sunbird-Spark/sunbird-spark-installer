@@ -27,36 +27,20 @@
                 </div>
 
                 <div class="kc-form-group">
-                    <label for="password-new" class="kc-label">Set Password*</label>
+                    <label for="name" class="kc-label">Name*</label>
                     <div class="input-wrapper">
-                        <input type="password" id="password-new" name="password-new" class="kc-input" placeholder="Enter Password" required/>
-                        <span class="password-toggle" onclick="togglePassword('password-new')">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </span>
-                    </div>
-                </div>
-
-                <div class="kc-form-group">
-                    <label for="password-confirm" class="kc-label">Confirm Password*</label>
-                    <div class="input-wrapper">
-                        <input type="password" id="password-confirm" name="password-confirm" class="kc-input" placeholder="Re-enter Password" required/>
-                        <span class="password-toggle" onclick="togglePassword('password-confirm')">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        </span>
+                        <input type="text" id="name" class="kc-input" placeholder="Enter your Name" required/>
                     </div>
                 </div>
 
                 <div class="kc-form-buttons">
-                    <button class="kc-button" type="submit">Continue</button>
+                    <button id="login" class="kc-button" type="submit" onclick="javascript:makeDivUnclickable()">Continue</button>
                 </div>
             </form>
-
-            <script>
-                function togglePassword(id) {
-                    const el = document.getElementById(id);
-                    el.type = el.type === "password" ? "text" : "password";
-                }
-            </script>
+            
+            <div class="back-to-login">
+                <a href="${url.loginUrl}">${msg("backToLogin")}</a>
+            </div>
         </div>
     <#elseif section = "info" >
         <#-- Handled inside the form pane -->

@@ -1,7 +1,6 @@
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true>
 <!DOCTYPE html>
-<html class="${properties.kcHtmlClass!}">
-<html lang="en">
+<html class="${properties.kcHtmlClass!}" lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -28,6 +27,39 @@
     <#if properties.scripts?has_content>
         <#list properties.scripts?split(' ') as script>
             <script src="${url.resourcesPath}/${script}" type="text/javascript"></script>
+            <#if script?contains('jquery')>
+                <script type="text/javascript">
+                    (function() {
+                        if (window.jQuery) {
+                            var originalAjax = jQuery.ajax;
+                            jQuery.ajax = function(options) {
+                                if (options.url && options.url.indexOf('/api/org/v2/search') !== -1) {
+                                    var deferred = jQuery.Deferred();
+                                    var mockResponse = {
+                                        "responseCode": "OK",
+                                        "result": {
+                                            "response": {
+                                                "content": [{
+                                                    "hashTagId": "sunbird",
+                                                    "status": 1,
+                                                    "isTenant": true,
+                                                    "slug": "sunbird"
+                                                }]
+                                            }
+                                        }
+                                    };
+                                    setTimeout(function() {
+                                        if (options.success) options.success(mockResponse);
+                                        deferred.resolve(mockResponse);
+                                    }, 10);
+                                    return deferred.promise();
+                                }
+                                return originalAjax.apply(this, arguments);
+                            };
+                        }
+                    })();
+                </script>
+            </#if>
         </#list>
     </#if>
     <#if scripts??>
