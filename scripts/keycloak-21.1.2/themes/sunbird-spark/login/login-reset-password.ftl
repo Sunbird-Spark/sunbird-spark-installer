@@ -1,7 +1,6 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout displayInfo=true; section>
     <#if section = "header">
-        <#-- Handled inside the form pane -->
     <#elseif section = "form">
         <div class="spark-form-pane">
             
@@ -9,8 +8,7 @@
                 <img src="${url.resourcesPath}/img/sunbird-logo.png" alt="Sunbird" class="sunbird-logo-img" onerror="this.src='https://raw.githubusercontent.com/sunbird-ed/sunbird-ed-portal/master/src/assets/images/sunbird_logo.png'">
             </div>
             
-            <!-- STEP 1: IDENTIFY USER -->
-            <div id="step-1">
+            <div>
                 <h1 class="page-title">Forgot Password?</h1>
                 <p class="page-subtitle">Don't worry! Share your details and we will send you a code to reset your password.</p>
 
@@ -20,214 +18,20 @@
                     </div>
                 </#if>
 
-                <form id="kc-reset-password-form" method="post">
+                <form id="kc-reset-password-form" action="${url.loginAction}" method="post">
                     <div class="kc-form-group">
                         <label for="username" class="kc-label">Email ID / Mobile Number*</label>
                         <div class="input-wrapper">
-                            <input type="text" id="username" name="username" class="kc-input" placeholder="Enter Email ID / Mobile Number" autofocus required/>
-                        </div>
-                    </div>
-
-                    <div class="kc-form-group">
-                        <label for="name" class="kc-label">Name*</label>
-                        <div class="input-wrapper">
-                            <input type="text" id="name" class="kc-input" placeholder="Enter your Name" required/>
+                            <input type="text" id="username" name="username" class="kc-input" placeholder="Enter Email ID / Mobile Number" autofocus autocomplete="username" required/>
                         </div>
                     </div>
 
                     <div class="kc-form-buttons">
-                        <button id="login" class="kc-button" type="button" onclick="return handleStep1(event)">Continue</button>
+                        <input id="login" class="kc-button" type="submit" value="Submit"/>
                     </div>
                 </form>
             </div>
-
-            <!-- STEP 2: VERIFY OTP (Initially Hidden) -->
-            <div id="step-2" class="hide">
-                <h1 class="page-title text-center">Enter the code</h1>
-                <p class="page-subtitle text-center">Enter the 6 digit code sent to your Email ID<br>and complete the verification</p>
-
-                <p class="otp-validity-text text-center">OTP is valid for 30 minutes</p>
-
-                <form id="kc-totp-login-form" method="post">
-                    <div class="otp-container">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); focusNext(this)" onkeydown="handleBackspace(this, event)">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); focusNext(this)" onkeydown="handleBackspace(this, event)">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); focusNext(this)" onkeydown="handleBackspace(this, event)">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); focusNext(this)" onkeydown="handleBackspace(this, event)">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); focusNext(this)" onkeydown="handleBackspace(this, event)">
-                        <input type="text" class="otp-input" maxlength="1" pattern="[0-9]" inputmode="numeric" required oninput="this.value = this.value.replace(/[^0-9]/g, ''); collectOtp()" onkeydown="handleBackspace(this, event)">
-                        
-                        <!-- Hidden input to store the actual concatenated OTP -->
-                        <input id="totp" name="smsCode" type="hidden" required pattern="^[0-9]{6}$" />
-                    </div>
-
-                    <div class="resend-otp-container text-center">
-                        <span id="timer">00:00</span> <a href="#" id="resend-link" onclick="resendOtp(); return false;">Resend OTP</a>
-                    </div>
-
-                    <div class="kc-form-buttons">
-                        <button class="kc-button block" type="button" onclick="return handleStep2(event)">Confirm and Proceed</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- STEP 3: RESET PASSWORD (Initially Hidden) -->
-            <div id="step-3" class="hide">
-                <h1 class="page-title">Set New Password</h1>
-                <p class="page-subtitle">Create a strong password to secure your account.</p>
-
-                <form id="kc-passwd-update-form" action="${url.loginAction}" method="post" onsubmit="return handleStep3(event)">
-                    <!-- Keep hidden inputs to satisfy Keycloak form requirements if needed later -->
-                    <input type="text" id="username-hidden" name="username" style="display:none;"/>
-                    <input type="password" id="password-hidden" name="password" autocomplete="current-password" style="display:none;"/>
-
-                    <div class="kc-form-group">
-                        <label for="password-new" class="kc-label">Create New Password*</label>
-                        <div class="input-wrapper">
-                            <input type="password" id="password-new" name="password-new" class="kc-input" autofocus autocomplete="new-password" placeholder="Enter New Password" required onkeyup="validatePassword()"/>
-                            <span class="password-toggle" onclick="togglePassword('password-new', 'eye-icon-new')">
-                                <svg id="eye-icon-new" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </span>
-                        </div>
-                        <div id="passwd-error-msg" class="ui text passwdchk">Your password must contain a minimum of 8 characters. It must include numerals, lower and upper case alphabets and special characters, without any spaces</div>
-                    </div>
-
-                    <div class="kc-form-group">
-                        <label for="password-confirm" class="kc-label">Confirm Password*</label>
-                        <div class="input-wrapper">
-                            <input type="password" id="password-confirm" name="password-confirm" class="kc-input" autocomplete="new-password" placeholder="Confirm New Password" required onkeyup="matchPassword()"/>
-                            <span class="password-toggle" onclick="togglePassword('password-confirm', 'eye-icon-confirm')">
-                                <svg id="eye-icon-confirm" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </span>
-                        </div>
-                        <div id="passwd-match-error-msg" class="ui text confpasswderr hide">Passwords do not match</div>
-                    </div>
-
-                    <div class="kc-form-buttons">
-                        <button id="login" class="kc-button" type="button" onclick="return handleStep3(event)">Reset Password</button>
-                    </div>
-                </form>
-            </div>
-            
-            <div id="reset-success" class="hide">
-                <h1 class="page-title">Congratulations!</h1>
-                <p class="page-subtitle">Your password has been successfully reset.</p>
-                <div class="success-icon" aria-hidden="true">
-                    <img src="${url.resourcesPath}/img/right-stroke.svg" alt="Success" class="success-check" />
-                </div>
-                <div class="kc-form-buttons">
-                    <button class="kc-button block" type="button" onclick="window.location.href='${url.loginUrl}'">Proceed to Login</button>
-                </div>
-            </div>
-            
         </div>
-        
-        <style>
-            .hide { display: none !important; }
-        </style>
-
-        <script>
-            // === STEP HANDLERS ===
-            function handleStep1(e) {
-                e.preventDefault();
-                var u = document.getElementById('username');
-                var n = document.getElementById('name');
-                var errs = [];
-                if (!u || !String(u.value || '').trim()) errs.push('Enter Email ID / Mobile Number');
-                if (!n || !String(n.value || '').trim()) errs.push('Enter Name');
-                if (errs.length) {
-                    if (window.showToast) window.showToast('error', errs.join(' • '), 5000, 'Error');
-                    return false;
-                }
-                window.__contactIdentifier = String(u.value || '').trim();
-                document.getElementById('step-1').classList.add('hide');
-                document.getElementById('step-2').classList.remove('hide');
-                setTimeout(function () {
-                    var firstOtp = document.querySelector('.otp-input');
-                    if (firstOtp) firstOtp.focus();
-                }, 100);
-                if (window.showToast) {
-                    var contact = window.__contactIdentifier || '';
-                    window.showToast('success', 'A verification code has been sent to ' + contact, 5000, 'OTP Sent');
-                }
-                return false;
-            }
-
-            function handleStep2(e) {
-                e.preventDefault();
-                if (collectOtp()) {
-                    document.getElementById('step-2').classList.add('hide');
-                    document.getElementById('step-3').classList.remove('hide');
-                } else {
-                    if (window.showToast) window.showToast('error', 'Please enter the complete 6-digit code', 5000, 'Error');
-                }
-                return false;
-            }
-            
-            function handleStep3(e) {
-                e.preventDefault();
-                var p1 = document.getElementById('password-new').value;
-                var p2 = document.getElementById('password-confirm').value;
-                if (!String(p1 || '').trim()) {
-                    if (window.showToast) window.showToast('error', 'Enter New Password', 5000, 'Error');
-                    return false;
-                }
-                if (p1 !== p2) {
-                    if (window.showToast) window.showToast('error', 'Passwords do not match', 5000, 'Error');
-                    return false;
-                }
-                document.getElementById('step-3').classList.add('hide');
-                document.getElementById('reset-success').classList.remove('hide');
-                return false;
-            }
-            function resendOtp() {
-                var contact = window.__contactIdentifier || (document.getElementById('username') && document.getElementById('username').value) || '';
-                if (window.showToast) window.showToast('success', 'A verification code has been sent to ' + String(contact || '').trim(), 5000, 'OTP Sent');
-            }
-
-            // === OTP LOGIC ===
-            function focusNext(el) {
-                if (el.value.length === 1) {
-                    const next = el.nextElementSibling;
-                    if (next && next.classList.contains('otp-input')) {
-                        next.focus();
-                    }
-                }
-            }
-            
-            function handleBackspace(el, event) {
-                if (event.key === 'Backspace' && el.value.length === 0) {
-                    const prev = el.previousElementSibling;
-                    if (prev && prev.classList.contains('otp-input')) {
-                        prev.focus();
-                    }
-                }
-            }
-
-            function collectOtp() {
-                const inputs = document.querySelectorAll('.otp-input');
-                let otp = '';
-                inputs.forEach(input => otp += input.value);
-                document.getElementById('totp').value = otp;
-                if(otp.length < 6) return false;
-                return true;
-            }
-
-            // === PASSWORD TOGGLE LOGIC ===
-             function togglePassword(id, iconId) {
-                const passwordInput = document.getElementById(id);
-                const eyeIcon = document.getElementById(iconId);
-                
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
-                    eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/><line x1="1" y1="1" x2="23" y2="23" stroke="currentColor"/>';
-                } else {
-                    passwordInput.type = 'password';
-                    eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-                }
-            }
-        </script>
     <#elseif section = "info" >
-        <#-- Handled inside the form pane -->
     </#if>
 </@layout.registrationLayout>

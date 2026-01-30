@@ -665,6 +665,15 @@ div[class*="kcFormGroupClass"] {
     background: #ac5039;
 }
 
+.kc-form-buttons {
+    text-align: center;
+}
+
+#backToApplication {
+    text-decoration: none;
+    display: inline-block;
+}
+
 .success-icon {
     display: flex;
     align-items: center;
