@@ -2505,7 +2505,14 @@ function doLogin(e) {
 
 $("body").ready(function ($) {
   $(".login-button").click(function (e) {
-    return doLogin(e);
+    e.preventDefault();
+    logInteractEvent("login");
+    logLoginImpressionEvent("pageexit");
+    setTimeout(function () {
+      $("#kc-form-login").submit();
+    }, 500);
+
+    return false;
   })
 
   $("#google-login-button").click(function (e) {
@@ -2684,10 +2691,6 @@ var makeDivUnclickable = function () {
 };
 
 var inputBoxFocusIn = function (currentElement) {
-  // var autoMerge = getValueFromSession('automerge');
-  // if (autoMerge === '1') {
-  //   return;
-  // }
   if (currentElement.id !== 'totp') {
     var placeholderElement = document.querySelector("label[id='" + currentElement.id + "LabelPlaceholder']");
     var labelElement = document.querySelector("label[id='" + currentElement.id + "Label']");
@@ -2696,10 +2699,6 @@ var inputBoxFocusIn = function (currentElement) {
   }
 };
 var inputBoxFocusOut = function (currentElement) {
-  // var autoMerge = getValueFromSession('automerge');
-  // if (autoMerge === '1') {
-  //   return;
-  // }
   if (currentElement.id !== 'totp') {
     var placeholderElement = document.querySelector("label[id='" + currentElement.id + "LabelPlaceholder']");
     var labelElement = document.querySelector("label[id='" + currentElement.id + "Label']");

@@ -39,14 +39,14 @@
                     <#if usernameEditDisabled??>
                         <input tabindex="1" id="emailormobile" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}" type="text" disabled placeholder="Enter Email ID / Mobile Number" />
                     <#else>
-                        <input tabindex="1" id="emailormobile" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}" type="text" autofocus autocomplete="off" placeholder="Enter Email ID / Mobile Number" />
+                        <input tabindex="1" id="emailormobile" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}" onfocusin="inputBoxFocusIn(this)" onfocusout="inputBoxFocusOut(this)" type="text" autofocus autocomplete="username" placeholder="Enter Email ID / Mobile Number" />
                     </#if>
                 </div>
 
                 <div class="${properties.kcFormGroupClass!}">
                     <label for="password" class="${properties.kcLabelClass!}">Password</label>
                     <div class="password-wrapper">
-                        <input tabindex="2" id="password" class="${properties.kcInputClass!}" name="password" type="password" autocomplete="off" placeholder="Enter Password" />
+                        <input tabindex="2" id="password" class="${properties.kcInputClass!}" name="password" type="password" onfocusin="inputBoxFocusIn(this)" onfocusout="inputBoxFocusOut(this)" autocomplete="current-password" placeholder="Enter Password" />
                         <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Toggle password visibility">
                             <svg id="eye-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10 4C4.5 4 1.5 10 1.5 10C1.5 10 4.5 16 10 16C15.5 16 18.5 10 18.5 10C18.5 10 15.5 4 10 4Z" stroke="#666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -58,12 +58,12 @@
 
                 <div class="forgot-password">
                     <#if realm.resetPasswordAllowed>
-                        <a id="fgtKeycloakFlow" tabindex="3" onclick="createTelemetryEvent(event); storeForgotPasswordLocation(event);" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a>
+                        <a id="fgtKeycloakFlow" tabindex="3" onclick="javascript:storeLocation(); javascript:makeDivUnclickable(); javascript:createTelemetryEvent(event); javascript:storeForgotPasswordLocation(event);" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a>
                     </#if>
                 </div>
 
                 <div id="kc-form-buttons" class="${properties.kcFormGroupClass!}">
-                    <input tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} login-button" name="login" id="kc-login" type="submit" value="Login"/>
+                    <button tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} login-button" name="login" id="kc-login" type="submit" onclick="doLogin(event)">Login</button>
                 </div>
             </form>
         </#if>
@@ -72,7 +72,7 @@
     <#elseif section = "info" >
         <#if realm.password && realm.registrationAllowed && !usernameEditDisabled??>
             <div id="kc-registration" class="registration-link">
-                <span>New user? Please <a tabindex="5" href="${url.registrationUrl}">create an account</a> to continue.</span>
+                <span>New user? Please <a tabindex="5" onclick=navigate('self')>create an account</a> to continue.</span>
             </div>
         </#if>
     </#if>
