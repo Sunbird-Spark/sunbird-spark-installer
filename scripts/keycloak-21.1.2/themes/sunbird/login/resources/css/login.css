@@ -63,6 +63,9 @@ body {
     background-image: url('../img/auth-wave-bg.png');
     background-size: cover;
     background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Utility classes requested */
@@ -493,55 +496,32 @@ div[class*="kcFormGroupClass"] {
 }
 
 /* Responsive Design */
-/* @media (max-width: 1440px) {
-    .login-left-panel {
-        display: none;
-    }
-    .login-right-panel {
-        flex: 1 1 100%;
-    }
-    .login-card {
-        border-radius: 3rem;
-    }
-} */
 @media (max-width: 1024px) {
-    .login-left-panel {
-        display: none;
-    }
-    .login-right-panel {
-        flex: 1 1 100%;
-    }
-    .login-card {
-        border-radius: 3rem;
+    .login-split-container {
+        padding: 2rem;
+        box-shadow: none !important;
     }
 }
-
 @media (max-width: 768px) {
     .login-split-container {
-        flex-direction: column;
+        box-shadow: none !important;
     }
-
     .login-left-panel {
-        min-height: 200px;
-        padding: 40px 20px;
+        display: none;
     }
-
-    .left-panel-title {
-        font-size: 28px;
-        text-align: center;
-    }
-
     .login-right-panel {
-        flex: 1;
-        padding: 30px 20px;
+        flex: 1 1 100%;
     }
-
     .login-card {
-        max-width: 100%;
+        height: fit-content !important;
+        border-radius: 3rem;
     }
 }
 
 @media (max-width: 480px) {
+    .login-split-container {
+        box-shadow: none !important;
+    }
     .welcome-title {
         font-size: 22px;
     }
