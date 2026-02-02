@@ -66,7 +66,7 @@ volume-autoscaler:
   scale_up_max_size: ""     
 
 nlwebflink:
-  enabled: true
+  enabled: false
   namespace: nlweb
   image:
     repository: sunbirded.azurecr.io/flink-nlweb
@@ -74,7 +74,7 @@ nlwebflink:
 
 
 nlweb:
-  enabled: true
+  enabled: false
   namespace: nlweb
   image:
     repository: sanketikahub/nlweb
