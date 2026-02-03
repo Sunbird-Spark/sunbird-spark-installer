@@ -1,4 +1,4 @@
 # For local development
-tofu {
+terraform {
   source = "../../modules//random_passwords/"
 }

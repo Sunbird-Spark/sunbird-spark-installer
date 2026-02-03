@@ -9,7 +9,7 @@ locals {
 }
 
 # For local development
-tofu {
+terraform {
   source = "../../modules//storage/"
 }
 

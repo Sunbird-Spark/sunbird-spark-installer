@@ -1,4 +1,4 @@
- tofu {
+ terraform {
   required_providers {
     azurerm = {
       version = "~> 4.0.1"  # Define the version constraint for the AzureRM provider
