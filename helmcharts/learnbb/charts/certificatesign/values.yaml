@@ -98,7 +98,7 @@ strategy:
   maxunavailable: 25%
 
 serviceAccount:
-  create: true
+  create: false
   name: ""
 
 serviceMonitor:

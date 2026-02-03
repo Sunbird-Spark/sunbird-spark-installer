@@ -1,54 +1,37 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout displayInfo=true; section>
-    <#if section = "title">
-        ${msg("emailForgotTitle")}
+    <#if section = "header">
     <#elseif section = "form">
-    <meta content="width=device-width, initial-scale=1" name="viewport" />
-    <div class="fullpage-background-image">
-        <div class="container-wrapper">
-                <div class="ui header centered mb-8">
-                    <img onerror="" alt="">
-                    <div class="signInHead">${msg("emailForgotTitle")}</div>
-                </div>
-                <div class="ui content center justfy textCenter mt-24">
-                    ${msg("enterEmailPhonenumberToGetCode")}
-                </div>
-                <div class="ui content center justfy textCenter mt-8 mb-16">
-                    <#if message?has_content>
-                        <div class="ui text ${message.type}">
-                            ${message.summary}
-                        </div>
-                    </#if>
-                </div>
-                <form id="kc-reset-password-form" class="ui form" method="POST" action="${url.loginAction}">
-                    <div class="field mb-24">
-                        <label id="usernameLabel" for="username" class="">
-                            <#if !realm.loginWithEmailAllowed>
-                                ${msg("username")}
-                            <#elseif !realm.registrationEmailAsUsername>
-                                ${msg("emailOrPhone")}
-                            <#else>${msg("email")}
-                            </#if>
-                        </label>
-                        <label id="usernameLabelPlaceholder" for="username" class="activeLabelColor hide">
-                            <#if !realm.loginWithEmailAllowed>${msg("username")}
-                            <#elseif !realm.registrationEmailAsUsername>${msg("placeholderForEmailOrPhone")}
-                            <#else>${msg("email")}
-                            </#if>
-                        </label>
-                        <input type="text" id="username" class="mt-8" name="username" onfocusin="inputBoxFocusIn(this)" onfocusout="inputBoxFocusOut(this)" autofocus/>
+        <div class="spark-form-pane">
+            
+            <div class="sunbird-logo-wrapper">
+                <img src="${url.resourcesPath}/img/sunbird-logo.png" alt="Sunbird" class="sunbird-logo-img" onerror="this.src='https://raw.githubusercontent.com/sunbird-ed/sunbird-ed-portal/master/src/assets/images/sunbird_logo.png'">
+            </div>
+            
+            <div>
+                <h1 class="page-title">Forgot Password?</h1>
+                <p class="page-subtitle">Don't worry! Share your details and we will send you a code to reset your password.</p>
+
+                <#if message?has_content>
+                    <div class="alert alert-${message.type}">
+                        <span class="kc-feedback-text">${message.summary}</span>
                     </div>
-                    <div class="field">
-                        <button id="login" onclick="javascript:makeDivUnclickable()" class="sb-btn sb-btn-normal sb-btn-primary width-100">
-                        ${msg("doReset")}
-                        </button>
+                </#if>
+
+                <form id="kc-reset-password-form" action="${url.loginAction}" method="post">
+                    <div class="kc-form-group">
+                        <label for="username" class="kc-label">Email ID / Mobile Number*</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="username" name="username" class="kc-input" placeholder="Enter Email ID / Mobile Number" autofocus autocomplete="username" required/>
+                        </div>
+                    </div>
+
+                    <div class="kc-form-buttons">
+                        <input id="login" class="kc-button" type="submit" value="Submit"/>
                     </div>
                 </form>
-                <div class="${properties.kcFormOptionsWrapperClass!} signUpMsg mb-56 mt-24 textCenter">
-                   <a id="versionLink" class="sb-btn sb-btn-normal sb-btn-outline-primary" onclick="javascript:makeDivUnclickable()" href="${url.loginUrl}">${msg("backToLogin")}</a>
-                </div>
+            </div>
         </div>
-    </div>
     <#elseif section = "info" >
     </#if>
 </@layout.registrationLayout>

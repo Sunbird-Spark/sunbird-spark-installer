@@ -3,10 +3,6 @@ default_passwords:
   superset_admin_password: &superset-admin-password "admin"
   keycloak_password: &keycloak-password "admin"
   postgresql_password: &postgresql-password "postgres"
-superset:
-  credentials:
-    adminUser: admin
-    adminPassword: *superset-admin-password
 kube-prometheus-stack:
   grafana:
     adminUser: admin
@@ -64,13 +60,12 @@ global:
   postgresql:
     postgresqlUsername: postgres
     postgresqlPassword: *postgresql-password
+  superset:
+        password: *superset-admin-password    
   keycloak:
    keycloak_user: admin
    keycloak_password: *keycloak-password  
   deploy_dial_services: *deploy_dial_services 
-  postgresql:
-    postgresqlUsername: postgres
-    postgresqlPassword: *postgresql-password
 
   # The merge domain is optional and is required only if user merge workflow is required.
   # For most audience, this workflow is not required. If you need this workflow, then

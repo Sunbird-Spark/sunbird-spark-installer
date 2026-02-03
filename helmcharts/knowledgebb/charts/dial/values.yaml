@@ -75,7 +75,7 @@ configmap:
   mountPath: /home/sunbird/sunbird-dial-service-1.0-SNAPSHOT/config
 
 serviceAccount:
-  create: true
+  create: false
 
 commonAnnotations:
   reloader.stakater.com/auto: "true"

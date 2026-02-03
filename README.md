@@ -65,7 +65,20 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
          deploy_dial_services: true
          ```
 
-5. Log in to your cloud provider:
+5. Enabling Asset Enrichment
+
+     If you want to enable asset enrichment, you can control it using the
+     `enable_asset_enrichment` flag.
+
+     - Default: `false` (Asset enrichment is disabled)
+
+     - To enable: set it to `true` in your `global-values.yaml` file. For example:
+
+         ```yaml
+         enable_asset_enrichment: true
+         ```
+
+6. Log in to your cloud provider:
     ```bash
     # If  cloud provider is Azure
     az login --tenant AZURE_TENANT_ID

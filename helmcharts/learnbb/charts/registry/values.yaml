@@ -60,7 +60,7 @@ configmap:
   mountPath: /home/sunbirdrc/config/public/_schemas
 
 serviceAccount:
-  create: true
+  create: false
   name: ""
 
 serviceMonitor:
@@ -105,19 +105,16 @@ registry_listener_security_protocol_map: INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT
 registry_inter_broker_listener_name: INTERNAL
 registry_offsets_topic_replication_factor: 1
 logging_level: INFO
-registry_zookeeper_tick_time: "2000"
 registry_kafka_broker_id: "1"
-zookeeper_client_port: "2181"
-kafka_zookeeper_connect: zookeeper
 kafka_advertised_listeners: kafka
 upstream_url: " {{ .Values.global.cloud_storage.cloud_public_storage_accountname }}:{{ .Values.global.cloud_storage.cloud_storage_content_bucketname }}" # not used anywhere
-ZOOKEEPER_TICK_TIME: 2000
 KAFKA_BROKER_ID: 1
 KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL:PLAINTEXT,OUTSIDE:PLAINTEXT"
 KAFKA_INTER_BROKER_LISTENER_NAME:  "INTERNAL"
 KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:  1
 logging_level_root : "INFO"
 registry_database: registry
+database_provider: "YUGABYTE"
 
 envoy_probes:
   failureThreshold: 2

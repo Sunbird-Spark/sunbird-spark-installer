@@ -1,27 +1,30 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout; section>
-    <#if section = "title">
-        ${msg("loginTitle",realm.displayName)}
-    <#elseif section = "header">
-        Reset link
-    <#elseif section = "form">
-        <form id="kc-totp-login-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
-            <div class="${properties.kcFormGroupClass!}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label class="${properties.kcLabelClass!}">Please check your registered email for reset link is sent!</label>
-                </div>
-
+    <#if section = "header">
+        <div class="login-header">
+            <div class="sunbird-logo">
+                <img src="${url.resourcesPath}/img/sunbird-logo.png" alt="Sunbird Logo" />
             </div>
-
-            <div class="${properties.kcFormGroupClass!}">
-                <div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
-                    <div class="${properties.kcFormOptionsWrapperClass!}">
+            <h1 class="welcome-title">Reset link</h1>
+            <p class="welcome-subtitle">Email verification sent</p>
+        </div>
+    <#elseif section = "form">
+        <div id="kc-form">
+          <div id="kc-form-wrapper">
+            <form id="kc-totp-login-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
+                <div class="${properties.kcFormGroupClass!}">
+                    <div class="${properties.kcLabelWrapperClass!}">
+                        <label class="${properties.kcLabelClass!}" style="text-align: center; display: block;">Please check your registered email for reset link is sent!</label>
                     </div>
                 </div>
-            </div>
-        </form>
-        <#if client?? && client.baseUrl?has_content>
-            <p><a id="backToApplication" onclick="javascript:makeDivUnclickable()" href="${client.baseUrl}">${msg("backToApplication")}</a></p>
-        </#if>
+            </form>
+          </div>
+        </div>
+    <#elseif section = "info" >
+        <div class="registration-link">
+            <#if client?? && client.baseUrl?has_content>
+                <a id="backToApplication" href="${client.baseUrl}">${msg("backToApplication")}</a>
+            </#if>
+        </div>
     </#if>
 </@layout.registrationLayout>

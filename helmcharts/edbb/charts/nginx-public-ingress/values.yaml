@@ -99,7 +99,7 @@ configmap:
   enabled: true
 
 serviceAccount:
-  create: true
+  create: false
   name: ""
 
 serviceMonitor:

@@ -19,7 +19,9 @@ spec:
       annotations:
         checksum/config: {{ .Files.Glob "files/*" | toYaml | sha256sum }}
     spec:
+       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "common.names.fullname" . }}
+      {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       {{- with .Values.image.pullSecrets }}

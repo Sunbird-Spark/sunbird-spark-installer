@@ -1,27 +1,20 @@
 <#import "template.ftl" as layout>
 <@layout.registrationLayout; section>
-    <#if section = "title">
-        ${msg("loginTitle",realm.displayName)}
-    <#elseif section = "header">
-        Oops ... an SMS could not be sent
-    <#elseif section = "form">
-        <form id="kc-totp-login-form" class="${properties.kcFormClass!}" action="${url.loginAction}" method="post">
-            <div class="${properties.kcFormGroupClass!}">
-                <div class="${properties.kcLabelWrapperClass!}">
-                    <label class="${properties.kcLabelClass!}">Please contact your system administrator</label>
-                </div>
-
+    <#if section = "form">
+        <div class="spark-form-pane validation-pane">
+            <div class="sunbird-logo-wrapper">
+                <img src="${url.resourcesPath}/img/sunbird-logo.png" alt="Sunbird" class="sunbird-logo-img" onerror="this.src='https://raw.githubusercontent.com/sunbird-ed/sunbird-ed-portal/master/src/assets/images/sunbird_logo.png'">
             </div>
-
-            <div class="${properties.kcFormGroupClass!}">
-                <div id="kc-form-options" class="${properties.kcFormOptionsClass!}">
-                    <div class="${properties.kcFormOptionsWrapperClass!}">
-                    </div>
+            <h1 class="page-title text-center">Verification Error</h1>
+            <#if message?has_content>
+                <div class="alert alert-${message.type} text-center mb-4">
+                    <span class="kc-feedback-text">${message.summary}</span>
                 </div>
+            </#if>
+            <p class="page-subtitle text-center">Please request a new code and try again.</p>
+            <div class="kc-form-buttons">
+                <a class="kc-button" href="${url.loginAction}">${msg("doClickHere")! "Back"}</a>
             </div>
-        </form>
-        <#if client?? && client.baseUrl?has_content>
-            <p><a id="backToApplication" onclick="javascript:makeDivUnclickable()" href="${client.baseUrl}">${msg("backToApplication")}</a></p>
-        </#if>
+        </div>
     </#if>
 </@layout.registrationLayout>
