@@ -1,13 +1,10 @@
 deploy_dial_services:  &deploy_dial_services  "true"
+enable_asset_enrichment: &enable_asset_enrichment "false"
 default_passwords:
   grafana_admin_password: &grafana-admin-password "prom-operator"
   keycloak_password: &keycloak-password "admin"
   superset_admin_password: &superset-admin-password "admin"
   postgresql_password: &postgresql-password "postgres"
-superset:
-  credentials:
-    adminUser: admin
-    adminPassword: *superset-admin-password
 kube-prometheus-stack:
   grafana:
     adminUser: admin
@@ -50,15 +47,17 @@ global:
   sunbird_msg_91_auth: ""
   sunbird_msg_sender: ""
   mail_from_certbot_notifications: ""  #The "from" email address used by the Certbot renewal job for sending SSL renewal status notifications via SendGrid SMTP
-
   youtube_apikey: ""
   postgresql:
     postgresqlUsername: postgres
     postgresqlPassword: *postgresql-password
+  superset:
+        password: *superset-admin-password  
   keycloak:
    keycloak_user: admin
    keycloak_password: *keycloak-password  
   deploy_dial_services: *deploy_dial_services   
+  enable_asset_enrichment: *enable_asset_enrichment
   # The merge domain is optional and is required  `only if user merge workflow is required.
   # For most audience, this workflow is not required. If you need this workflow, then
   # set the value of merge_domain_status to "true" and provide a subdomain / another domain

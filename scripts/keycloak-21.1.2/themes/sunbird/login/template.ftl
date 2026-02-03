@@ -1,7 +1,6 @@
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true>
 <!DOCTYPE html>
-<html class="${properties.kcHtmlClass!}">
-<html lang="en">
+<html class="${properties.kcHtmlClass!}" lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -18,8 +17,8 @@
             <meta name="${meta?split('==')[0]}" content="${meta?split('==')[1]}"/>
         </#list>
     </#if>
-    <title><#nested "title"></title>
-    <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
+    <title>Log in to Sunbird</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="${url.resourcesPath}/img/fav.png" />
     <#if properties.styles?has_content>
         <#list properties.styles?split(' ') as style>
             <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
@@ -38,8 +37,25 @@
 </head>
 
 <body class="${properties.kcBodyClass!}">
-    <main>
-    <div id="kc-logo"><a href="${properties.kcLogoLink!'#'}" title="kc-logo-wrapper"><div id="kc-logo-wrapper"></div><span class="hide">kc-logo</span></a></div>
+    <main class="login-main">
+        <div class="login-wrapper">
+            <div class="login-split-container">
+                <div class="login-left-panel">
+                    <div class="login-left-panel-container">
+                    <div class="background-pattern" style="background-image: url('${url.resourcesPath}/img/auth-wave-bg.png');"></div>
+                    <div class="left-panel-content">
+                        <h2 class="left-panel-title">Empower your future<br/>through learning.</h2>
+                    </div>
+                    </div>
+                </div>
+                <div class="login-right-panel">
+                    <div class="login-card">
+                    <!-- Close Button -->
+                    <button class="close-button" onclick="window.history.back();" aria-label="Close">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
 
     <div id="kc-container" class="${properties.kcContainerClass!}">
         <div id="kc-container-wrapper" class="${properties.kcContainerWrapperClass!}">
@@ -117,7 +133,62 @@
             </div>
         </div>
     </div>
+                    </div><!-- Close login-card -->
+                </div><!-- Close login-right-panel -->
+            </div><!-- Close login-split-container -->
+        </div><!-- Close login-wrapper -->
     </main>
+    <div class="toast-container"></div>
+    <script type="text/javascript">
+        if (!window.showToast) {
+            window.showToast = function (type, text, duration, title) {
+                try {
+                    var container = document.querySelector('.toast-container');
+                    if (!container) {
+                        container = document.createElement('div');
+                        container.className = 'toast-container';
+                        container.setAttribute('aria-live', 'polite');
+                        container.setAttribute('aria-atomic', 'true');
+                        document.body.appendChild(container);
+                    }
+                    var cls = 'toast';
+                    if (type) cls += ' toast-' + String(type).toLowerCase();
+                    var toast = document.createElement('div');
+                    toast.className = cls;
+                    toast.setAttribute('role', 'status');
+                    var t = document.createElement('div');
+                    t.className = 'toast-title';
+                    t.textContent = title || (String(type).toLowerCase() === 'error' ? 'Error' : '');
+                    var msg = document.createElement('div');
+                    msg.className = 'toast-message';
+                    msg.textContent = text || '';
+                    var close = document.createElement('button');
+                    close.className = 'toast-close';
+                    close.setAttribute('aria-label', 'Close');
+                    close.innerHTML = '&times;';
+                    toast.appendChild(t);
+                    toast.appendChild(msg);
+                    toast.appendChild(close);
+                    container.appendChild(toast);
+                    setTimeout(function () { toast.classList.add('show'); }, 10);
+                    var hide = function () {
+                        toast.classList.remove('show');
+                        setTimeout(function () { toast.remove(); }, 200);
+                    };
+                    close.addEventListener('click', hide);
+                    setTimeout(hide, Number(duration) || 5000);
+                    return toast;
+                } catch (e) { /* no-op */ }
+            };
+        }
+    </script>
+    <#if displayMessage && message?has_content>
+    <script type="text/javascript">
+        if (window.showToast) {
+            window.showToast('${message.type}', '${message.summary?js_string}');
+        }
+    </script>
+    </#if>
 </body>
 </html>
 </#macro>

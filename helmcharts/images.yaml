@@ -19,19 +19,9 @@ images:
     tag: "1.0.6"
 
   kafka: &kafka
-    registry: "sunbirded.azurecr.io"
-    repository: "kafka"
-    tag: "3.3.1-debian-11-r25"
-
-  zookeeper: &zookeeper
-    registry: "sunbirded.azurecr.io"
-    repository: "zookeeper"
-    tag: "3.8.1-debian-11-r6"
-
-  cassandra: &cassandra
-    registry: "sunbirded.azurecr.io"
-    repository: "cassandra"
-    tag: "3.11.13-debian-11-r3"
+    registry: "docker.io"
+    repository: sanketikahub/kafka
+    tag: "4.0.0"
 
   postgresql: &postgresql
     registry: "sunbirded.azurecr.io"
@@ -64,7 +54,7 @@ images:
     tag: v1.12.1
 
   discussion_mw: &discussion_mw
-    repository: "sunbirded.azurecr.io/discussion-middleware"
+    repository: "ghcr.io/sunbird-lern/discussions-middleware"
     tag: "release-8.1.0_rc2-e7360ec-2"
 
   echo: &echo
@@ -84,12 +74,12 @@ images:
     tag: "0.14.1"
 
   kong_apis: &kong_apis
-    repository: "sunbirded.azurecr.io/kong-apis"
-    tag: "0.14.1"
+    repository: "sunbirded.azurecr.io/kong-scripts"
+    tag: "0.1.8"
 
   kong_consumer: &kong_consumer
-    repository: "sunbirded.azurecr.io/kong-consumer"
-    tag: "0.14.1"
+    repository: "sunbirded.azurecr.io/kong-scripts"
+    tag: "0.1.8"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -97,7 +87,7 @@ images:
 
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
-    tag: "release-7.0.0_8e6b2db_2345"
+    tag: "release-7.0.0_8e6b2db_23"
 
   nginx_public_ingress: &nginx_public_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -117,7 +107,7 @@ images:
 
   certregistry: &certregistry
     repository: "ghcr.io/sunbird-lern/certificate-registry"
-    tag: "release-8.1.0_rc1_623a7ac_2"
+    tag: "release-8.1.0_rc2_546e8d5_3"
 
   certificateapi: &certificateapi
     repository: "sunbirded.azurecr.io/sunbird-rc-certificate-api"
@@ -129,7 +119,7 @@ images:
 
   groups: &groups
     repository: "ghcr.io/sunbird-lern/groups-service"
-    tag: "release-8.1.0_rc1_48a145b_8"
+    tag: "spark-v0.1_014341b_9"
 
   keycloak: &keycloak
     repository: "sunbirded.azurecr.io/keycloak"
@@ -137,60 +127,45 @@ images:
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "sunbirded.azurecr.io/keycloak-kids-keys"
-    tag: "0.1.5"
+    tag: "v3"
 
   lms: &lms
     repository: "ghcr.io/sunbird-lern/lms-service"
-    tag: "release-8.1.0_rc2_144d90d_10"
+    tag: "spark-v0.1_6a20586_14"
 
   notification: &notification
     repository: "ghcr.io/sunbird-lern/notification-service"
-    tag: "release-8.1.0_rc3_eaf6c11_8"
-
-  print: &print
-    repository: "sunbirded.azurecr.io/print-service"
-    tag: "release-3.1.0_f9a608c"
+    tag: "spark-v0.1_fe4e9e9_9"
 
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
-    tag: "release-5.1.0_ece7ed3_14"
+    tag: "sparkv0.0.13.1"
 
   userorg: &userorg
     registry: "sunbirded.azurecr.io"
     repository: "ghcr.io/sunbird-lern/userorg-service"
-    tag: "release-8.1.0_rc2_3dd81ea_13"
+    tag: "spark-v0.1_04057c0_16"
 
-  content: &content
-    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/content-service"
-    tag: "release-8.1.0_rc4_5712381"
+  knowlg: &knowlg
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
+    tag: "spark-v0.6_a8b080a"
 
   dial: &dial
     repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
     tag: "release-8.1.0_rc1_8fbeab3"
 
-  learning: &learning
-    repository: "sunbirded.azurecr.io/learning-service"
-    tag: "latest"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "release-8.1.0_rc4_5712381"
-
-  taxonomy: &taxonomy
-    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/taxonomy-api"
-    tag: "release-8.1.0_rc4_5712381"
-
-  assessment: &assessment
-    repository: "ghcr.io/sunbird-inquiry/inquiry-api-service"
-    tag: "release-8.1.0_rc4_62371b1_4"
+    tag: "spark-v0.3_a8b48cb"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
-    tag: "release-8.0.0_rc3_f082527_4"
+    tag: "spark-v0.1_8b8e877_5"
 
   superset: &superset
-    repository: "sunbirded.azurecr.io/superset"
-    tag: "release-7.0.0" 
+    repository: sanketikahub/superset
+    tag: 4.1.1
 
   nlweb: &nlweb
     repository: "sanketikahub/nlweb"
@@ -199,7 +174,11 @@ images:
   nlwebflink: &nlwebflink
     repository: "sunbirded.azurecr.io/flink-nlweb"
     tag: "v1.0.0"
- 
+
+  yugabyte: &yugabyte  
+    registry: yugabytedb
+    repository: yugabyte
+    tag: 2025.2.0.0-b131 
 
 # Internal block with pull secrets
 internal: &internal
@@ -215,16 +194,6 @@ internal: &internal
 
   kafka:
     image: *kafka
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  zookeeper:
-    image: *zookeeper
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  cassandra:
-    image: *cassandra
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -256,9 +225,14 @@ internal: &internal
   alloy:
     image: *alloy
     imagePullSecrets:
-      - name: "registry-secret-name"    
+      - name: "registry-secret-name"   
 
-  discussion_mw:
+  knowlg:
+    image: *knowlg
+    imagePullSecrets:
+      - name: "registry-secret-name"      
+
+  discussionmw:
     image: *discussion_mw
     imagePullSecrets:
       - name: "registry-secret-name"
@@ -278,17 +252,18 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
+
   kong:
     image: *kong
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  kong_apis:
+  kong-apis:
     image: *kong_apis
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  kong_consumer:
+  kong-consumer:
     image: *kong_consumer
     imagePullSecrets:
       - name: "registry-secret-name"
@@ -298,12 +273,12 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  nginx_private_ingress:
+  nginx-private-ingress:
     image: *nginx_private_ingress
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  nginx_public_ingress:
+  nginx-public-ingress:
     image: *nginx_public_ingress
     imagePullSecrets:
       - name: "registry-secret-name"
@@ -312,6 +287,11 @@ internal: &internal
     image: *nodebb
     imagePullSecrets:
       - name: "registry-secret-name"
+
+  postgresql:
+    image: *postgresql
+    imagePullSecrets:
+      - name: "registry-secret-name"    
 
   adminutil:
     image: *adminutil
@@ -363,11 +343,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  print:
-    image: *print
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
   registry:
     image: *registry
     imagePullSecrets:
@@ -378,18 +353,9 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  content:
-    image: *content
-    imagePullSecrets:
-      - name: "registry-secret-name"
 
   dial:
     image: *dial
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  learning:
-    image: *learning
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -398,15 +364,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  taxonomy:
-    image: *taxonomy
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  assessment:
-    image: *assessment
-    imagePullSecrets:
-      - name: "registry-secret-name"
 
   telemetry:
     image: *telemetry
@@ -427,7 +384,10 @@ internal: &internal
     image: *nlwebflink
     imagePullSecrets:
       - name: "registry-secret-name"
- 
+  yugabyte:
+    image: *yugabyte
+    imagePullSecrets:
+      - name: "registry-secret-name"
 
 # Merge internal into root for direct access
 <<: *internal
@@ -437,12 +397,12 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "release-8.1.0_rc1_e7ac747"
+    tag: "spark-v0.1_b7e896f"
 
   learnflink:
-    registry: "ghcr.io"
-    repository: "sunbird-lern/data-pipeline"
-    tag: "release-8.1.0_rc1_7ea4c2c"
+    registry: "ghcr.io/sunbird-lern"
+    repository: "data-pipeline"
+    tag: "spark-v0.2_7258208"
 
   inquiryflink:
     registry: "sunbirded.azurecr.io"

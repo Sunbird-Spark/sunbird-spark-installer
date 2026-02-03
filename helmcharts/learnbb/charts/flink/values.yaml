@@ -159,9 +159,9 @@ cassandra_isMultiDCEnabled: false
 kp_schema_base_path: "https://{{ .Values.global.object_storage_endpoint }}./{{ .Values.global.public_container_name }}/schemas/local"
 lms_service_base_url: "http://lms-service:9000"
 kp_search_service_base_url: "http://search-service:9000"
-content_read_api_host: "http://content-service:9000"
+content_read_api_host: "http://knowlg-service:9000"
 content_read_api_endpoint: "content/v3/read/"
-content_service_base_url: "http://content-service:9000"
+content_service_base_url: "http://knowlg-service:9000"
 userorg_service_base_url: "http://userorg-service:9000"
 cert_reg_service_base_url: "http://certreg:9000/certreg"
 enc_service_base_url: "http://enc:9000/enc"
@@ -199,7 +199,6 @@ kafka_topic_migrate_certificate_request: "{{ .Values.global.env }}.legacy.certif
 kafka_topic_contentstate_invalid: "{{ .Values.global.env }}.contentstate.invalid"
 kafka_topic_enrolment_sync_request: "{{ .Values.global.env }}.batch.enrolment.sync.request"
 kafka_topic_assessment: "{{ .Values.global.env }}.telemetry.assess"
-kafka_group_enrolment_reconciliation: "{{ .Values.global.env }}-enrolment-reconciliation-group"
 kafka_group_collection_pre_processor: "{{ .Values.global.env }}-collection-cert-pre-processor-group"
 kafka_group_certificate_generator: "{{ .Values.global.env }}-certificate-generator-group"
 kafka_group_certificate_migrator: "{{ .Values.global.env }}-certificate-migrator-group"
@@ -258,12 +257,6 @@ enrolment_reconciliation_batch_write_size: 10
 enrolment_reconciliation_filter_processe_enabled: true
 enrolment_reconciliation_collection_status_cache_expiry_time: 3600
 
-### Collection Cert Pre Processor
-collection_cert_pre_processor_consumer_parallelism: 1
-generate_certificate_parallelism: 1
-middleware_course_batch_table: "course_batch"
-middleware_user_enrolments_table: "user_enrolments"
-middleware_assessment_aggregator_table: "assessment_aggregator"
 
 ###  Collection Generator Job related Vars
 collection_certificate_generator_consumer_parallelism: 1
@@ -339,8 +332,6 @@ log4j_console_properties: |
   logger.kafka.level = ERROR
   logger.hadoop.name = org.apache.hadoop
   logger.hadoop.level = ERROR
-  logger.zookeeper.name = org.apache.zookeeper
-  logger.zookeeper.level = ERROR
 
   # Log all infos to the console
   appender.console.name = ConsoleAppender
@@ -357,11 +348,11 @@ base_config: |
       broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
       producer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
       consumer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
-      zookeeper = "{{ .Values.global.zookeeper.host }}:{{ .Values.global.zookeeper.port }}"
       producer {
         max-request-size = 1572864
         batch.size = 98304
         linger.ms = 10
+        zookeeper = ""
       }
     }
     job {
@@ -408,8 +399,8 @@ base_config: |
       port = 6379
     }
     lms-cassandra {
-        host = "{{ .Values.global.cassandra.host }}"
-        port = "{{ .Values.global.cassandra.port }}"
+        host = "{{ .Values.global.yugabyte.host }}"
+        port = "{{ .Values.global.yugabyte.port }}"
         isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
     }
     neo4j {
@@ -426,8 +417,8 @@ base_config: |
       }
     }
     ml-cassandra {
-      host = "{{ .Values.global.cassandra.host }}"
-      port = "{{ .Values.global.cassandra.port }}"
+      host = "{{ .Values.global.yugabyte.host }}"
+      port = "{{ .Values.global.yugabyte.port }}"
       isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
     }
     ml-mongo {
@@ -448,6 +439,8 @@ flink_jobs:
         output.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_activity_agg_failed "context" $) }}"
         output.certissue.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_request "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_activity_agg "context" $) }}"
+        zookeeper = ""
+
       }
       task {
         window.shards = "{{ .Values.activity_agg_window_shards }}"
@@ -506,6 +499,8 @@ flink_jobs:
       kafka {
         input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_content_publish_request "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_relation_cache_updater "context" $) }}"
+        zookeeper = ""
+
       }
       task {
         consumer.parallelism = "{{ .Values.relation_cache_updater_consumer_parallelism }}"
@@ -532,53 +527,7 @@ flink_jobs:
       taskmanager.memory.network.fraction: 0.1
     job_classname: org.sunbird.job.relationcache.task.RelationCacheUpdaterStreamTask
 
-  enrolment-reconciliation:
-    enabled: true
-    config: |+
-      include file("/data/flink/conf/base-config.conf")
-      kafka {
-        input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_enrolment_sync_request "context" $) }}"
-        output.audit.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_telemetry_raw "context" $) }}"
-        output.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_activity_agg_failed "context" $) }}"
-        output.certissue.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_request "context" $) }}"
-        groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_enrolment_reconciliation "context" $) }}"
-      }
-      task {
-        restart-strategy.attempts = "{{ .Values.restart_attempts }}" # max 3 restart attempts
-        restart-strategy.delay = 240000 # in milli-seconds # on max restarts (3) within 4 min the job will fail.
-        consumer.parallelism = "{{ .Values.enrolment_reconciliation_consumer_parallelism }}"
-        enrolment.reconciliation.parallelism = "{{ .Values.enrolment_reconciliation_parallelism }}"
-        enrolment.complete.parallelism = "{{ .Values.enrolment_complete_parallelism }}"
-      }
-      lms-cassandra {
-        keyspace = "{{ .Values.middleware_course_keyspace }}"
-        consumption.table = "{{ .Values.middleware_consumption_table }}"
-        user_activity_agg.table = "{{ .Values.middleware_user_activity_agg_table }}"
-        user_enrolments.table = "user_enrolments"
-      }
-      redis {
-        database {
-          relationCache.id = 10
-        }
-      }
-      threshold.batch.write.size = "{{ .Values.enrolment_reconciliation_batch_write_size }}"
-      activity {
-        module.aggs.enabled = true
-        collection.status.cache.expiry = "{{ .Values.enrolment_reconciliation_collection_status_cache_expiry_time }}"
-      }
-      service {
-        search.basePath = "{{ .Values.kp_search_service_base_url }}"
-      }
-    flink-conf: |+
-      jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
-      taskmanager.numberOfTaskSlots: 1
-      parallelism.default: 1
-      jobmanager.execution.failover-strategy: region
-      taskmanager.memory.network.fraction: 0.1
-    job_classname: org.sunbird.job.recounciliation.task.EnrolmentReconciliationStreamTask
-
-  collection-cert-pre-processor:
+  collection-certificate-generator:
     enabled: true
     serviceMonitor: *serviceMonitor
     config: |+
@@ -587,82 +536,37 @@ flink_jobs:
         input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_request "context" $) }}"
         output.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_generate_certificate_request "context" $) }}"
         output.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_failed "context" $) }}"
-        groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_collection_pre_processor "context" $) }}"
-      }
-      task {
-        restart-strategy.attempts = "{{ .Values.restart_attempts }}" # max 3 restart attempts
-        restart-strategy.delay = 240000 # in milli-seconds # on max restarts (3) within 4 min the job will fail.
-        parallelism = "{{ .Values.collection_cert_pre_processor_consumer_parallelism }}"
-        consumer.parallelism = "{{ .Values.collection_cert_pre_processor_consumer_parallelism }}"
-        generate_certificate.parallelism = "{{.Values.generate_certificate_parallelism }}"
-      }
-      lms-cassandra {
-        keyspace = "{{ .Values.middleware_course_keyspace }}"
-        consumption.table = "{{ .Values.middleware_consumption_table }}"
-        user_enrolments.table = "{{ .Values.middleware_user_enrolments_table }}"
-        course_batch.table = "{{ .Values.middleware_course_batch_table }}"
-        assessment_aggregator.table = "{{ .Values.middleware_assessment_aggregator_table }}"
-        user_activity_agg.table = "{{ .Values.middleware_user_activity_agg_table }}"
-      }
-      redis {
-          database {
-            contentCache.id = 5
-            collectionCache.id = 0
-          }
-      }
-      cert_domain_url = "https://{{ .Values.global.domain }}"
-      user_read_api = "/private/user/v1/read"
-      content_read_api = "/content/v3/read"
-      service {
-        content.basePath = "{{ .Values.content_service_base_url }}"
-        learner.basePath = "{{ .Values.userorg_service_base_url }}"
-      }
-      enable.suppress.exception = "{{ include "common.tplvalues.render" (dict "value" .Values.collection_certificate_pre_processor_enable_suppress_exception "context" $) }}"
-      redis-meta {
-        host = "{{ .Values.metadata2_redis_host | default .Values.global.redis.host }}"
-        port = 6379
-      }
-      assessment.metrics.supported.contenttype = ["SelfAssess"]
-      cert_cloud_storage_type = "{{ include "common.tplvalues.render" (dict "value" .Values.cert_cloud_storage_type "context" $) }}"
-      cert_cloud_storage_secret = "{{ include "common.tplvalues.render" (dict "value" .Values.cert_cloud_storage_secret "context" $) }}"
-      cert_cloud_storage_key = "{{ include "common.tplvalues.render" (dict "value" .Values.cert_cloud_storage_key "context" $) }}"
-      cloud_storage_base_url = "{{ include "common.tplvalues.render" (dict "value" .Values.cloud_storage_base_url "context" $) }}"
-      cloud_store_base_path_placeholder = "{{ include "common.tplvalues.render" (dict "value" .Values.cloud_store_base_path_placeholder "context" $) | default "CLOUD_BASE_PATH" }}"
-      content_cloud_storage_container = "{{ .Values.global.public_container_name }}"
-      cloud_storage_cname_url = "{{ include "common.tplvalues.render" (dict "value" .Values.cloud_storage_cname_url "context" $) }}"
-    flink-conf: |+
-      jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
-      taskmanager.numberOfTaskSlots: 1
-      parallelism.default: 1
-      jobmanager.execution.failover-strategy: region
-      taskmanager.memory.network.fraction: 0.1
-    job_classname: org.sunbird.job.collectioncert.task.CollectionCertPreProcessorTask
-
-  collection-certificate-generator:
-    enabled: true
-    serviceMonitor: *serviceMonitor
-    config: |+
-      include file("/data/flink/conf/base-config.conf")
-      kafka {
-        input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_generate_certificate_request "context" $) }}"
+        output.cert.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_generate_certificate_failed "context" $) }}"
         output.audit.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_telemetry_raw "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_certificate_generator "context" $) }}"
+        zookeeper = ""
+
       }
       task {
         restart-strategy.attempts = "{{ .Values.restart_attempts }}" # max 3 restart attempts
         restart-strategy.delay = 240000 # in milli-seconds # on max restarts (3) within 4 min the job will fail.
         consumer.parallelism = "{{ .Values.collection_certificate_generator_consumer_parallelism }}"
         parallelism = "{{ .Values.collection_certificate_generator_parallelism }}"
+        generate_certificate.parallelism = 1
+      }
+      redis {
+        database {
+          contentCache.id = 5
+          collectionCache.id = 0
+        }
       }
       lms-cassandra {
         keyspace = "{{ .Values.middleware_course_keyspace }}"
-        user_enrolments.table = "{{ .Values.middleware_user_enrolments_table }}"
-        course_batch.table = "{{ .Values.middleware_course_batch_table }}"
+        user_enrolments.table = "user_enrolments"
+        course_batch.table = "course_batch"
         sbkeyspace = "{{ .Values.registry_sunbird_keyspace }}"
+        assessment_aggregator.table = "{{ .Values.middleware_cassandra_assessment_aggregator_table}}"
+        user_activity_agg.table = "{{ .Values.middleware_cassandra_user_activity_agg_table }}"
         certreg.table ="{{ .Values.cert_registry_table }}"
       }
       cert_domain_url = "https://{{ .Values.global.domain }}"
+      user_read_api = "/private/user/v1/read"
+      content_read_api = "/content/v3/read"
       cert_container_name = "{{ .Values.global.public_container_name }}"
       cert_cloud_storage_type = "{{ include "common.tplvalues.render" (dict "value" .Values.cert_cloud_storage_type "context" $) }}"
       cert_cloud_storage_secret = "{{ include "common.tplvalues.render" (dict "value" .Values.cert_cloud_storage_secret "context" $) }}"
@@ -679,7 +583,9 @@ flink_jobs:
         rc.basePath = "{{ .Values.cert_rc_base_url }}"
         rc.entity = "{{ .Values.cert_rc_entity }}"
         rc.rcApiKey = "{{ .Values.sunbird_api_auth_token }}"
+        content.basePath = "{{ .Values.content_service_base_url }}"
       }
+      assessment.metrics.supported.contenttype = ["SelfAssess"]
       enable.suppress.exception = "{{ include "common.tplvalues.render" (dict "value" .Values.collection_certificate_generator_enable_suppress_exception "context" $) }}"
       enable.rc.certificate = "{{ include "common.tplvalues.render" (dict "value" .Values.collection_certificate_generator_enable_rc_certificate "context" $) }}"
       task.rc.badcharlist = "{{ include "common.tplvalues.render" (dict "value" .Values.collection_certificate_generator_rc_badcharlist "context" $) }}"
@@ -691,38 +597,7 @@ flink_jobs:
       jobmanager.execution.failover-strategy: region
       taskmanager.memory.network.fraction: 0.1
     job_classname: org.sunbird.job.certgen.task.CertificateGeneratorStreamTask
-  merge-user-courses:
-    enabled: true
-    serviceMonitor: *serviceMonitor
-    config: |+
-      include file("/data/flink/conf/base-config.conf")
-      kafka {
-        input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_lms_user_account "context" $) }}"
-        output.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_learning_failed "context" $) }}"
-        groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_merge_courses "context" $) }}"
-        output.course.batch.updater.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_course_batch_job_request "context" $) }}"
-      }
-      task {
-        consumer.parallelism = "{{ .Values.merge_user_courses_consumer_parallelism }}"
-        parallelism = "{{ .Values.merge_user_courses_parallelism }}"
-        course_batch_updater.parallelism = "{{ .Values.merge_user_courses_course_batch_parallelism }}"
-      }
-      lms-cassandra {
-        keyspace = "{{ .Values.middleware_course_keyspace }}"
-        content_consumption.table = "{{ .Values.middleware_consumption_table }}"
-        user_enrolments.table = "{{ .Values.middleware_user_enrolments_table }}"
-        user_activity_agg.table = "{{ .Values.middleware_user_activity_agg_table }}"
-      }
-      course.date.format = "{{ .Values.merge_user_courses_course_date_format }}"
-    flink-conf: |+
-      jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
-      taskmanager.numberOfTaskSlots: 1
-      parallelism.default: 1
-      jobmanager.execution.failover-strategy: region
-      taskmanager.memory.network.fraction: 0.1
-    job_classname: org.sunbird.job.merge.user.courses.task.MergeUserCoursesStreamTask
-
+  
   assessment-aggregator:
     enabled: true
     serviceMonitor: *serviceMonitor
@@ -731,11 +606,12 @@ flink_jobs:
       kafka {
         producer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
         consumer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
-        zookeeper = "{{ .Values.global.zookeeper.host }}:{{ .Values.global.zookeeper.port }}"
         input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_assessment "context" $) }}"
         failed.topic= "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_assessment_failed "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_assessment_aggregator "context" $) }}"
         output.certissue.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_request "context" $) }}"
+        zookeeper = ""
+
       }
       task {
         consumer.parallelism = "{{ .Values.assessaggregator_consumer_parallelism }}"
@@ -778,7 +654,8 @@ flink_jobs:
       kafka {
         input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_lms_notification "context" $) }}"
         groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_lms_notification "context" $) }}"
-      }
+        zookeeper = ""
+        }
       task {
         restart-strategy.attempts = "{{ .Values.restart_attempts }}" # max 3 restart attempts
         restart-strategy.delay = 240000 # in milli-seconds # on max restarts (3) within 4 min the job will fail.
@@ -810,6 +687,8 @@ flink_jobs:
       kafka {
         input.topic = "{{ .Values.global.env }}.delete.user"
         groupId = "{{ .Values.global.env }}-delete-user-group"
+        zookeeper = ""
+
       }
       task {
         user.deletion.cleanup.parallelism = "{{ .Values.user_deletion_cleanup_job_parallelism }}"

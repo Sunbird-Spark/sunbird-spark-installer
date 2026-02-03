@@ -1,4 +1,13 @@
-#edbb
+adminutil:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100M
+    limits:
+      cpu: 1
+      memory: 1G
+
+
 bot:
   resources:
     requests:
@@ -7,15 +16,6 @@ bot:
     limits:
       cpu: 1000m
       memory: 1024Mi
-
-discussionmw:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 1G
 
 echo:
   resources:
@@ -39,7 +39,7 @@ kong:
   resources:
     requests:
       cpu: 100m
-      memory: 100M
+      memory: 100Mi
     limits:
       cpu: 1
       memory: 1G    
@@ -80,16 +80,6 @@ player:
       cpu: 1
       memory: 1G      
 
-    
-#inquirybb
-assessment:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 1G
       
 flink: &flink
   resources:
@@ -110,7 +100,7 @@ learnbb:
   flink: *flink
 
 #knowledgebb
-content:
+knowlg:
   resources:
     requests:
       cpu: 100m
@@ -127,14 +117,6 @@ dial:
       cpu: 1
       memory: 1024Mi   
 
-learning:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 1024Mi
-    limits:
-      cpu: 1
-      memory: 4096Mi  
 
 search:
   resources:
@@ -144,15 +126,6 @@ search:
     limits:
       cpu: 1
       memory: 1024Mi 
-
-taxonomy:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
 
 #learnbb
 adminutils:
@@ -199,18 +172,63 @@ certregistry:
     limits:
       cpu: 1
       memory: 1024Mi      
- 
 
-cassandra:
-  persistence:
-    size: 25Gi
+knowlg:
   resources:
     requests:
-      cpu: 520m
-      memory: 3Gi
+      cpu: 100m
+      memory: 100Mi
     limits:
-      cpu: 750m
-      memory: 10Gi 
+      cpu: 1
+      memory: 1024Mi
+
+dial:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi   
+
+discussionmw:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100M
+    limits:
+      cpu: 1
+      memory: 1G
+
+elasticsearch:
+  master:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+    persistence:
+      size: 25Gi
+
+echo:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi  
+
+flink: &flink
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1024Mi
+    limits:
+      cpu: 1
+      memory: 2048Mi  
 
 groups:
   resources:
@@ -221,6 +239,29 @@ groups:
       cpu: 1
       memory: 1G
 
+kafka:
+  broker:
+    resources:
+      limits:
+        cpu: 1
+        memory: 2048Mi
+      requests:
+        cpu: 750m
+        memory: 1024Mi
+    persistence:
+      size: 5Gi
+  controller:
+    replicaCount: 3
+    resources:
+      limits:
+        cpu: 1
+        memory: 2048Mi
+      requests:
+        cpu: 750m
+        memory: 1024Mi
+    persistence:
+      size: 5Gi
+
 # keycloak:
 #   resources:
 #     requests:
@@ -230,29 +271,23 @@ groups:
 #         cpu: 750m
 #         memory: 750Mi
 
-lms:
+knowledgemw:
   resources:
     requests:
       cpu: 100m
       memory: 100Mi
     limits:
       cpu: 1
-      memory: 1536Mi
+      memory: 1G    
 
-notification:
+knowledgebb:
+  flink: *flink
+
+kong:
   resources:
     requests:
       cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
-
-print:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
+      memory: 100M
     limits:
       cpu: 1
       memory: 1024Mi
@@ -285,16 +320,6 @@ kafka:
       memory: 1024Mi
   persistence:
     size: 10Gi
-  zookeeper:  
-    persistence:
-      size: 2Gi
-    resources:
-      limits:
-        cpu: 256m
-        memory: 512Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
 
 neo4j:
   resources:
@@ -308,6 +333,16 @@ neo4j:
     pvc:
       storage: 25Gi
 
+
+telemetry:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi
+
 postgresql: 
   persistence:
     size: 25Gi
@@ -318,28 +353,6 @@ postgresql:
     requests:
       cpu: 250m
       memory: 256Mi
-
-redis: 
-  master:
-    persistence:
-      size: 25Gi
-    primary:
-    resources:
-      limits:
-        cpu: 0.5
-        memory: 2Gi
-      requests:
-        cpu: 0.5
-        memory: 1Gi 
-
-telemetry:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
 
 superset:
   resources:
@@ -448,6 +461,254 @@ kube-prometheus-stack:
           cpu: 1
           memory: 2Gi    
 
+kubernetes-dashboard:
+  api:
+    containers:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+        limits:
+          cpu: 250m
+          memory: 400Mi
+  web:
+    containers:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+        limits:
+          cpu: 250m
+          memory: 400Mi
+  metricsScraper:
+    containers:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+        limits:
+          cpu: 250m
+          memory: 400Mi
+
+learnbb:
+  flink: *flink
+
+learning:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1024Mi
+    limits:
+      cpu: 1
+      memory: 4096Mi  
+
+lms:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1536Mi
+
+loki:
+  gateway:
+    resources: 
+      limits:
+        cpu: 0.1
+        memory: 256Mi
+      requests:
+        cpu: 0.1
+        memory: 128Mi
+
+neo4j:
+  resources:
+    requests:
+      cpu: "0.5"
+      memory: "2Gi"
+    limits:
+      cpu: "1"
+      memory: "4Gi"
+  neo4j:
+    pvc:
+      storage: 25Gi
+
+nginx-private-ingress:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 500m
+      memory: 500Mi
+
+nginx-public-ingress:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1G  
+
+nodebb:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100M
+    limits:
+      cpu: 1
+      memory: 2G      
+
+notification:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi
+
+player:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1G      
+
+postgresql: 
+  persistence:
+    size: 25Gi
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+print:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi
+
+promtail:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+registry:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 2G
+
+reloader:
+  reloader:
+    deployment:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits:
+          cpu: 1000m
+          memory: 1G
+
+report: 
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1000m
+      memory: 1G
+
+redis: 
+  master:
+    persistence:
+      size: 25Gi
+    primary:
+    resources:
+      limits:
+        cpu: 0.5
+        memory: 2Gi
+      requests:
+        cpu: 0.5
+        memory: 1Gi 
+
+search:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi 
+
+spark: 
+  master:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+  persistence:
+    spark_data_pvc:
+      size: 25Gi
+    log_data_pvc:
+      size: 25Gi    
+
+superset:
+  resources:
+    limits:
+      cpu: 512m
+      memory: 1024Mi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+taxonomy:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi
+
+telemetry:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi
+
+userorg:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 1024Mi
+
 velero:
   resources: 
     limits:
@@ -464,15 +725,3 @@ velero:
       limits:
         cpu: 1000m
         memory: 1024Mi
-
-elasticsearch:
-  master:
-    resources:
-      requests:
-        cpu: "1"
-        memory: "2Gi"
-      limits:
-        cpu: "2"
-        memory: "4Gi"
-    persistence:
-      size: 25Gi
