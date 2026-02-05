@@ -31,6 +31,14 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 12. For cloud-specific tools, follow the instructions in the respective README file based on your provider.  
     Example for Azure: [opentofu/azure/README.md](opentofu/azure/README.md)
 
+### CLI Versions
+
+The installer has been used and verified with the following CLI versions:
+
+- **OpenTofu**: v1.11.4
+- **Terragrunt**: v0.77.5
+
+While the installer may work with other versions, these are the versions that have been tested and confirmed to work. If you encounter issues with different versions, please try using these specific versions.
 ### Notes
 - Existing files in the following locations will be backed up with a `.bak` extension, and the files will be overwritten:
     - `~/.config/rclone/rclone.conf`
