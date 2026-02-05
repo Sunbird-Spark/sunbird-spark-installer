@@ -76,13 +76,12 @@ images:
 
   kong_apis: &kong_apis
     registry: "docker.io"
-    repository: "divyagovindaiah123/kongapisworking"
-    tag: "0.0.12"
+    repository: "sunbirded.azurecr.io/kong-scripts"
+    tag: "3.9.1"
 
-  kong_consumer: &kong_consumer
-    registry: "docker.io"
-    repository: "divyagovindaiah123/kongapisworking"
-    tag: "0.0.12"
+  kong_consumers: &kong_consumers
+    repository: "sunbirded.azurecr.io/kong-scripts"
+    tag: "3.9.1"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -266,8 +265,8 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  kong-consumer:
-    image: *kong_consumer
+  kong-consumers:
+    image: *kong_consumers
     imagePullSecrets:
       - name: "registry-secret-name"
 
