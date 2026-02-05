@@ -1,5 +1,5 @@
 # For local development
-tofu {
+terraform {
   source = "../../modules//upload-files/"
 }
 
