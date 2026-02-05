@@ -172,7 +172,7 @@ images:
     tag: "0.0.1"
 
   nlwebflink: &nlwebflink
-    repository: "unbirded.azurecr.io/flink-nlweb-job"
+    repository: "sunbirded.azurecr.io/flink-nlweb-job"
     tag: "0.0.3"
 
   yugabyte: &yugabyte  
@@ -400,7 +400,7 @@ global:
     tag: "spark-v0.1_b7e896f"
 
   learnflink:
-    registry: "chethann07"
+    registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
     tag: "spark-v0.2_7258208"
 
