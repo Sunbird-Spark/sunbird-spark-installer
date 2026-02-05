@@ -54,7 +54,7 @@ variable "sa_namespace" {
 variable "cluster_service_account_name" {
   description = "The name of the custom service account used for the GKE cluster. This parameter is limited to a maximum of 28 characters."
   type        = string
-  default     = "opentofu"
+  default     = "terraform"
 }
 
 variable "sa_key_store_bucket" {
