@@ -287,7 +287,7 @@ if [ $# -eq 0 ]; then
     create_tf_resources
     cd ../../../helmcharts
     install_helm_components
-    cd ../terraform/gcp/$environment
+    cd ../opentofu/gcp/$environment
     restart_workloads_using_keys
     certificate_config
     dns_mapping
