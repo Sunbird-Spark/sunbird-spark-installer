@@ -4,7 +4,7 @@ Follow this document if you are setting up Sunbird-Ed on GCP
 
 #### Required tools and permissions
 1. Google Cloud CLI (https://cloud.google.com/sdk/docs/install)
-2. Ensure that the user or service account running the OpenTofu script has the necessary privileges as [listed here](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication).
+2. Ensure that the user or service account running the Terraform script has the necessary privileges as [listed here](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#authentication).
 
 **Note:**
 We will overwrite the following files. Please take a backup of your existing files in the following locations:
