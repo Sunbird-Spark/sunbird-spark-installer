@@ -182,7 +182,6 @@ inquiry:
   assessment_media_resolution: "low"
   # Neo4j Configuration
   neo4j_objecttypes_enabled: '["Question"]'
-
 javaenv:
   javaoptions: -Xms500m -Xmx500m
   _javaoptions: -Dlog4j2.formatMsgNoLookups=true
