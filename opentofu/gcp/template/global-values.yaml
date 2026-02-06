@@ -40,7 +40,7 @@ global:
   lets_encrypt_ssl: false #enable this if you are using  let's encrypt ssl certificate
   play_http:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
-  cloud_private_storage_secret: "{{ .Values.global.gcp_storage_account_key | default "gcp-credentials"}}"
+    # cloud_private_storage_secret: "{{ .Values.global.gcp_storage_account_key | default "gcp-credentials"}}"
   # Provide values for the following variables
   sunbird_google_captcha_site_key: 
   google_captcha_private_key: 
