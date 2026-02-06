@@ -4,7 +4,7 @@ Follow this document if you are setting up Sunbird-Ed on Azure
 
 #### Required tools and permisions
 1. Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-2. Ensure that the user or service principal running the OpenTofu script has the necessary prvileges as [listed here](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application#api-permissions)
+2. Ensure that the user or service principal running the Terraform script has the necessary prvileges as [listed here](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application#api-permissions)
 
 **Note:**
 We will overwrite the following files. Please take a backup of your existing files in the following locations
