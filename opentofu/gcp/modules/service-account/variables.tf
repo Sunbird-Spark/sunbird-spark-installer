@@ -25,7 +25,7 @@ variable "project" {
 variable "cluster_service_account_description" {
   description = "A description of the custom service account used for the GKE cluster."
   type        = string
-  default     = "GKE Cluster Service Account managed by OpenTofu"
+  default     = "GKE Cluster Service Account managed by Terraform"
 }
 
 variable "service_account_roles" {
