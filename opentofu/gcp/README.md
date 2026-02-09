@@ -44,7 +44,7 @@ export GOOGLE_PROJECT_ID=<your_project_id>
 
 Note: Make sure you select the correct project and authenticate with the appropriate credentials.
 
-### Creating infrastructure using Terraform
+### Creating infrastructure using OpenTofu
 
 The installer can be run on one of the following platforms:
 - Linux
@@ -55,7 +55,7 @@ The installer can be run on one of the following platforms:
 1. Google Cloud CLI (https://cloud.google.com/sdk/docs/install)
 2. jq (https://jqlang.github.io/jq/download/)
 3. rclone (https://rclone.org/)
-4. Terraform (https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+4. OpenTofu (https://opentofu.org/docs/intro/install/)
 5. Terragrunt (https://terragrunt.gruntwork.io/docs/getting-started/install/)
 6. Python 3 (https://www.python.org/downloads/)
 7. PyJwt python package (https://pypi.org/project/PyJWT/)
@@ -64,18 +64,18 @@ The installer can be run on one of the following platforms:
 #### CLI Versions
 The installer doesn't require a specific CLI version, but we have documented the versions used and verified. If a future release of a CLI tool introduces a breaking change, it may result in installation failure. Please raise a GitHub issue if you encounter such an issue.
 
-#### Terraform Backend Setup
+#### OpenTofu Backend Setup
 
 ```
 git clone https://github.com/project-sunbird/sunbird-ed-installer.git
-cd terraform/gcp
+cd opentofu/gcp
 gcloud auth login
 gcloud config set project <your_project_id>
 ```
 
 #### GCP Infra Setup
 
-Post login, update the `terraform/gcp/<env>/global-values.yaml` file with the variables as per your environment:
+Post login, update the `opentofu/gcp/<env>/global-values.yaml` file with the variables as per your environment:
 
 ```
 building_block: "" # building block name
@@ -103,10 +103,10 @@ proxy_certificate: |
  <certificate_generated_when_setting_up_ssl>
 ```
 
-Then run the following Terraform commands:
+Then run the following OpenTofu commands:
 
 ```
-cd terraform/gcp/dev
+cd opentofu/gcp/dev
 terragrunt init
 terragrunt run-all validate
 terragrunt run-all plan

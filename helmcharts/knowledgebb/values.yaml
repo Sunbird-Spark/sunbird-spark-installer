@@ -177,7 +177,6 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
-
 # play_http: &play_http
 #   secret_key: "secretKey"
 schema: &schema
