@@ -55,12 +55,12 @@ az storage account create --resource-group "$RESOURCE_GROUP_NAME" \
 # Create the blob container
 az storage container create --name "$CONTAINER_NAME" --account-name "$STORAGE_ACCOUNT_NAME"
 
-# Export Terraform backend details to a file
-echo "export AZURE_TERRAFORM_BACKEND_RG=$RESOURCE_GROUP_NAME" > tf.sh
-echo "export AZURE_TERRAFORM_BACKEND_STORAGE_ACCOUNT=$STORAGE_ACCOUNT_NAME" >> tf.sh
-echo "export AZURE_TERRAFORM_BACKEND_CONTAINER=$CONTAINER_NAME" >> tf.sh
+# Export OpenTofu backend details to a file
+echo "export AZURE_OPENTOFU_BACKEND_RG=$RESOURCE_GROUP_NAME" > tf.sh
+echo "export AZURE_OPENTOFU_BACKEND_STORAGE_ACCOUNT=$STORAGE_ACCOUNT_NAME" >> tf.sh
+echo "export AZURE_OPENTOFU_BACKEND_CONTAINER=$CONTAINER_NAME" >> tf.sh
 echo "export AZURE_SUBSCRIPTION_ID=$SUBSCRIPTION_ID" >> tf.sh  # <-- Added Subscription ID export
 
-echo -e "\nTerraform backend setup complete!"
+echo -e "\nOpenTofu backend setup complete!"
 echo -e "Run the following command to set the environment variables:"
 echo "source tf.sh"
