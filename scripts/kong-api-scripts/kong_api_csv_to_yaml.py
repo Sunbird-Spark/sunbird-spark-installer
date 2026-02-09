@@ -9,21 +9,34 @@ def setup_yaml():
   yaml.add_representer(OrderedDict, represent_dict_order)
 
 def convert_csv_to_yaml(apis_csv_file):
+    """Convert CSV to Kong 3.9.1 YAML format with services and routes"""
     reader = csv.DictReader(apis_csv_file, delimiter=',')
     apis = []
     for row in reader:
+        # Kong 3.9.1 format: services with routes
         apis.append(OrderedDict([
             ('name', row['NAME']),
-            ('request_path', row['REQUEST PATH']),
-            ('upstream_url', row['UPSTREAM PATH']),
-            ('strip_request_path', True),
+            ('url', row['UPSTREAM PATH']),  # Changed: upstream_url → url (Kong 3.9.1)
+            ('routes', [OrderedDict([
+                ('paths', [row['REQUEST PATH']]),
+                ('strip_path', True)
+            ])]),
             ('plugins', [
                 OrderedDict([('name', 'jwt')]),
                 OrderedDict([('name', 'cors')]),
-                "{{ statsd_pulgin }}",
-                OrderedDict([('name', 'acl'), ('config.whitelist', row["WHITELIST GROUP"])]),
-                OrderedDict([('name', 'rate-limiting'), ('config.hour', row["RATE LIMIT"]), ('config.limit_by', row["LIMIT BY"])]),
-                OrderedDict([('name', 'request-size-limiting'), ('config.allowed_payload_size', row["REQUEST SIZE LIMIT"])]),
+                "{{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}",
+                # Kong 3.0 Breaking Change: whitelist → allow
+                OrderedDict([('name', 'acl'), ('config', OrderedDict([
+                    ('allow', [g.strip() for g in row["WHITELIST GROUP"].split(',')])
+                ]))]),
+                OrderedDict([('name', 'rate-limiting'), ('config', OrderedDict([
+                    ('policy', 'local'),
+                    ('hour', int(row["RATE LIMIT"])),
+                    ('limit_by', row["LIMIT BY"])
+                ]))]),
+                OrderedDict([('name', 'request-size-limiting'), ('config', OrderedDict([
+                    ('allowed_payload_size', row["REQUEST SIZE LIMIT"])
+                ]))]),
             ])
         ]))
     yaml.dump(apis, sys.stdout, default_flow_style=False)

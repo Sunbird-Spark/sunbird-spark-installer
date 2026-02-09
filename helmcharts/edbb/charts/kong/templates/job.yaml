@@ -7,6 +7,7 @@ metadata:
   annotations:
     {{- .Values.provisioningAnnotations | toYaml | nindent 4 }}
 spec:
+  ttlSecondsAfterFinished: 300
   template:
     spec:
       initContainers:
@@ -15,7 +16,9 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c"]
           args:
-          - "timeout 300 sh -c 'until nc -z {{.Values.global.yugabyte.host}} {{.Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'"
+          - |
+            timeout 600 sh -c '
+            until nc -z {{.Values.global.yugabyte.host}} {{.Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -25,9 +28,59 @@ spec:
             - -c
           args:
             - |
-              echo "Starting migrations..."
-              kong migrations up --v
+              set -e
+              echo "==== Starting Kong migrations ===="
+              
+              # Bootstrap database (idempotent)
+              echo "Running bootstrap..."
+              kong migrations bootstrap --v
+              
+              # Iterative migration loop
+              MAX_ITERATIONS=10
+              for i in $(seq 1 $MAX_ITERATIONS); do
+                echo "==== Migration iteration $i/$MAX_ITERATIONS ===="
+                
+                # Run pending migrations
+                echo "Running migrations up..."
+                if ! kong migrations up --v 2>&1 | tee /tmp/up.log; then
+                  echo "⚠️  Migrations up had errors, checking if progress was made..."
+                fi
+                
+                # Wait for DB to settle
+                sleep 10
+                
+                # Finalize pending migrations
+                echo "Running migrations finish..."
+                if kong migrations finish --v 2>&1 | tee /tmp/finish.log; then
+                  # Check if all migrations are complete
+                  if grep -q "No pending migrations" /tmp/finish.log || grep -q "Database is already up-to-date" /tmp/finish.log; then
+                    echo "✅ All migrations completed successfully!"
+                    exit 0
+                  elif grep -q "New migrations available" /tmp/finish.log; then
+                    echo "ℹ️  New migrations available, continuing to next iteration..."
+                    sleep 10
+                    continue
+                  fi
+                else
+                  echo "⚠️  Migrations finish had errors, will retry..."
+                  sleep 20
+                fi
+              done
+              
+              echo "❌ Migrations incomplete after $MAX_ITERATIONS iterations"
+              kong migrations list --v
+              exit 1
           env:
+            - name: KONG_PG_CONNECT_TIMEOUT
+              value: "600"
+            - name: KONG_PG_STATEMENT_TIMEOUT
+              value: "600000"
+            - name: KONG_PG_IDLE_IN_TRANSACTION_SESSION_TIMEOUT
+              value: "120000"
+            - name: KONG_PG_KEEPALIVE_TIMEOUT
+              value: "600"
+            - name: KONG_PG_MAX_CONCURRENT_QUERIES
+              value: "1"
             - name: KONG_DATABASE
               value: {{ .Values.kong_database }}
             - name: KONG_PG_DATABASE
