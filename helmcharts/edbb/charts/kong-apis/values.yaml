@@ -162,6 +162,7 @@ registry_service_url: "http://registry-service:8081"
 provisioningAnnotations:
   "helm.sh/hook": post-install,post-upgrade
 
+  
 configmap:
   enabled: true
   mountPath: /config

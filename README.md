@@ -209,3 +209,78 @@ sunbird-ed-installer/helmcharts/monitoring/charts/alloy
 ```text
 sunbird-ed-installer/helmcharts/images.yaml
 ```
+
+## Kong Upgrade Guide
+
+This section documents the Kong API Gateway upgrade process from version 0.14.1 to 3.9.1 and provides instructions for future upgrades.
+
+### Current Kong Version
+
+- **Kong**: 3.9.1
+- **Kong Scripts Image**: `sunbirded.azurecr.io/kong-scripts:3.9.1`
+
+### Building Kong Scripts Image
+
+The `kong-scripts` image is used for `kong-apis` and `kong-consumers` jobs. To build and push a new version:
+
+```bash
+cd scripts/kong-api-scripts
+
+# Build for AMD64 architecture (recommended for Azure/AWS/GCP)
+docker buildx build --platform linux/amd64 -t <registry>/kong-scripts:3.9.1 --push .
+
+# Build for multiple architectures
+docker buildx build --platform linux/amd64,linux/arm64 -t <registry>/kong-scripts:3.9.1 --push .
+```
+
+**Important**: Always build for `linux/amd64` for production environments running on Azure, AWS, or GCP to avoid "exec format error" issues.
+
+### Kong Upgrade Process (0.14.1 → 3.9.1)
+
+#### 1. Database Compatibility
+
+Kong 3.9.1 requires PostgreSQL-compatible databases. When using YugabyteDB:
+
+- Use the PostgreSQL port (default: `5433`)
+- Expect slower migration performance compared to native PostgreSQL (10-20x slower)
+- Increase migration timeouts significantly
+
+#### 2. Migration Job Configuration
+
+The Kong migration job has been enhanced with extended timeout settings for YugabyteDB compatibility:
+
+```yaml
+env:
+  - name: KONG_PG_CONNECT_TIMEOUT
+    value: "600"  # 10 minutes
+  - name: KONG_PG_STATEMENT_TIMEOUT
+    value: "600000"  # 10 minutes (in milliseconds)
+  - name: KONG_PG_IDLE_IN_TRANSACTION_SESSION_TIMEOUT
+    value: "120000"  # 2 minutes (in milliseconds)
+  - name: KONG_PG_KEEPALIVE_TIMEOUT
+    value: "600"  # 10 minutes
+```
+
+#### 3. JWT Plugin Changes
+
+Kong 3.9.1 changed the JWT credential storage format:
+
+- **Old (0.14.1)**: Stored `iss` field separately
+- **New (3.9.1)**: Only stores `key` field (equivalent to `iss`)
+
+**Fix Applied**: Updated `kong_consumers.py` at line 127:
+
+```python
+# OLD: if saved_credential.get('iss') == credential_iss:
+# NEW:
+if saved_credential.get('key') == credential_iss:
+```
+
+### References
+
+- [Kong Migration Guide](https://docs.konghq.com/gateway/latest/upgrade/)
+- [Kong 3.9.x Release Notes](https://docs.konghq.com/gateway/changelog/)
+- [YugabyteDB PostgreSQL Compatibility](https://docs.yugabyte.com/preview/explore/ysql-language-features/)
+
+---
+
