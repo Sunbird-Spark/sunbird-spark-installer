@@ -47,6 +47,9 @@ yugabyte: &yugabyte
       - name: "druid_raw"
       - name: "superset"
       - name: "registry"
+  gflags:
+  tserver: 
+    cdc_enable_replicate_intents: "true"    
 
   image:
     registry: yugabytedb
@@ -64,22 +67,7 @@ yugabyte: &yugabyte
     tserver: 3
   username: "yugabyte"
   password: "yugabyte"  
-
-janusgraph: &janusgraph
-  enabled: true
-  fullnameOverride: "janusgraph"
-  nameOverride: "janusgraph"
-  host: "janusgraph"
-  port: 8182
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/janusgraph
-    tag: 1.1.0-debian-12-r21
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  provisioning:
-    annotations: *provisioningAnnotations    
-
+ 
 kafka: &kafka
   enabled: true
   nameOverride: kafka
@@ -142,7 +130,6 @@ global:
   redis: *redis
   kafka: *kafka
   yugabyte: *yugabyte
-  janusgraph: *janusgraph
   keycloak_kid_keys_configmap: keycloak-kids-keys
   keycloak_key_configmap: keycloak-key
   kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
