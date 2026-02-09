@@ -4,8 +4,8 @@ fullnameOverride: "kong"
 replicaCount: 1
 
 image:
-  repository: sunbirded.azurecr.io/kong
-  tag: "0.14.1"
+  repository: docker.io/kong
+  tag: "3.9.1"
   pullPolicy: IfNotPresent
   pullSecrets: []
 

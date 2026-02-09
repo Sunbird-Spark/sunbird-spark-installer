@@ -9,7 +9,7 @@ read -r
 environment=$(basename "$(pwd)")
 
 function create_tf_backend() {
-    echo -e "Creating terraform state backend"
+    echo -e "Creating opentofu state backend"
     bash create_tf_backend.sh
 }
 
@@ -42,23 +42,23 @@ function create_tf_resources() {
 
 function certificate_keys() {
      #  # If keys already present in global-values.yaml → skip writing
-    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../terraform/gcp/$environment/global-values.yaml 2>/dev/null; then
+    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/gcp/$environment/global-values.yaml 2>/dev/null; then
         echo "Certificate keys already present — skipping generation and write."
         return
     fi
     # Generate private and public keys using openssl
     echo "Creation of RSA keys for certificate signing"
-    openssl genrsa -out ../terraform/gcp/$environment/certkey.pem;
-    openssl rsa -in ../terraform/gcp/$environment/certkey.pem -pubout -out ../terraform/gcp/$environment/certpubkey.pem
-    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../terraform/gcp/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../terraform/gcp/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../terraform/gcp/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../terraform/gcp/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
-    printf "\n" >> ../terraform/gcp/$environment/global-values.yaml
-    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> ../terraform/gcp/$environment/global-values.yaml
-    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> ../terraform/gcp/$environment/global-values.yaml
-    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> ../terraform/gcp/$environment/global-values.yaml
-    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> ../terraform/gcp/$environment/global-values.yaml
+    openssl genrsa -out ../opentofu/gcp/$environment/certkey.pem;
+    openssl rsa -in ../opentofu/gcp/$environment/certkey.pem -pubout -out ../opentofu/gcp/$environment/certpubkey.pem
+    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/gcp/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/gcp/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../opentofu/gcp/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../opentofu/gcp/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
+    printf "\n" >> ../opentofu/gcp/$environment/global-values.yaml
+    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
+    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
+    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
+    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
 }
 
 function certificate_config() {
@@ -114,8 +114,8 @@ function install_component() {
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
         $ed_values_flag \
         -f "global-resources.yaml" \
-        -f "../terraform/gcp/$environment/global-values.yaml" \
-        -f "../terraform/gcp/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/gcp/$environment/global-values.yaml" \
+        -f "../opentofu/gcp/$environment/global-cloud-values.yaml" --timeout 30m --debug
 }
 
 function install_helm_components() {
@@ -172,7 +172,7 @@ function dns_mapping() {
 function generate_postman_env() {
     local current_directory="$(pwd)"
     if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../terraform/gcp/$environment 2>/dev/null || true
+        cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
     domain_name=$(kubectl get cm -n sunbird lms-env -ojsonpath='{.data.sunbird_web_url}')
     blob_store_path=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.cloud_private_storage_accountname}')
@@ -192,7 +192,7 @@ function generate_postman_env() {
         -e "s|BLOB_STORE_PATH|${blob_store_path}|g" \
         "${temp_file}" >"env.json"
 
-    echo -e "A env.json file is created in this directory: terraform/gcp/$environment"
+    echo -e "A env.json file is created in this directory: opentofu/gcp/$environment"
     echo "Import the env.json file into postman to invoke other APIs"
 }
 
@@ -206,7 +206,7 @@ function restart_workloads_using_keys() {
 function run_post_install() {
     local current_directory="$(pwd)"
     if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../terraform/gcp/$environment 2>/dev/null || true
+        cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
     check_pod_status
     echo "Starting post install..."
@@ -217,7 +217,7 @@ function run_post_install() {
 function create_client_forms() {
     local current_directory="$(pwd)"
     if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../terraform/gcp/$environment 2>/dev/null || true
+        cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
     cp -rf ../../../postman-collection/ED-${RELEASE}  .
     check_pod_status
@@ -287,7 +287,7 @@ if [ $# -eq 0 ]; then
     create_tf_resources
     cd ../../../helmcharts
     install_helm_components
-    cd ../terraform/gcp/$environment
+    cd ../opentofu/gcp/$environment
     restart_workloads_using_keys
     certificate_config
     dns_mapping

@@ -118,7 +118,7 @@ variable "igw_cidr" {
 
 
 variable "log_config" {
-  description = "The logging options for the subnetwork flow logs. Setting this value to `null` will disable them. See https://www.terraform.io/docs/providers/google/r/compute_subnetwork.html for more information and examples."
+  description = "The logging options for the subnetwork flow logs. Setting this value to `null` will disable them. See https://www.tofu.io/docs/providers/google/r/compute_subnetwork.html for more information and examples."
   type = object({
     aggregation_interval = string
     flow_sampling        = number
