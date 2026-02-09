@@ -101,6 +101,7 @@ desktop_device_groups: &desktop_devicev_groups
   - deleteNotificationFeed
 
 anonymous_user_groups: &anonymous_user_groups
+  - portal_anonymous
   - deviceCreate
   - locationAccess
   - telemetryCreate

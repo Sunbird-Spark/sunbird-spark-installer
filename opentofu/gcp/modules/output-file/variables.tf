@@ -5,17 +5,12 @@ variable "env" {
 
 variable "environment" {
     type        = string
-    description = "Envrionment name. All resources will be prefixed with this value in terraform."
+    description = "Envrionment name. All resources will be prefixed with this value in tofu."
 }
 
 variable "building_block" {
     type        = string
     description = "Building block name. All resources will be prefixed with this value."
-}
-
-variable "storage_account_name" {
-    type        = string
-    description = "Storage account name."
 }
 
 variable "storage_container_public" {
@@ -26,11 +21,6 @@ variable "storage_container_public" {
 variable "storage_container_private" {
     type        = string
     description = "Private storage container name."
-}
-
-variable "storage_account_primary_access_key" {
-    type        = string
-    description = "Storage account primary access key."
 }
 
 variable "base_location" {
@@ -46,10 +36,12 @@ variable "base_location" {
       error_message = "The string must have a length ranging from 12 to 24 characters."
   }
 }
+
 variable "private_ingressgateway_ip" {
     type        = string
     description = "Private LB IP."
 }
+
 variable "encryption_string" {
   type        = string
   description = "This string will be used to encrypt / mask various values. Use a strong random string in order to secure the applications. The string should be exactly 32 characters in length. If you forget the string, the application will stop working and the string cannot be retrieved."
@@ -59,9 +51,34 @@ variable "encryption_string" {
     error_message = "The string must have a length of exactly 32 characters."
   }
 }
+
 variable "dial_state_container_public" {
     type        = string
-    description = "dial_state storage container name."
+    description = "Public storage container name with blob access."
+}
+
+variable "gcp_storage_bucket_key" {
+  description = "The key for accessing the Google Cloud Storage bucket"
+  type        = string
+  default     = ""
+}
+
+variable "gcp_storage_account_mail" {
+  description = "The name of the GCP storage account"
+  type        = string
+  default     = ""
+}
+
+variable "gcp_project_id" {
+  description = "The GCP project ID"
+  type        = string
+  default     = ""
+}
+
+variable "storage_class" {
+  description = "The storage class for the GKE cluster."
+  type        = string
+  default     = ""  
 }
 
 variable "cloud_storage_provider" {
@@ -70,9 +87,21 @@ variable "cloud_storage_provider" {
   default     = ""
 }
 
-
-variable "velero_container_name" {
-  description = "The name of the Velero storage container."
+variable "cloud_storage_region" {
+  description = "The region for the cloud storage provider."
   type        = string
   default     = ""
+}
+
+variable "cloud_storage_private_key_id" {
+  description = "The private key ID for the cloud storage provider."
+  type        = string
+  default     = ""
+}
+
+variable "velero_storage_container_private" {
+  description = "The name of the private storage container for Velero backups."
+  type        = string
+  default     = ""
+  
 }

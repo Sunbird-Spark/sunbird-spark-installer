@@ -7,9 +7,9 @@ https://cloud.google.com/kubernetes-engine/docs/tutorials/authenticating-to-clou
 ## How do you use this module?
 
 * See the [root README](https://github.com/gruntwork-io/terraform-google-gke/blob/master/README.md) for instructions on
-using Terraform modules.
+using OpenTofu modules.
 * See the [examples](https://github.com/gruntwork-io/terraform-google-gke/tree/master/examples) folder for example usage.
 * See [variables.tf](https://github.com/gruntwork-io/terraform-google-gke/blob/master/modules/gke-service-account/variables.tf) for all the
-variables you can set on this module.
+variables you can set on this OpenTofu module.
 * See [outputs.tf](https://github.com/gruntwork-io/terraform-google-gke/blob/master/modules/gke-service-account/outputs.tf) for all the variables
 that are outputted by this module.

@@ -38,10 +38,10 @@ velero:
         config:
           prefix: 
           serviceAccount: ${gcp_storage_account_email}
-    dbbackupbackupStorageLocation:
+    dbbackupStorageLocation:
       - name: dbbackup
         provider: ${cloud_storage_provider}
-        bucket: "$${gcp_velero_storage_container_private}"
+        bucket: "${gcp_velero_storage_container_private}"
         config:
           prefix: 
           serviceAccount: ${gcp_storage_account_email}      

@@ -66,16 +66,18 @@ images:
     tag: "release-3.9.0_RC1_01339f9_07941f0_1_router"
 
   kong: &kong
-    repository: "sunbirded.azurecr.io/kong"
-    tag: "0.14.1"
+    registry: "docker.io"
+    repository: "kong"
+    tag: "3.9.1"
 
   kong_apis: &kong_apis
+    registry: "docker.io"
     repository: "sunbirded.azurecr.io/kong-scripts"
-    tag: "0.1.8"
+    tag: "3.9.1"
 
-  kong_consumer: &kong_consumer
+  kong_consumers: &kong_consumers
     repository: "sunbirded.azurecr.io/kong-scripts"
-    tag: "0.1.8"
+    tag: "3.9.1"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -246,8 +248,8 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  kong-consumer:
-    image: *kong_consumer
+  kong-consumers:
+    image: *kong_consumers
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -381,8 +383,3 @@ global:
     registry: "sunbirded.azurecr.io"
     repository: "data-pipeline"
     tag: "release-8.0.0_RC1_b4f909c"
-
-  obsrvflink:
-    registry: "sunbirded.azurecr.io"
-    repository: "sunbird-datapipeline"
-    tag: "release-5.2.0_RC8_9610bc7_13_be0895d"

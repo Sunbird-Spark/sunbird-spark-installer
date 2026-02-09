@@ -47,6 +47,7 @@ yugabyte: &yugabyte
       - name: "druid_raw"
       - name: "superset"
       - name: "registry"
+
   image:
     registry: yugabytedb
     repository: yugabyte
@@ -63,6 +64,7 @@ yugabyte: &yugabyte
     tserver: 3
   username: "yugabyte"
   password: "yugabyte"  
+   
 
 kafka: &kafka
   enabled: true

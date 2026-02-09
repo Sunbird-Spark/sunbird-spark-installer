@@ -78,12 +78,12 @@ else
 fi
 
 # Write environment variables to tf.sh
-echo "export TERRAFORM_GCP_PROJECT=$GCP_PROJECT" > tf.sh
-echo "export TERRAFORM_BACKEND_BUCKET=$BUCKET_NAME" >> tf.sh
+echo "export OPENTOFU_GCP_PROJECT=$GCP_PROJECT" > tf.sh
+echo "export OPENTOFU_BACKEND_BUCKET=$BUCKET_NAME" >> tf.sh
 
 # Print out the result
-echo -e "\nTerraform backend setup complete!"
-echo "TERRAFORM_GCP_PROJECT=$GCP_PROJECT"
-echo "TERRAFORM_BACKEND_BUCKET=$BUCKET_NAME"
+echo -e "\nOpenTofu backend setup complete!"
+echo "OPENTOFU_GCP_PROJECT=$GCP_PROJECT"
+echo "OPENTOFU_BACKEND_BUCKET=$BUCKET_NAME"
 echo "Run the following to export environment variables:"
 echo "source tf.sh"
