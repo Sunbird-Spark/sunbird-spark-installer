@@ -4,8 +4,8 @@ generate "backend" {
   contents = <<EOF
 terraform {
   backend "gcs" {
-    bucket  = "${get_env("TERRAFORM_BACKEND_BUCKET")}"
-    prefix  = "${path_relative_to_include()}/terraform.tfstate"
+    bucket  = "${get_env("OPENTOFU_BACKEND_BUCKET")}"
+    prefix  = "${path_relative_to_include()}/tofu.tfstate"
   }
 }
 EOF

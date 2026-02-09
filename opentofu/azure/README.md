@@ -23,7 +23,7 @@ Note: Make sure you replace the AZURE_TENANT_ID with the tenant id from Azure Co
 
 #### Azure Infra Setup
 
-Post login, update the `terraform/azure/<env>/global-values.yaml` with the variables as per your environment
+Post login, update the `opentofu/azure/<env>/global-values.yaml` with the variables as per your environment
 
 ```
   building_block: "" # building block name
