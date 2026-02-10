@@ -40,4 +40,5 @@ dependencies:
     condition: yugabyte.enabled
   - name: router
     condition: router.enabled
- 
+  - name: nginx-private-ingress
+    condition: nginx-private-ingress.enabled
