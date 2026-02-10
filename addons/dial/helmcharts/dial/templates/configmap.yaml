@@ -80,4 +80,3 @@ data:
   {{- include "common.tplvalues.render" (dict "value" $var "context" $) | nindent 6 }}
   {{- end }}
 {{- end }}
-{{- end }}

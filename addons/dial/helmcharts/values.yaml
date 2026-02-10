@@ -1,0 +1,43 @@
+# DIAL Addon Global Values
+# This file contains all the necessary values for standalone DIAL deployment
+
+global:
+  # Service endpoints (should match your cluster service names)
+  elasticsearch:
+    host: "elasticsearch-master"
+    port: 9200
+  
+  redis:
+    host: "redis-master"
+    port: 6379
+  
+  yugabyte:
+    host: "yb-tserver-service"
+    port: 9042
+  
+  kafka:
+    host: "kafka"
+    port: 9092
+  
+  installation:
+    id: "sunbird"
+  
+  channel:
+    default: "sunbird"
+  
+  play_http:
+    secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms"
+
+
+image:
+  repository: ghcr.io/sunbird-knowlg/sunbird-dial-service
+  tag: "release-8.1.0_rc1_8fbeab3"
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 100Mi
+  limits:
+    cpu: 1
+    memory: 1024Mi

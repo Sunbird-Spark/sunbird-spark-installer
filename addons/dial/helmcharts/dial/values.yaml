@@ -5,7 +5,7 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/sunbird-knowlg/sunbird-dial-service
-  tag: "release-8.0.0_rc4_726775d"
+  tag: "release-8.1.0_rc1_8fbeab3"
   pullPolicy: IfNotPresent
   pullSecrets: []
 

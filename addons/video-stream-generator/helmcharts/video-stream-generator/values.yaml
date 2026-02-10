@@ -69,6 +69,10 @@ serviceMonitor:
     jobLabel: "app.kubernetes.io/name"
     port: prom
 
+ingress: {}
+serviceAccount:
+  create: false
+
 jobmanager:
   rpc_port: 6123
   blob_port: 6124

@@ -8,11 +8,6 @@ REPO_ROOT="$(cd "$ADDON_DIR/../.." && pwd)"
 
 DEFAULT_NAMESPACE="sunbird"
 DEFAULT_RELEASE_NAME="dial"
-GLOBAL_VALUES_FILE="$REPO_ROOT/terraform/azure/template/global-cloud-values.yaml"
-
-if [ -f "$REPO_ROOT/terraform/gcp/template/global-cloud-values.yaml" ]; then
-    GLOBAL_VALUES_FILE="$REPO_ROOT/terraform/gcp/template/global-cloud-values.yaml"
-fi
 
 NAMESPACE="${NAMESPACE:-$DEFAULT_NAMESPACE}"
 RELEASE_NAME="${RELEASE_NAME:-$DEFAULT_RELEASE_NAME}"
@@ -30,12 +25,36 @@ done
 
 if [ "$ACTION" = "install" ]; then
     cd "$HELMCHARTS_DIR/dial"
-    helm dependency update
     
-    HELM_ARGS="-f $GLOBAL_VALUES_FILE"
+    # Detect cloud provider
+    if [ -f "$REPO_ROOT/opentofu/azure/template/global-values.yaml" ]; then
+        CLOUD_DIR="$REPO_ROOT/opentofu/azure/template"
+    elif [ -f "$REPO_ROOT/opentofu/gcp/template/global-values.yaml" ]; then
+        CLOUD_DIR="$REPO_ROOT/opentofu/gcp/template"
+    else
+        echo "ERROR: No opentofu global-values.yaml found"
+        exit 1
+    fi
+    
+    # Build helm args with all 3 files (like main install.sh does)
+    # 1. Base global values from opentofu
+    HELM_ARGS="-f $CLOUD_DIR/global-values.yaml"
+    
+    # 2. Cloud-generated values (overrides #1)
+    if [ -f "$CLOUD_DIR/global-cloud-values.yaml" ]; then
+        HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
+    else
+        echo "ERROR: global-cloud-values.yaml not found. Please run opentofu first."
+        exit 1
+    fi
+    
+    # 3. Addon-specific values (overrides #1 and #2)
+    HELM_ARGS="$HELM_ARGS -f $HELMCHARTS_DIR/values.yaml"
+    
+    # 4. Custom values file if provided (overrides all above)
     [ -n "$VALUES_FILE" ] && HELM_ARGS="$HELM_ARGS -f $VALUES_FILE"
     
-    helm upgrade --install "$RELEASE_NAME" . --namespace "$NAMESPACE" $HELM_ARGS --wait --timeout 10m
+    helm upgrade --install "$RELEASE_NAME" . --namespace "$NAMESPACE" $HELM_ARGS
     
     echo "DIAL service deployed successfully"
 

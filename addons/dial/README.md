@@ -4,7 +4,9 @@
 
 - `helm` 3.x installed
 - `kubectl` configured and connected to cluster
-- OpenTofu has been run (generates global-cloud-values.yaml)
+- **OpenTofu must be run first** to generate `global-cloud-values.yaml`
+  - This file is created in `opentofu/azure/template/` or `opentofu/gcp/template/`
+  - It contains all the required configuration values
 
 ## Checklist
 
