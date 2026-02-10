@@ -1,8 +1,17 @@
 name: Build and Push Docker Images
 
 on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - '.github/workflows/build-push-images.yml'
   workflow_dispatch:
     inputs:
+      branch:
+        description: 'Branch to build from'
+        required: true
+        default: 'github-actions'
       services:
         description: 'Services to build (comma-separated or "all")'
         required: true
@@ -43,6 +52,8 @@ jobs:
       - name: Checkout
         if: ${{ github.event.inputs.services == 'all' || contains(github.event.inputs.services, matrix.service.name) }}
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
 
       - name: Set up Docker Buildx
         if: ${{ github.event.inputs.services == 'all' || contains(github.event.inputs.services, matrix.service.name) }}
