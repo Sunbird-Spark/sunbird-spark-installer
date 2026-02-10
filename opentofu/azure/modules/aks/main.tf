@@ -1,4 +1,4 @@
-terraform {
+tofu {
   required_providers {
     azurerm = {
       version = "~> 4.0.1"
@@ -18,28 +18,6 @@ provider "azurerm" {
       }
       environment_name = "${var.building_block}-${var.environment}"
   }
-
-  resource "azuread_application" "aks_app" {
-    display_name    = local.environment_name
-  }
-
-  resource "azuread_service_principal" "aks_sp" {
-    client_id = azuread_application.aks_app.client_id
-  }
-
-  resource "azuread_service_principal_password" "aks_sp_password" {
-  service_principal_id = azuread_service_principal.aks_sp.id
-  end_date             = timeadd(timestamp(), var.end_date_relative)
-  lifecycle {
-    ignore_changes = [end_date, value, start_date]
-  }
-}
-
-resource "azurerm_role_assignment" "aks_sp_assignment" {
-  principal_id         = split("/", azuread_service_principal.aks_sp.id)[2]
-  scope                = var.vnet_subnet_id
-  role_definition_name = "Network Contributor"
-}
 
   resource "azurerm_kubernetes_cluster" "aks" {
     name                = "${local.environment_name}"
@@ -62,16 +40,26 @@ resource "azurerm_role_assignment" "aks_sp_assignment" {
       dns_service_ip = var.dns_service_ip
     }
 
-    service_principal {
-      client_id     = azuread_application.aks_app.client_id
-      client_secret = azuread_service_principal_password.aks_sp_password.value
+    # Use System-Assigned Managed Identity
+    # No Azure AD permissions needed - only Contributor role on Resource Group
+    # Identity auto-created with cluster, auto-deleted when cluster deleted
+    identity {
+      type = "SystemAssigned"
     }
 
     tags = merge(
         local.common_tags,
         var.additional_tags
         )
-    depends_on = [ azurerm_role_assignment.aks_sp_assignment ]
+  }
+
+  # Grant Network Contributor role to AKS System-Assigned Identity
+  resource "azurerm_role_assignment" "aks_network_contributor" {
+    principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
+    scope                = var.vnet_subnet_id
+    role_definition_name = "Network Contributor"
+    
+    depends_on = [azurerm_kubernetes_cluster.aks]
   }
 
   # resource "azurerm_kubernetes_cluster_node_pool" "small_nodepool" {
