@@ -30,7 +30,7 @@ cd addons/dial
 **That's it!** The script automatically:
 - Uses namespace `sunbird` (default)
 - Loads configuration from OpenTofu-generated files
-- Merges addon-specific values from `helmcharts/values.yaml`
+- Merges addon-specific values from `global-values.yaml`
 - Uses the `dial_state_container_public` created by OpenTofu
 
 ### Installation Options

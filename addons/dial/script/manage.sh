@@ -3,7 +3,7 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ADDON_DIR="$(dirname "$SCRIPT_DIR")"
-HELMCHARTS_DIR="$ADDON_DIR/helmcharts"
+CHART_DIR="$ADDON_DIR/dial"
 REPO_ROOT="$(cd "$ADDON_DIR/../.." && pwd)"
 
 DEFAULT_NAMESPACE="sunbird"
@@ -24,7 +24,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [ "$ACTION" = "install" ]; then
-    cd "$HELMCHARTS_DIR/dial"
+    cd "$CHART_DIR"
     
     # Detect cloud provider
     if [ -f "$REPO_ROOT/opentofu/azure/template/global-values.yaml" ]; then
@@ -36,20 +36,16 @@ if [ "$ACTION" = "install" ]; then
         exit 1
     fi
     
-    # Build helm args with all 3 files (like main install.sh does)
     # 1. Base global values from opentofu
     HELM_ARGS="-f $CLOUD_DIR/global-values.yaml"
     
-    # 2. Cloud-generated values (overrides #1)
+    # 2. Cloud-generated values (optional)
     if [ -f "$CLOUD_DIR/global-cloud-values.yaml" ]; then
         HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
-    else
-        echo "ERROR: global-cloud-values.yaml not found. Please run opentofu first."
-        exit 1
     fi
     
-    # 3. Addon-specific values (overrides #1 and #2)
-    HELM_ARGS="$HELM_ARGS -f $HELMCHARTS_DIR/values.yaml"
+    # 3. Addon-specific global values
+    HELM_ARGS="$HELM_ARGS -f $ADDON_DIR/global-values.yaml"
     
     # 4. Custom values file if provided (overrides all above)
     [ -n "$VALUES_FILE" ] && HELM_ARGS="$HELM_ARGS -f $VALUES_FILE"
