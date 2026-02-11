@@ -4,8 +4,9 @@ fullnameOverride: "video-stream-generator"
 replicaCount: 1
 
 image:
-  repository: ghcr.io/sunbird-knowlg/knowledge-platform-jobs
-  tag: "release-8.1.0_rc1_e7ac747"
+  registry: "ghcr.io"
+  repository: "sunbird-knowlg/knowledge-platform-jobs"
+  tag: "spark-v0.1_b7e896f"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
@@ -69,9 +70,10 @@ serviceMonitor:
     jobLabel: "app.kubernetes.io/name"
     port: prom
 
-ingress: {}
 serviceAccount:
   create: false
+
+ingress: {}
 
 jobmanager:
   rpc_port: 6123

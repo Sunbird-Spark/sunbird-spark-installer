@@ -1,63 +1,88 @@
 #!/bin/bash
 set -e
 
+# PATHS
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ADDON_DIR="$(dirname "$SCRIPT_DIR")"
-CHART_DIR="$ADDON_DIR/dial"
+CHART_DIR="$ADDON_DIR/helmchart/dial"
 REPO_ROOT="$(cd "$ADDON_DIR/../.." && pwd)"
 
-DEFAULT_NAMESPACE="sunbird"
-DEFAULT_RELEASE_NAME="dial"
-
-NAMESPACE="${NAMESPACE:-$DEFAULT_NAMESPACE}"
-RELEASE_NAME="${RELEASE_NAME:-$DEFAULT_RELEASE_NAME}"
+# DEFAULTS
+NAMESPACE="sunbird"
+RELEASE_NAME="dial"
 ACTION="$1"
-shift 2>/dev/null || true
+CLOUD_PROVIDER="${2:-azure}" # Default to azure if not provided
 
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -n|--namespace) NAMESPACE="$2"; shift 2 ;;
-        -r|--release) RELEASE_NAME="$2"; shift 2 ;;
-        -f|--values) VALUES_FILE="$2"; shift 2 ;;
-        *) shift ;;
-    esac
-done
+provision_resources() {
+    local provider_dir="$ADDON_DIR/opentofu/$CLOUD_PROVIDER"
+    if [ -d "$provider_dir" ]; then
+        echo "Provisioning cloud resources for $CLOUD_PROVIDER using Terragrunt..."
+        pushd "$provider_dir" > /dev/null
+        terragrunt run-all apply --terragrunt-non-interactive
+        popd > /dev/null
+    else
+        echo "No cloud resources to provision for $CLOUD_PROVIDER"
+    fi
+}
 
-if [ "$ACTION" = "install" ]; then
+deploy_chart() {
+    echo "Deploying DIAL Helm chart..."
     cd "$CHART_DIR"
     
-    # Detect cloud provider
-    if [ -f "$REPO_ROOT/opentofu/azure/template/global-values.yaml" ]; then
-        CLOUD_DIR="$REPO_ROOT/opentofu/azure/template"
-    elif [ -f "$REPO_ROOT/opentofu/gcp/template/global-values.yaml" ]; then
-        CLOUD_DIR="$REPO_ROOT/opentofu/gcp/template"
-    else
-        echo "ERROR: No opentofu global-values.yaml found"
+    local CLOUD_DIR="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/template"
+    
+    # Check for required configuration files
+    if [ ! -f "$CLOUD_DIR/global-values.yaml" ] || [ ! -f "$CLOUD_DIR/global-cloud-values.yaml" ]; then
+        echo "ERROR: OpenTofu global values not found in $CLOUD_DIR. Please run opentofu first."
         exit 1
     fi
     
-    # 1. Base global values from opentofu
+    # Standard values layering
     HELM_ARGS="-f $CLOUD_DIR/global-values.yaml"
-    
-    # 2. Cloud-generated values (optional)
-    if [ -f "$CLOUD_DIR/global-cloud-values.yaml" ]; then
-        HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
-    fi
-    
-    # 3. Addon-specific global values
-    HELM_ARGS="$HELM_ARGS -f $ADDON_DIR/global-values.yaml"
-    
-    # 4. Custom values file if provided (overrides all above)
-    [ -n "$VALUES_FILE" ] && HELM_ARGS="$HELM_ARGS -f $VALUES_FILE"
+    HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
+    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-values.yaml"
     
     helm upgrade --install "$RELEASE_NAME" . --namespace "$NAMESPACE" $HELM_ARGS
-    
     echo "DIAL service deployed successfully"
+}
 
-elif [ "$ACTION" = "uninstall" ]; then
-    helm uninstall "$RELEASE_NAME" --namespace "$NAMESPACE"
-    echo "DIAL service uninstalled"
-else
-    echo "Usage: $0 [install|uninstall] [-n namespace] [-r release] [-f values-file]"
-    exit 1
-fi
+uninstall_chart() {
+    echo "Uninstalling DIAL Helm chart..."
+    helm uninstall "$RELEASE_NAME" --namespace "$NAMESPACE" || echo "Helm release not found, skipping."
+}
+
+destroy_resources() {
+    local provider_dir="$ADDON_DIR/opentofu/$CLOUD_PROVIDER"
+    if [ -d "$provider_dir" ]; then
+        echo "Destroying cloud resources for $CLOUD_PROVIDER using Terragrunt..."
+        pushd "$provider_dir" > /dev/null
+        terragrunt run-all destroy --terragrunt-non-interactive
+        popd > /dev/null
+    fi
+}
+
+install() {
+    provision_resources
+    deploy_chart
+}
+
+uninstall() {
+    uninstall_chart
+    # By default, resource destruction is disabled for safety. 
+    # Uncomment the line below to enable automatic cleanup.
+    # destroy_resources
+}
+
+# --- Main Execution ---
+case "$ACTION" in
+    install)
+        install
+        ;;
+    uninstall)
+        uninstall
+        ;;
+    *)
+        echo "Usage: $0 [install|uninstall] [azure|gcp]"
+        exit 1
+        ;;
+esac

@@ -15,9 +15,10 @@ output "azurerm_storage_container_public" {
   value = azurerm_storage_container.storage_container_public.name
 }
 
-output "azurerm_dial_state_container_public" {
-  value = azurerm_storage_container.dial_state_container_public.name
-}
+# DIAL container output commented - now managed by addons/dial/opentofu
+# output "azurerm_dial_state_container_public" {
+#   value = azurerm_storage_container.dial_state_container_public.name
+# }
 
 output "azurerm_velero_container_name" {
   value = azurerm_storage_container.velero_storage_container_private.name

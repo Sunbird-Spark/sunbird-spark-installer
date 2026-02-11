@@ -60,8 +60,8 @@ spec:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
         checksum/job-config: {{ $jobData | toYaml | sha256sum }}
     spec:
-      {{- if .Values.global.serviceAccount.create }}
-      serviceAccountName: {{ .Values.global.serviceAccount.name }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -75,7 +75,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.knowledgeflink.registry }}/{{ .Values.global.knowledgeflink.repository }}:{{ .Values.global.knowledgeflink.tag }}"
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           workingDir: {{ .Values.taskmanager.flink_work_dir }}
           command: ["/opt/flink/bin/taskmanager.sh"]
@@ -154,8 +154,8 @@ spec:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
         checksum/job-config: {{ $jobData | toYaml | sha256sum }}
     spec:
-      {{- if .Values.global.serviceAccount.create }}
-      serviceAccountName: {{ .Values.global.serviceAccount.name }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -169,7 +169,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.knowledgeflink.registry }}/{{ .Values.global.knowledgeflink.repository }}:{{ .Values.global.knowledgeflink.tag }}"
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           workingDir: {{ .Values.jobmanager.flink_work_dir }}
           command: ["/opt/flink/bin/standalone-job.sh"]

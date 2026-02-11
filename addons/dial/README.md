@@ -28,22 +28,21 @@ cd addons/dial
 ```
 
 **That's it!** The script automatically:
+- **Provisions cloud resources** (if `opentofu` directory exists) using Terragrunt
 - Uses namespace `sunbird` (default)
 - Loads configuration from OpenTofu-generated files
-- Merges addon-specific values from `global-values.yaml`
+- Merges shared addon values from `addons/global-values.yaml`
 - Uses the `dial_state_container_public` created by OpenTofu
 
 ### Installation Options
 
 ```bash
-# Install with custom namespace
-./script/manage.sh install -n my-namespace
+# Install for a specific cloud provider (defaults to azure)
+./script/manage.sh install azure
+./script/manage.sh install gcp
 
-# Install with custom release name
-./script/manage.sh install -r my-dial-release
-
-# Install with custom values file
-./script/manage.sh install -f custom-values.yaml
+# Uninstall everything
+./script/manage.sh uninstall azure
 ```
 
 ## Verify Installation

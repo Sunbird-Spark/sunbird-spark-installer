@@ -72,8 +72,10 @@ resource "azurerm_storage_container" "storage_container_public" {
   container_access_type = "blob"
 }
 
-resource "azurerm_storage_container" "dial_state_container_public" {
-  name                  = "${local.environment_name}-dial-${local.unique_uuid}"
-  storage_account_name  = azurerm_storage_account.storage_account.name
-  container_access_type = "blob"
-}
+# DIAL container moved to addons/dial/opentofu/azure/storage
+# Uncomment below if you want to manage DIAL container from main opentofu
+# resource "azurerm_storage_container" "dial_state_container_public" {
+#   name                  = "${local.environment_name}-dial-${local.unique_uuid}"
+#   storage_account_name  = azurerm_storage_account.storage_account.name
+#   container_access_type = "blob"
+# }

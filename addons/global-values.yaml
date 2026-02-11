@@ -1,0 +1,34 @@
+# Addons Global Values
+# Shared configuration for all Sunbird Spark addons
+
+global:
+  # Service endpoints
+  elasticsearch:
+    host: "elasticsearch-master"
+    port: 9200
+  
+  redis:
+    host: "redis-master"
+    port: 6379
+  
+  yugabyte:
+    host: "yb-tserver-service"
+    port: 9042
+  
+  kafka:
+    host: "kafka"
+    port: 9092
+  
+  neo4j:
+    host: "neo4j"
+    port: 7687
+  
+  installation:
+    id: "sunbird"
+  
+  channel:
+    default: "sunbird"
+
+  dial_state_container_public: "dummy values"
+
+

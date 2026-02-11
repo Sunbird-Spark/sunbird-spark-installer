@@ -59,10 +59,11 @@ variable "encryption_string" {
     error_message = "The string must have a length of exactly 32 characters."
   }
 }
-variable "dial_state_container_public" {
-    type        = string
-    description = "dial_state storage container name."
-}
+# DIAL container variable commented - now managed by addons/dial/opentofu
+# variable "dial_state_container_public" {
+#     type        = string
+#     description = "dial_state storage container name."
+# }
 
 variable "cloud_storage_provider" {
   description = "The cloud storage provider to use."
