@@ -103,8 +103,16 @@ function install_component() {
             certificate_keys
         fi
       fi
+    local addon_values_flag=""
+    if [ "$(yq '.deploy_dial_services' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]; then
+        if [ -f "../addons/global-values.yaml" ]; then
+            addon_values_flag="-f ../addons/global-values.yaml"
+        fi
+    fi
+
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
         $ed_values_flag \
+        $addon_values_flag \
         -f images.yaml \
         -f "global-resources.yaml" \
         -f "../opentofu/azure/$environment/global-values.yaml" \

@@ -34,6 +34,6 @@ resource "null_resource" "update_global_values" {
   }
 
   provisioner "local-exec" {
-    command = "yq -i '.global.dial_state_container_public = \"${azurerm_storage_container.dial_state_container_public.name}\"' ${path.module}/../../../../global-values.yaml"
+    command = "yq -i '.global.dial_state_container_public = \"${azurerm_storage_container.dial_state_container_public.name}\"' ${path.module}/../../../../../global-values.yaml"
   }
 }
