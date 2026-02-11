@@ -34,7 +34,7 @@ spec:
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.global.images.dial_service.registry }}/{{ .Values.global.images.dial_service.repository }}:{{ .Values.global.images.dial_service.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.livenessProbe }}
           livenessProbe:

@@ -1,34 +1,7 @@
 {{- $currentScope := . }}
 {{- range $jobName, $jobData := .Values.flink_jobs }}
 
-  {{- /* Determine if this job should be enabled */}}
-  {{- $isDialUpdater := or (eq $jobName "dialcode-context-updater") (eq $jobName "qrcode-image-generator") }}
-  {{- /* Normalize global.deploy_dial_services (may be a string anchor) into a real boolean */}}
-  {{- $globalDialRaw := default false $.Values.global.deploy_dial_services }}
-  {{- $globalDialStr := printf "%v" $globalDialRaw | lower | trim }}
-  {{- $globalDialEnabled := or (eq $globalDialStr "true") (eq $globalDialStr "1") (eq $globalDialStr "yes") (eq $globalDialStr "y") (eq $globalDialStr "on") }}
-
-  {{- /* Determine if this is an asset enrichment job */}}
-  {{- $isAssetEnrich := eq $jobName "asset-enrichment" }}
-  {{- /* Normalize global.enable_asset_enrichment (may be a string anchor) into a real boolean */}}
-  {{- $globalAssetRaw := default false $.Values.global.enable_asset_enrichment }}
-  {{- $globalAssetStr := printf "%v" $globalAssetRaw | lower | trim }}
-  {{- $globalAssetEnrichEnabled := or (eq $globalAssetStr "true") (eq $globalAssetStr "1") (eq $globalAssetStr "yes") (eq $globalAssetStr "y") (eq $globalAssetStr "on") }}
-
-  {{- /* Normalize job-level enabled value (jobData.enabled) to boolean as well */}}
-  {{- $jobEnabledRaw := default false $jobData.enabled }}
-  {{- $jobEnabledStr := printf "%v" $jobEnabledRaw | lower | trim }}
-  {{- $jobEnabledBool := or (eq $jobEnabledStr "true") (eq $jobEnabledStr "1") (eq $jobEnabledStr "yes") (eq $jobEnabledStr "y") (eq $jobEnabledStr "on") }}
-
-  {{- /* Determine final enabled state based on job type */}}
-  {{- $enabled := $jobEnabledBool }}
-  {{- if $isDialUpdater }}
-    {{- $enabled = $globalDialEnabled }}
-  {{- else if $isAssetEnrich }}
-    {{- $enabled = $globalAssetEnrichEnabled }}
-  {{- end }}
-
-  {{- if $enabled }}
+  {{- if $jobData.enabled }}
     {{- with $currentScope }}
 
       {{- $component := "taskmanager" }}
