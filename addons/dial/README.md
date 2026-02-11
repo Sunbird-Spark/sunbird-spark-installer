@@ -9,7 +9,7 @@ The DIAL (Digital Infrastructure for Augmented Learning) Service is a QR code ge
 - `helm` 3.x installed
 - `kubectl` configured and connected to cluster
 - **OpenTofu must be run first** to generate `global-cloud-values.yaml`
-  - This file is created in `opentofu/azure/template/` or `opentofu/gcp/template/`
+  - This file is created in your environment folder: `opentofu/<provider>/<env_name>/`
   - It contains all the required configuration values
 
 ## Checklist
@@ -24,6 +24,7 @@ The DIAL (Digital Infrastructure for Augmented Learning) Service is a QR code ge
 
 ```bash
 cd addons/dial
+export ENV_NAME=demo # Replace with your environment name
 ./script/manage.sh install
 ```
 
@@ -40,6 +41,10 @@ cd addons/dial
 # Install for a specific cloud provider (defaults to azure)
 ./script/manage.sh install azure
 ./script/manage.sh install gcp
+
+# Specify a custom environment directory (e.g., if you copied template to 'demo')
+export ENV_NAME=demo
+./script/manage.sh install azure
 
 # Uninstall everything
 ./script/manage.sh uninstall azure

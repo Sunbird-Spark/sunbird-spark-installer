@@ -29,7 +29,11 @@ deploy_chart() {
     echo "Deploying DIAL Helm chart..."
     cd "$CHART_DIR"
     
-    local CLOUD_DIR="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/template"
+    if [ -z "$ENV_NAME" ]; then
+        echo "ERROR: ENV_NAME environment variable is not set. Please export it (e.g., export ENV_NAME=demo) before running this script."
+        exit 1
+    fi
+    local CLOUD_DIR="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/$ENV_NAME"
     
     # Check for required configuration files
     if [ ! -f "$CLOUD_DIR/global-values.yaml" ] || [ ! -f "$CLOUD_DIR/global-cloud-values.yaml" ]; then
