@@ -59,8 +59,8 @@ jobs:
         id: prep
         run: |
           echo "OWNER_LOWERCASE=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
-          # Format: <branch-name>_<short-sha>, lowercased
-          RAW_TAG="${{ github.ref_name }}_${GITHUB_SHA::7}"
+          # Format: develop_<short-sha>, lowercased
+          RAW_TAG="develop_${GITHUB_SHA::7}"
           echo "IMAGE_TAG=$(echo $RAW_TAG | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Build and Push
