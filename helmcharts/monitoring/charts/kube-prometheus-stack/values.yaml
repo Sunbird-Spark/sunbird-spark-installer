@@ -4263,7 +4263,6 @@ prometheus-blackbox-exporter:
       - name: analytics
         url: "http://analytics-service:9000/health"
         module: http_2xx
-        module: http_2xx
       - name: notification
         url: "http://notification-service:9000/health"
         module: http_2xx
