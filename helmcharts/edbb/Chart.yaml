@@ -39,6 +39,8 @@ dependencies:
     version: 2025.2.0   # Chart version
     condition: yugabyte.enabled
   - name: router
+    version: 0.1.0
     condition: router.enabled
   - name: nginx-private-ingress
+    version: 0.1.0
     condition: nginx-private-ingress.enabled

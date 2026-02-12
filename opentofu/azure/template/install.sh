@@ -54,7 +54,6 @@ function certificate_keys() {
 
 
 function certificate_config() {
-    # Check if jq is available in the knowledge-mw container, install only if missing
     echo "Configuring Certificate keys"
     if ! kubectl -n sunbird exec deploy/knowledge-mw -- which jq >/dev/null 2>&1; then
         echo "jq not found in knowledge-mw container, attempting to install..."
