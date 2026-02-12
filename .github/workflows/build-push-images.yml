@@ -3,12 +3,9 @@ name: Docker Build and Push
 on:
   push:
     paths:
-      - 'scripts/keycloak/**'
       - 'scripts/keycloak-21.1.2/**'
       - 'scripts/keycloak-postgres-query/**'
       - 'scripts/kong-api-scripts/**'
-      - 'scripts/postgresql-backup/**'
-      - 'scripts/redis-backup/**'
       - 'scripts/sunbird-yugabyte-migrations/**'
 
 jobs:
@@ -28,12 +25,9 @@ jobs:
         with:
           base: ${{ github.event.before }}
           filters: |
-            keycloak: 'scripts/keycloak/**'
             keycloak-21.1.2: 'scripts/keycloak-21.1.2/**'
             keycloak-postgres-query: 'scripts/keycloak-postgres-query/**'
             kong-api-scripts: 'scripts/kong-api-scripts/**'
-            postgresql-backup: 'scripts/postgresql-backup/**'
-            redis-backup: 'scripts/redis-backup/**'
             sunbird-yugabyte-migrations: 'scripts/sunbird-yugabyte-migrations/**'
 
   docker-build-push:
