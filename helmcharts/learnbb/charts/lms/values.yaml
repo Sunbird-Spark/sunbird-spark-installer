@@ -116,6 +116,7 @@ sidecars: {}
 
 cloud_store_base_path_placeholder: ""
 cloud_storage_path_prefix_dial: "dial"
+sunbird_group_service_api_base_url: "http://groups-service:9000"
 sunbird_mw_system_host: lms-service
 sunbird_mw_system_port: 8088
 sunbird_app_name: "sunbird"
