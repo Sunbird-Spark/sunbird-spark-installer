@@ -30,15 +30,7 @@ global:
     default: "sunbird"
 
   dial_state_container_public: "dummy values"
-
-  images:
-    knowledge_platform_jobs:
-      registry: ghcr.io
-      repository: sunbird-knowlg/knowledge-platform-jobs
-      tag: "spark-v0.1_b7e896f"
-    dial_service:
-      registry: ghcr.io
-      repository: sunbird-knowlg/sunbird-dial-service
-      tag: "release-8.1.0_rc1_8fbeab3"
-
+  
+  keycloak_kid_keys_configmap: keycloak-kids-keys
+  keycloak_key_configmap: keycloak-key
 

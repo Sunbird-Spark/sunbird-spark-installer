@@ -1,0 +1,29 @@
+# Discussion Forum Images Configuration
+# Images are referenced via .Values.global.images in helmchart templates
+
+global:
+  images:
+    dial_service:
+      registry: ghcr.io
+      repository: sunbird-knowlg/sunbird-dial-service
+      tag: "release-8.1.0_rc1_8fbeab3"
+    
+    discussionmw:
+      registry: ghcr.io
+      repository: sunbird-lern/discussions-middleware
+      tag: "release-8.1.0_rc2-e7360ec-2"
+    
+    groups:
+      registry: ghcr.io
+      repository: sunbird-lern/groups-service
+      tag: "spark-v0.1_014341b_9"
+    
+    knowledge_platform_jobs:
+      registry: ghcr.io
+      repository: sunbird-knowlg/knowledge-platform-jobs
+      tag: "spark-v0.1_b7e896f"
+    
+    nodebb:
+      registry: sunbirded.azurecr.io
+      repository: nodebb
+      tag: "release-5.0.0_RC1_1_v1.18.6"
