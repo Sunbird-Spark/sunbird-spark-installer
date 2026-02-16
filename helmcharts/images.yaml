@@ -63,7 +63,7 @@ images:
 
   player: &player
     repository: "sunbirded.azurecr.io/sunbird-portal"
-    tag: "spark-v0.13"
+    tag: "spark-v0.13_665b9ed"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
