@@ -1,11 +1,5 @@
 #!/bin/bash
 set -euo pipefail
-
-echo -e "\nPlease ensure you have updated all the mandatory variables as mentioned in the documentation."
-echo "The installation will fail if any of the mandatory variables are missing."
-echo "Press Enter to continue..."
-read -r
-
 environment=$(basename "$(pwd)")
 
 function create_tf_backend() {
