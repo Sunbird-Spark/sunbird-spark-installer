@@ -62,7 +62,7 @@ images:
     tag: "release-7.7.0_rc1_50b5b2d_2"
 
   player: &player
-    repository: "ghcr.io/sunbird-ed/sunbirded-portal/player"
+    repository: "sunbirded.azurecr.io/sunbird-portal"
     tag: "spark-v0.12_e38565c"
 
   router: &router
