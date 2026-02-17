@@ -149,8 +149,8 @@ images:
     tag: "spark-v0.1_04057c0_16"
 
   knowlg: &knowlg
-    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v0.6_a8b080a"
+    repository: "snt1/knowledge-service"
+    tag: "v.0.0.21"
 
   dial: &dial
     repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
@@ -181,6 +181,11 @@ images:
     registry: yugabytedb
     repository: yugabyte
     tag: 2025.2.0.0-b131 
+
+  janusgraph: &janusgraph
+    registry: sunbirded.azurecr.io
+    repository: janusgraph
+    tag: 1.1.0
 
 # Internal block with pull secrets
 internal: &internal
@@ -388,6 +393,11 @@ internal: &internal
       - name: "registry-secret-name"
   yugabyte:
     image: *yugabyte
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  janusgraph:
+    image: *janusgraph
     imagePullSecrets:
       - name: "registry-secret-name"
 
