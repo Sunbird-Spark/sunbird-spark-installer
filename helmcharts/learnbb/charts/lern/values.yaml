@@ -11,8 +11,15 @@ image:
 podAnnotations: {}
 
 podSecurityContext: {}
+  # runAsNonRoot: true
+  # runAsUser: 1001
+  # fsGroup: 1001
 
 securityContext: {}
+  # readOnlyRootFilesystem: false
+  # capabilities:
+  #   drop:
+  #   - ALL
 
 service:
   type: ClusterIP
@@ -36,7 +43,7 @@ resources:
 autoscaling:
   enabled: false
   minReplicas: 1
-  maxReplicas: 10
+  maxReplicas: 100
   metrics:
     - type: Resource
       resource:
