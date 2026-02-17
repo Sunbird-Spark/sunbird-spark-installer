@@ -163,7 +163,7 @@ user_pii_target_object_types: '{
   "Collection": ["1.0"]
 }'
 user_pii_replacement_value: "Deleted User"
-user_org_service_base_url: "http://userorg-service:9000"
+user_org_service_base_url: "http://lern-service:9000"
 email_notification_subject: "User Account Deletion Notification"
 email_notification_regards: "Team"
 

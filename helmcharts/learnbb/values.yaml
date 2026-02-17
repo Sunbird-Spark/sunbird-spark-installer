@@ -5,6 +5,8 @@ certregistry:
   opa_enabled: true
 userorg:
   opa_enabled: true
+lern:
+  opa_enabled: true
 lms:
   opa_enabled: true
 notification:

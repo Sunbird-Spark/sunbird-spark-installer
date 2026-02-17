@@ -502,6 +502,15 @@ learning:
       cpu: 1
       memory: 4096Mi  
 
+lern:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 100Mi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
 lms:
   resources:
     requests:

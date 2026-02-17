@@ -131,6 +131,10 @@ images:
     repository: "sunbirded.azurecr.io/keycloak-kids-keys"
     tag: "v3"
 
+  lern: &lern
+    repository: "ghcr.io/sunbird-lern/lern-service"
+    tag: "lern-service_0d2d27c_2"
+    
   lms: &lms
     repository: "ghcr.io/sunbird-lern/lms-service"
     tag: "spark-v0.1_6a20586_14"
@@ -335,6 +339,11 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
+  lern:
+    image: *lern
+    imagePullSecrets:
+      - name: "registry-secret-name"
+  
   lms:
     image: *lms
     imagePullSecrets:

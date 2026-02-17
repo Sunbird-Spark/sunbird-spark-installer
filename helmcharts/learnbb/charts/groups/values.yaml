@@ -112,7 +112,7 @@ commonAnnotations:
 
 sunbird_cassandra_username: ""
 sunbird_cassandra_password: ""
-userorg_service_url: http://userorg-service:9000
+lern_service_url: http://lern-service:9000
 content_service_url: http://search-service:9000
 sunbird_user_service_search_url: /private/user/v1/search
 sunbird_cs_search_url: /v3/search
@@ -123,7 +123,7 @@ max_group_limit: "50"
 enable_userid_redis_cache: "true"
 groups_redis_ttl: "86400"
 user_redis_ttl: "3600"
-notification_service_base_url: http://notification-service:9000
+notification_service_base_url: http://lern-service:9000
 notification_service_api_url: /v2/notification/send
 enable_tenant_config: '*'
 isMultiDCEnabled: "false"
