@@ -93,25 +93,3 @@ data:
   {{ $key }}: |-
 {{- $value | trim | nindent 4 }}
 {{- end }}
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.global.keycloak_key_configmap }}
-  namespace: {{ .Release.Namespace }}
-data:
-{{- range $key, $value := .Values.global.keycloak_key_data }}
-  {{ $key }}: {{ $value | quote }}
-{{- end }}
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ .Values.global.keycloak_kid_keys_configmap }}
-  namespace: {{ .Release.Namespace }}
-data:
-{{- range $key, $value := .Values.global.keycloak_kids_keys_data }}
-  {{ $key }}: {{ $value | quote }}
-{{- end }}
