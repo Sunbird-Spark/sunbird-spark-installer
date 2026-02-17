@@ -47,6 +47,9 @@ yugabyte: &yugabyte
       - name: "druid_raw"
       - name: "superset"
       - name: "registry"
+  gflags:
+  tserver: 
+    cdc_enable_replicate_intents: "true"    
 
   image:
     registry: yugabytedb
@@ -64,8 +67,7 @@ yugabyte: &yugabyte
     tserver: 3
   username: "yugabyte"
   password: "yugabyte"  
-   
-
+ 
 kafka: &kafka
   enabled: true
   nameOverride: kafka

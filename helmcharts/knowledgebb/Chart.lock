@@ -11,10 +11,10 @@ dependencies:
 - name: kafka
   repository: https://charts.bitnami.com/bitnami
   version: 20.0.2
-- name: neo4j
-  repository: ""
-  version: 0.1.0
 - name: yugabyte
   repository: https://charts.yugabyte.com
   version: 2025.2.0   
+- name: janusgraph
+  repository: ""
+  version: 1.4.10
 digest: sha2

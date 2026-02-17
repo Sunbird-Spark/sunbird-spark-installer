@@ -1,0 +1,56 @@
+{{- if .Values.schemaInit.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "janusgraph.fullname" . }}-schema-init
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "janusgraph.labels" . | nindent 4 }}
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels: {{- include "janusgraph.labels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-janusgraph
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Waiting for JanusGraph to be ready..."
+              for i in $(seq 1 300); do
+                if nc -z {{ include "janusgraph.fullname" . }} 8182; then
+                  echo "JanusGraph is ready!"
+                  exit 0
+                fi
+                echo "Attempt $i: Waiting for JanusGraph on port 8182..."
+                sleep 1
+              done
+              echo "JanusGraph failed to become ready after 5 minutes"
+              exit 1
+      containers:
+        - name: schema-init
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/opt/janusgraph/bin/gremlin.sh"]
+          args: ["-e", "/schema-init-script/schema_init.groovy"]
+          env:
+            - name: JANUSGRAPH_HOST
+              value: {{ include "janusgraph.fullname" . }}
+            - name: JANUSGRAPH_PORT
+              value: "8182"
+          volumeMounts:
+            - name: schema-init-script
+              mountPath: /schema-init-script
+          resources:
+            {{- toYaml .Values.schemaInit.resources | nindent 12 }}
+      volumes:
+        - name: schema-init-script
+          configMap:
+            name: janusgraph-configs
+            items:
+              - key: schema-init.groovy
+                path: schema_init.groovy
+            defaultMode: 0755
+{{- end }}
