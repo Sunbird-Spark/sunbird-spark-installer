@@ -20,7 +20,7 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 1. [jq](https://jqlang.github.io/jq/download/)
 2. [yq](https://github.com/mikefarah/yq#install) (for YAML processing)
 3. [rclone](https://rclone.org/)
-4. [Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+4. [OpenTofu](https://opentofu.org/docs/intro/install/)
 5. [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
 6. Linux / MacOS / GitBash (Windows)
 7. Python 3 
@@ -29,8 +29,16 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 10. [helm](https://helm.sh/docs/intro/quickstart/#install-helm)
 11. [Postman CLI](https://learning.postman.com/docs/getting-started/installation/installation-and-updates/)
 12. For cloud-specific tools, follow the instructions in the respective README file based on your provider.  
-    Example for Azure: [terraform/azure/README.md](terraform/azure/README.md)
+    Example for Azure: [opentofu/azure/README.md](opentofu/azure/README.md)
 
+### CLI Versions
+
+The installer has been used and verified with the following CLI versions:
+
+- **OpenTofu**: v1.11.4
+- **Terragrunt**: v0.77.5
+
+While the installer may work with other versions, these are the versions that have been tested and confirmed to work. If you encounter issues with different versions, please try using these specific versions.
 ### Notes
 - Existing files in the following locations will be backed up with a `.bak` extension, and the files will be overwritten:
     - `~/.config/rclone/rclone.conf`
@@ -45,12 +53,12 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
      ```
 2. Copy the template directory:
      ```bash
-     cd terraform/<cloud-provider>   # Replace <cloud-provider> with your cloud provider (e.g., azure, aws, gcp)
+     cd opentofu/<cloud-provider>   # Replace <cloud-provider> with your cloud provider (e.g., azure, aws, gcp)
      cp -r template demo
      cd demo
      ```
 3. Fill in the variables in `demo/global-values.yaml`.
-   take reference from  [terraform/azure/README.md]
+   take reference from  [opentofu/azure/README.md]
 
 4. Controlling DIAL Services and Flink Jobs
 
@@ -111,7 +119,7 @@ This installation setup creates the following default users with different roles
 
 ##  Destorying the sunbird instance
 ```bash
-cd terraform/<cloud-provider>/<env>
+cd opentofu/<cloud-provider>/<env>
 time ./install.sh destroy_tf_resources
 ```
 
@@ -149,7 +157,7 @@ When `lets_encrypt_ssl` is enabled:
 Once the renewal completes:
 
 1. Fetch the renewed keys from the ConfigMap.
-2. Update your `terraform/<cloud-provider>/<env>/global-values.yaml` file with the new values:
+2. Update your `opentofu/<cloud-provider>/<env>/global-values.yaml` file with the new values:
 
 ```yaml
 proxy_private_key: |
@@ -201,114 +209,78 @@ sunbird-ed-installer/helmcharts/monitoring/charts/alloy
 ```text
 sunbird-ed-installer/helmcharts/images.yaml
 ```
-# JanusGraph Helm Chart
+
+## Kong Upgrade Guide
+
+This section documents the Kong API Gateway upgrade process from version 0.14.1 to 3.9.1 and provides instructions for future upgrades.
+
+### Current Kong Version
+
+- **Kong**: 3.9.1
+- **Kong Scripts Image**: `sunbirded.azurecr.io/kong-scripts:3.9.1`
+
+### Building Kong Scripts Image
+
+The `kong-scripts` image is used for `kong-apis` and `kong-consumers` jobs. To build and push a new version:
 
 ```bash
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
-helm search repo bitnami/janusgraph
-helm pull bitnami/janusgraph
+cd scripts/kong-api-scripts
+
+# Build for AMD64 architecture (recommended for Azure/AWS/GCP)
+docker buildx build --platform linux/amd64 -t <registry>/kong-scripts:3.9.1 --push .
+
+# Build for multiple architectures
+docker buildx build --platform linux/amd64,linux/arm64 -t <registry>/kong-scripts:3.9.1 --push .
 ```
 
-## Installation Steps
+**Important**: Always build for `linux/amd64` for production environments running on Azure, AWS, or GCP to avoid "exec format error" issues.
 
-1. Extract the downloaded `.tgz` file.
-2. Replace the extracted folder in the following directory:
+### Kong Upgrade Process (0.14.1 → 3.9.1)
 
-```text
-sunbird-ed-installer/helmcharts/edbb/charts/janusgraph
-```
+#### 1. Database Compatibility
 
-# JanusGraph Data Migration from Neo4j
+Kong 3.9.1 requires PostgreSQL-compatible databases. When using YugabyteDB:
 
-## 1. Exporting Data from Neo4j
-SSH into your Neo4j instance and export the Node and Relationship data to CSV format using `cypher-shell`:
+- Use the PostgreSQL port (default: `5433`)
+- Expect slower migration performance compared to native PostgreSQL (10-20x slower)
+- Increase migration timeouts significantly
 
-**Export Nodes:**
-```bash
-bin/cypher-shell -u neo4j \
-"MATCH (n)
-RETURN id(n) AS node_id, labels(n) AS labels, properties(n) AS props" \
---format plain > /var/lib/neo4j/import/nodes.csv
-```
+#### 2. Migration Job Configuration
 
-**Export Relationships:**
-```bash
-bin/cypher-shell -u neo4j \
-"MATCH (a)-[r]->(b)
-RETURN id(a) AS from_id, type(r) AS rel_type, id(b) AS to_id, properties(r) AS props" \
---format plain > /var/lib/neo4j/import/relationships.csv
-```
-
-## 2. Preparing JanusGraph for Migration
-
-### Download Migration Scripts
-Download the required migration and initialization scripts from the official repository:
-- [JanusGraph Migration Scripts Repository](https://github.com/Sanketika-Bengaluru/knowledge-platform-26/tree/develop/master-data/janusgraph)
-
-Download `schema_init.groovy`, `import_data_final.groovy`, and `verify_migration.groovy` to your local machine.
-
-### Copy Scripts to Pod
-Once downloaded, copy the scripts to the JanusGraph pod:
-
-```bash
-# Set pod name
-export JG_POD=$(kubectl get pods -n sunbird -l app.kubernetes.io/name=janusgraph -o jsonpath='{.items[0].metadata.name}')
-
-# Copy Scripts
-kubectl cp schema_init.groovy sunbird/$JG_POD:/tmp/schema_init.groovy
-kubectl cp import_data_final.groovy sunbird/$JG_POD:/tmp/import_data_final.groovy
-kubectl cp verify_migration.groovy sunbird/$JG_POD:/tmp/verify_migration.groovy
-
-# Copy Configuration (Optional)
-kubectl cp janusgraph-cql.properties sunbird/$JG_POD:/tmp/janusgraph-cql.properties
-```
-
-## 3. Importing Data
-Create the data directory in the pod and copy the exported CSV files:
-
-```bash
-# Create directory
-kubectl exec -n sunbird $JG_POD -- mkdir -p /data
-
-# Copy CSVs
-kubectl cp /path/to/nodes.csv sunbird/$JG_POD:/data/nodes.csv
-kubectl cp /path/to/relationships.csv sunbird/$JG_POD:/data/relationships.csv
-```
-
-# JanusGraph CDC Configuration
-
-JanusGraph CDC (Change Data Capture) is used to track changes in the graph and push them to external systems (e.g., Kafka or local logs).
-
-## 1. Prepare CDC Extension Jar
-Place the `janusgraph-cdc-extension-1.0.0.jar` in the following directory:
-```text
-sunbird-ed-installer/helmcharts/edbb/charts/janusgraph/config/
-```
-
-## 2. Build and Push Custom Image
-Build the custom JanusGraph image using the provided `Dockerfile` in `sunbird-ed-installer/helmcharts/edbb/charts/janusgraph/`. This image correctly bundles the CDC extension jar into the JanusGraph library directory.
-
-## 3. Update Image Version
-Update the JanusGraph image reference in `sunbird-ed-installer/helmcharts/images.yaml` to point to your custom image.
-
-## 4. Enable CDC in Configuration
-Add the following configuration to your `sunbird-ed-installer/helmcharts/edbb/charts/janusgraph/config/gremlin-server.yaml` to enable the transaction log and CDC processor:
+The Kong migration job has been enhanced with extended timeout settings for YugabyteDB compatibility:
 
 ```yaml
-tx.log-tx: true
-log.learning_graph_events.backend: default
-log.learning_graph_events.key-consistent: true
-log.learning_graph_events.read-interval: 500
-graph.txn.log_processor.enable: true
-graph.txn.log_processor.sinks: LOG
-graph.txn.log_processor.converter: SUNBIRD_LEGACY
+env:
+  - name: KONG_PG_CONNECT_TIMEOUT
+    value: "600"  # 10 minutes
+  - name: KONG_PG_STATEMENT_TIMEOUT
+    value: "600000"  # 10 minutes (in milliseconds)
+  - name: KONG_PG_IDLE_IN_TRANSACTION_SESSION_TIMEOUT
+    value: "120000"  # 2 minutes (in milliseconds)
+  - name: KONG_PG_KEEPALIVE_TIMEOUT
+    value: "600"  # 10 minutes
 ```
 
-## 5. Verification
-Check the JanusGraph pod logs for successful initialization:
-- `Executed once at startup of Gremlin Server.`
-- `Initializing GraphLogProcessor...`
+#### 3. JWT Plugin Changes
 
-Mutation events will be captured and logged to:
-`/opt/bitnami/janusgraph/logs/cdc-events.log`
+Kong 3.9.1 changed the JWT credential storage format:
+
+- **Old (0.14.1)**: Stored `iss` field separately
+- **New (3.9.1)**: Only stores `key` field (equivalent to `iss`)
+
+**Fix Applied**: Updated `kong_consumers.py` at line 127:
+
+```python
+# OLD: if saved_credential.get('iss') == credential_iss:
+# NEW:
+if saved_credential.get('key') == credential_iss:
+```
+
+### References
+
+- [Kong Migration Guide](https://docs.konghq.com/gateway/latest/upgrade/)
+- [Kong 3.9.x Release Notes](https://docs.konghq.com/gateway/changelog/)
+- [YugabyteDB PostgreSQL Compatibility](https://docs.yugabyte.com/preview/explore/ysql-language-features/)
+
+---
+

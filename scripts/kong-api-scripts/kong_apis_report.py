@@ -1,15 +1,21 @@
-import urllib2, argparse, json, csv
-
+import argparse
+import json
+import csv
 from common import get_apis, json_request
 
 def create_api_report_csv(kong_admin_api_url, report_file_path):
-    saved_apis = get_apis(kong_admin_api_url)
+    """Generate report for services on-boarded (Kong 3.9.1)"""
+    saved_services = get_apis(kong_admin_api_url)
     with open(report_file_path, 'w') as csvfile:
-        fieldnames = ['Name', 'Path']
+        fieldnames = ['Name', 'URL', 'Protocol']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        for api in saved_apis:
-            writer.writerow({'Name': api['name'], 'Path': api['request_path']})
+        for service in saved_services:
+            writer.writerow({
+                'Name': service['name'],
+                'URL': service.get('url', 'N/A'),
+                'Protocol': service.get('protocol', 'http')
+            })
 
 if  __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Generate report for APIs on-boarded')

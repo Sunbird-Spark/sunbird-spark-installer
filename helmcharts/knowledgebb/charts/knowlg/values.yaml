@@ -180,9 +180,8 @@ inquiry:
   assessment_default_framework: "NCF"
   assessment_item_mime_type: "application/vnd.ekstep.ecml-archive"
   assessment_media_resolution: "low"
-  # Janusgraph Configuration
-  graph_objecttypes_enabled: '["Question"]'
-
+  # Neo4j Configuration
+  neo4j_objecttypes_enabled: '["Question"]'
 javaenv:
   javaoptions: -Xms500m -Xmx500m
   _javaoptions: -Dlog4j2.formatMsgNoLookups=true

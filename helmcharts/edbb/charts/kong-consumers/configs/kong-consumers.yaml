@@ -6,98 +6,112 @@ kong_consumers:
     state: present
     key: api_admin
     secret: api_admin{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: api_admin
     print_credentials: true
   - username: mobile_admin
     groups: {{ .Values.mobile_admin_groups | toYaml | nindent 4 }}
     state: present
     key: mobile_admin
     secret: mobile_admin{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: mobile_admin
     print_credentials: true
   - username: mobile_app
     groups: {{ .Values.mobile_app_groups | toYaml | nindent 4 }}
     state: present
     key: mobile_app
     secret: mobile_app{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: mobile_app
     print_credentials: true
   - username: mobile_device
     groups: {{ .Values.mobile_device_groups | toYaml | nindent 4 }}
     state: present
     key: mobile_device
     secret: mobile_device{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: mobile_device
     print_credentials: true
   - username: mobile_devicev2
     groups: {{ .Values.mobile_device_groups | toYaml | nindent 4 }}
     state: present
     key: mobile_devicev2
     secret: mobile_devicev2{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: mobile_devicev2
     print_credentials: true
   - username: desktop_device
     groups: {{ .Values.desktop_device_groups | toYaml | nindent 4 }}
     state: present
     key: desktop_device
     secret: desktop_device{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: desktop_device
     print_credentials: true
   - username: desktop_devicev2
     groups: {{ .Values.desktop_device_groups | toYaml | nindent 4 }}
     state: present
     key: desktop_devicev2
     secret: desktop_devicev2{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: desktop_devicev2
     print_credentials: true
   - username: portal_anonymous_register
     groups: {{ .Values.portal_anonymous_register | toYaml | nindent 4 }}
     state: present
     key: portal_anonymous_register
     secret: portal_anonymous_register{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: portal_anonymous_register
     print_credentials: true
   - username: portal_loggedin_register
     groups: {{ .Values.portal_loggedin_register | toYaml | nindent 4 }}
     state: present
     key: portal_loggedin_register
     secret: portal_loggedin_register{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: portal_loggedin_register
     print_credentials: true
   - username: portal_anonymous
     groups: {{ .Values.anonymous_user_groups | toYaml | nindent 4 }}
     state: present
     key: portal_anonymous
     secret: portal_anonymous{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: portal_anonymous
     print_credentials: true
   - username: portal_loggedin
     groups: {{ .Values.kong_all_consumer_groups | toYaml | nindent 4 }}
     state: present
     key: portal_loggedin
     secret: portal_loggedin{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: portal_loggedin
     print_credentials: true
   - username: portal_anonymous_fallback_token
     groups: {{ .Values.anonymous_user_groups | toYaml | nindent 4 }}
     state: present
     key: portal_anonymous_fallback_token
     secret: portal_anonymous_fallback_token{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: portal_anonymous_fallback_token
     print_credentials: true
   - username: portal_loggedin_fallback_token
     groups: {{ .Values.kong_all_consumer_groups | toYaml | nindent 4 }}
     state: present
     key: portal_loggedin_fallback_token
     secret: portal_loggedin_fallback_token{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: portal_loggedin_fallback_token
     print_credentials: true
   - username: adminutil_learner_api_token
     groups: {{ .Values.userAccess | toYaml | nindent 4 }}
     state: present
     key: adminutil_learner_api_token
     secret: adminutil_learner_api_token{{ $randomString }}
-    algorithm: HS256
+    credential_algorithm: HS256
+    credential_iss: adminutil_learner_api_token
     print_credentials: true
 {{- range $key, $value := $.Values.global.mobile_devicev2_public_keys }}
   - username: mobile_devicev2
