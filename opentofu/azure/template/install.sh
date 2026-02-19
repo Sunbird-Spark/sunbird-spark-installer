@@ -1,6 +1,5 @@
 #!/bin/bash
 set -euo pipefail
-read -r
 
 environment=$(basename "$(pwd)")
 
