@@ -50,6 +50,8 @@ yugabyte: &yugabyte
   gflags:
   tserver: 
     cdc_enable_replicate_intents: "true"    
+    ysql_enable_read_committed_isolation: "true"
+
 
   image:
     registry: yugabytedb
