@@ -3,8 +3,8 @@ fullnameOverride: "lern"
 replicaCount: 1
 
 image:
-  repository: ghcr.io/sunbird-lern/lern-service
-  tag: "lern-service_0d2d27c_2"
+  repository: chethann07/lern-service
+  tag: "docker_change_ver2"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
@@ -193,6 +193,17 @@ cloud_storage_path_prefix_dial: "dial"
 cloud_store_base_path_placeholder: ""
 sunbird_dial_service_base_url: http://dial-service:9000
 sunbird_dial_service_search_url: "/dialcode/v3/search"
+
+enable_activity_aggregator_actor:"true"
+enable_module_aggregation:"true"
+sunbird_course_keyspace:"sunbird_courses"
+redis_relation_cache_index:"10"
+dedup_redis_index:"13"
+dedup_redis_expiry:"604800"
+activity_input_dedup_enabled:"false"
+service_search_base_path:"http://search-service:9000”
+filter_processed_enrolments:"true" 
+assessment_direct_aggregation_enabled: "true"
 
 # Notification Specific
 sunbird_cassandra_notification_keyspace: sunbird_notifications
