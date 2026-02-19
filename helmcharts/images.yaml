@@ -187,6 +187,7 @@ images:
     repository: janusgraph
     tag: 1.1.0
 
+
 # Internal block with pull secrets
 internal: &internal
   velero:
