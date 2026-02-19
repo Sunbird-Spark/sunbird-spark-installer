@@ -132,8 +132,8 @@ images:
     tag: "v3"
 
   lern: &lern
-    repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "lern-service_0d2d27c_2"
+    repository: "chethann07/lern-service"
+    tag: "sparkv1"
     
   lms: &lms
     repository: "ghcr.io/sunbird-lern/lms-service"
@@ -422,9 +422,9 @@ global:
     tag: "spark-sec-v2"
 
   learnflink:
-    registry: "ghcr.io/sunbird-lern"
+    registry: "chethann07/data-pipeline"
     repository: "data-pipeline"
-    tag: "spark-v0.2_7258208"
+    tag: "vulnfix_feb26_v1"
 
   inquiryflink:
     registry: "sunbirded.azurecr.io"
