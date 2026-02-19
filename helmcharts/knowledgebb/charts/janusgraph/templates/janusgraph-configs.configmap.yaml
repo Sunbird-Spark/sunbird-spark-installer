@@ -28,3 +28,4 @@ data:
     log.learning_graph_events.key-consistent=true
     log.learning_graph_events.read-interval=500
     {{- include "common.tplvalues.render" ( dict "value" .Values.janusgraphCqlExtraProperties "context" $ ) | nindent 4 }}
+    

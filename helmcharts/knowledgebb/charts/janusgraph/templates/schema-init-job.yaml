@@ -54,3 +54,4 @@ spec:
                 path: schema_init.groovy
             defaultMode: 0755
 {{- end }}
+
