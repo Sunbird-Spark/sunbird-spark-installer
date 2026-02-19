@@ -8,7 +8,7 @@ HELMCHARTS_DIR="$ADDON_DIR/helmcharts"
 REPO_ROOT="$(cd "$ADDON_DIR/../.." && pwd)"
 
 # DEFAULTS
-NAMESPACE="addon"
+NAMESPACE="sunbird"
 ACTION="$1"
 CLOUD_PROVIDER="${2:-azure}" # Default to azure if not provided
 

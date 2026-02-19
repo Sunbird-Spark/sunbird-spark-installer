@@ -114,6 +114,7 @@ base_config: |
     broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
     producer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
     consumer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+    zookeeper = ""
     producer {
       max-request-size = 1572864
       batch.size = 98304

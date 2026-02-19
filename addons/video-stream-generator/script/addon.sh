@@ -33,6 +33,7 @@ deploy_chart() {
     HELM_ARGS="-f $CLOUD_DIR/global-values.yaml"
     HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
     HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-values.yaml"
+    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/images.yaml"
     
     helm upgrade --install "$RELEASE_NAME" . --namespace "$NAMESPACE" $HELM_ARGS
     echo "Video Stream Generator deployed successfully"

@@ -43,10 +43,11 @@ deploy_chart() {
     local HELM_ARGS="-f $CLOUD_DIR/global-values.yaml"
     HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
     HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-values.yaml"
+    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/images.yaml"
 
     for chart in "${CHARTS[@]}"; do
         echo "Deploying $chart Helm chart..."
-        local chart_path="$ADDON_DIR/helmchart/$chart"
+        local chart_path="$ADDON_DIR/helmcharts/$chart"
         if [ -d "$chart_path" ]; then
             helm upgrade --install "$chart" "$chart_path" --namespace "$NAMESPACE" $HELM_ARGS
             echo "$chart service deployed successfully"
