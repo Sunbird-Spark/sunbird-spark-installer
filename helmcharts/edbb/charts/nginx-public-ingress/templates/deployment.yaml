@@ -73,6 +73,8 @@ spec:
           - name: config
             mountPath: /var/www/html/apple-app-site-association.json
             subPath: apple-app-site-association.json
+          - name: addon-config
+            mountPath: /etc/nginx/conf.d/addons
           {{- end }}
         {{- with .Values.sidecars }}
         {{- toYaml . | nindent 8 }}
@@ -82,4 +84,13 @@ spec:
       - name: config
         configMap:
           name: {{ include "common.names.fullname" . }}
+      # addon-config: each installed addon drops a ConfigMap named <addon>-nginx-config
+      # with a single key (e.g. nodebb.conf) containing nginx location blocks.
+      # The volume is optional so the core chart works with no addons installed.
+      - name: addon-config
+        projected:
+          sources:
+          - configMap:
+              name: discussion-forum-nginx-config
+              optional: true
       {{- end }}

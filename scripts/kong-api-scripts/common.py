@@ -10,16 +10,26 @@ logging.basicConfig()
 # Kong 3.9.1 Upgrade: /apis endpoint replaced with /services
 # Services represent backend targets, Routes define how requests are matched
 # This function now fetches services instead of deprecated APIs
-def get_apis(kong_admin_api_url):
-    """Fetch services from Kong 3.9.1 (replaces legacy /apis endpoint)"""
+def get_apis(kong_admin_api_url, managed_by=None):
+    """
+    Fetch services from Kong 3.9.1 (replaces legacy /apis endpoint).
+
+    managed_by: When set, fetches ONLY services tagged 'managed-by:<managed_by>'.
+                This enables ownership-isolated sync so each chart only sees and
+                manages the services it owns. Services owned by other charts are
+                completely invisible and are never deleted.
+    """
     max_page_size = 1000
-    services_url_with_size_limit = "{}/services?size={}".format(kong_admin_api_url, max_page_size)
+    tag_filter = ""
+    if managed_by:
+        tag_filter = "&tags=managed-by:{}".format(urllib.parse.quote(managed_by, safe=''))
+    services_url_with_size_limit = "{}/services?size={}{}".format(kong_admin_api_url, max_page_size, tag_filter)
     services_response = json.loads(retrying_urlopen(services_url_with_size_limit).read().decode('utf-8'))
-    
+
     # Kong 3.x may not include 'total' in response, use actual data length as fallback
     data = services_response.get("data", [])
     total_services = services_response.get("total", len(data))
-    
+
     if(total_services > max_page_size):
         raise Exception("There are {} services existing in system which is more than max_page_size={}. Please increase max_page_size if this is expected".format(total_services, max_page_size))
     else:

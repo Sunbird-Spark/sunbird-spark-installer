@@ -22,7 +22,7 @@ The Video Stream Generator is an Apache Flink job that handles video transcoding
 ```bash
 cd addons/video-stream-generator
 export ENV_NAME=demo # Replace with your environment name
-./script/manage.sh install
+./script/addon.sh install
 ```
 
 **That's it!** The script automatically:
@@ -35,15 +35,15 @@ export ENV_NAME=demo # Replace with your environment name
 
 ```bash
 # Install for a specific cloud provider (defaults to azure)
-./script/manage.sh install azure
-./script/manage.sh install gcp
+./script/addon.sh install azure
+./script/addon.sh install gcp
 
 # Specify a custom environment directory (e.g., if you copied template to 'demo')
 export ENV_NAME=demo
-./script/manage.sh install azure
+./script/addon.sh install azure
 
 # Uninstall everything
-./script/manage.sh uninstall azure
+./script/addon.sh uninstall azure
 ```
 
 ## Verify Installation
@@ -70,5 +70,5 @@ kubectl port-forward -n sunbird svc/video-stream-generator-jobmanager 8081:8081
 
 ```bash
 cd addons/video-stream-generator
-./script/manage.sh uninstall
+./script/addon.sh uninstall
 ```

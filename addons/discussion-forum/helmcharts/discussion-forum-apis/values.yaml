@@ -1,0 +1,79 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: shashank04515/kong-scripts
+  tag: "local-upsert"
+  pullPolicy: Always
+  pullSecrets: []
+
+kong_admin_url: kong
+kong_admin_port: 8001
+
+# Ownership label — the kong_apis.py script uses this to scope deletions.
+# Only routes declared in THIS chart will ever be deleted on re-run.
+# Core routes are never touched.
+managed_by: discussion-forum
+
+# --- Route prefixes ---
+discussions_prefix: /discussion
+group_service_prefix: /group
+
+# These are shared prefixes that happen to also carry some
+# discussion/groups routes (e.g. /data/v1/... routes)
+data_service_prefix: /data
+
+# --- Upstream service URLs ---
+discussions_mw_service_url: "http://discussionmw-service:3002"
+group_service_url: "http://groups-service:9000"
+
+# --- Rate limits (match core defaults) ---
+small_rate_limit_per_hour: 100
+medium_rate_limit_per_hour: 5000
+large_rate_limit_per_hour: 10000
+
+# --- Request size limits in MB ---
+small_request_size_limit: 1
+medium_request_size_limit: 10
+large_request_size_limit: 100
+
+# StatsD plugin config — must match the core value exactly
+statsd_pulgin:
+  name: statsd
+  config.host: "statsd-service"
+  config.port: "9125"
+  config.metrics:
+  - name: request_count
+    sample_rate: 1
+    stat_type: counter
+  - name: latency
+    stat_type: timer
+  - name: request_size
+    stat_type: timer
+  - name: status_count
+    sample_rate: 1
+    stat_type: counter
+  - name: response_size
+    stat_type: timer
+  - consumer_identifier: username
+    name: unique_users
+    stat_type: set
+  - consumer_identifier: username
+    name: request_per_user
+    sample_rate: 1
+    stat_type: counter
+  - name: upstream_latency
+    stat_type: timer
+  - name: kong_latency
+    stat_type: timer
+  - consumer_identifier: username
+    name: status_count_per_user
+    sample_rate: 1
+    stat_type: counter
+
+provisioningAnnotations:
+  "helm.sh/hook": post-install,post-upgrade
+
+configmap:
+  enabled: true
+  mountPath: /config

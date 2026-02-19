@@ -15,7 +15,7 @@ QR code generation and management service for learning content. Provides DIAL co
 **Quick Install**:
 ```bash
 cd addons/dial
-./script/manage.sh install
+./script/addon.sh install
 ```
 
 ### Video Stream Generator
@@ -27,7 +27,7 @@ Apache Flink job for video streaming and media processing. Handles video transco
 **Quick Install**:
 ```bash
 cd addons/video-stream-generator
-./script/manage.sh install
+./script/addon.sh install
 ```
 
 ## Architecture
@@ -47,7 +47,7 @@ addons/
     │       └── configs/        # Application configuration files (if needed)
     ├── opentofu/                # OpenTofu/Terraform configurations (optional)
     └── script/
-        └── manage.sh            # Installation/uninstallation script
+        └── addon.sh            # Installation/uninstallation script
 ```
 
 **Note**: The `opentofu/` directory is optional and used when an addon requires additional cloud resources (e.g., storage accounts, databases, networking) to be provisioned. If present, run the OpenTofu configurations before installing the addon's Helm chart.
@@ -89,11 +89,11 @@ All addons follow a similar pattern:
 cd addons/<addon-name>
 
 # Install with default settings (defaults to azure)
-./script/manage.sh install
+./script/addon.sh install
 
 # Install for a specific cloud provider
-./script/manage.sh install azure
-./script/manage.sh install gcp
+./script/addon.sh install azure
+./script/addon.sh install gcp
 ```
 
 ### Verification
@@ -116,7 +116,7 @@ kubectl describe deployment -n sunbird <addon-name>
 cd addons/<addon-name>
 
 # Uninstall
-./script/manage.sh uninstall
+./script/addon.sh uninstall
 
 ```
 

@@ -62,15 +62,6 @@ nginx-public-ingress:
       cpu: 1
       memory: 1G  
 
-nodebb:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 2G      
-
 player:
   resources:
     requests:
@@ -190,15 +181,6 @@ dial:
     limits:
       cpu: 1
       memory: 1024Mi   
-
-discussionmw:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 1G
 
 elasticsearch:
   master:
@@ -550,15 +532,6 @@ nginx-public-ingress:
     limits:
       cpu: 1
       memory: 1G  
-
-nodebb:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 2G      
 
 notification:
   resources:

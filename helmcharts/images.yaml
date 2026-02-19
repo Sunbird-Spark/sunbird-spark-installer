@@ -53,10 +53,6 @@ images:
     repository: grafana/alloy
     tag: v1.12.1
 
-  discussion_mw: &discussion_mw
-    repository: "ghcr.io/sunbird-lern/discussions-middleware"
-    tag: "release-8.1.0_rc2-e7360ec-2"
-
   echo: &echo
     repository: "ghcr.io/project-sunbird/sunbird-echo-service"
     tag: "release-7.7.0_rc1_50b5b2d_2"
@@ -95,10 +91,6 @@ images:
     repository: "sunbirded.azurecr.io/proxy"
     tag: "release-7.0.0_8e6b2db_23"
 
-  nodebb: &nodebb
-    repository: "sunbirded.azurecr.io/nodebb"
-    tag: "release-5.0.0_RC1_1_v1.18.6"
-
   adminutil: &adminutil
     repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
     tag: "release-7.0.0_RC1_1_6c8f6f"
@@ -118,10 +110,6 @@ images:
   certificatesign: &certificatesign
     repository: "sunbirded.azurecr.io/sunbird-rc-certificate-signer"
     tag: "release-5.1.0_2bc7760_9"
-
-  groups: &groups
-    repository: "ghcr.io/sunbird-lern/groups-service"
-    tag: "spark-v0.1_014341b_9"
 
   keycloak: &keycloak
     repository: "sunbirded.azurecr.io/keycloak"
@@ -234,11 +222,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"      
 
-  discussionmw:
-    image: *discussion_mw
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
   echo:
     image: *echo
     imagePullSecrets:
@@ -285,11 +268,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  nodebb:
-    image: *nodebb
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
   postgresql:
     image: *postgresql
     imagePullSecrets:
@@ -317,11 +295,6 @@ internal: &internal
 
   certificatesign:
     image: *certificatesign
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  groups:
-    image: *groups
     imagePullSecrets:
       - name: "registry-secret-name"
 

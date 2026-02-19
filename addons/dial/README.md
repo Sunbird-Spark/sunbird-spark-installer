@@ -25,7 +25,7 @@ The DIAL (Digital Infrastructure for Augmented Learning) Service is a QR code ge
 ```bash
 cd addons/dial
 export ENV_NAME=demo # Replace with your environment name
-./script/manage.sh install
+./script/addon.sh install
 ```
 
 **That's it!** The script automatically:
@@ -39,15 +39,15 @@ export ENV_NAME=demo # Replace with your environment name
 
 ```bash
 # Install for a specific cloud provider (defaults to azure)
-./script/manage.sh install azure
-./script/manage.sh install gcp
+./script/addon.sh install azure
+./script/addon.sh install gcp
 
 # Specify a custom environment directory (e.g., if you copied template to 'demo')
 export ENV_NAME=demo
-./script/manage.sh install azure
+./script/addon.sh install azure
 
 # Uninstall everything
-./script/manage.sh uninstall azure
+./script/addon.sh uninstall azure
 ```
 
 ## Verify Installation
@@ -71,5 +71,5 @@ curl http://localhost:9000/health
 
 ```bash
 cd addons/dial
-./script/manage.sh uninstall
+./script/addon.sh uninstall
 ```

@@ -10,6 +10,10 @@ image:
 kong_admin_url: kong
 kong_admin_port: 8001
 
+# Ownership label stamped on every service this chart registers.
+# Sync is scoped to this label — other charts' services are never deleted.
+managed_by: core
+
 statsd_pulgin:
   name: statsd
   config.host: "statsd-service"
@@ -96,14 +100,12 @@ desktop_app_prefix: /desktop
 license_api_prefix: /license
 report_service_prefix: /data/v1/report-service
 analytics_report_service_prefix: /report/jobs
-group_service_prefix: /group
 auth_service_prefix: /auth
 object_category_prefix: /object/category
 object_category_definition_prefix: /object/category/definition
 dataset_service_prefix: /dataset
 asset_prefix: /asset
 collection_prefix: /collection
-discussions_prefix: /discussion
 question_prefix: /question
 questionset_prefix: /questionset
 integration_app_prefix: /app
@@ -142,10 +144,8 @@ cert_service_url: "http://cert-service:9000"
 cert_registry_service_url: "http://cert-registry-service:9000"
 content_service_url: "http://knowlg-service:9000"
 report_service_url: "http://report-service:3030"
-group_service_url: "http://groups-service:9000"
 analytics_api_service_url: "http://analytics-service:9000"
 taxonomy_service_url: "http://knowlg-service:9000"
-discussions_mw_service_url: "http://discussionmw-service:3002/discussion"
 assessment_service_url: "http://knowlg-service:9000"
 ml_reports_service_url: "http://ml-reports-service:3000"
 ml_survey_service_url: "http://ml-survey-service:3000"

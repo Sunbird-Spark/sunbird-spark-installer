@@ -136,3 +136,9 @@ global:
 
 commonAnnotations:
   reloader.stakater.com/auto: "true"
+
+nginx:
+  publicIngress:
+    enabled: true
+  privateIngress:
+    enabled: false
