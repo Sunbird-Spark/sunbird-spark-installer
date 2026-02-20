@@ -33,7 +33,7 @@ metadata:
   annotations:
 {{ include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
   {{- end }}
-
+data:
   {{- $var := .Files.Get "configs/env.yaml" }}
   {{- include "common.tplvalues.render" (dict "value" $var "context" $) | nindent 2 }}
 
