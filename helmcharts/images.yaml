@@ -153,8 +153,8 @@ images:
     tag: "spark-v0.1_04057c0_16"
 
   knowlg: &knowlg
-    repository: "docker.io/aimansharief/knowlg-service"
-    tag: "v0.0.21"
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
+    tag: "spark-v07_0d5e615"
 
   dial: &dial
     repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
@@ -189,7 +189,7 @@ images:
   janusgraph: &janusgraph
     registry:  snt1
     repository: janusgraph
-    tag: v1.0.29
+    tag: vv2.0.0
 
 
 # Internal block with pull secrets
@@ -418,15 +418,10 @@ internal: &internal
 global:
   knowledgeflink:
     registry: "ghcr.io"
-    repository: "aimansharief/knowledge-platform-jobs"
-    tag: "spark-sec-v2"
+    repository: "sunbird-knowlg/knowledge-platform-jobs"
+    tag: "spark-v0.3_e4a5d99"
 
   learnflink:
     registry: "chethann07/data-pipeline"
     repository: "data-pipeline"
-    tag: "vulnfix_feb26_v1"
-
-  inquiryflink:
-    registry: "sunbirded.azurecr.io"
-    repository: "data-pipeline"
-    tag: "release-8.0.0_RC1_b4f909c"
+    tag: "spark-v0.2_7258208"
