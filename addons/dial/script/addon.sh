@@ -19,6 +19,7 @@ provision_resources() {
     if [ -d "$provider_dir" ]; then
         echo "Provisioning cloud resources for $CLOUD_PROVIDER using Terragrunt..."
         pushd "$provider_dir" > /dev/null
+        terragrunt run-all plan --terragrunt-non-interactive
         terragrunt run-all apply --terragrunt-non-interactive
         popd > /dev/null
     else
@@ -69,13 +70,14 @@ destroy_resources() {
     if [ -d "$provider_dir" ]; then
         echo "Destroying cloud resources for $CLOUD_PROVIDER using Terragrunt..."
         pushd "$provider_dir" > /dev/null
+        terragrunt run-all plan -destroy --terragrunt-non-interactive
         terragrunt run-all destroy --terragrunt-non-interactive
         popd > /dev/null
     fi
 }
 
 install() {
-    provision_resources
+    # provision_resources
     deploy_chart
 }
 

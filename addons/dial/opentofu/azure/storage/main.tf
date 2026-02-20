@@ -23,7 +23,7 @@ data "azurerm_storage_account" "existing" {
 }
 
 resource "azurerm_storage_container" "dial_state_container_public" {
-  name                  = "${var.environment}-dial-${var.unique_uuid}"
+  name                  = lower("${var.building_block}-${var.environment}-dial-${var.unique_uuid}")
   storage_account_name  = data.azurerm_storage_account.existing.name
   container_access_type = "blob"
 }
@@ -34,6 +34,6 @@ resource "null_resource" "update_global_values" {
   }
 
   provisioner "local-exec" {
-    command = "yq -i '.global.dial_state_container_public = \"${azurerm_storage_container.dial_state_container_public.name}\"' ${path.module}/../../../../../global-values.yaml"
+    command = "yq -i '.global.dial_state_container_public = \"${azurerm_storage_container.dial_state_container_public.name}\"' ${var.global_values_file}"
   }
 }

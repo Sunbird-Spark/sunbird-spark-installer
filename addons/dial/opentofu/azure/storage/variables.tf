@@ -22,3 +22,13 @@ variable "unique_uuid" {
   type        = string
   description = "Unique UUID for container naming"
 }
+
+variable "building_block" {
+  type        = string
+  description = "Building block name (e.g., ed)"
+}
+
+variable "global_values_file" {
+  type        = string
+  description = "Absolute path to global-values.yaml"
+}
