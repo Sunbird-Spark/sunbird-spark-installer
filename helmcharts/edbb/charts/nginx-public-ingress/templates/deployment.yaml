@@ -90,7 +90,9 @@ spec:
       - name: addon-config
         projected:
           sources:
+          {{- range .Values.configmap.addon_config_configmaps }}
           - configMap:
-              name: discussion-forum-nginx-config
+              name: {{ . }}
               optional: true
+          {{- end }}
       {{- end }}

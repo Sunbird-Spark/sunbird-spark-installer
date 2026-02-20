@@ -50,6 +50,11 @@ readinessProbe: &readinessProbe
     port: 9000
 
 ingress: {}
+nginx:
+  privateIngress:
+    enabled: false
+  publicIngress:
+    enabled: true
 
 resources:
   requests:
