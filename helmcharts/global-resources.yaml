@@ -99,14 +99,6 @@ knowlg:
     limits:
       cpu: 1
       memory: 1024Mi
-dial:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi   
 
 
 search:
@@ -173,14 +165,6 @@ knowlg:
       cpu: 1
       memory: 1024Mi
 
-dial:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi   
 
 elasticsearch:
   master:

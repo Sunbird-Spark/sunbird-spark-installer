@@ -140,11 +140,6 @@ images:
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
     tag: "spark-v0.6_a8b080a"
 
-  dial: &dial
-    repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
-    tag: "release-8.1.0_rc1_8fbeab3"
-
-
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
     tag: "spark-v0.3_a8b48cb"
@@ -325,12 +320,6 @@ internal: &internal
 
   userorg:
     image: *userorg
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-
-  dial:
-    image: *dial
     imagePullSecrets:
       - name: "registry-secret-name"
 
