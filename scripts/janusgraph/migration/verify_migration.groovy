@@ -1,5 +1,5 @@
 
-graph = JanusGraphFactory.open('data/opt/bitnami/janusgraph/conf/janusgraph-cql.properties')
+graph = JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph-cql.properties')
 g = graph.traversal()
 println "Vertex Count: " + g.V().count().next()
 println "Edge Count: " + g.E().count().next()
