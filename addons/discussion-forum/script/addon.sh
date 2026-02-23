@@ -50,11 +50,30 @@ uninstall_service() {
     helm uninstall "$SERVICE_NAME" --namespace "$NAMESPACE" || echo "Helm release $SERVICE_NAME not found, skipping."
 }
 
+post_install_nodebb_plugins() {
+    echo ">> Waiting for NodeBB deployment to be ready..."
+    kubectl rollout status deployment nodebb -n "$NAMESPACE" --timeout=300s
+
+    echo ">> Activating NodeBB plugins..."
+    kubectl exec -n "$NAMESPACE" deploy/nodebb -- ./nodebb activate nodebb-plugin-create-forum
+    kubectl exec -n "$NAMESPACE" deploy/nodebb -- ./nodebb activate nodebb-plugin-sunbird-oidc
+    kubectl exec -n "$NAMESPACE" deploy/nodebb -- ./nodebb activate nodebb-plugin-write-api
+
+    echo ">> Rebuilding NodeBB to apply plugin changes..."
+    kubectl exec -n "$NAMESPACE" deploy/nodebb -- ./nodebb build
+
+    echo ">> Restarting NodeBB..."
+    kubectl delete pod -n "$NAMESPACE" -l app.kubernetes.io/name=nodebb
+
+    echo "NodeBB plugins are activated, built, and NodeBB has been restarted."
+}
+
 install() {
     echo "Installing Discussion Forum services..."
     for SERVICE in "${SERVICES[@]}"; do
         deploy_service "$SERVICE"
     done
+    post_install_nodebb_plugins
     echo "All Discussion Forum services deployed successfully"
 }
 
