@@ -5,7 +5,7 @@ import org.apache.tinkerpop.gremlin.structure.Direction
 import groovy.json.JsonSlurper
 
 // Open Graph
-graph = JanusGraphFactory.open('/data/opt/bitnami/janusgraph/conf/janusgraph-cql.properties')
+graph = JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph-cql.properties')
 // Bind graph and traversal to global binding for access in closures
 binding.graph = graph
 binding.g = graph.traversal()

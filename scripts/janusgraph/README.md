@@ -94,6 +94,8 @@ Example Docker build (from `scripts/janusgraph` directory):
 cp /path/to/target/janusgraph-cdc-extension-1.0-SNAPSHOT.jar .
 docker build -t janusgraph-cdc-custom:1.1.0 .
 ```
+here we have to build the jar and copy to the docker build context and then build the docker image.
+will get the jar from https://github.com/Sunbird-Knowlg/knowledge-platform-db-extensions/tree/develop/janusgraph-cdc-extension  
 
 Update the JanusGraph image tag in `helmcharts/images.yaml` after building and pushing your custom image.
 
