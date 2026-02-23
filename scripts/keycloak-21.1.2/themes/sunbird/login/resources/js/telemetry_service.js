@@ -2487,11 +2487,6 @@ function stringToHTML(str) {
   return doc?.body?.innerText || document.createElement('body');
 }
 window.onload = function () {
-  var version = getValueFromSession('version');
-  var isForgetPasswordAllow = getValueFromSession('version');
-
-  addVersionToURL(version);
-
   var error_message = (new URLSearchParams(window.location.search)).get('error_message');
   var success_message = (new URLSearchParams(window.location.search)).get('success_message');
 
@@ -2509,26 +2504,17 @@ window.onload = function () {
     }
   }
 
-  if (version == null || version === '' || version > 4) {
-    var forgotElement = document.getElementById("fgtPortalFlow");
-    if (forgotElement) {
-      forgotElement.className = forgotElement.className.replace("hide", "");
-    }
-  } else {
-    var forgotElement = document.getElementById("fgtKeycloakFlow");
-    if (forgotElement) {
-      forgotElement.className = forgotElement.className.replace("hide", "");
-      forgotElement.href = forgotElement.href + '&version=' + version;
-    }
-  }
-  if (!version && isForgetPasswordAllow >= 4) {
-    hideElement("fgtKeycloakFlow");
-    var forgotElement = document.getElementById("fgtPortalFlow");
-    if (forgotElement) {
-      forgotElement.className = forgotElement.className.replace("hide", "");
-    }
+  // Show portal flow by default
+  var forgotElement = document.getElementById("fgtPortalFlow");
+  if (forgotElement) {
+    forgotElement.className = forgotElement.className.replace("hide", "");
   }
 
+  // Show self signup by default
+  var selfSingUp = document.getElementById("selfSingUp");
+  if (selfSingUp) {
+    selfSingUp.className = selfSingUp.className.replace(/\bhide\b/g, "");
+  }
 };
 var storeValueForMigration = function () {
   // storing values in sessionStorage for future references
@@ -2598,17 +2584,7 @@ var setElementValue = function (elementId, elementValue) {
 var storeLocation = function () {
   sessionStorage.setItem('url', window.location.href);
 }
-var addVersionToURL = function (version) {
-
-  if (version >= 1) {
-
-    var selfSingUp = document.getElementById("selfSingUp");
-
-    if (selfSingUp) {
-      selfSingUp.className = selfSingUp.className.replace(/\bhide\b/g, "");
-    }
-  }
-}
+// Version dependencies removed - function no longer needed
 var makeDivUnclickable = function () {
   var otpForm = document.getElementById("kc-totp-login-form");
   var resetPswdForm = document.getElementById("kc-reset-password-form");
@@ -2683,26 +2659,13 @@ var urlMap = {
   self: '/signup'
 }
 var navigate = function (type) {
-  var version = getValueFromSession('version');
-  if (version == '1' || version == '2') {
-    if (type == 'google' || type == 'self') {
-      if (type == 'google') {
-        logInteractEvent("google-signin");
-      } else if (type == 'self') {
-        logInteractEvent("sign-up");
-      }
-      redirect(urlMap[type]);
-    }
-  } else if (version >= '3') {
-    if (type == 'google') {
-      logInteractEvent("google-signin");
-      handleGoogleAuthEvent()
-    } else if (type == 'self') {
-      if (type == 'self') {
-        logInteractEvent("sign-up");
-      }
-      redirectToPortal(urlMap[type])
-    }
+  // Use portal flow by default (version >= 3 behavior)
+  if (type == 'google') {
+    logInteractEvent("google-signin");
+    handleGoogleAuthEvent()
+  } else if (type == 'self') {
+    logInteractEvent("sign-up");
+    redirectToPortal(urlMap[type])
   }
 }
 
@@ -2882,8 +2845,7 @@ var matchPassword = () => {
 var backToApplication = () => {
   var redirect_uri = getValueFromSession('redirect_uri');
   if (redirect_uri) {
-    var updatedQuery = redirect_uri.split('?')[0];
-    window.location.href = updatedQuery;
+    window.location.href = redirect_uri;
   }
 }
 

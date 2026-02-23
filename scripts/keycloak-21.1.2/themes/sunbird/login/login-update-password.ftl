@@ -11,18 +11,12 @@
             <h1 class="page-title">Set New Password</h1>
             <p class="page-subtitle">Create a strong password to secure your account.</p>
 
-            <#if message?has_content>
-                <div class="alert alert-${message.type}">
-                    <span class="kc-feedback-text">${message.summary}</span>
-                </div>
-            </#if>
-
             <form id="kc-passwd-update-form" class="kc-form" action="${url.loginAction}" method="post">
                 <input type="text" id="username" name="username" value="${username}" style="display:none;"/>
                 <input type="password" id="password" name="password" autocomplete="current-password" style="display:none;"/>
 
                 <div class="kc-form-group">
-                    <label for="password-new" class="kc-label">Create New Password*</label>
+                    <label for="password-new" class="kc-label">New Password*</label>
                     <div class="input-wrapper">
                         <input type="password" id="password-new" name="password-new" class="kc-input" autofocus autocomplete="new-password" placeholder="Enter New Password" required onkeyup="validatePassword()"/>
                         <span class="password-toggle" onclick="togglePassword('password-new', 'eye-icon-new')">
@@ -81,6 +75,7 @@
                 }
                 var form = document.getElementById('kc-passwd-update-form');
                 if (form && form.checkValidity && form.checkValidity()) {
+                    try { sessionStorage.setItem('sb_redirect_reset_success', '1'); } catch (e) {}
                     if (form.requestSubmit) form.requestSubmit(); else form.submit();
                 } else {
                     if (window.showToast) window.showToast('error', 'Please fix the highlighted fields');
@@ -103,4 +98,6 @@
         <style>
             .hide { display: none !important; }
         </style>
+    <#elseif section = "info" >
+    </#if>
 </@layout.registrationLayout>
