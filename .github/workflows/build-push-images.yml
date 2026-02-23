@@ -1,0 +1,76 @@
+name: Docker Build and Push
+
+on:
+  push:
+    paths:
+      - 'scripts/keycloak-21.1.2/**'
+      - 'scripts/keycloak-postgres-query/**'
+      - 'scripts/kong-api-scripts/**'
+      - 'scripts/sunbird-yugabyte-migrations/**'
+      - 'scripts/janusgraph/**'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      directories: ${{ steps.filter.outputs.changes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check changed directories
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          base: ${{ github.event.before }}
+          filters: |
+            keycloak-21.1.2: 'scripts/keycloak-21.1.2/**'
+            keycloak-postgres-query: 'scripts/keycloak-postgres-query/**'
+            kong-api-scripts: 'scripts/kong-api-scripts/**'
+            sunbird-yugabyte-migrations: 'scripts/sunbird-yugabyte-migrations/**'
+            janusgraph: 'scripts/janusgraph/**'
+
+  docker-build-push:
+    needs: prepare
+    if: needs.prepare.outputs.directories != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory: ${{ fromJson(needs.prepare.outputs.directories) }}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Lowercase repository owner and generate tag
+        id: prep
+        run: |
+          echo "OWNER_LOWERCASE=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
+          # Format: develop_<short-sha>, lowercased
+          RAW_TAG="develop_${GITHUB_SHA::7}"
+          echo "IMAGE_TAG=$(echo $RAW_TAG | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Build and Push
+        uses: docker/build-push-action@v6
+        with:
+          context: ./scripts/${{ matrix.directory }}
+          file: ./scripts/${{ matrix.directory }}/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ steps.prep.outputs.OWNER_LOWERCASE }}/${{ matrix.directory }}:${{ steps.prep.outputs.IMAGE_TAG }}
+            ghcr.io/${{ steps.prep.outputs.OWNER_LOWERCASE }}/${{ matrix.directory }}:latest
