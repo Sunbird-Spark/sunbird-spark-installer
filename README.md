@@ -63,15 +63,15 @@ While the installer may work with other versions, these are the versions that ha
 4. Controlling DIAL Services and Flink Jobs
 
      If you need DIAL-related services and Flink jobs, you can enable them using the
-     `deploy_dial_services` flag.
+      `deployed_dial_addon` flag.
 
-     - Default: `false` (DIAL services are not deployed)
+      - Default: `false` (DIAL services are not deployed)
 
-     - To enable: set it to `true` in your `global-values.yaml` file. For example:
+      - To enable: set it to `true` in your `global-values.yaml` file. For example:
 
-         ```yaml
-         deploy_dial_services: true
-         ```
+          ```yaml
+          deployed_dial_addon: true
+          ```
 
 5. Enabling Asset Enrichment
 
@@ -86,7 +86,7 @@ While the installer may work with other versions, these are the versions that ha
          enable_asset_enrichment: true
          ```
 
-6. Log in to your cloud provider:
+5. Log in to your cloud provider:
     ```bash
     # If  cloud provider is Azure
     az login --tenant AZURE_TENANT_ID

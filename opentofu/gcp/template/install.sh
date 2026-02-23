@@ -112,7 +112,7 @@ function install_component() {
         fi
       fi
     local addon_values_flag=""
-    if [ "$(yq '.deploy_dial_services' "../opentofu/gcp/$environment/global-values.yaml")" = "true" ]; then
+    if [ "$(yq '.deployed_dial_addon' "../opentofu/gcp/$environment/global-values.yaml")" = "true" ]; then
         if [ -f "../addons/global-values.yaml" ]; then
             addon_values_flag="-f ../addons/global-values.yaml"
         fi
