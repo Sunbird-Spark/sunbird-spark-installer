@@ -7,6 +7,7 @@ on:
       - 'scripts/keycloak-postgres-query/**'
       - 'scripts/kong-api-scripts/**'
       - 'scripts/sunbird-yugabyte-migrations/**'
+      - 'scripts/janusgraph/**'
 
 jobs:
   prepare:
@@ -29,6 +30,7 @@ jobs:
             keycloak-postgres-query: 'scripts/keycloak-postgres-query/**'
             kong-api-scripts: 'scripts/kong-api-scripts/**'
             sunbird-yugabyte-migrations: 'scripts/sunbird-yugabyte-migrations/**'
+            janusgraph: 'scripts/janusgraph/**'
 
   docker-build-push:
     needs: prepare
