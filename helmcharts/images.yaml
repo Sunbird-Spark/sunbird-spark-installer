@@ -86,7 +86,6 @@ images:
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
     tag: "release-8.1.0_rc2_0c57074_10"
-
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
     tag: "release-7.0.0_8e6b2db_23"
@@ -185,7 +184,7 @@ images:
   janusgraph: &janusgraph
     registry:  snt1
     repository: janusgraph
-    tag: vv2.0.0
+    tag: v2.0.0
 
 
 # Internal block with pull secrets
