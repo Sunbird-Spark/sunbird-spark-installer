@@ -157,6 +157,21 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
+janusgraph: &janusgraph
+  enabled: true
+  fullnameOverride: "janusgraph"
+  nameOverride: "janusgraph"
+  host: "janusgraph"
+  port: 8182
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/janusgraph
+    tag: 1.1.0-debian-12-r21
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+  provisioning:
+    annotations: *provisioningAnnotations 
+
 # play_http: &play_http
 #   secret_key: "secretKey"
 schema: &schema
@@ -175,6 +190,7 @@ global:
   elasticsearch: *es
   yugabyte: *yugabyte
   kafka: *kafka
+  janusgraph: *janusgraph
   # play_http: *play_http
   schema: *schema
   graph_passport: *graph_passport
