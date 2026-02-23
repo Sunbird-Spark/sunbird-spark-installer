@@ -58,7 +58,7 @@ g.V().count()
 g.E().count()
 ```
 
-## Notes
+### Notes
 - Always run schema initialization before importing data.
 - Use dynamic pod lookup (`$JG_POD`) to avoid hardcoding pod names.
 - If pod container names differ, ensure you target the `janusgraph` container in `kubectl exec`.
