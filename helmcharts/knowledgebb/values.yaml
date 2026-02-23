@@ -82,6 +82,11 @@ yugabyte: &yugabyte
   username: yugabyte
   password: "yugabyte"    
 
+yugabytecql:
+  image:
+    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
+    tag: "develop_499032f"
+
 kafka: &kafka
   enabled: true
   nameOverride: "kafka"
