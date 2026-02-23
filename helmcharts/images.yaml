@@ -75,8 +75,7 @@ images:
     tag: "3.9.1"
 
   kong_apis: &kong_apis
-    registry: "ghcr.io"
-    repository: "sunbird-spark/kong-api-scripts"
+    repository: "ghcr.io/sunbird-spark/kong-api-scripts"
     tag: "develop_499032f"
 
   kong_consumers: &kong_consumers
