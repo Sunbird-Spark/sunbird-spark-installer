@@ -71,13 +71,12 @@ images:
     tag: "3.9.1"
 
   kong_apis: &kong_apis
-    registry: "docker.io"
-    repository: "sunbirded.azurecr.io/kong-scripts"
-    tag: "3.9.1"
+    repository: "ghcr.io/sunbird-spark/kong-api-scripts"
+    tag: "develop_499032f"
 
   kong_consumers: &kong_consumers
-    repository: "sunbirded.azurecr.io/kong-scripts"
-    tag: "3.9.1"
+    repository: "ghcr.io/sunbird-spark/kong-api-scripts"
+    tag: "develop_499032f"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -116,8 +115,8 @@ images:
     tag: "release-8.0.0_1acd65c"
 
   keycloak-kids-keys: &keycloak-kids-keys
-    repository: "sunbirded.azurecr.io/keycloak-kids-keys"
-    tag: "v3"
+    repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
+    tag: "develop_499032f"
 
   lms: &lms
     repository: "ghcr.io/sunbird-lern/lms-service"
@@ -162,13 +161,17 @@ images:
     tag: "0.0.1"
 
   nlwebflink: &nlwebflink
-    repository: "sunbirded.azurecr.io/flink-nlweb"
-    tag: "v1.0.0"
+    repository: "sunbirded.azurecr.io/flink-nlweb-job"
+    tag: "0.0.3"
 
   yugabyte: &yugabyte  
     registry: yugabytedb
     repository: yugabyte
     tag: 2025.2.0.0-b131 
+
+  yugabytecql: &yugabytecql
+    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
+    tag: "develop_499032f"
 
 # Internal block with pull secrets
 internal: &internal
@@ -361,6 +364,10 @@ internal: &internal
       - name: "registry-secret-name"
   yugabyte:
     image: *yugabyte
+    imagePullSecrets:
+      - name: "registry-secret-name"
+  yugabytecql:
+    image: *yugabytecql
     imagePullSecrets:
       - name: "registry-secret-name"
 
