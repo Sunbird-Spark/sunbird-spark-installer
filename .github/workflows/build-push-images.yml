@@ -2,9 +2,6 @@ name: Docker Build and Push
 
 on:
   push:
-    branches:
-      - develop
-      - main
     paths:
       - 'scripts/keycloak-21.1.2/**'
       - 'scripts/keycloak-postgres-query/**'
