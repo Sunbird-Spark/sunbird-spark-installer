@@ -4,7 +4,7 @@ dependencies:
 - name: common
   repository: https://nimbushubin.github.io/helmcharts
   version: 0.1.0
-description: A production-ready Helm chart for lms
+description: A production-ready Helm chart for lern
 maintainers:
 - name: NimbusHub.in
 name: certificatesign
