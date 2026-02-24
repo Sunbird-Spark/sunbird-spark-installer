@@ -3,8 +3,8 @@ fullnameOverride: "lern"
 replicaCount: 1
 
 image:
-  repository: chethann07/lern-service
-  tag: "docker_change_ver2"
+  repository: ghcr.io/sunbird-lern/lern-service
+  tag: "spark-v0.3_bfff86f_6"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
