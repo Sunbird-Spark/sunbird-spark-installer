@@ -495,14 +495,6 @@ lern:
       cpu: 1
       memory: 2Gi
 
-lms:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1536Mi
 
 loki:
   gateway:
@@ -552,15 +544,6 @@ nodebb:
     limits:
       cpu: 1
       memory: 2G      
-
-notification:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
 
 player:
   resources:
@@ -685,15 +668,6 @@ taxonomy:
       memory: 1024Mi
 
 telemetry:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
-
-userorg:
   resources:
     requests:
       cpu: 100m
