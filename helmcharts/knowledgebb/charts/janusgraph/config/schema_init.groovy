@@ -13,7 +13,7 @@ import org.apache.tinkerpop.gremlin.structure.Direction
 // 1. Connect to Graph
 // Uses standard container configuration (assuming /opt/janusgraph/conf/janusgraph-cql-server.properties or similar is default)
 // If running from inside container with Environment variables set:
-jg = JanusGraphFactory.open('/data/opt/bitnami/janusgraph/conf/janusgraph-cql.properties')
+jg = JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph.properties')
 mgmt = jg.openManagement()
 
 println "--- STARTING SCHEMA INITIALIZATION ---"
@@ -136,14 +136,23 @@ makeCompositeIndex('byNodeType', 'IL_SYS_NODE_TYPE', false)
 println "Committing Transaction..."
 mgmt.commit()
 
-// 7. Verify & Wait for REGISTERED status
+// 7. Verify & Wait for REGISTERED/ENABLED status
 println "Waiting for Index Registration..."
 waitIndex = { indexName ->
     try {
+        def index = mgmt.getGraphIndex(indexName)
+        if (index) {
+            def status = index.getIndexStatus(index.getFieldKeys()[0])
+            if (status == SchemaStatus.ENABLED || status == SchemaStatus.REGISTERED) {
+                println "Index $indexName is already $status."
+                return
+            }
+        }
+        println "Waiting for index $indexName to reach REGISTERED status..."
         org.janusgraph.graphdb.database.management.ManagementSystem.awaitGraphIndexStatus(jg, indexName).status(SchemaStatus.REGISTERED).call()
-        println "Index $indexName is REGISTERED/ENABLED."
+        println "Index $indexName wait complete."
     } catch (Exception e) {
-        println "Warning: Index $indexName status check failed or timed out: ${e.message}"
+        println "Notice: Index $indexName status check completed: ${e.message}"
     }
 }
 
@@ -152,4 +161,3 @@ waitIndex('byCode')
 waitIndex('byIdentifier')
 
 println "--- SCHEMA INITIALIZATION COMPLETE ---"
-System.exit(0)

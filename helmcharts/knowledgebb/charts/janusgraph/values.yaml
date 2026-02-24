@@ -1043,9 +1043,8 @@ schemaInit:
   ##
   resources:
     limits:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 500m
+      memory: 2Gi
     requests:
       cpu: 250m
-      memory: 100Mi
-
+      memory: 1Gi

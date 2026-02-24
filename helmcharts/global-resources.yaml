@@ -60,16 +60,7 @@ nginx-public-ingress:
       memory: 100Mi
     limits:
       cpu: 1
-      memory: 1G  
-
-nodebb:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 2G      
+      memory: 1G
 
 player:
   resources:
@@ -188,15 +179,6 @@ dial:
       cpu: 1
       memory: 1024Mi   
 
-discussionmw:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 1G
-
 elasticsearch:
   master:
     resources:
@@ -225,16 +207,7 @@ flink: &flink
       memory: 1024Mi
     limits:
       cpu: 1
-      memory: 2048Mi  
-
-groups:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 1G
+      memory: 2048Mi
 
 kafka:
   broker:
@@ -534,16 +507,7 @@ nginx-public-ingress:
       memory: 100Mi
     limits:
       cpu: 1
-      memory: 1G  
-
-nodebb:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 2G      
+      memory: 1G      
 
 player:
   resources:
@@ -564,15 +528,6 @@ postgresql:
     requests:
       cpu: 250m
       memory: 256Mi
-
-print:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
 
 promtail:
   resources:

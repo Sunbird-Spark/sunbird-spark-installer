@@ -43,3 +43,6 @@ dependencies:
     repository: https://charts.yugabyte.com
     version: 2025.2.0   # Chart version
     condition: yugabyte.enabled
+  - name: janusgraph
+    version: 1.4.10
+    condition: janusgraph.enabled

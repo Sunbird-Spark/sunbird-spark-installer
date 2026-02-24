@@ -144,3 +144,10 @@ migration:
     waitTime: 120
 
 devops_release_branch: release-7.0.0
+
+router:
+  enabled: false
+
+nginx-private-ingress:
+  enabled: false
+
