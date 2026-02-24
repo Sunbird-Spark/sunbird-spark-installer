@@ -90,6 +90,13 @@ taskmanager:
   replicas: 1
   cpu_requests: 0.3
 
+cloud_storage:
+  type: "azure" # not required
+cloudstorage_metadatalist: '["appIcon","posterImage","artifactUrl","downloadUrl","variants","previewUrl","pdfUrl", "streamingUrl", "toc_url"]'
+cloudstorage_write_base_path: '["https://{{ .Values.global.object_storage_endpoint }}"]'
+cloudstorage_read_base_path: "https://{{ .Values.global.object_storage_endpoint }}"
+cloudstorage_relative_path_prefix: "CONTENT_STORAGE_BASE_PATH"
+
 log4j_console_properties: |
   rootLogger.level = INFO
   rootLogger.appenderRef.console.ref = ConsoleAppender
