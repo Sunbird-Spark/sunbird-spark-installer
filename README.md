@@ -112,7 +112,7 @@ This installation setup creates the following default users with different roles
 | Content Creator   | contentcreator@yopmail.com| Creator@123      |
 | Content Reviewer  | contentreviewer@yopmail.com | Reviewer@123   |
 | Book Creator      | bookcreator@yopmail.com   | Bookcreator@123  |
-| Book Reviewer     | bookreviewer@yopmail.com  | BookReviewer@123 |
+| Book Reviewer     | bookreviewer@yopmail.com  | bookReviewer@123 |
 | Public User 1     | user1@yopmail.com         | User1@123        |
 | Public User 2     | user2@yopmail.com         | User2@123        |
 
