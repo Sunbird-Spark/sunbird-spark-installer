@@ -60,18 +60,19 @@ While the installer may work with other versions, these are the versions that ha
 3. Fill in the variables in `demo/global-values.yaml`.
    take reference from  [opentofu/azure/README.md]
 
-4. Controlling DIAL Services and Flink Jobs
+4. Enabling DIAL Addon Integration
 
-     If you need DIAL-related services and Flink jobs, you can enable them using the
-      `deployed_dial_addon` flag.
+     The DIAL addon is deployed independently via the scripts in `addons/dial`. However, the core Sunbird services (LMS, Player, etc.) need to be aware of the DIAL addon to enable proper integration and routing.
 
-      - Default: `false` (DIAL services are not deployed)
+     - **To Enable Integration**: Set `deployed_dial_addon: true` in your `global-values.yaml` file. This tells the core installation script to include addon-specific configurations.
+     
+     - **When to set this**: Enable this flag if you have deployed or intend to deploy the DIAL addon.
 
-      - To enable: set it to `true` in your `global-values.yaml` file. For example:
+     Example in `global-values.yaml`:
 
-          ```yaml
-          deployed_dial_addon: true
-          ```
+     ```yaml
+     deployed_dial_addon: true
+     ```
 
 5. Enabling Asset Enrichment
 
