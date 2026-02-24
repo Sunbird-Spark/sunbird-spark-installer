@@ -4,8 +4,8 @@ dependencies:
 - name: common
   repository: https://nimbushubin.github.io/helmcharts
   version: 0.1.0
-description: A production-ready Helm chart for Notification
+description: A production-ready Helm chart for Lern Service
 maintainers:
-- name: NimbusHub.in
-name: notification
+- name: Sunbird
+name: lern
 version: 0.1.0
