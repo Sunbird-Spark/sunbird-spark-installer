@@ -210,6 +210,30 @@ sunbird-ed-installer/helmcharts/monitoring/charts/alloy
 sunbird-ed-installer/helmcharts/images.yaml
 ```
 
+# JanusGraph Helm Chart
+
+**Current JanusGraph Base Image Version**: bitnami/janusgraph:1.1.0
+
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
+helm search repo bitnami/janusgraph
+helm pull bitnami/janusgraph
+```
+
+This will download the Helm chart as a `.tgz` file.
+
+## Installation Steps
+
+1. Extract the downloaded `.tgz` file.
+2. Replace the extracted folder in the following directory:
+
+```text
+sunbird-ed-installer/helmcharts/edbb/charts/janusgraph
+```
+
+3. Update the JanusGraph version in the configuration files to match the version being used.
+
 ## Kong Upgrade Guide
 
 This section documents the Kong API Gateway upgrade process from version 0.14.1 to 3.9.1 and provides instructions for future upgrades.
