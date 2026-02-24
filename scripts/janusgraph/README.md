@@ -58,7 +58,7 @@ g.V().count()
 g.E().count()
 ```
 
-## Notes
+### Notes
 - Always run schema initialization before importing data.
 - Use dynamic pod lookup (`$JG_POD`) to avoid hardcoding pod names.
 - If pod container names differ, ensure you target the `janusgraph` container in `kubectl exec`.
@@ -78,7 +78,7 @@ The JanusGraph CDC (Change Data Capture) Log Processor is a standalone JAR that 
 Refer to the official janusgraph-cdc-extension repository for build instructions (Maven recommended):
 
 ```bash
-git clone https://github.com/Sanketika-Bengaluru/knowledge-platform-db-extensions.git
+git clone https://github.com/Sunbird-Knowlg/knowledge-platform-db-extensions.git
 cd knowledge-platform-db-extensions/janusgraph-cdc-extension
 git checkout develop
 mvn clean package -DskipTests
@@ -86,15 +86,30 @@ mvn clean package -DskipTests
 
 After build the JAR will be at `target/janusgraph-cdc-extension-1.0-SNAPSHOT.jar`.
 
-### Docker image (place JAR in Docker build context)
-Place the built JAR in the same directory as the `Dockerfile` (scripts/janusgraph/) and build the image.
+### Docker image (Multi-stage Build)
+The Docker image is built using a **multi-stage build** process. This eliminates the need to manually build the JAR or commit it to the repository.
 
-Example Docker build (from `scripts/janusgraph` directory):
+#### How it works:
+1.  **Stage 1: Build (Maven)**
+    *   Uses `maven:3.9-eclipse-temurin-11` as the base.
+    *   Clones the [knowledge-platform-db-extensions](https://github.com/Sunbird-Knowlg/knowledge-platform-db-extensions.git) repository.
+    *   Checks out the `develop` branch.
+    *   Navigates to the `janusgraph-cdc-extension` directory.
+    *   Runs `mvn clean package -DskipTests` to build the extension JAR.
+
+2.  **Stage 2: Final (JanusGraph)**
+    *   Uses `bitnamilegacy/janusgraph:1.1.0-debian-12-r21` as the base.
+    *   Copies the built JAR file from the `builder` stage directly into the `/opt/bitnami/janusgraph/lib/` directory.
+
+#### Local Build
+To build the image locally, simply run:
 ```bash
-cp /path/to/target/janusgraph-cdc-extension-1.0-SNAPSHOT.jar .
 docker build -t janusgraph-cdc-custom:1.1.0 .
 ```
 
-Update the JanusGraph image tag in `helmcharts/images.yaml` after building and pushing your custom image.
+#### GitHub Automation
+The GitHub Action is configured to automatically build and push this image to GHCR whenever any changes are pushed to this directory (`scripts/janusgraph/`).
 
----
+After the build completes, update the image tag in `helmcharts/images.yaml`.
+
+----
