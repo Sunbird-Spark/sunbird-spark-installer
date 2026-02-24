@@ -81,9 +81,6 @@ flink: &flink
       cpu: 1
       memory: 2048Mi  
 
-inquirybb:
-  flink: *flink
-
 knowledgebb:
   flink: *flink
 
@@ -293,19 +290,6 @@ kafka:
       memory: 1024Mi
   persistence:
     size: 10Gi
-
-neo4j:
-  resources:
-    requests:
-      cpu: "0.5"
-      memory: "2Gi"
-    limits:
-      cpu: "1"
-      memory: "4Gi"
-  neo4j:
-    pvc:
-      storage: 25Gi
-
 
 telemetry:
   resources:

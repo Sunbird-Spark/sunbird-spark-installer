@@ -81,7 +81,6 @@ images:
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
     tag: "release-8.1.0_rc2_0c57074_10"
-
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
     tag: "release-7.0.0_8e6b2db_23"
@@ -137,7 +136,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v0.6_a8b080a"
+    tag: "spark-v07_0d5e615"
 
   dial: &dial
     repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
@@ -168,6 +167,11 @@ images:
     registry: yugabytedb
     repository: yugabyte
     tag: 2025.2.0.0-b131 
+
+  janusgraph: &janusgraph
+    registry:  snt1
+    repository: janusgraph
+    tag: v2.0.0
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
@@ -371,6 +375,11 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
+  janusgraph:
+    image: *janusgraph
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
 # Merge internal into root for direct access
 <<: *internal
 
@@ -379,14 +388,9 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v0.1_b7e896f"
+    tag: "spark-v0.3_e4a5d99"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
     tag: "spark-v0.2_7258208"
-
-  inquiryflink:
-    registry: "sunbirded.azurecr.io"
-    repository: "data-pipeline"
-    tag: "release-8.0.0_RC1_b4f909c"
