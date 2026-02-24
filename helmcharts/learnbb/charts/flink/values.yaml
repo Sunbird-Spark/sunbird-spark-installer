@@ -157,12 +157,12 @@ sunbird_msg_91_auth: "your-msg-91-auth-key"
 
 cassandra_isMultiDCEnabled: false
 kp_schema_base_path: "https://{{ .Values.global.object_storage_endpoint }}./{{ .Values.global.public_container_name }}/schemas/local"
-lms_service_base_url: "http://lms-service:9000"
+lms_service_base_url: "http://lern-service:9000"
 kp_search_service_base_url: "http://search-service:9000"
 content_read_api_host: "http://knowlg-service:9000"
 content_read_api_endpoint: "content/v3/read/"
 content_service_base_url: "http://knowlg-service:9000"
-userorg_service_base_url: "http://userorg-service:9000"
+userorg_service_base_url: "http://lern-service:9000"
 cert_reg_service_base_url: "http://certreg:9000/certreg"
 enc_service_base_url: "http://enc:9000/enc"
 cert_rc_base_url: "http://registry-service:8081/api/v1"
@@ -218,28 +218,6 @@ producer_batch_size: 98304
 producer_linger_ms: 10
 redis_timeout: 30000
 
-### Activity Aggregate job related vars
-activity_agg_consumer_parallelism: 1
-activity_agg_dedup_parallelism: 1
-activity_agg_parallelism: 1
-enrolment_complete_parallelism: 1
-middleware_consumption_table: "user_content_consumption"
-middleware_user_activity_agg_table: "user_activity_agg"
-middleware_course_keyspace: "sunbird_courses"
-activity_agg_checkpointing_interval: 300000
-activity_agg_checkpointing_pause_interval: 90000
-activity_agg_batch_interval: 60
-activity_agg_batch_read_size: 1
-activity_agg_batch_write_size: 10
-activity_agg_window_shards: 1000
-activity_agg_dedup_index: 13
-activity_agg_dedup_expiry: 604800
-activity_module_aggs_enabled: true
-activity_input_dedup_enabled: true
-activity_agg_enrolment_filter_processe_enabled: true
-activity_agg_collection_status_cache_expiry_time: 3600
-
-
 ### Relation Cache Updater Job related Vars
 extractor_consumer_parallelism: 1
 relation_cache_updater_consumer_parallelism: 1
@@ -278,17 +256,6 @@ merge_user_courses_course_date_format: "yyyy-MM-dd HH:mm:ss:SSSZ"
 ###  Notification Job related Vars
 notification_job_consumer_parallelism: 1
 notification_job_parallelism: 1
-
-### assessment-aggregator related vars
-assessaggregator_parallelism: 1
-assessaggregator_consumer_parallelism: 1
-assessaggregator_downstream_parallelism: 1
-assessaggregator_scoreaggregator_parallelism: 1
-middleware_cassandra_courses_keyspace: sunbird_courses
-middleware_cassandra_assessment_aggregator_table: assessment_aggregator
-middleware_cassandra_assessment_question_type : question
-middleware_cassandra_user_enrolments_table: user_enrolments
-middleware_cassandra_user_activity_agg_table: user_activity_agg
 
 ###  User-cache-update Job related Vars
 user_cache_updater_job_consumer_parallelism: 1
@@ -427,69 +394,6 @@ base_config: |
     }
     sunbird_instance_name = "Sunbird"
 flink_jobs:
-  activity-aggregate-updater:
-    enabled: true
-    serviceMonitor: *serviceMonitor
-    config: |+
-      include file("/data/flink/conf/base-config.conf")
-      kafka {
-        input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_course_batch_job_request "context" $) }}"
-        output.audit.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_telemetry_raw "context" $) }}"
-        output.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_activity_agg_failed "context" $) }}"
-        output.certissue.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_request "context" $) }}"
-        groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_activity_agg "context" $) }}"
-        zookeeper = ""
-
-      }
-      task {
-        window.shards = "{{ .Values.activity_agg_window_shards }}"
-        checkpointing.interval = "{{ .Values.activity_agg_checkpointing_interval }}"
-        checkpointing.pause.between.seconds = "{{ .Values.activity_agg_checkpointing_pause_interval }}"
-        restart-strategy.attempts = "{{ .Values.restart_attempts }}"
-        restart-strategy.delay = 240000 # in milli-seconds # on max restarts (3) within 4 min the job will fail.
-        consumer.parallelism = "{{ .Values.activity_agg_consumer_parallelism }}"
-        dedup.parallelism = "{{ .Values.activity_agg_dedup_parallelism }}"
-        activity.agg.parallelism = "{{ .Values.activity_agg_parallelism }}"
-        enrolment.complete.parallelism = "{{ .Values.enrolment_complete_parallelism }}"
-      }
-      lms-cassandra {
-        keyspace = "{{ .Values.middleware_course_keyspace }}"
-        consumption.table = "{{ .Values.middleware_consumption_table }}"
-        user_activity_agg.table = "{{ .Values.middleware_user_activity_agg_table }}"
-        user_enrolments.table = "user_enrolments"
-      }
-      redis {
-        database {
-          relationCache.id = 10
-        }
-      }
-      dedup-redis {
-        host = "{{ .Values.global.redis.host }}"
-        port = 6379
-        database.index = "{{ .Values.activity_agg_dedup_index }}"
-        database.expiry = "{{ .Values.activity_agg_dedup_expiry }}"
-      }
-      threshold.batch.read.interval = "{{ .Values.activity_agg_batch_interval }}"
-      threshold.batch.read.size = "{{ .Values.activity_agg_batch_read_size }}"
-      threshold.batch.write.size = "{{ .Values.activity_agg_batch_write_size }}"
-      activity {
-        module.aggs.enabled = true
-        input.dedup.enabled = true
-        filter.processed.enrolments = "{{ .Values.activity_agg_enrolment_filter_processe_enabled }}"
-        collection.status.cache.expiry = "{{ .Values.activity_agg_collection_status_cache_expiry_time }}"
-      }
-      service {
-        search.basePath = "{{ .Values.kp_search_service_base_url }}"
-      }
-    flink-conf: |+
-      jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
-      taskmanager.numberOfTaskSlots: 1
-      parallelism.default: 1
-      jobmanager.execution.failover-strategy: region
-      taskmanager.memory.network.fraction: 0.1
-    job_classname: org.sunbird.job.aggregate.task.ActivityAggregateUpdaterStreamTask
-
   relation-cache-updater:
     enabled: true
     serviceMonitor: *serviceMonitor
@@ -596,54 +500,6 @@ flink_jobs:
       jobmanager.execution.failover-strategy: region
       taskmanager.memory.network.fraction: 0.1
     job_classname: org.sunbird.job.certgen.task.CertificateGeneratorStreamTask
-  
-  assessment-aggregator:
-    enabled: true
-    serviceMonitor: *serviceMonitor
-    config: |+
-      include file("/data/flink/conf/base-config.conf")
-      kafka {
-        producer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
-        consumer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
-        input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_assessment "context" $) }}"
-        failed.topic= "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_assessment_failed "context" $) }}"
-        groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_assessment_aggregator "context" $) }}"
-        output.certissue.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_request "context" $) }}"
-        zookeeper = ""
-
-      }
-      task {
-        consumer.parallelism = "{{ .Values.assessaggregator_consumer_parallelism }}"
-        downstream.parallelism = "{{ .Values.assessaggregator_downstream_parallelism }}"
-        assessaggregator {
-          parallelism = "{{ .Values.assessaggregator_parallelism }}"
-        }
-        scoreaggregator.parallelism = "{{ .Values.assessaggregator_scoreaggregator_parallelism }}"
-      }
-      lms-cassandra {
-        keyspace = "{{ .Values.middleware_cassandra_courses_keyspace }}"
-        table = "{{ .Values.middleware_cassandra_assessment_aggregator_table }}"
-        questionudttype= "{{ .Values.middleware_cassandra_assessment_question_type }}"
-        enrolmentstable = "{{ .Values.middleware_cassandra_user_enrolments_table }}"
-        activitytable = "{{ .Values.middleware_cassandra_user_activity_agg_table }}"
-      }
-      redis {
-        database {
-          relationCache.id = 10
-          contentCache.id = 5
-        }
-      }
-      assessment.skip.missingRecords = true
-      content.read.api = "{{ .Values.content_read_api_host }}/{{ .Values.content_read_api_endpoint }}"
-      user.activity.agg.type="attempt_metrics"
-    flink-conf: |+
-      jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
-      taskmanager.numberOfTaskSlots: 1
-      parallelism.default: 1
-      jobmanager.execution.failover-strategy: region
-      taskmanager.memory.network.fraction: 0.1
-    job_classname: org.sunbird.job.assessment.task.AssessmentAggregatorStreamTask
 
   notification-job:
     enabled: true

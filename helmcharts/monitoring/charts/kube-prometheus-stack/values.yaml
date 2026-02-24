@@ -4227,7 +4227,7 @@ prometheus-blackbox-exporter:
         url: "http://knowledge-mw-service:5000/service/health"
         module: http_2xx
       - name: userorg
-        url: "http://userorg-service:9000/service/health"
+        url: "http://lern-service:9000/service/health"
         module: http_2xx
       - name: dial
         url: "http://dial-service:9000/health"
@@ -4245,7 +4245,7 @@ prometheus-blackbox-exporter:
         url: "http://adminutil:4000/health"
         module: http_2xx
       - name: lms
-        url: "http://lms-service:9000/service/health"
+        url: "http://lern-service:9000/service/health"
         module: http_2xx
       - name: cert
         url: "http://cert-service:9000/service/health"
@@ -4269,7 +4269,7 @@ prometheus-blackbox-exporter:
         url: "http://discussionmw-service:3002/health"
         module: http_2xx
       - name: notification
-        url: "http://notification-service:9000/health"
+        url: "http://lern-service:9000/health"
         module: http_2xx
       - name: registry
         url: "http://registry-service:8081"

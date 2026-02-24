@@ -459,14 +459,15 @@ learning:
       cpu: 1
       memory: 4096Mi  
 
-lms:
+lern:
   resources:
     requests:
       cpu: 100m
       memory: 100Mi
     limits:
       cpu: 1
-      memory: 1536Mi
+      memory: 2Gi
+
 
 loki:
   gateway:
@@ -507,15 +508,6 @@ nginx-public-ingress:
     limits:
       cpu: 1
       memory: 1G      
-
-notification:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
 
 player:
   resources:
@@ -631,15 +623,6 @@ taxonomy:
       memory: 1024Mi
 
 telemetry:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
-
-userorg:
   resources:
     requests:
       cpu: 100m

@@ -3,11 +3,7 @@ postgres_migration_image: sunbirded.azurecr.io/postgresql:11.14.0
 cassandra_migration_version: main
 certregistry:
   opa_enabled: true
-userorg:
-  opa_enabled: true
-lms:
-  opa_enabled: true
-notification:
+lern:
   opa_enabled: true
 registry:
   opa_enabled: false
@@ -78,7 +74,6 @@ yugabyte: &yugabyte
   databases:
     - name: "keycloak"
     - name: "quartz"
-    - name: "userorg"
     - name: "enc-keys"
     - name: "registry"
 
