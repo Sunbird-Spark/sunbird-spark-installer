@@ -5,6 +5,18 @@ import future.keywords.in
 import input.attributes.request.http as http_request
 
 urls_to_action_mapping := {
+  # lms
+  "/v1/course/batch/update": "updateBatch",
+  "/v1/user/courses/list": "listCourseEnrollments",
+  "/v1/course/enroll": "courseEnrollment",
+  "/v1/course/unenroll": "courseUnEnrollment",
+  "/v1/content/state/read": "readContentState",
+  "/v1/content/state/update": "updateContentState",
+  "/v1/course/batch/cert/template/add": "courseBatchAddCertificateTemplate",
+  "/v1/course/batch/cert/template/remove": "courseBatchRemoveCertificateTemplate",
+  "/v1/course/batch/create": "createBatch",
+  "/v1/course/batch/read": "getBatch",
+  # userorg
   "/v1/user/tnc/accept": "acceptTermsAndCondition",
   "/v1/user/update": "updateUser",
   "/v1/user/assign/role": "assignRole",
@@ -27,44 +39,121 @@ urls_to_action_mapping := {
   "/v1/user/consent/update": "updateUserConsent",
   "/v2/org/preferences/read": "readTenantPreferences",
   "/v2/org/preferences/create": "createTenantPreferences",
-  "/v2/org/preferences/update": "updateTenantPreferences"
+  "/v2/org/preferences/update": "updateTenantPreferences",
+  # notification
+  "/v1/notification/feed/read": "readNotificationFeed",
+  "/v1/notification/feed/delete": "deleteNotificationFeed",
+  "/v1/notification/feed/update": "updateNotificationFeed"
 }
 
-# Tnc API policy updates to handle different scenarios as explained below
-# When some or all payloads are missing:
-# 1. Missing userid and tnc type
-# 2. Missing tnc type
-# 3. Missing userid and tnc type not as orgAdminTnc / reportViewerTnc
-# 4. Missing userid but tnc type as orgAdminTnc / reportViewerTnc
-# When all payloads are present:
-# 5. Both userid, tnc type present and tnc type not as orgAdminTnc / reportViewerTnc
-# 6. Both userid, tnc type present and tnc type as orgAdminTnc / reportViewerTnc
-# Issue identified as part of -
-# - https://project-sunbird.atlassian.net/browse/SB-29723
-# - https://project-sunbird.atlassian.net/browse/SB-29996
+# --- Shared / Helpers ---
 
-# Point #1
+# --- LMS Actions ---
+updateBatch {
+  acls := ["updateBatch"]
+  roles := ["CONTENT_CREATOR", "COURSE_CREATOR", "COURSE_MENTOR"]
+  super.acls_check(acls)
+  super.role_check(roles)
+}
+
+listCourseEnrollments {
+  super.public_role_check
+  user_id := split(http_request.path, "/")[5]
+  split(user_id, "?")[0] == super.userid
+}
+
+courseEnrollment {
+  super.public_role_check
+  input.parsed_body.request.userId == super.userid
+}
+
+courseUnEnrollment {
+  super.public_role_check
+  input.parsed_body.request.userId == super.userid
+}
+
+readContentState {
+  super.public_role_check
+  input.parsed_body.request.userId == super.userid
+}
+
+readContentState {
+  super.public_role_check
+  not input.parsed_body.request.userId
+}
+
+updateContentState {
+  super.public_role_check
+  not input.parsed_body.request.assessments
+  input.parsed_body.request.userId == super.userid
+}
+
+updateContentState {
+  super.public_role_check
+  not input.parsed_body.request.userId
+  not input.parsed_body.request.assessments
+}
+
+updateContentState {
+  super.public_role_check
+  input.parsed_body.request.userId == super.userid
+  assessment_userids := {ids | ids := input.parsed_body.request.assessments[_].userId}
+  count(assessment_userids) == 1
+  assessment_userids[super.userid] == super.userid
+}
+
+updateContentState {
+  super.public_role_check
+  not input.parsed_body.request.userId
+  assessment_userids := {ids | ids := input.parsed_body.request.assessments[_].userId}
+  count(assessment_userids) == 1
+  assessment_userids[super.userid] == super.userid
+}
+
+courseBatchAddCertificateTemplate {
+  acls := ["courseBatchAddCertificateTemplate"]
+  roles := ["CONTENT_CREATOR", "COURSE_CREATOR", "COURSE_MENTOR"]
+  super.acls_check(acls)
+  super.role_check(roles)
+}
+
+courseBatchRemoveCertificateTemplate {
+  acls := ["courseBatchRemoveCertificateTemplate"]
+  roles := ["CONTENT_CREATOR", "COURSE_CREATOR", "COURSE_MENTOR"]
+  super.acls_check(acls)
+  super.role_check(roles)
+}
+
+createBatch {
+  acls := ["createBatch"]
+  roles := ["CONTENT_CREATOR", "COURSE_CREATOR", "COURSE_MENTOR"]
+  super.acls_check(acls)
+  super.role_check(roles)
+}
+
+getBatch {
+  super.public_role_check
+}
+
+# --- UserOrg Actions ---
 acceptTermsAndCondition {
   super.public_role_check
   not input.parsed_body.request.userId
   not input.parsed_body.request.tncType
 }
 
-# Point #2
 acceptTermsAndCondition {
   super.public_role_check
   input.parsed_body.request.userId == super.userid
   not input.parsed_body.request.tncType
 }
 
-# Point #3
 acceptTermsAndCondition {
   super.public_role_check
   not input.parsed_body.request.userId
   not input.parsed_body.request.tncType in ["orgAdminTnc", "reportViewerTnc"]
 }
 
-# Point #4 - As orgAdminTnc
 acceptTermsAndCondition {
   acls := ["acceptTnc"]
   roles := ["ORG_ADMIN"]
@@ -74,7 +163,6 @@ acceptTermsAndCondition {
   "orgAdminTnc" == input.parsed_body.request.tncType
 }
 
-# Point #4 - As reportViewerTnc
 acceptTermsAndCondition {
   acls := ["acceptTnc"]
   roles := ["REPORT_VIEWER", "REPORT_ADMIN"]
@@ -84,14 +172,12 @@ acceptTermsAndCondition {
   "reportViewerTnc" == input.parsed_body.request.tncType
 }
 
-# Point #5
 acceptTermsAndCondition {
   super.public_role_check
   input.parsed_body.request.userId == super.userid
   not input.parsed_body.request.tncType in ["orgAdminTnc", "reportViewerTnc"]
 }
 
-# Point #6 - As orgAdminTnc
 acceptTermsAndCondition {
   acls := ["acceptTnc"]
   roles := ["ORG_ADMIN"]
@@ -101,7 +187,6 @@ acceptTermsAndCondition {
   "orgAdminTnc" == input.parsed_body.request.tncType
 }
 
-# Point #6 - As reportViewerTnc
 acceptTermsAndCondition {
   acls := ["acceptTnc"]
   roles := ["REPORT_VIEWER", "REPORT_ADMIN"]
@@ -120,7 +205,6 @@ assignRole {
   acls := ["assignRole"]
   roles := ["ORG_ADMIN"]
   super.acls_check(acls)
-  # Org check will do an implicit role check so there is no need to invoke super.role_check(roles)
   token_organisationids := super.org_check(roles)
   input.parsed_body.request.organisationId in token_organisationids
 }
@@ -129,20 +213,12 @@ assignRoleV2 {
   acls := ["assignRole"]
   roles := ["ORG_ADMIN"]
   super.acls_check(acls)
-  # Org check will do an implicit role check so there is no need to invoke super.role_check(roles)
   token_orgs := super.org_check(roles)
-
-  # In the below code, we use sets and compare them
-  # This can be done using arrays also
-  # Take a look at the audience check (commented out) in common.rego which uses the array logic
-
   payload_orgs := {ids | ids := input.parsed_body.request.roles[_].scope[_].organisationId}
   matching_orgs := {orgs | some i; payload_orgs[i] in token_orgs; orgs := i}
   payload_orgs == matching_orgs
 }
 
-# https://project-sunbird.atlassian.net/browse/SB-30186
-# Allow the request to go through if the organisationId is an array type in order to receive a 400 Bad Request error from backend
 assignRoleV2 {
   acls := ["assignRole"]
   roles := ["ORG_ADMIN"]
@@ -180,7 +256,6 @@ getUserProfileV5 {
   split(user_id, "?")[0] == super.userid
 }
 
-# Org admin is allowed to retrive any user info using the /v5/user/read endpoint
 getUserProfileV5 {
   acls := ["getUserProfileV5"]
   roles := ["ORG_ADMIN"]
@@ -188,7 +263,6 @@ getUserProfileV5 {
   super.role_check(roles)
 }
 
-# Allow the API call when using ?withTokens=true as query param - https://project-sunbird.atlassian.net/browse/SB-29676
 getUserProfileV5 {
   super.public_role_check
   contains(http_request.path, "?withTokens=true")
@@ -200,29 +274,15 @@ userFeed {
   split(user_id, "?")[0] == super.userid
 }
 
-# https://project-sunbird.atlassian.net/browse/SB-29951
-# Temporary fix as all feed url's begin with /v1/user/feed
-# Having only the userFeed (/v1/user/feed/:userid) block is causing issues for other similar routes like /v1/user/feed/create, /v1/user/feed/delete and /v1/user/feed/update
-# Adding the other url blocks below and making them a pass through to avoid rejecting the API incorrectly
-
-userFeedCreate {
-  true
-}
-
-userFeedDelete {
-  true
-}
-
-userFeedUpdate {
-  true
-}
+userFeedCreate { true }
+userFeedDelete { true }
+userFeedUpdate { true }
 
 updateUserV2 {
   super.public_role_check
   input.parsed_body.request.userId == super.userid
 }
 
-# Org admin is allowed to update any user info using the /v2/user/update endpoint
 updateUserV2 {
   acls := ["updateUserV2"]
   roles := ["ORG_ADMIN"]
@@ -242,19 +302,16 @@ updateUserDeclarations {
   payload_userids[super.userid] == super.userid
 }
 
-# If for token exists, check request.managedBy matches for_token_parentid
 managedUserV1Create {
   super.public_role_check
   input.parsed_body.request.managedBy == super.for_token_parentid
 }
 
-# If for token doesn't exist, check request.managedBy matches userid
 managedUserV1Create {
   super.public_role_check
   input.parsed_body.request.managedBy == super.userid
 }
 
-# If for token exists, check userid in url matches for token parent id
 searchManagedUser {
   super.public_role_check
   super.for_token_exists
@@ -262,7 +319,6 @@ searchManagedUser {
   split(user_id, "?")[0] == super.for_token_parentid
 }
 
-# If for token doesn't exist, check userid in url matches the x-authenticated-user-token userid
 searchManagedUser {
   super.public_role_check
   not super.for_token_exists
@@ -275,7 +331,6 @@ readUserConsent {
   input.parsed_body.request.consent.filters.userId == super.userid
 }
 
-# Org admin is allowed to read any user's consent using the /v1/user/consent/read endpoint
 readUserConsent {
   acls := ["readUserConsent"]
   roles := ["ORG_ADMIN"]
@@ -304,4 +359,21 @@ updateTenantPreferences {
   roles := ["ORG_ADMIN"]
   super.acls_check(acls)
   super.role_check(roles)
+}
+
+# --- Notification Actions ---
+readNotificationFeed {
+  super.public_role_check
+  user_id := split(http_request.path, "/")[5]
+  split(user_id, "?")[0] == super.userid
+}
+
+deleteNotificationFeed {
+  super.public_role_check
+  input.parsed_body.request.userId == super.userid
+}
+
+updateNotificationFeed {
+  super.public_role_check
+  input.parsed_body.request.userId == super.userid
 }
