@@ -71,18 +71,16 @@ images:
     tag: "3.9.1"
 
   kong_apis: &kong_apis
-    registry: "docker.io"
-    repository: "sunbirded.azurecr.io/kong-scripts"
-    tag: "3.9.1"
+    repository: "ghcr.io/sunbird-spark/kong-api-scripts"
+    tag: "develop_499032f"
 
   kong_consumers: &kong_consumers
-    repository: "sunbirded.azurecr.io/kong-scripts"
-    tag: "3.9.1"
+    repository: "ghcr.io/sunbird-spark/kong-api-scripts"
+    tag: "develop_499032f"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
     tag: "release-8.1.0_rc2_0c57074_10"
-
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
     tag: "release-7.0.0_8e6b2db_23"
@@ -116,8 +114,8 @@ images:
     tag: "release-8.0.0_1acd65c"
 
   keycloak-kids-keys: &keycloak-kids-keys
-    repository: "sunbirded.azurecr.io/keycloak-kids-keys"
-    tag: "v3"
+    repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
+    tag: "develop_499032f"
 
   lms: &lms
     repository: "ghcr.io/sunbird-lern/lms-service"
@@ -138,7 +136,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v0.6_a8b080a"
+    tag: "spark-v07_0d5e615"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -157,13 +155,22 @@ images:
     tag: "0.0.1"
 
   nlwebflink: &nlwebflink
-    repository: "sunbirded.azurecr.io/flink-nlweb"
-    tag: "v1.0.0"
+    repository: "sunbirded.azurecr.io/flink-nlweb-job"
+    tag: "0.0.3"
 
   yugabyte: &yugabyte  
     registry: yugabytedb
     repository: yugabyte
     tag: 2025.2.0.0-b131 
+
+  janusgraph: &janusgraph
+    registry:  snt1
+    repository: janusgraph
+    tag: v2.0.0
+
+  yugabytecql: &yugabytecql
+    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
+    tag: "develop_499032f"
 
 # Internal block with pull secrets
 internal: &internal
@@ -352,6 +359,15 @@ internal: &internal
     image: *yugabyte
     imagePullSecrets:
       - name: "registry-secret-name"
+  yugabytecql:
+    image: *yugabytecql
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  janusgraph:
+    image: *janusgraph
+    imagePullSecrets:
+      - name: "registry-secret-name"
 
 # Merge internal into root for direct access
 <<: *internal
@@ -361,14 +377,9 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v0.1_b7e896f"
+    tag: "spark-v0.3_e4a5d99"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
     tag: "spark-v0.2_7258208"
-
-  inquiryflink:
-    registry: "sunbirded.azurecr.io"
-    repository: "data-pipeline"
-    tag: "release-8.0.0_RC1_b4f909c"

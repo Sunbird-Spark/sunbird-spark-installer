@@ -1,0 +1,116 @@
+{{- if .Values.schemaInit.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "common.names.fullname" . }}-schema-init
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 8 }}
+    spec:
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.podSecurityContext "context" $) | nindent 8 }}
+      {{- end }}
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-janusgraph
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Waiting for JanusGraph to be ready..."
+              for i in $(seq 1 300); do
+                if nc -z {{ include "common.names.fullname" . }} 8182; then
+                  echo "JanusGraph is ready!"
+                  exit 0
+                fi
+                echo "Attempt $i: Waiting for JanusGraph on port 8182..."
+                sleep 1
+              done
+              echo "JanusGraph failed to become ready after 5 minutes"
+              exit 1
+        - name: fix-user
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "root:x:0:0:root:/root:/bin/bash" > /etc/passwd
+              echo "janus:x:1001:1001:janus:/home/janus:/sbin/nologin" >> /etc/passwd
+          volumeMounts:
+            - name: etc-passwd
+              mountPath: /etc
+      containers:
+        - name: schema-init
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/bash", "-c"]
+          args: 
+            - |
+              export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH"
+              export HOME="/tmp"
+              export JAVA_HOME="/opt/bitnami/java"
+              export JAVA_TOOL_OPTIONS="-Xmx1g -Xms512m -Djava.util.prefs.userRoot=/tmp/.java -Djava.util.prefs.systemRoot=/tmp/.java/system"
+              
+              mkdir -p /tmp/.java/system
+              chmod -R 777 /tmp/.java
+              
+              # Satisfy gremlin.sh version check if awk is missing
+              if ! command -v awk &> /dev/null; then
+                  if command -v mawk &> /dev/null; then ln -s $(command -v mawk) /tmp/awk;
+                  elif command -v gawk &> /dev/null; then ln -s $(command -v gawk) /tmp/awk;
+                  else echo 'printf "17\n"' > /tmp/awk && chmod +x /tmp/awk; fi
+                  export PATH="/tmp:$PATH"
+              fi
+
+              # Ensure bitnami environment is sourced
+              [ -f /opt/bitnami/scripts/janusgraph-env.sh ] && . /opt/bitnami/scripts/janusgraph-env.sh
+              /opt/bitnami/janusgraph/bin/gremlin.sh -e /schema-init-script/schema_init.groovy
+          volumeMounts:
+            - name: schema-init-script
+              mountPath: /schema-init-script
+            - name: janusgraph-main-config
+              mountPath: /opt/bitnami/janusgraph/conf/janusgraph.properties
+              subPath: janusgraph.properties
+            - name: janusgraph-configs
+              mountPath: /opt/bitnami/janusgraph/conf/janusgraph-cql-server.properties
+              subPath: janusgraph-cql-server.properties
+            - name: etc-passwd
+              mountPath: /etc
+            - name: tmp
+              mountPath: /tmp
+          env:
+            - name: JANUSGRAPH_HOST
+              value: {{ include "common.names.fullname" . }}
+            - name: JANUSGRAPH_PORT
+              value: "8182"
+            - name: HADOOP_USER_NAME
+              value: "janus"
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.schemaInit.resources | nindent 12 }}
+      volumes:
+        - name: schema-init-script
+          configMap:
+            name: janusgraph-configs
+            items:
+              - key: schema-init.groovy
+                path: schema_init.groovy
+            defaultMode: 0755
+        - name: janusgraph-configs
+          configMap:
+            name: janusgraph-configs
+        - name: janusgraph-main-config
+          configMap:
+            name: {{ include "janusgraph.configmapName" . }}
+        - name: etc-passwd
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+{{- end }}
+

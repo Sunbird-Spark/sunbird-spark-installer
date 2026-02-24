@@ -47,6 +47,11 @@ yugabyte: &yugabyte
       - name: "druid_raw"
       - name: "superset"
       - name: "registry"
+  gflags:
+    tserver: 
+      cdc_enable_replicate_intents: "true"    
+      ysql_enable_read_committed_isolation: "true"
+
 
   image:
     registry: yugabytedb
@@ -64,8 +69,7 @@ yugabyte: &yugabyte
     tserver: 3
   username: "yugabyte"
   password: "yugabyte"  
-   
-
+ 
 kafka: &kafka
   enabled: true
   nameOverride: kafka
@@ -140,3 +144,10 @@ migration:
     waitTime: 120
 
 devops_release_branch: release-7.0.0
+
+router:
+  enabled: false
+
+nginx-private-ingress:
+  enabled: false
+
