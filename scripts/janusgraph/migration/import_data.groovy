@@ -1,4 +1,3 @@
-
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.apache.tinkerpop.gremlin.structure.T
 import org.apache.tinkerpop.gremlin.structure.Direction
@@ -12,8 +11,23 @@ binding.g = graph.traversal()
 
 println "--- STARTING DATA MIGRATION (User Script Fixed) ---"
 
+def replaceExisting = false
+if (binding.hasVariable('args')) {
+    replaceExisting = args.any { it == 'replace=true' }
+}
+if (binding.hasVariable('replace') && (binding.replace == 'true' || binding.replace == true)) {
+    replaceExisting = true
+}
+if (System.getProperty('replace') == 'true') {
+    replaceExisting = true
+}
+println "replace parameter is set to: ${replaceExisting}"
+
 // --- 1. NODES ---
 println "Importing Nodes..."
+
+binding.tx = graph.buildTransaction().logIdentifier("learning_graph_events").start()
+binding.txG = binding.tx.traversal()
 
 if (!binding.hasVariable('state')) {
     binding.state = [accumulating: false, jsonBuffer: '', nodeLine: '']
@@ -24,8 +38,8 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
         if (idx == 1) return // skip header
 
         def state = binding.state
-        // Access g via binding
-        def g = binding.g
+        // Use transaction traversal for CDC log identifier
+        def g = binding.txG
 
         if (state.accumulating) {
             state.nodeLine += ' ' + line.trim()
@@ -66,9 +80,13 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
             }
         }
 
+        if (existing && replaceExisting) {
+            g.V(existing).drop().iterate()
+            existing = null
+        }
+
         if (!existing) {
-            // binding.graph.addVertex works
-            def v = binding.graph.addVertex(T.label, label, 'node_id', nodeIdVal)
+            def v = binding.tx.addVertex(T.label, label, 'node_id', nodeIdVal)
             propsMap.each { k, vprop ->
                 if (vprop instanceof List) vprop = vprop.join(',')
                 else if (vprop instanceof BigDecimal) vprop = vprop.doubleValue()
@@ -79,19 +97,21 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
         println "Error on line $idx: ${e.message}"
     }
 }
-binding.graph.tx().commit()
+binding.tx.commit()
 println "\nNodes Imported."
 
 
 // --- 2. RELATIONSHIPS ---
 println "Importing Relationships..."
 
+binding.tx2 = graph.buildTransaction().logIdentifier("learning_graph_events").start()
+binding.tx2G = binding.tx2.traversal()
+
 new File('/tmp/relationships.csv').eachLine { line, idx ->
     try {
         if (idx == 1) return
 
-        def g = binding.g // Access g
-        def graph = binding.graph 
+        def g = binding.tx2G // Use transaction traversal for CDC log identifier
 
         def matcher = line =~ /^(\d+),\s*"([^"]+)",\s*(\d+),\s*(.*)$/
         if (!matcher.matches()) {
@@ -127,6 +147,10 @@ new File('/tmp/relationships.csv').eachLine { line, idx ->
 
         if (fromV && toV) {
             def existing = fromV.edges(Direction.OUT, relType).find { it.inVertex().value('node_id') == toId }
+            if (existing && replaceExisting) {
+                g.E(existing).drop().iterate()
+                existing = null
+            }
             if (!existing) {
                 def e = fromV.addEdge(relType, toV)
                 propsMap.each { k, v -> e.property(k, v) }
@@ -138,11 +162,16 @@ new File('/tmp/relationships.csv').eachLine { line, idx ->
         println "Error on edge line $idx: ${e.message}"
     }
 }
-binding.graph.tx().commit()
+binding.tx2.commit()
 println "Relationships Imported."
 
 // Verify
 println "Vertices: " + binding.g.V().count().next()
 println "Edges: " + binding.g.E().count().next()
+
+// Close the graph gracefully to ensure CDC transaction logs are flushed
+println "Closing graph to flush CDC logs..."
+graph.close()
+println "Graph closed successfully."
 
 System.exit(0)
