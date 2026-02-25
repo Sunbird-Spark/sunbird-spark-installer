@@ -372,6 +372,6 @@ global:
     tag: "spark-v0.3_e4a5d99"
 
   learnflink:
-    registry: "ghcr.io/sunbird-lern/data-pipeline"
+    registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
     tag: "spark-v0.2_7258208"

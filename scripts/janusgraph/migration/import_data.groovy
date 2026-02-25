@@ -62,14 +62,23 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
 
         def nodeIdVal = parts[0].toLong()
         def labelRaw = parts[1].replaceAll(/\[|\]|"/, '')
-        def label = labelRaw
+        def label = labelRaw.trim()
         def propsRaw = parts[2..-1].join(',')
 
         def propsFixed = propsRaw.replaceAll(/([{,]\s*)(\w+):/, '$1"$2":')
                                  .replaceAll(/\bTRUE\b/, 'true')
                                  .replaceAll(/\bFALSE\b/, 'false')
 
-        def propsMap = new JsonSlurper().parseText(propsFixed)
+        def rawMap = new JsonSlurper().parseText(propsFixed)
+        def propsMap = rawMap.collectEntries { k, v ->
+            def cleanVal = v
+            if (v instanceof String) {
+                cleanVal = v.trim()
+            } else if (v instanceof List) {
+                cleanVal = v.collect { it instanceof String ? it.trim() : it }
+            }
+            return [(k.trim()): cleanVal]
+        }
 
         def existing = g.V().has('node_id', nodeIdVal).tryNext().orElse(null)
         
@@ -81,7 +90,9 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
         }
 
         if (existing && replaceExisting) {
-            g.V(existing).drop().iterate()
+            def dropTx = graph.newTransaction()
+            dropTx.traversal().V(existing.id()).drop().iterate()
+            dropTx.commit()
             existing = null
         }
 
@@ -120,7 +131,7 @@ new File('/tmp/relationships.csv').eachLine { line, idx ->
         }
 
         def fromId = matcher[0][1].toLong()
-        def relType = matcher[0][2]
+        def relType = matcher[0][2].trim()
         def toId = matcher[0][3].toLong()
         def propsRaw = matcher[0][4].trim()
 
@@ -136,6 +147,9 @@ new File('/tmp/relationships.csv').eachLine { line, idx ->
                         def v = kvParts[1].trim()
                         if (v ==~ /^\d+$/) v = v.toLong()
                         else if (v ==~ /^\d+\.\d+$/) v = v.toDouble()
+                        else {
+                            v = v.replaceAll(/^["']|["']$/, '').trim()
+                        }
                         propsMap[k] = v
                     }
                 }
@@ -148,7 +162,9 @@ new File('/tmp/relationships.csv').eachLine { line, idx ->
         if (fromV && toV) {
             def existing = fromV.edges(Direction.OUT, relType).find { it.inVertex().value('node_id') == toId }
             if (existing && replaceExisting) {
-                g.E(existing).drop().iterate()
+                def dropTx = graph.newTransaction()
+                dropTx.traversal().E(existing.id()).drop().iterate()
+                dropTx.commit()
                 existing = null
             }
             if (!existing) {
