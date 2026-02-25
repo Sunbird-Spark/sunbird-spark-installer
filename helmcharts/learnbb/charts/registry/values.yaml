@@ -60,7 +60,7 @@ configmap:
   mountPath: /home/sunbirdrc/config/public/_schemas
 
 serviceAccount:
-  create: true
+  create: false
   name: ""
 
 serviceMonitor:
@@ -114,6 +114,7 @@ KAFKA_INTER_BROKER_LISTENER_NAME:  "INTERNAL"
 KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:  1
 logging_level_root : "INFO"
 registry_database: registry
+database_provider: "YUGABYTE"
 
 envoy_probes:
   failureThreshold: 2

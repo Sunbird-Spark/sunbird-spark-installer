@@ -20,7 +20,7 @@ spec:
         # Wait for Kong admin endpoint to be reachable (port 8001) before seeding APIs
         args:
         - |
-          timeout 300 sh -c '
+          timeout 600 sh -c '
             until nc -z kong 8001; do
               echo "waiting for kong admin...";
               sleep 10;

@@ -225,9 +225,18 @@ base_config: |
   port = "{{ .Values.global.yugabyte.port }}"
   }
 
-  neo4j {
-  routePath = "bolt://{{ .Values.global.neo4j.host }}:{{ .Values.global.neo4j.port }}"
+  janusgraph {
+  host = "{{ .Values.global.janusgraph.host }}"
+  port = "{{ .Values.global.janusgraph.port }}"
+  storage.backend = "cql"
+  storage.host = "{{ .Values.global.yugabyte.host }}"
+  storage.port = "{{ .Values.global.yugabyte.port }}"
   graph = "domain"
+  storage.cql.read-consistency-level = "ONE"
+  storage.cql.write-consistency-level = "ONE"
+  storage.cql.local-datacenter = "datacenter1"
+  log.learning_graph_events.backend = "default"
+
   }
 
   es {
@@ -248,6 +257,7 @@ flink_jobs:
         input.topic = "{{ .Values.global.env }}.knowlg.learning.graph.events"
         error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
         groupId = "{{ .Values.global.env }}-search-indexer-group"
+        zookeeper = ""
         producer {
           max-request-size = 5242880
         }
@@ -260,7 +270,7 @@ flink_jobs:
         dialcodemetricsIndexer.parallelism = 1
       }
       compositesearch.index.name = "compositesearch"
-      nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "plugins", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "batches", "trackable", "credentials", "discussionForum", "provider", "osMetadata", "actions"]
+      nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "batches", "provider", "osMetadata", "actions"]
       schema.definition_cache.expiry = 14400
       restrict {
         metadata.objectTypes = []
@@ -306,6 +316,7 @@ flink_jobs:
         output.audit.topic = "{{ .Values.global.env }}.knowlg.telemetry.raw"
         output.obsrv.topic = "{{ .Values.global.env }}.knowlg.transaction.meta"
         groupId = "{{ .Values.global.env }}-transaction-event-processor-group"
+        zookeeper = ""
       }
 
       task {
@@ -363,6 +374,7 @@ flink_jobs:
         input.topic = "{{ .Values.global.env }}.knowlg.learning.job.request"
         groupId = "{{ .Values.global.env }}-asset-enrichment-group"
         video_stream.topic = "{{ .Values.global.env }}.knowlg.content.postpublish.request"
+        zookeeper = ""
       }
 
       task {
@@ -435,6 +447,7 @@ flink_jobs:
         input.topic = "{{ .Values.global.env }}.knowlg.dialcode.context.job.request"
         failed.topic = "{{ .Values.global.env }}.knowlg.dialcode.context.job.request.failed"
         groupId = "{{ .Values.global.env }}-dialcode-group"
+        zookeeper = ""
       }
 
       task {
@@ -496,6 +509,7 @@ flink_jobs:
         error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
         groupId = "{{ .Values.global.env }}-knowlg-publish-group"
         content_metadata.topic = "dv.telemetry.coss"
+        zookeeper = ""
       }
 
       task {
@@ -510,7 +524,7 @@ flink_jobs:
           qsCache.id = 1
         }
       }
-
+    
       question {
         keyspace = "{{ .Values.global.env }}_question_store"
         table = "question_data"

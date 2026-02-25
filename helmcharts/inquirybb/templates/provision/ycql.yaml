@@ -30,7 +30,7 @@ spec:
           mountPath: /opt/shared-volume
       containers:
       - name: migration
-        image: sunbirded.azurecr.io/yugabytecql:v1.0.0
+        image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
         imagePullPolicy: IfNotPresent
         command: ['bash', '-c']
         args:

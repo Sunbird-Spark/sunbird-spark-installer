@@ -53,10 +53,6 @@ images:
     repository: grafana/alloy
     tag: v1.12.1
 
-  discussion_mw: &discussion_mw
-    repository: "ghcr.io/sunbird-lern/discussions-middleware"
-    tag: "release-8.1.0_rc2-e7360ec-2"
-
   echo: &echo
     repository: "ghcr.io/project-sunbird/sunbird-echo-service"
     tag: "release-7.7.0_rc1_50b5b2d_2"
@@ -70,21 +66,21 @@ images:
     tag: "release-3.9.0_RC1_01339f9_07941f0_1_router"
 
   kong: &kong
-    repository: "sunbirded.azurecr.io/kong"
-    tag: "0.14.1"
+    registry: "docker.io"
+    repository: "kong"
+    tag: "3.9.1"
 
   kong_apis: &kong_apis
-    repository: "sunbirded.azurecr.io/kong-scripts"
-    tag: "0.1.8"
+    repository: "ghcr.io/sunbird-spark/kong-api-scripts"
+    tag: "develop_499032f"
 
-  kong_consumer: &kong_consumer
-    repository: "sunbirded.azurecr.io/kong-scripts"
-    tag: "0.1.8"
+  kong_consumers: &kong_consumers
+    repository: "ghcr.io/sunbird-spark/kong-api-scripts"
+    tag: "develop_499032f"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
     tag: "release-8.1.0_rc2_0c57074_10"
-
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
     tag: "release-7.0.0_8e6b2db_23"
@@ -92,10 +88,6 @@ images:
   nginx_public_ingress: &nginx_public_ingress
     repository: "sunbirded.azurecr.io/proxy"
     tag: "release-7.0.0_8e6b2db_23"
-
-  nodebb: &nodebb
-    repository: "sunbirded.azurecr.io/nodebb"
-    tag: "release-5.0.0_RC1_1_v1.18.6"
 
   adminutil: &adminutil
     repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
@@ -117,38 +109,25 @@ images:
     repository: "sunbirded.azurecr.io/sunbird-rc-certificate-signer"
     tag: "release-5.1.0_2bc7760_9"
 
-  groups: &groups
-    repository: "ghcr.io/sunbird-lern/groups-service"
-    tag: "spark-v0.1_014341b_9"
-
   keycloak: &keycloak
     repository: "sunbirded.azurecr.io/keycloak"
     tag: "release-8.0.0_1acd65c"
 
   keycloak-kids-keys: &keycloak-kids-keys
-    repository: "sunbirded.azurecr.io/keycloak-kids-keys"
-    tag: "v3"
+    repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
+    tag: "develop_499032f"
 
-  lms: &lms
-    repository: "ghcr.io/sunbird-lern/lms-service"
-    tag: "spark-v0.1_6a20586_14"
-
-  notification: &notification
-    repository: "ghcr.io/sunbird-lern/notification-service"
-    tag: "spark-v0.1_fe4e9e9_9"
-
+  lern: &lern
+    repository: "ghcr.io/sunbird-lern/lern-service"
+    tag: "spark-v0.3_bfff86f_6"
+    
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
-    tag: "release-5.1.0_ece7ed3_14"
-
-  userorg: &userorg
-    registry: "sunbirded.azurecr.io"
-    repository: "ghcr.io/sunbird-lern/userorg-service"
-    tag: "spark-v0.1_04057c0_16"
+    tag: "sparkv0.0.13.1"
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v0.5_b821db4"
+    tag: "spark-v07_0d5e615"
 
   dial: &dial
     repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
@@ -172,13 +151,22 @@ images:
     tag: "0.0.1"
 
   nlwebflink: &nlwebflink
-    repository: "sunbirded.azurecr.io/flink-nlweb"
-    tag: "v1.0.0"
+    repository: "sunbirded.azurecr.io/flink-nlweb-job"
+    tag: "0.0.3"
 
   yugabyte: &yugabyte  
     registry: yugabytedb
     repository: yugabyte
     tag: 2025.2.0.0-b131 
+
+  janusgraph: &janusgraph
+    registry:  snt1
+    repository: janusgraph
+    tag: v2.0.0
+
+  yugabytecql: &yugabytecql
+    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
+    tag: "develop_499032f"
 
 # Internal block with pull secrets
 internal: &internal
@@ -230,11 +218,6 @@ internal: &internal
   knowlg:
     image: *knowlg
     imagePullSecrets:
-      - name: "registry-secret-name"      
-
-  discussionmw:
-    image: *discussion_mw
-    imagePullSecrets:
       - name: "registry-secret-name"
 
   echo:
@@ -263,8 +246,8 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  kong-consumer:
-    image: *kong_consumer
+  kong-consumers:
+    image: *kong_consumers
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -280,11 +263,6 @@ internal: &internal
 
   nginx-public-ingress:
     image: *nginx_public_ingress
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  nodebb:
-    image: *nodebb
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -318,11 +296,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  groups:
-    image: *groups
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
   keycloak:
     image: *keycloak
     imagePullSecrets:
@@ -333,23 +306,13 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  lms:
-    image: *lms
+  lern:
+    image: *lern
     imagePullSecrets:
       - name: "registry-secret-name"
-
-  notification:
-    image: *notification
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
+  
   registry:
     image: *registry
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  userorg:
-    image: *userorg
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -388,6 +351,15 @@ internal: &internal
     image: *yugabyte
     imagePullSecrets:
       - name: "registry-secret-name"
+  yugabytecql:
+    image: *yugabytecql
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  janusgraph:
+    image: *janusgraph
+    imagePullSecrets:
+      - name: "registry-secret-name"
 
 # Merge internal into root for direct access
 <<: *internal
@@ -397,19 +369,9 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v0.1_b7e896f"
+    tag: "spark-v0.3_e4a5d99"
 
   learnflink:
-    registry: "ghcr.io/sunbird-lern"
+    registry: "ghcr.io/sunbird-lern/data-pipeline"
     repository: "data-pipeline"
     tag: "spark-v0.2_7258208"
-
-  inquiryflink:
-    registry: "sunbirded.azurecr.io"
-    repository: "data-pipeline"
-    tag: "release-8.0.0_RC1_b4f909c"
-
-  obsrvflink:
-    registry: "sunbirded.azurecr.io"
-    repository: "sunbird-datapipeline"
-    tag: "release-5.2.0_RC8_9610bc7_13_be0895d"

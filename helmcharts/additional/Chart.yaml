@@ -17,6 +17,10 @@ dependencies:
     repository: "file://./charts/nlweb"
     condition: nlweb.enabled
   - name: nlwebflink
-    version: 0.0.1
+    version: 0.1.0
     repository: "file://./charts/nlwebflink"
     condition: nlwebflink.enabled         
+  - name: kafka
+    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 32.2.15
+    condition: kafka.enabled

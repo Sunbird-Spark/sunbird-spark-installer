@@ -46,6 +46,13 @@ yugabyte: &yugabyte
       - name: "kong"
       - name: "druid_raw"
       - name: "superset"
+      - name: "registry"
+  gflags:
+    tserver: 
+      cdc_enable_replicate_intents: "true"    
+      ysql_enable_read_committed_isolation: "true"
+
+
   image:
     registry: yugabytedb
     repository: yugabyte
@@ -62,7 +69,7 @@ yugabyte: &yugabyte
     tserver: 3
   username: "yugabyte"
   password: "yugabyte"  
-
+ 
 kafka: &kafka
   enabled: true
   nameOverride: kafka
@@ -121,37 +128,10 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
-postgresql: &postgresql
-  enabled: true
-  image:
-    registry: sunbirded.azurecr.io
-    repository: postgresql
-    tag: 11.14.0
-  fullnameOverride: postgresql
-  host: postgresql
-  port: 5432
-  postgresqlUsername: postgres
-  postgresqlPassword: postgres
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  provisioning:
-    annotations: *provisioningAnnotations
-  persistence:
-    size: 25Gi
-  primary:
-    resources:
-      limits:
-        cpu: 250m
-        memory: 512Mi
-      requests:
-        cpu: 250m
-        memory: 256Mi
-
 global:
   redis: *redis
   kafka: *kafka
   yugabyte: *yugabyte
-  postgresql: *postgresql
   keycloak_kid_keys_configmap: keycloak-kids-keys
   keycloak_key_configmap: keycloak-key
   kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
@@ -164,3 +144,10 @@ migration:
     waitTime: 120
 
 devops_release_branch: release-7.0.0
+
+router:
+  enabled: false
+
+nginx-private-ingress:
+  enabled: false
+
