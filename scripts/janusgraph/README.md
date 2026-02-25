@@ -112,4 +112,4 @@ The GitHub Action is configured to automatically build and push this image to GH
 
 After the build completes, update the image tag in `helmcharts/images.yaml`.
 
-----
+---
