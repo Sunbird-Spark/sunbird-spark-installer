@@ -117,22 +117,13 @@ images:
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
     tag: "develop_499032f"
 
-  lms: &lms
-    repository: "ghcr.io/sunbird-lern/lms-service"
-    tag: "spark-v0.1_6a20586_14"
-
-  notification: &notification
-    repository: "ghcr.io/sunbird-lern/notification-service"
-    tag: "spark-v0.1_fe4e9e9_9"
-
+  lern: &lern
+    repository: "ghcr.io/sunbird-lern/lern-service"
+    tag: "spark-v0.3_bfff86f_6"
+    
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
     tag: "sparkv0.0.13.1"
-
-  userorg: &userorg
-    registry: "sunbirded.azurecr.io"
-    repository: "ghcr.io/sunbird-lern/userorg-service"
-    tag: "spark-v0.1_04057c0_16"
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
@@ -310,23 +301,19 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  lms:
-    image: *lms
+  lern:
+    image: *lern
     imagePullSecrets:
       - name: "registry-secret-name"
-
-  notification:
-    image: *notification
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
+  
   registry:
     image: *registry
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  userorg:
-    image: *userorg
+
+  dial:
+    image: *dial
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -380,6 +367,6 @@ global:
     tag: "spark-v0.3_e4a5d99"
 
   learnflink:
-    registry: "ghcr.io/sunbird-lern"
+    registry: "ghcr.io/sunbird-lern/data-pipeline"
     repository: "data-pipeline"
     tag: "spark-v0.2_7258208"
