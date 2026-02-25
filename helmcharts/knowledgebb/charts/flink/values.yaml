@@ -535,6 +535,11 @@ flink_jobs:
         table = "questionset_hierarchy"
       }
 
+      collection_hierarchy {
+        keyspace = "{{ .Values.global.env }}_hierarchy_store"
+        table = "hierarchy_relations"
+      }
+
       content {
         bundleLocation = "/tmp/contentBundle"
         isECARExtractionEnabled = true
