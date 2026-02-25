@@ -1,16 +1,16 @@
- terraform {
+terraform {
   required_providers {
     azurerm = {
-      version = "~> 4.0.1"  # Define the version constraint for the AzureRM provider
+      version = "~> 4.0.1" # Define the version constraint for the AzureRM provider
       source  = "hashicorp/azurerm"
     }
   }
 }
 provider "azurerm" {
-  subscription_id ="${var.subscription_id}"
-  features {}  # Always include the features block for Azure provider
-  resource_provider_registrations = "none"  # Optional
-  }
+  subscription_id = var.subscription_id
+  features {}                              # Always include the features block for Azure provider
+  resource_provider_registrations = "none" # Optional
+}
 data "azurerm_subscription" "current" {}
 
 resource "random_id" "bucket_id" {
@@ -18,26 +18,26 @@ resource "random_id" "bucket_id" {
 }
 
 locals {
-    unique_uuid = random_id.bucket_id.hex
+  unique_uuid = random_id.bucket_id.hex
 
-    common_tags = {
-      environment = "${var.environment}"
-      BuildingBlock = "${var.building_block}"
-      unique_uuid    = local.unique_uuid
-    }
-    subid = split("-", "${data.azurerm_subscription.current.subscription_id}")
-    environment_name = "${var.building_block}-${var.environment}"
-    uid = local.subid[0]
-    environment_name_without_dashes = replace(local.environment_name, "-", "")
-    storage_account_name = "${local.environment_name_without_dashes}${local.uid}"
+  common_tags = {
+    environment   = "${var.environment}"
+    BuildingBlock = "${var.building_block}"
+    unique_uuid   = local.unique_uuid
+  }
+  subid                           = split("-", "${data.azurerm_subscription.current.subscription_id}")
+  environment_name                = "${var.building_block}-${var.environment}"
+  uid                             = local.subid[0]
+  environment_name_without_dashes = replace(local.environment_name, "-", "")
+  storage_account_name            = "${local.environment_name_without_dashes}${local.uid}"
 }
 
 resource "azurerm_storage_account" "storage_account" {
-  name                     = "${local.storage_account_name}"
-  resource_group_name      = var.resource_group_name
-  location                 = var.location
-  account_tier             = var.azure_storage_tier
-  account_replication_type = var.azure_storage_replication
+  name                       = local.storage_account_name
+  resource_group_name        = var.resource_group_name
+  location                   = var.location
+  account_tier               = var.azure_storage_tier
+  account_replication_type   = var.azure_storage_replication
   https_traffic_only_enabled = false
   blob_properties {
     cors_rule {
@@ -50,9 +50,9 @@ resource "azurerm_storage_account" "storage_account" {
     }
   }
   tags = merge(
-      local.common_tags,
-      var.additional_tags
-      )
+    local.common_tags,
+    var.additional_tags
+  )
 }
 
 resource "azurerm_storage_container" "storage_container_private" {
@@ -71,11 +71,3 @@ resource "azurerm_storage_container" "storage_container_public" {
   storage_account_name  = azurerm_storage_account.storage_account.name
   container_access_type = "blob"
 }
-
-# DIAL container moved to addons/dial/opentofu/azure/storage
-# Uncomment below if you want to manage DIAL container from main opentofu
-# resource "azurerm_storage_container" "dial_state_container_public" {
-#   name                  = "${local.environment_name}-dial-${local.unique_uuid}"
-#   storage_account_name  = azurerm_storage_account.storage_account.name
-#   container_access_type = "blob"
-# }
