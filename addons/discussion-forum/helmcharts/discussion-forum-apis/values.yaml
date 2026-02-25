@@ -2,8 +2,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  repository: shashank04515/kong-scripts
-  tag: "local-upsert"
+  registry: ghcr.io
+  repository: sunbird-spark/kong-api-scripts
+  tag: "develop_5c87617"
   pullPolicy: Always
   pullSecrets: []
 

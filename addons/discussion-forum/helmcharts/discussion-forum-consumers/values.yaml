@@ -2,9 +2,9 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  # Same kong-scripts image used by the core kong-consumers chart
-  repository: shashank04515/kong-scripts
-  tag: "local-upsert"
+  registry: ghcr.io
+  repository: sunbird-spark/kong-api-scripts
+  tag: "develop_5c87617"
   pullPolicy: Always
   pullSecrets: []
 
@@ -14,6 +14,34 @@ kong_admin_port: 8001
 # managed_by scopes ACL group deletions to only the groups declared in this chart.
 # Core groups (contentAccess, userAccess, etc.) are never touched.
 managed_by: discussion-forum
+
+mobile_device_discussion_groups: &mobile_device_discussion_groups
+  - discussionAccess
+  - groupAccess
+  - groupCreate
+  - groupUpdate
+
+desktop_device_discussion_groups: &desktop_device_discussion_groups
+  - groupAccess
+  - groupCreate
+  - groupUpdate
+  - groupAdmin
+
+portal_discussion_groups: &portal_discussion_groups
+  - discussionAccess
+  - discussionCreate
+  - groupAccess
+  - groupCreate
+  - groupUpdate
+  - groupAdmin
+
+api_admin_discussion_groups: &api_admin_discussion_groups
+  - discussionAccess
+  - discussionCreate
+  - groupAccess
+  - groupAdmin
+  - groupCreate
+  - groupUpdate
 
 provisioningAnnotations:
   "helm.sh/hook": post-install,post-upgrade

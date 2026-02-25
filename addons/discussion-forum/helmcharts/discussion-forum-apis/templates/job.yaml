@@ -33,7 +33,7 @@ spec:
 
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.global.images.kong_api_scripts.registry }}/{{ .Values.global.images.kong_api_scripts.repository }}:{{ .Values.global.images.kong_api_scripts.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
           - /bin/sh

@@ -3,7 +3,8 @@ fullnameOverride: "groups"
 replicaCount: 1
 
 image:
-  repository: ghcr.io/sunbird-lern/groups-service
+  registry: ghcr.io
+  repository: sunbird-lern/groups-service
   tag: "release-8.0.0_rc5_952df5d_5"
   pullPolicy: IfNotPresent
   pullSecrets: []
