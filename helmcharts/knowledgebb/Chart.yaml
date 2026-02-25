@@ -39,10 +39,10 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     version: 32.2.15
     condition: kafka.enabled
-  - name: neo4j
-    condition: neo4j.enabled
-    version: 0.1.0
   - name: yugabyte
     repository: https://charts.yugabyte.com
     version: 2025.2.0   # Chart version
     condition: yugabyte.enabled
+  - name: janusgraph
+    version: 1.4.10
+    condition: janusgraph.enabled

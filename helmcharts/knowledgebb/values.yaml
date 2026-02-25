@@ -4,26 +4,6 @@ knowlg_automation_repo_branch: main
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
 
-neo4j: &neo4j
-  enabled: true
-  host: "neo4j"
-  port: 7687
-  boltPort: 8687
-  image:
-    repository: sunbirded.azurecr.io/neo4j
-    tag: "3.3.0"
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  provisioning:
-    annotations: *provisioningAnnotations
-    waitForNeo4j: "true"
-  resources:
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-    limits:
-      cpu: "1"
-      memory: "2Gi"
 
 elasticsearch: &es
   enabled: true
@@ -102,6 +82,11 @@ yugabyte: &yugabyte
   username: yugabyte
   password: "yugabyte"    
 
+yugabytecql:
+  image:
+    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
+    tag: "develop_499032f"
+
 kafka: &kafka
   enabled: true
   nameOverride: "kafka"
@@ -177,6 +162,21 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
+janusgraph: &janusgraph
+  enabled: true
+  fullnameOverride: "janusgraph"
+  nameOverride: "janusgraph"
+  host: "janusgraph"
+  port: 8182
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/janusgraph
+    tag: 1.1.0-debian-12-r21
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+  provisioning:
+    annotations: *provisioningAnnotations 
+
 # play_http: &play_http
 #   secret_key: "secretKey"
 schema: &schema
@@ -193,9 +193,9 @@ objectcategorydefinition: &objectcategorydefinition
 global:
   redis: *redis
   elasticsearch: *es
-  neo4j: *neo4j
   yugabyte: *yugabyte
   kafka: *kafka
+  janusgraph: *janusgraph
   # play_http: *play_http
   schema: *schema
   graph_passport: *graph_passport

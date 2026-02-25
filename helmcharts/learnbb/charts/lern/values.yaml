@@ -1,0 +1,257 @@
+fullnameOverride: "lern"
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/sunbird-lern/lern-service
+  tag: "spark-v0.3_bfff86f_6"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # runAsNonRoot: true
+  # runAsUser: 1001
+  # fsGroup: 1001
+
+securityContext: {}
+  # readOnlyRootFilesystem: false
+  # capabilities:
+  #   drop:
+  #   - ALL
+
+service:
+  type: ClusterIP
+  protocol: TCP
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+
+ingress:
+  enabled: false
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 100Mi
+  limits:
+    cpu: 1
+    memory: 2Gi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+livenessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+  httpGet:
+    path: /health
+    port: 9000
+
+readinessProbe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+  httpGet:
+    path: /health
+    port: 9000
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+configmap:
+  enabled: true
+  mountPath: /home/sunbird/lern-service-impl-1.0-SNAPSHOT/conf
+
+commonAnnotations:
+  reloader.stakater.com/auto: "true"
+
+serviceAccount:
+  create: false
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+  labels:
+    release: monitoring
+  honorLabels: true
+  jobLabel: "app.kubernetes.io/name"
+
+# Common App Settings
+bind_hostname: "0.0.0.0"
+sunbird_cassandra_keyspace: "sunbird"
+sunbird_app_name: "sunbird"
+sunbird_sso_username: admin
+sunbird_sso_password: admin
+keycloak_realm: sunbird
+sunbird_sso_client_id: lms
+sunbird_sso_client_secret: "lms"
+actor_hostname: actor-service
+sunbird_analytics_api_base_url: "http://analytics-service:9000"
+sunbird_search_service_api_base_url: "http://search-service:9000"
+sunbird_quartz_mode: cluster
+sunbird_encryption_mode: local
+sunbird_badger_baseurl: http://badger:8004
+sunbird_remote_req_router_path: pekko.tcp://SunbirdMWSystem@actor-service:8088/user/RequestRouter
+sunbird_remote_bg_req_router_path: kka.tcp://SunbirdMWSystem@actor-service:8088/user/BackgroundRequestRouter
+sunbird_api_mgr_base_url: http://knowledge-mw-service:5000
+sunbird_api_base_url: http://knowledge-mw-service:5000
+sunbird_default_channel: "sunbird"
+sunbird_user_bulk_upload_size: "1001"
+sunbird_cert_service_base_url:  "http://cert-service:9000"
+sunbird_otp_allowed_attempt: "5"
+feed_limit: "30"
+form_api_endpoint: "/plugin/v1/form/read"
+userorg_in_memory_cache_ttl: "600"
+user_index_alias: "user_alias"
+org_index_alias: "org_alias"
+sunbird_reset_pass_msg: "You have requested to reset password. Click on the link to set a password:"
+sunbird_mw_system_host: "localhost"
+sunbird_mw_system_port: 8088
+sunbird_telemetry_base_url: "http://telemetry-service:9001"
+telemetry_queue_threshold_value: "100"
+sunbird_cs_search_path: "/v1/content/search"
+sunbird_registry_service_baseurl: "http://registry-service:8081"
+sunbird_time_zone: "Asia/Kolkata"
+sunbird_otp_length: 6
+sunbird_otp_expiration: 1800
+sunbird_course_batch_notification_signature: sunbird
+sunbird_course_batch_notification_enabled: true
+sunbird_user_profile_field_default_visibility: private
+sunbird_email_max_recipients_limit: 100
+sunbird_url_shortner_enable: false
+telemetry_pdata_pid: lern-service
+api_actor_provider: local
+background_actor_provider: local
+sunbird_health_check_enable: "true"
+sunbird_keycloak_user_federation_provider_id: "cassandrafederationid"
+sunbird_gzip_enable: "true"
+sunbird_gzip_size_threshold: "262144"
+sunbird_cache_enable: "false"
+notification_service_base_url: "http://localhost:9000"
+keys_basepath: "/keys/"
+PORTAL_SERVICE_PORT: "http://player:3000"
+sunbird_installation_display_name_for_sms: "Sunbird"
+sunbird_sso_lb_ip: "http://keycloak:8080/"
+isMultiDCEnabled: "false"
+JAVA_OPTIONS: -Xmx1024m
+_JAVA_OPTIONS: "-Dlog4j2.formatMsgNoLookups=true"
+sunbird_content_service_api_base_url: http://knowlg-service:9000
+enable_captcha: "false"
+user-deletion-broadcast-topic: "local.delete.user"
+
+# LMS Specific
+sunbird_group_service_api_base_url: "http://groups-service:9000"
+content_service_url: "http://knowlg-service:9000"
+content_read_url: "/content/v3/read/"
+sunbird_user_org_api_base_url: "http://localhost:9000"
+sunbird_user_search_cretordetails_fields: "id,firstName,lastName"
+sunbird_user_service_api_base_url: "http://localhost:9000"
+limit_managed_user_creation: "true"
+managed_user_limit: "30"
+sunbird_user_qrcode_courses_limit: "5000"
+learning_content_props_to_add: "mimeType,contentType,name,code,description,keywords,framework,copyright,topic"
+group_activity_agg_cache_ttl: "3600"
+group_activity_agg_cache_enable: "false"
+redis_connection_max: "64"
+redis_connection_idle_max: "32"
+redis_connection_idle_min: "1"
+redis_connection_minEvictableIdleTimeSeconds: "120"
+redis_connection_timeBetweenEvictionRunsSeconds: "300"
+redis_experimentIndex: "10"
+redis_dbIndex: "2"
+user_enrolments_response_cache_enable: "true"
+user_enrolments_response_cache_ttl: "300"
+collection_summary_agg_data_source: 'audit-rollup-syncts'
+collection_summary_agg_cache_ttl: "21600"
+enrollment_list_size: "1000"
+cloud_storage_path_prefix_dial: "dial"
+cloud_store_base_path_placeholder: ""
+sunbird_dial_service_base_url: http://dial-service:9000
+sunbird_dial_service_search_url: "/dialcode/v3/search"
+
+enable_activity_aggregator_actor: "true"
+enable_module_aggregation: "true"
+sunbird_course_keyspace: "sunbird_courses"
+redis_relation_cache_index: "10"
+dedup_redis_index: "13"
+dedup_redis_expiry: "604800"
+activity_input_dedup_enabled: "false"
+service_search_base_path: "http://search-service:9000"
+filter_processed_enrolments: "true"
+assessment_direct_aggregation_enabled: "true"
+
+# Notification Specific
+sunbird_cassandra_notification_keyspace: sunbird_notifications
+LEARNER_SERVICE_PORT: "http://localhost:9000"
+
+# OPA / Envoy
+opa_enabled: false
+
+envoy_probes:
+  failureThreshold: 2
+  httpGet:
+    path: /ready
+    port: 10000
+    scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+opa_probes:
+  failureThreshold: 3
+  httpGet:
+    path: /health?plugins
+    port: 8282
+    scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 5
+
+envoy_resources:
+  requests:
+    cpu: "100m"
+    memory: "100Mi"
+  limits:
+    cpu: "1"
+    memory: "1024Mi"
+
+opa_resources:
+  requests:
+    cpu: "100m"
+    memory: "100Mi"
+  limits:
+    cpu: "1"
+    memory: "1024Mi"
+
+init_container_resources:
+  requests:
+    cpu: "100m"
+    memory: "100Mi"
+  limits:
+    cpu: "1"
+    memory: "1024Mi"

@@ -9,12 +9,13 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 19.5.14
 - name: kafka
-  repository: https://charts.bitnami.com/bitnami
-  version: 20.0.2
-- name: neo4j
-  repository: ""
-  version: 0.1.0
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 32.2.15
 - name: yugabyte
   repository: https://charts.yugabyte.com
-  version: 2025.2.0   
-digest: sha2
+  version: 2025.2.0
+- name: janusgraph
+  repository: ""
+  version: 1.4.10
+digest: sha256:37f618d54d3c94f0fe9c2c81c313637989afc291b3635a13b469a51174bc4335
+generated: "2026-02-24T13:02:39.541458418+05:30"
