@@ -2,30 +2,27 @@
 # Stage 1: Get the official Keycloak image
 FROM quay.io/keycloak/keycloak:21.1.2 AS source
 
-# Stage 2: Create a patched base image using UBI 9 Minimal
-FROM registry.access.redhat.com/ubi9/ubi-minimal:latest AS patched_base
+# Stage 2: Create a patched base image using UBI 9 Minimal (pinned to a stable version)
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.4 AS patched_base
 USER root
 # Fix OS vulnerabilities (glibc, java, etc.) and install Java 17
 RUN microdnf update -y && \
     microdnf install -y shadow-utils java-17-openjdk-headless && \
+    groupadd -g 1000 keycloak && \
+    useradd -u 1000 -g keycloak -m -d /opt/keycloak -s /sbin/nologin keycloak && \
+    microdnf remove -y shadow-utils && \
     microdnf clean all
-
-# Create the keycloak user and group (mirrors official image)
-RUN groupadd -g 1000 keycloak && \
-    useradd -u 1000 -g keycloak -m -d /opt/keycloak -s /sbin/nologin keycloak
 
 # Stage 3: Final Image
 FROM patched_base
-COPY --from=source /opt/keycloak/ /opt/keycloak/
+COPY --from=source --chown=keycloak:keycloak /opt/keycloak/ /opt/keycloak/
 
 # Copy your local configurations/providers
-COPY ./conf/ /opt/keycloak/conf/
-COPY ./providers/ /opt/keycloak/providers/
-COPY ./themes/ /opt/keycloak/themes/
-COPY ./imports/ /opt/keycloak/imports/
+COPY --chown=keycloak:keycloak ./conf/ /opt/keycloak/conf/
+COPY --chown=keycloak:keycloak ./providers/ /opt/keycloak/providers/
+COPY --chown=keycloak:keycloak ./themes/ /opt/keycloak/themes/
+COPY --chown=keycloak:keycloak ./imports/ /opt/keycloak/imports/
 
-USER root
-RUN chown -R keycloak:keycloak /opt/keycloak
 USER keycloak
 
 ENV KC_FEATURES=token-exchange
