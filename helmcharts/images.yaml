@@ -166,7 +166,7 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_499032f"
+    tag: "develop_7c0a40d"
 
 # Internal block with pull secrets
 internal: &internal
@@ -372,6 +372,6 @@ global:
     tag: "spark-cr1_e810893"
 
   learnflink:
-    registry: "ghcr.io/sunbird-lern/data-pipeline"
+    registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
     tag: "spark-v0.2_7258208"

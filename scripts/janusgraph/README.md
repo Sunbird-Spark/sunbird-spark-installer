@@ -42,7 +42,7 @@ kubectl exec -it -n sunbird $JG_POD -- tar -xzf /tmp/migration.tar.gz -C /tmp
 
 Run the import script inside JanusGraph:
 ```bash
-kubectl exec -it -n sunbird $JG_POD -- /opt/bitnami/janusgraph/bin/gremlin.sh -e /tmp/import_data.groovy
+kubectl exec -it -n sunbird $JG_POD -- /opt/bitnami/janusgraph/bin/gremlin.sh -e /tmp/import_data.groovy   replace=true
 ```
 
 ## 5. Verify migration
@@ -112,4 +112,4 @@ The GitHub Action is configured to automatically build and push this image to GH
 
 After the build completes, update the image tag in `helmcharts/images.yaml`.
 
-----
+---
