@@ -25,6 +25,11 @@
         </#list>
     </#if>
     
+    <#-- Hide page immediately when an actionUri redirect is pending -->
+    <#if actionUri??>
+    <style>body { visibility: hidden !important; }</style>
+    </#if>
+
     <#-- Hide already logged in messages immediately -->
     <style type="text/css">
         .toast-container .toast:has(.toast-message:contains("already logged in")),
