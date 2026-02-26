@@ -391,21 +391,11 @@
         })();
     </script>
     </#if>
-    <script type="text/javascript">
-        (function () {
-            try {
-                var flag = sessionStorage.getItem('sb_redirect_reset_success');
-                if (flag) {
-                    sessionStorage.removeItem('sb_redirect_reset_success');
-                    var base = '<#if client??>${client.baseUrl!}</#if>';
-                    if (!base || base.length === 0) {
-                        base = window.location.origin;
-                    }
-                    var target = String(base).replace(/\/+$/, '') + '/password-reset-success';
-                    window.location.href = target;
-                }
-            } catch (e) {}
-        })();
+    <script>
+        window.addEventListener("load", function () {
+            const proceed = document.querySelector("a[href]");
+            if (proceed) proceed.click();
+        });
     </script>
 </body>
 </html>
