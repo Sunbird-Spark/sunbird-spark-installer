@@ -174,6 +174,8 @@ user_enrolments_response_cache_ttl: "300"
 collection_summary_agg_data_source: 'audit-rollup-syncts'
 collection_summary_agg_cache_ttl: "21600"
 enrollment_list_size: "1000"
+hierarchy_store_keyspace: "_hierarchy_store"
+hierarchy_relations_table: "hierarchy_relations"
 cloud_storage_path_prefix_dial: "dial"
 cloud_store_base_path_placeholder: ""
 sunbird_dial_service_search_url: "/dialcode/v3/search"
