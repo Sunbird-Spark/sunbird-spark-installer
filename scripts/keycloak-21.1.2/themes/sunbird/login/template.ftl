@@ -391,12 +391,6 @@
         })();
     </script>
     </#if>
-    <script>
-        window.addEventListener("load", function () {
-            const proceed = document.querySelector("a[href]");
-            if (proceed) proceed.click();
-        });
-    </script>
 </body>
 </html>
 </#macro>
