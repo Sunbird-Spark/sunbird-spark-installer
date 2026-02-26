@@ -44,6 +44,32 @@
         // Immediate execution - don't wait for DOM ready
         (function () {
             try {
+                // Check if this is a password reset success
+                var isResetSuccess = sessionStorage.getItem('sb_redirect_reset_success');
+                if (isResetSuccess === '1') {
+                    console.log('Password reset success detected, redirecting to portal...');
+                    sessionStorage.removeItem('sb_redirect_reset_success');
+                    
+                    var redirect_uri = getValueFromSession('redirect_uri');
+                    var client_id = new URLSearchParams(window.location.search).get('client_id');
+                    
+                    if (redirect_uri) {
+                        try {
+                            var redirect_uriLocation = new URL(redirect_uri);
+                            var redirectUrl = redirect_uriLocation.protocol + '//' + redirect_uriLocation.host + '/password-reset-success';
+                            console.log('Redirecting to:', redirectUrl);
+                            window.location.href = redirectUrl;
+                            return;
+                        } catch (e) {
+                            console.error('Error parsing redirect_uri:', e);
+                        }
+                    }
+                    
+                    // Fallback to current host
+                    window.location.href = window.location.protocol + '//' + window.location.host + '/password-reset-success';
+                    return;
+                }
+                
                 var summary = '${message.summary?js_string}';
                 console.log('Info page - Checking message summary:', summary);
                 

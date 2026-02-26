@@ -99,5 +99,6 @@
             .hide { display: none !important; }
         </style>
     <#elseif section = "info" >
+        <#-- Info section content can go here if needed -->
     </#if>
 </@layout.registrationLayout>
