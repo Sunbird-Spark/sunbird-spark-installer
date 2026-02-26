@@ -7,7 +7,12 @@
         ${message.summary}
         </#if>
     <#elseif section = "form">
-    <div id="kc-info-message">
+    <#if !skipLink?? && actionUri??>
+    <script type="text/javascript">
+        window.location.href = "${actionUri}";
+    </script>
+    </#if>
+    <div id="kc-info-message"<#if !skipLink?? && actionUri??> style="display:none"</#if>>
         <p class="instruction">${message.summary}<#if requiredActions??><#list requiredActions>: <b><#items as reqActionItem>${msg("requiredAction.${reqActionItem}")}<#sep>, </#items></b></#list><#else></#if></p>
         <#if skipLink??>
         <#else>
@@ -15,9 +20,6 @@
                 <p><a href="${pageRedirectUri}">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
             <#elseif actionUri??>
                 <p><a href="${actionUri}">${kcSanitize(msg("proceedWithAction"))?no_esc}</a></p>
-                <script type="text/javascript">
-                    window.location.href = "${actionUri}";
-                </script>
             <#elseif client.baseUrl??>
                 <p><a href="${client.baseUrl}">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
             </#if>
