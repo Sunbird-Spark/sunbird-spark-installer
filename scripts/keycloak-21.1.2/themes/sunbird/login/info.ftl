@@ -8,6 +8,7 @@
         </#if>
     <#elseif section = "form">
     <#if !skipLink?? && actionUri??>
+    <style>body { visibility: hidden !important; }</style>
     <script type="text/javascript">
         window.location.href = "${actionUri}";
     </script>
