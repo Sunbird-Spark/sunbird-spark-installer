@@ -15,6 +15,9 @@
                 <p><a href="${pageRedirectUri}">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
             <#elseif actionUri??>
                 <p><a href="${actionUri}">${kcSanitize(msg("proceedWithAction"))?no_esc}</a></p>
+                <script type="text/javascript">
+                    window.location.href = "${actionUri}";
+                </script>
             <#elseif client.baseUrl??>
                 <p><a href="${client.baseUrl}">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
             </#if>
