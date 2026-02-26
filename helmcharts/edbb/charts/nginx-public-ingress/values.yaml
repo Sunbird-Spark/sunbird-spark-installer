@@ -228,12 +228,3 @@ apple_universal_links: '{"applinks":{"apps":[],"details":[{"appID":"123456.dev.s
 
 lets_encrypt_ssl: false #enable this if you are using  let's encrypt ssl
 storageClassName: "default"
-
-  # SMTP relay settings (for Gmail, Outlook, etc.)
-smtp:
-  host: <update the host> # e.g. smtp.gmail.com
-  port: <update the port> # e.g. 587
-  user: <update the user> # e.g. your_email@gmail.com
-  pass: "<app password>" # e.g. your_app_password
-  from: <update the from mail> # e.g. your_email@gmail.com
-  to: <update the to mail> # e.g. your_email@gmail.com
