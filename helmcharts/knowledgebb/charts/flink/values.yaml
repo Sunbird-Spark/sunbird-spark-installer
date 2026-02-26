@@ -244,64 +244,6 @@ base_config: |
   }
 
 flink_jobs:
-  search-indexer:
-    enabled: true
-    serviceMonitor: *serviceMonitor
-    config: |+
-      include file("/data/flink/conf/base-config.conf")
-      job {
-        env = "{{ .Values.global.env }}"
-      }
-      kafka {
-        event.max.size = "1048576" # Max is only 1MB
-        input.topic = "{{ .Values.global.env }}.knowlg.learning.graph.events"
-        error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
-        groupId = "{{ .Values.global.env }}-search-indexer-group"
-        zookeeper = ""
-        producer {
-          max-request-size = 5242880
-        }
-      }
-      task {
-        consumer.parallelism = 1
-        router.parallelism = 1
-        compositeSearch.parallelism = 1
-        dialcodeIndexer.parallelism = 1
-        dialcodemetricsIndexer.parallelism = 1
-      }
-      compositesearch.index.name = "compositesearch"
-      nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "batches", "provider", "osMetadata", "actions"]
-      schema.definition_cache.expiry = 14400
-      restrict {
-        metadata.objectTypes = []
-        objectTypes = ["EventSet", "Questionnaire", "Misconception", "FrameworkType", "EventSet", "Event"]
-      }
-      cloudstorage.metadata.replace_absolute_path=true
-      cloudstorage.relative_path_prefix= "CONTENT_STORAGE_BASE_PATH"
-      cloudstorage.read_base_path="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_read_base_path "context" $) }}"
-      cloudstorage.write_base_path=["https://{{ .Values.global.object_storage_endpoint }}"] 
-      cloudstorage.mecloudstorage.metadata.list={{ .Values.cloudstorage_metadatalist }}
-      cloud_storage_container="{{ .Values.global.public_container_name }}"
-      schema.basePath="https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
-
-    flink-conf: |+
-      jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
-      taskmanager.numberOfTaskSlots: 1
-      jobManager.numberOfTaskSlots: 1
-      parallelism.default: 1
-      jobmanager.execution.failover-strategy: region
-      taskmanager.memory.network.fraction: 0.1
-      scheduler-mode: reactive
-      heartbeat.timeout: 8000
-      heartbeat.interval: 5000
-      taskmanager.memory.process.size: 1700m
-      jobmanager.memory.process.size: 1600m
-      # classloader.resolve-order: "parent-first"
-      # state.savepoints.dir: file:///tmp
-
-    job_classname: org.sunbird.job.searchindexer.task.SearchIndexerStreamTask
-
   transaction-event-processor:
     enabled: true
     serviceMonitor: *serviceMonitor
@@ -315,15 +257,20 @@ flink_jobs:
         input.topic = "{{ .Values.global.env }}.knowlg.learning.graph.events"
         output.audit.topic = "{{ .Values.global.env }}.knowlg.telemetry.raw"
         output.obsrv.topic = "{{ .Values.global.env }}.knowlg.transaction.meta"
+        error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
         groupId = "{{ .Values.global.env }}-transaction-event-processor-group"
         zookeeper = ""
       }
 
       task {
-      consumer.parallelism = 1
-      parallelism = 1
-      producer.parallelism = 1
-      window.time = 60
+        consumer.parallelism = 1
+        parallelism = 1
+        producer.parallelism = 1
+        window.time = 60
+        router.parallelism = 1
+        compositeSearch.parallelism = 1
+        dialcodeIndexer.parallelism = 1
+        dialcodemetricsIndexer.parallelism = 1
       }
 
       schema {
@@ -341,7 +288,23 @@ flink_jobs:
           audit-event-generator = true
           audit-history-indexer = true
           obsrv-metadata-generator = true
+          composite-search-indexer = true
+          dialcode-indexer = false
+          dialcode-metrics-indexer = false
       }
+      compositesearch.index.name = "compositesearch"
+      nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "batches", "provider", "osMetadata", "actions"]
+      schema.definition_cache.expiry = 14400
+      restrict {
+        metadata.objectTypes = []
+        objectTypes = ["EventSet", "Questionnaire", "Misconception", "FrameworkType", "EventSet", "Event"]
+      }
+      cloudstorage.metadata.replace_absolute_path=true
+      cloudstorage.relative_path_prefix= "CONTENT_STORAGE_BASE_PATH"
+      cloudstorage.read_base_path="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_read_base_path "context" $) }}"
+      cloudstorage.write_base_path=["https://{{ .Values.global.object_storage_endpoint }}"] 
+      cloudstorage.mecloudstorage.metadata.list={{ .Values.cloudstorage_metadatalist }}
+      cloud_storage_container="{{ .Values.global.public_container_name }}"
 
     flink-conf: |+
       jobmanager.memory.flink.size: 1024m
