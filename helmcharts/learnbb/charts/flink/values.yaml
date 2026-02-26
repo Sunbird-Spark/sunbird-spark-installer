@@ -218,12 +218,6 @@ producer_batch_size: 98304
 producer_linger_ms: 10
 redis_timeout: 30000
 
-### Relation Cache Updater Job related Vars
-extractor_consumer_parallelism: 1
-relation_cache_updater_consumer_parallelism: 1
-relation_cache_updater_parallelism: 1
-middleware_content_hierarchy_table: "content_hierarchy"
-middleware_hierarchy_keyspace: "{{ .Values.global.env }}_hierarchy_store"
 ###  Certificate Job related Vars
 certificate_generator_consumer_parallelism: 1
 certificate_generator_parallelism: 1
@@ -394,42 +388,6 @@ base_config: |
     }
     sunbird_instance_name = "Sunbird"
 flink_jobs:
-  relation-cache-updater:
-    enabled: true
-    serviceMonitor: *serviceMonitor
-    config: |+
-      include file("/data/flink/conf/base-config.conf")
-      kafka {
-        input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_content_publish_request "context" $) }}"
-        groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_relation_cache_updater "context" $) }}"
-        zookeeper = ""
-
-      }
-      task {
-        consumer.parallelism = "{{ .Values.relation_cache_updater_consumer_parallelism }}"
-        parallelism = "{{ .Values.relation_cache_updater_parallelism }}"
-      }
-      lms-cassandra {
-            keyspace = "{{ include "common.tplvalues.render" (dict "value" .Values.middleware_hierarchy_keyspace "context" $) }}"
-            table = "{{ .Values.middleware_content_hierarchy_table }}"
-      }
-      redis {
-        database.index = 10
-      }
-      dp-redis {
-        host = "{{ .Values.global.redis.host }}"
-        port = 6379
-        database.index = 5
-      }
-    flink-conf: |+
-      jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
-      taskmanager.numberOfTaskSlots: 1
-      parallelism.default: 1
-      jobmanager.execution.failover-strategy: region
-      taskmanager.memory.network.fraction: 0.1
-    job_classname: org.sunbird.job.relationcache.task.RelationCacheUpdaterStreamTask
-
   collection-certificate-generator:
     enabled: true
     serviceMonitor: *serviceMonitor
