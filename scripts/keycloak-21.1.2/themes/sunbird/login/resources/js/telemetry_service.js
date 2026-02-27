@@ -2845,7 +2845,8 @@ var matchPassword = () => {
 var backToApplication = () => {
   var redirect_uri = getValueFromSession('redirect_uri');
   if (redirect_uri) {
-    window.location.href = redirect_uri;
+    var updatedQuery = redirect_uri.split('?')[0];
+    window.location.href = updatedQuery;
   }
 }
 

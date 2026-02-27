@@ -26,6 +26,8 @@ global:
   release_version: release-7.0.0
   domain: ""
   lets_encrypt_ssl: false  #enable this if you are using  let's encrypt ssl certificate
+  cert_notifications:
+    email: "" # provide the email address for certificate renewal notifications/alerts
   play_http:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
   subscription_id: ""
