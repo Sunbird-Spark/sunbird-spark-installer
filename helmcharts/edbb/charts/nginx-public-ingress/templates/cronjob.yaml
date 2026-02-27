@@ -55,7 +55,7 @@ spec:
 
               env:
                 - name: EMAIL
-                  value: {{ .Values.global.cert_notifications.email }}
+                  value: {{ if .Values.global.cert_notifications }}{{ .Values.global.cert_notifications.email | quote }}{{ else }}""{{ end }}
                 - name: DOMAIN
                   value: {{ .Values.global.domain }}
                 - name: CERTBOT_STAGING
