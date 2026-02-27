@@ -4,9 +4,6 @@ fullnameOverride: "dialcode-context-updater"
 replicaCount: 1
 
 image:
-  registry: ghcr.io
-  repository: sunbird-knowlg/knowledge-platform-jobs
-  tag: "release-8.1.0_rc1_e7ac747"
   pullPolicy: IfNotPresent
   pullSecrets: []
 

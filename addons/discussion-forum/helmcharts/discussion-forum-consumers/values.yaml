@@ -2,9 +2,6 @@ nameOverride: ""
 fullnameOverride: ""
 
 image:
-  registry: ghcr.io
-  repository: sunbird-spark/kong-api-scripts
-  tag: "develop_5c87617"
   pullPolicy: Always
   pullSecrets: []
 

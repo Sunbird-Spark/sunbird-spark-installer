@@ -3,11 +3,7 @@ fullnameOverride: "discussionmw"
 
 replicaCount: 1
 
-image:
-  registry: sunbirded.azurecr.io
-  repository: discussion-middleware
-  tag: release-7.0.0_RC1_850b795_3
-  pullSecrets: []
+image: {}
 
 podAnnotations: {}
 

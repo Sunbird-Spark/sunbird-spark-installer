@@ -4,9 +4,6 @@ fullnameOverride: "video-stream-generator"
 replicaCount: 1
 
 image:
-  registry: "ghcr.io"
-  repository: "sunbird-knowlg/knowledge-platform-jobs"
-  tag: "spark-v0.1_b7e896f"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
