@@ -87,7 +87,7 @@ While the installer may work with other versions, these are the versions that ha
          enable_asset_enrichment: true
          ```
 
-5. Log in to your cloud provider:
+6. Log in to your cloud provider:
     ```bash
     # If  cloud provider is Azure
     az login --tenant AZURE_TENANT_ID
@@ -98,7 +98,7 @@ While the installer may work with other versions, these are the versions that ha
     # If cloud provider is GCP
     gcloud auth login
     ```
-6. Run the installation script:
+7. Run the installation script:
      ```bash
      time ./install.sh
      ```
