@@ -118,6 +118,7 @@ yugabyte: &yugabyte
       - name: "druid_raw"
       - name: "superset"
       - name: "registry"
+      - name: "portal"
   gflags:
     tserver: 
       cdc_enable_replicate_intents: "true"    
