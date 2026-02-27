@@ -24,7 +24,7 @@
         </div>
         
         <#if realm.password>
-            <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
+            <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="POST">
                 <div class="${properties.kcFormGroupClass!}">
                     <label for="emailormobile" class="${properties.kcLabelClass!}">Email ID / Mobile Number</label>
 
@@ -65,7 +65,7 @@
     <#elseif section = "info" >
         <#if realm.password && realm.registrationAllowed && !usernameEditDisabled??>
             <div id="kc-registration" class="registration-link">
-                <span>New user? Please <a tabindex="5" onclick=navigate('self')>create an account</a> to continue.</span>
+                <span>New user? Please <a tabindex="5" onclick="navigate('self'); return false;">create an account</a> to continue.</span>
             </div>
         </#if>
     </#if>

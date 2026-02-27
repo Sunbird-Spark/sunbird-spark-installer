@@ -25,6 +25,11 @@
         </#list>
     </#if>
     
+    <#-- Hide page immediately when an actionUri redirect is pending -->
+    <#if actionUri??>
+    <style>body { visibility: hidden !important; }</style>
+    </#if>
+
     <#-- Hide already logged in messages immediately -->
     <style type="text/css">
         .toast-container .toast:has(.toast-message:contains("already logged in")),
@@ -391,22 +396,6 @@
         })();
     </script>
     </#if>
-    <script type="text/javascript">
-        (function () {
-            try {
-                var flag = sessionStorage.getItem('sb_redirect_reset_success');
-                if (flag) {
-                    sessionStorage.removeItem('sb_redirect_reset_success');
-                    var base = '<#if client??>${client.baseUrl!}</#if>';
-                    if (!base || base.length === 0) {
-                        base = window.location.origin;
-                    }
-                    var target = String(base).replace(/\/+$/, '') + '/password-reset-success';
-                    window.location.href = target;
-                }
-            } catch (e) {}
-        })();
-    </script>
 </body>
 </html>
 </#macro>
