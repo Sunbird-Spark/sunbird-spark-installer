@@ -1830,3 +1830,4 @@ CREATE TABLE IF NOT EXISTS sunbird.page_section (
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
 
+INSERT INTO "system_settings" ("field", "id", "value") VALUES ('default_channel','default_channel','sunbird');
