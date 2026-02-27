@@ -111,18 +111,12 @@ keycloak_realm: sunbird
 sunbird_sso_client_id: lms
 sunbird_sso_client_secret: "lms"
 actor_hostname: actor-service
-sunbird_analytics_api_base_url: "http://analytics-service:9000"
-sunbird_search_service_api_base_url: "http://search-service:9000"
 sunbird_quartz_mode: cluster
 sunbird_encryption_mode: local
-sunbird_badger_baseurl: http://badger:8004
 sunbird_remote_req_router_path: pekko.tcp://SunbirdMWSystem@actor-service:8088/user/RequestRouter
 sunbird_remote_bg_req_router_path: kka.tcp://SunbirdMWSystem@actor-service:8088/user/BackgroundRequestRouter
-sunbird_api_mgr_base_url: http://knowledge-mw-service:5000
-sunbird_api_base_url: http://knowledge-mw-service:5000
 sunbird_default_channel: "sunbird"
 sunbird_user_bulk_upload_size: "1001"
-sunbird_cert_service_base_url:  "http://cert-service:9000"
 sunbird_otp_allowed_attempt: "5"
 feed_limit: "30"
 form_api_endpoint: "/plugin/v1/form/read"
@@ -132,7 +126,6 @@ org_index_alias: "org_alias"
 sunbird_reset_pass_msg: "You have requested to reset password. Click on the link to set a password:"
 sunbird_mw_system_host: "localhost"
 sunbird_mw_system_port: 8088
-sunbird_telemetry_base_url: "http://telemetry-service:9001"
 telemetry_queue_threshold_value: "100"
 sunbird_cs_search_path: "/v1/content/search"
 sunbird_registry_service_baseurl: "http://registry-service:8081"
@@ -152,25 +145,17 @@ sunbird_keycloak_user_federation_provider_id: "cassandrafederationid"
 sunbird_gzip_enable: "true"
 sunbird_gzip_size_threshold: "262144"
 sunbird_cache_enable: "false"
-notification_service_base_url: "http://localhost:9000"
 keys_basepath: "/keys/"
 PORTAL_SERVICE_PORT: "http://player:3000"
 sunbird_installation_display_name_for_sms: "Sunbird"
-sunbird_sso_lb_ip: "http://keycloak:8080/"
 isMultiDCEnabled: "false"
 JAVA_OPTIONS: -Xmx1024m
 _JAVA_OPTIONS: "-Dlog4j2.formatMsgNoLookups=true"
-sunbird_content_service_api_base_url: http://knowlg-service:9000
 enable_captcha: "false"
 user-deletion-broadcast-topic: "local.delete.user"
 
 # LMS Specific
-sunbird_group_service_api_base_url: "http://groups-service:9000"
-content_service_url: "http://knowlg-service:9000"
-content_read_url: "/content/v3/read/"
-sunbird_user_org_api_base_url: "http://localhost:9000"
 sunbird_user_search_cretordetails_fields: "id,firstName,lastName"
-sunbird_user_service_api_base_url: "http://localhost:9000"
 limit_managed_user_creation: "true"
 managed_user_limit: "30"
 sunbird_user_qrcode_courses_limit: "5000"
@@ -193,7 +178,6 @@ hierarchy_store_keyspace: "_hierarchy_store"
 hierarchy_relations_table: "hierarchy_relations"
 cloud_storage_path_prefix_dial: "dial"
 cloud_store_base_path_placeholder: ""
-sunbird_dial_service_base_url: http://dial-service:9000
 sunbird_dial_service_search_url: "/dialcode/v3/search"
 
 enable_activity_aggregator_actor: "true"
@@ -203,13 +187,11 @@ redis_relation_cache_index: "10"
 dedup_redis_index: "13"
 dedup_redis_expiry: "604800"
 activity_input_dedup_enabled: "false"
-service_search_base_path: "http://search-service:9000"
 filter_processed_enrolments: "true"
 assessment_direct_aggregation_enabled: "true"
 
 # Notification Specific
 sunbird_cassandra_notification_keyspace: sunbird_notifications
-LEARNER_SERVICE_PORT: "http://localhost:9000"
 
 # OPA / Envoy
 opa_enabled: false
@@ -257,3 +239,8 @@ init_container_resources:
   limits:
     cpu: "1"
     memory: "1024Mi"
+
+global:
+  keycloak_kid_keys_configmap: keycloak-kids-keys
+  keycloak_key_configmap: keycloak-key
+  kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
