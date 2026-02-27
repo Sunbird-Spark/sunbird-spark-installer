@@ -137,6 +137,7 @@ sunbird_course_batch_notification_enabled: true
 sunbird_user_profile_field_default_visibility: private
 sunbird_email_max_recipients_limit: 100
 sunbird_url_shortner_enable: false
+sunbird_password_reset_login_page_url:  "/password-reset-success"
 telemetry_pdata_pid: lern-service
 api_actor_provider: local
 background_actor_provider: local

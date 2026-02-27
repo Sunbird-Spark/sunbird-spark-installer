@@ -1,8 +1,7 @@
-replicaCount: 1
+default: "dev"
+env: &env
 fullname: obsrvbb
-
-provisioningAnnotations: &provisioningAnnotations
-  "helm.sh/hook-weight": "-4"
+replicaCount: 1
 
 kafka: &kafka
   enabled: true
@@ -48,7 +47,9 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
-      
+provisioningAnnotations: &provisioningAnnotations
+  "helm.sh/hook-weight": "-4"  
+
 superset:
   enabled: true
 
@@ -77,10 +78,8 @@ yugabyte: &yugabyte
     master: 3
     tserver: 3
   username: yugabyte  
-  password: yugabyte    
+  password: yugabyte
 
-env: &env
-default: "dev"
 global:
   kafka: *kafka
   yugabyte: *yugabyte
