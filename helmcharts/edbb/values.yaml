@@ -2,6 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+provisioningAnnotations: &provisioningAnnotations
+  "helm.sh/hook-weight": "-4"
+    # "helm.sh/hook": post-install,post-upgrade
+
+
 devops_release_branch: release-7.0.0
 
 fullname: edbb
@@ -76,10 +81,6 @@ migration:
 nginx-private-ingress:
   enabled: false
 
-provisioningAnnotations: &provisioningAnnotations
-  "helm.sh/hook-weight": "-4"
-  # "helm.sh/hook": post-install,post-upgrade
-
 redis: &redis
   enabled: true
   registry: "sunbirded.azurecr.io"
@@ -126,7 +127,6 @@ yugabyte: &yugabyte
       cdc_enable_replicate_intents: "true"    
       ysql_enable_read_committed_isolation: "true"
 
-
   image:
     registry: yugabytedb
     repository: yugabyte
@@ -151,4 +151,3 @@ global:
   kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
   redis: *redis
   yugabyte: *yugabyte
-

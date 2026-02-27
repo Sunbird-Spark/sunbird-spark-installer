@@ -96,6 +96,15 @@ dial:
       cpu: 1
       memory: 1024Mi  
 
+janusgraph:
+  resources:
+    requests:
+      cpu: 1
+      memory: 3Gi
+    limits:
+      cpu: 3
+      memory: 6Gi
+
 knowlg:
   resources:
     requests:
@@ -631,12 +640,3 @@ yugabyte:
       limits:
         cpu: "2"
         memory: 4Gi
-
-janusgraph:
-  resources:
-    requests:
-      cpu: 1
-      memory: 3Gi
-    limits:
-      cpu: 3
-      memory: 6Gi

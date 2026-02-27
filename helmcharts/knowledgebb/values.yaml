@@ -1,6 +1,8 @@
 content:
   opa_enabled: true
 
+provisioningAnnotations: &provisioningAnnotations
+  "helm.sh/hook-weight": "-4"
 fullname: kbb
 
 knowlg_automation_repo_branch: main
@@ -150,9 +152,6 @@ objectcategorydefinition: &objectcategorydefinition
 
 # play_http: &play_http
 #   secret_key: "secretKey"
-
-provisioningAnnotations: &provisioningAnnotations
-  "helm.sh/hook-weight": "-4"
 
 redis: &redis
   enabled: true
