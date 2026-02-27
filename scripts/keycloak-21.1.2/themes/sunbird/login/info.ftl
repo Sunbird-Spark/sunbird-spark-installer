@@ -12,6 +12,7 @@
              <#if skipLink??>
              <#else>
                <#if pageRedirectUri??>
+                 <style>body { visibility: hidden !important; }</style>
                  <p><a href="${pageRedirectUri}" class="kc-button">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
                  <script type="text/javascript">
                    window.location.href = "${pageRedirectUri}";
@@ -30,6 +31,7 @@
                    </script>
                  </div>
                <#elseif client.baseUrl??>
+                 <style>body { visibility: hidden !important; }</style>
                  <p><a href="${client.baseUrl}" class="kc-button">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
                  <script type="text/javascript">
                    window.location.href = "${client.baseUrl}";
