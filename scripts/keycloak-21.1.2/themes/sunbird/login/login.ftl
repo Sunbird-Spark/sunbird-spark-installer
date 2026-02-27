@@ -24,7 +24,7 @@
         </div>
         
         <#if realm.password>
-            <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="get">
+            <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="POST">
                 <div class="${properties.kcFormGroupClass!}">
                     <label for="emailormobile" class="${properties.kcLabelClass!}">Email ID / Mobile Number</label>
 
