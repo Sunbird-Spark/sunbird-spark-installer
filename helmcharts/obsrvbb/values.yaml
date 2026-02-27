@@ -1,10 +1,10 @@
+replicaCount: 1
+fullname: obsrvbb
+env: &env
+default: "dev"
+
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
-
-default: "dev"
-env: &env
-fullname: obsrvbb
-replicaCount: 1
 
 kafka: &kafka
   enabled: true
@@ -61,7 +61,6 @@ yugabyte: &yugabyte
   postgresql_port: 5433
   databases:
     - name: "superset"
-
   image:
     registry: yugabytedb
     repository: yugabyte

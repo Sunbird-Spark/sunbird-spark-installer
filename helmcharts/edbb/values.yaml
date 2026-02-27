@@ -1,17 +1,13 @@
 # Default values for obsrvbb.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+fullname: edbb
+replicaCount: 1
+devops_release_branch: release-7.0.0
 
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
     # "helm.sh/hook": post-install,post-upgrade
-
-
-devops_release_branch: release-7.0.0
-
-fullname: edbb
-
-replicaCount: 1
 
 kafka: &kafka
   enabled: true
@@ -126,7 +122,6 @@ yugabyte: &yugabyte
     tserver: 
       cdc_enable_replicate_intents: "true"    
       ysql_enable_read_committed_isolation: "true"
-
   image:
     registry: yugabytedb
     repository: yugabyte

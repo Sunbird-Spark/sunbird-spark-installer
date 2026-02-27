@@ -1,18 +1,19 @@
+fullname: kbb
+
+knowlg_automation_repo_branch: main
+
+channel: &channel
+  default: "in.ekstep"
+
 content:
   opa_enabled: true
 
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
-fullname: kbb
-
-knowlg_automation_repo_branch: main
 
 migration:
   yugabyte:
     waitTime: 120
-
-channel: &channel
-  default: "in.ekstep"
 
 elasticsearch: &es
   enabled: true

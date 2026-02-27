@@ -1,12 +1,11 @@
-cassandra_migration_version: 
+cassandra_migration_version: main
+devops_release_branch: release-8.0.0
 
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
 
 certregistry:
   opa_enabled: true
-
-devops_release_branch: release-8.0.0
 
 lern:
   opa_enabled: true
@@ -134,7 +133,6 @@ yugabyte: &yugabyte
     - name: "quartz"
     - name: "enc-keys"
     - name: "registry"
-
   image:
     registry: yugabytedb
     repository: yugabyte
