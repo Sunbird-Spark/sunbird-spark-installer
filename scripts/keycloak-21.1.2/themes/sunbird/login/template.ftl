@@ -24,8 +24,8 @@
             <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
         </#list>
     </#if>
-    <#-- Hide page immediately when an actionUri redirect is pending -->
-    <#if actionUri??>
+    <#-- Hide page immediately when an auto-redirect is pending -->
+    <#if actionUri?? || pageRedirectUri?? || client.baseUrl?has_content>
     <style>body { visibility: hidden !important; }</style>
     </#if>
     <#if properties.scripts?has_content>

@@ -13,6 +13,9 @@
              <#else>
                <#if pageRedirectUri??>
                  <p><a href="${pageRedirectUri}" class="kc-button">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
+                 <script type="text/javascript">
+                   window.location.href = "${pageRedirectUri}";
+                 </script>
                <#elseif actionUri??>
                  <div class="ui text active centered inline large loader">Loading.. Please wait..</div>
                  <div id="kc-info-message-hide" style="display:none">
@@ -28,6 +31,9 @@
                  </div>
                <#elseif client.baseUrl??>
                  <p><a href="${client.baseUrl}" class="kc-button">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
+                 <script type="text/javascript">
+                   window.location.href = "${client.baseUrl}";
+                 </script>
                </#if>
              </#if>
         </div>
