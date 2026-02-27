@@ -835,7 +835,7 @@ div[class*="kcFormGroupClass"] {
 .toast {
     min-width: 280px;
     max-width: 360px;
-    background: #2D3748;
+    background: #EDEBE3;
     color: #111;
     border-radius: 8px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.2);
