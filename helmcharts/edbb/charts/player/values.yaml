@@ -67,7 +67,7 @@ livenessProbe:
       port: 3000
   initialDelaySeconds: 15
   periodSeconds: 15
-  timeoutSeconds: 5
+  timeoutSeconds: 300
 
 readinessProbe:
   failureThreshold: 2
@@ -76,7 +76,7 @@ readinessProbe:
       port: 3000
   initialDelaySeconds: 15
   periodSeconds: 15
-  timeoutSeconds: 5
+  timeoutSeconds: 300
 
 nodeSelector: {}
 tolerations: []
@@ -113,7 +113,7 @@ sidecars: {}
   #   args: ["-c", "tail -f /var/log/app.log"] # Run a shell script that tails the log file
 
 opa_enabled: false
-learning_service_base_url: "http://userorg-service:9000"
+learning_service_base_url: "http://lern-service:9000"
 sunbird_session_store_type: "yugabyte"
 sunbird_anonymous_session_ttl: "86400000"
 sunbird_portal_log_level: "debug"
