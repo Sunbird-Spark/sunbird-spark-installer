@@ -218,7 +218,7 @@ kafka:
         cpu: 750m
         memory: 1024Mi
     persistence:
-      size: 5Gi
+      size: 8Gi
   controller:
     replicaCount: 3
     resources:
@@ -229,7 +229,7 @@ kafka:
         cpu: 750m
         memory: 1024Mi
     persistence:
-      size: 5Gi
+      size: 8Gi
 
 # keycloak:
 #   resources:
