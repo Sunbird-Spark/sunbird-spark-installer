@@ -1,9 +1,19 @@
 fullname: kbb
+
 knowlg_automation_repo_branch: main
+
+channel: &channel
+  default: "in.ekstep"
+
+content:
+  opa_enabled: true
 
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
 
+migration:
+  yugabyte:
+    waitTime: 120
 
 elasticsearch: &es
   enabled: true
@@ -42,50 +52,26 @@ elasticsearch: &es
     repository: bitnami-shell-archived
     tag: 11-debian-11-r54
 
-redis: &redis
-  enabled: true
-  nameOverride: "redis"
-  fullnameOverride: "redis"
-  auth:
-    enabled: false
-  host: "redis-master"
-  port: 6379
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  replica:
-    replicaCount: 0
-  master:
-    persistence:
-      size: 25Gi
+graph_passport: &graph_passport
+  key_base: "secretKey"
 
-yugabyte: &yugabyte
+installation: &installation
+  id: ekstep
+
+janusgraph: &janusgraph
   enabled: true
-  nameOverride: "yugabyte"
-  fullnameOverride: "yugabyte"
-  host: "yb-tserver-service" 
-  port: 9042
-  postgresql_port: 5433
+  fullnameOverride: "janusgraph"
+  nameOverride: "janusgraph"
+  host: "janusgraph"
+  port: 8182
   image:
-    registry: yugabytedb
-    repository: yugabyte
-    tag: 2025.2.0.0-b131 
+    registry: docker.io
+    repository: bitnamilegacy/janusgraph
+    tag: 1.1.0-debian-12-r21
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
   provisioning:
-    annotations: *provisioningAnnotations
-  persistence:
-    size: 25Gi  
-  # Force single replica for Yugabyte masters and tservers (override subchart defaults)
-  replicas:
-    master: 3
-    tserver: 3   
-  username: yugabyte
-  password: "yugabyte"    
-
-yugabytecql:
-  image:
-    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_499032f"
+    annotations: *provisioningAnnotations 
 
 kafka: &kafka
   enabled: true
@@ -162,53 +148,72 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
-janusgraph: &janusgraph
-  enabled: true
-  fullnameOverride: "janusgraph"
-  nameOverride: "janusgraph"
-  host: "janusgraph"
-  port: 8182
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/janusgraph
-    tag: 1.1.0-debian-12-r21
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  provisioning:
-    annotations: *provisioningAnnotations 
-
-# play_http: &play_http
-#   secret_key: "secretKey"
-schema: &schema
-  base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
-graph_passport: &graph_passport
-  key_base: "secretKey"
-installation: &installation
-  id: ekstep
-channel: &channel
-  default: "in.ekstep"
 objectcategorydefinition: &objectcategorydefinition
   keyspace: "{{ .Values.global.env }}_category_store"
 
+# play_http: &play_http
+#   secret_key: "secretKey"
+
+redis: &redis
+  enabled: true
+  nameOverride: "redis"
+  fullnameOverride: "redis"
+  auth:
+    enabled: false
+  host: "redis-master"
+  port: 6379
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+  replica:
+    replicaCount: 0
+  master:
+    persistence:
+      size: 25Gi
+
+schema: &schema
+  base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
+
+yugabyte: &yugabyte
+  enabled: true
+  nameOverride: "yugabyte"
+  fullnameOverride: "yugabyte"
+  host: "yb-tserver-service" 
+  port: 9042
+  postgresql_port: 5433
+  image:
+    registry: yugabytedb
+    repository: yugabyte
+    tag: 2025.2.0.0-b131 
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+  provisioning:
+    annotations: *provisioningAnnotations
+  persistence:
+    size: 25Gi  
+  # Force single replica for Yugabyte masters and tservers (override subchart defaults)
+  replicas:
+    master: 3
+    tserver: 3   
+  username: yugabyte
+  password: "yugabyte"    
+
+yugabytecql:
+  image:
+    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
+    tag: "develop_499032f"
+
 global:
-  redis: *redis
+  channel: *channel
   elasticsearch: *es
-  yugabyte: *yugabyte
-  kafka: *kafka
-  janusgraph: *janusgraph
-  # play_http: *play_http
-  schema: *schema
   graph_passport: *graph_passport
   installation: *installation
-  channel: *channel
-  objectcategorydefinition: *objectcategorydefinition
-  provisioningAnnotations: *provisioningAnnotations
+  janusgraph: *janusgraph
+  kafka: *kafka
   keycloak_kid_keys_configmap: keycloak-kids-keys
   kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
-
-content:
-  opa_enabled: true
-
-migration:
-  yugabyte:
-    waitTime: 120
+  objectcategorydefinition: *objectcategorydefinition
+  # play_http: *play_http
+  provisioningAnnotations: *provisioningAnnotations
+  redis: *redis
+  schema: *schema
+  yugabyte: *yugabyte
