@@ -24,6 +24,10 @@
             <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
         </#list>
     </#if>
+    <#-- Hide page immediately when an actionUri redirect is pending -->
+    <#if actionUri??>
+    <style>body { visibility: hidden !important; }</style>
+    </#if>
     <#if properties.scripts?has_content>
         <#list properties.scripts?split(' ') as script>
             <script src="${url.resourcesPath}/${script}" type="text/javascript"></script>
