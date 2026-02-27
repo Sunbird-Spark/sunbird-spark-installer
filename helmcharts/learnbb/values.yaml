@@ -1,5 +1,8 @@
 cassandra_migration_version: 
 
+provisioningAnnotations: &provisioningAnnotations
+  "helm.sh/hook-weight": "-4"
+
 certregistry:
   opa_enabled: true
 
@@ -104,9 +107,6 @@ neo4j: &neo4j
   provisioning:
     annotations: *provisioningAnnotations
 
-provisioningAnnotations: &provisioningAnnotations
-  "helm.sh/hook-weight": "-4"
-
 redis: &redis
   enabled: true
   fullnameOverride: "redis"
@@ -156,8 +156,6 @@ yugabytecql:
   image:
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_499032f"
-
-
 
 global:
   elasticsearch: *es
