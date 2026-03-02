@@ -42,14 +42,14 @@ spec:
           export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
           export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
           # run migrations directly from embedded scripts
-          cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-knowlg
+          cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern
           chmod +x execute_migrations.sh || true
           set +e
           ./execute_migrations.sh $ENV
           MIGRATION_EXIT=$?
           set -e
           # Print log file to stdout so errors are visible in kubectl logs
-          LOG_FILE=$(ls -t /opt/migrations/sunbird-yugabyte-migrations/sunbird-knowlg/migration_*.log 2>/dev/null | head -1)
+          LOG_FILE=$(ls -t /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern/migration_*.log 2>/dev/null | head -1)
           if [ -n "$LOG_FILE" ]; then
             echo "======== MIGRATION LOG ========"
             cat "$LOG_FILE"
