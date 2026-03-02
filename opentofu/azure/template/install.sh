@@ -112,7 +112,7 @@ function install_helm_components() {
 }
 
 function dns_mapping() {
-    domain_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_web_url}')
+    domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
     PUBLIC_IP=$(kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].ip}')
 
     local timeout=$((SECONDS + 300))
@@ -142,7 +142,7 @@ function generate_postman_env() {
     if [ "$(basename $current_directory)" != "$environment" ]; then
         cd ../opentofu/azure/$environment 2>/dev/null || true
     fi
-    domain_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_web_url}')
+    domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
     blob_store_path=$(kubectl get cm -n sunbird player-env -o jsonpath='{.data.sunbird_public_storage_account_name}' | sed 's|/$||')
     public_container_name=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.cloud_storage_resourceBundle_bucketname}') 
     api_key=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_api_auth_token}')
