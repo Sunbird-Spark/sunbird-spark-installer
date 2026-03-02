@@ -73,7 +73,7 @@
     <#elseif section = "info" >
         <#if realm.password && realm.registrationAllowed && !usernameEditDisabled??>
             <div id="kc-registration" class="registration-link">
-                <span>New user? Please <a tabindex="5" onclick=navigate('self')>create an account</a> to continue.</span>            
+                <span>New user? Please <a tabindex="5" onclick=navigate('self')>create an account</a> to continue.</span>
             </div>
         </#if>
     </#if>
