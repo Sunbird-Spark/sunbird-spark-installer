@@ -58,8 +58,8 @@ images:
     tag: "release-7.7.0_rc1_50b5b2d_2"
 
   player: &player
-    repository: "ghcr.io/sunbird-ed/sunbirded-portal/player"
-    tag: "release-8.1.0_rc5_61af49d"
+    repository: "sunbirded.azurecr.io/sunbird-portal"
+    tag: "spark-v0.54_9fd166b"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -110,8 +110,8 @@ images:
     tag: "release-5.1.0_2bc7760_9"
 
   keycloak: &keycloak
-    repository: "sunbirded.azurecr.io/keycloak"
-    tag: "release-8.0.0_1acd65c"
+    repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
+    tag: "develop_af3556f"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
@@ -166,7 +166,7 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_7c0a40d"
+    tag: "develop_8425122"
 
 # Internal block with pull secrets
 internal: &internal

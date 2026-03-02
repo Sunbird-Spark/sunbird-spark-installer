@@ -486,7 +486,7 @@ kong_apis:
 
 - name: createForm
   uris: "{{ .Values.data_service_prefix }}/v1/form/create"
-  url: "{{ .Values.player_service_url }}/plugin/v1/form/create"
+  url: "{{ .Values.player_service_url }}/data/v1/form/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -2285,7 +2285,7 @@ kong_apis:
 
 - name: readForm
   uris: "{{ .Values.data_service_prefix }}/v1/form/read"
-  url: "{{ .Values.player_service_url }}/plugin/v1/form/read"
+  url: "{{ .Values.player_service_url }}/data/v1/form/read"
   strip_path: true
   plugins:
   - name: cors
@@ -3363,7 +3363,7 @@ kong_apis:
 
 - name: updateForm
   uris: "{{ .Values.data_service_prefix }}/v1/form/update"
-  url: "{{ .Values.player_service_url }}/plugin/v1/form/update"
+  url: "{{ .Values.player_service_url }}/data/v1/form/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -4263,7 +4263,7 @@ kong_apis:
 
 - name: listForm
   uris: "{{ .Values.data_service_prefix }}/v1/form/list"
-  url: "{{ .Values.player_service_url }}/plugin/v1/form/list"
+  url: "{{ .Values.player_service_url }}/data/v1/form/list"
   strip_path: true
   plugins:
   - name: jwt
@@ -8262,7 +8262,7 @@ kong_apis:
 
 - name: fetchAllForm
   uris: "{{ .Values.data_service_prefix }}/v1/form/fetchAll"
-  url: "{{ .Values.player_service_url }}/plugin/v1/form/fetchAll"
+  url: "{{ .Values.player_service_url }}/data/v1/form/fetchAll"
   strip_path: true
   plugins:
   - name: jwt

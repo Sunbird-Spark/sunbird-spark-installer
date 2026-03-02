@@ -72,6 +72,7 @@ livenessProbe:
   initialDelaySeconds: 15
   periodSeconds: 15
   failureThreshold: 5
+  timeoutSeconds: 300
 
 # readinessProbe: {}
 # Example:
@@ -82,6 +83,7 @@ readinessProbe:
   initialDelaySeconds: 15
   periodSeconds: 15
   failureThreshold: 5
+  timeoutSeconds: 300
 
 nodeSelector: {}
 tolerations: []

@@ -1,6 +1,5 @@
 #!/bin/bash
 set -euo pipefail
-
 environment=$(basename "$(pwd)")
 
 function create_tf_backend() {
@@ -113,7 +112,7 @@ function install_helm_components() {
 }
 
 function dns_mapping() {
-    domain_name=$(kubectl get cm -n sunbird lms-env -ojsonpath='{.data.sunbird_web_url}')
+    domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
     PUBLIC_IP=$(kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].ip}')
 
     local timeout=$((SECONDS + 1200))
@@ -143,13 +142,13 @@ function generate_postman_env() {
     if [ "$(basename $current_directory)" != "$environment" ]; then
         cd ../opentofu/azure/$environment 2>/dev/null || true
     fi
-    domain_name=$(kubectl get cm -n sunbird lms-env -ojsonpath='{.data.sunbird_web_url}')
-    blob_store_path=$(kubectl get cm -n sunbird player-env -o jsonpath='{.data.sunbird_public_storage_account_name}' | sed 's|/$||')
-    public_container_name=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.cloud_storage_resourceBundle_bucketname}') 
-    api_key=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_api_auth_token}')
-    keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_portal_session_secret}')
-    keycloak_admin=$(kubectl get cm -n sunbird userorg-env -ojsonpath='{.data.sunbird_sso_username}')
-    keycloak_password=$(kubectl get cm -n sunbird userorg-env -ojsonpath='{.data.sunbird_sso_password}')
+    domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
+    blob_store_path=$(kubectl get cm -n sunbird lern-env -o jsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
+    public_container_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_content_cloud_storage_container}') 
+    api_key=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_authorization}')
+    keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
+    keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
+    keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
     generated_uuid=$(uuidgen)
     temp_file=$(mktemp)
     cp postman.env.json "${temp_file}"
@@ -169,8 +168,8 @@ function generate_postman_env() {
 
 function restart_workloads_using_keys() {
     echo -e "\nRestart workloads using keycloak keys and wait for them to start..."
-    kubectl rollout restart deployment -n sunbird neo4j knowledge-mw player report content adminutil cert-registry groups userorg lms notification registry analytics
-    kubectl rollout status deployment -n sunbird neo4j knowledge-mw player report content adminutil cert-registry groups userorg lms notification registry analytics
+    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
+    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
     echo -e "\nWaiting for all pods to start"
 }
 
