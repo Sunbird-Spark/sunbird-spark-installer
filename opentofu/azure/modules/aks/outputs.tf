@@ -21,13 +21,3 @@ output "cluster_ca_certificate" {
 output "private_ingressgateway_ip" {
   value = var.private_ingressgateway_ip
 }
-
-output "aks_identity_principal_id" {
-  description = "Principal ID of the AKS System-Assigned Managed Identity (for role assignments)"
-  value       = azurerm_kubernetes_cluster.aks.identity[0].principal_id
-}
-
-output "aks_identity_tenant_id" {
-  description = "Tenant ID of the AKS System-Assigned Managed Identity"
-  value       = azurerm_kubernetes_cluster.aks.identity[0].tenant_id
-}
