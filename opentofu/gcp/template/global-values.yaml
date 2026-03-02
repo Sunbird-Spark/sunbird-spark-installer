@@ -60,8 +60,14 @@ global:
   postgresql:
     postgresqlUsername: postgres
     postgresqlPassword: *postgresql-password
+  postgresql:
+    postgresqlUsername: postgres
+    postgresqlPassword: *postgresql-password
   superset:
-        password: *superset-admin-password    
+      init:
+        adminUser:
+          username: admin
+          password: *superset-admin-password   
   keycloak:
    keycloak_user: admin
    keycloak_password: *keycloak-password  
