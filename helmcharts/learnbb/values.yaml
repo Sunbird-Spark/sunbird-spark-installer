@@ -6,9 +6,10 @@ provisioningAnnotations: &provisioningAnnotations
 
 certregistry:
   opa_enabled: true
-
 lern:
-  opa_enabled: true
+  opa_enabled: 
+registry:
+  opa_enabled: false
 
 migration:
   yugabyte:
@@ -19,9 +20,6 @@ migration:
     waitTime: 120
 
 postgres_migration_image: sunbirded.azurecr.io/postgresql:11.14.0
-
-registry:
-  opa_enabled: false
 
 elasticsearch: &es
   enabled: true

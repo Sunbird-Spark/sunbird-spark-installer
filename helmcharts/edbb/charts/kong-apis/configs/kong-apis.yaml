@@ -214,25 +214,6 @@ kong_apis:
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
-- name: compositeSearchv3
-  uris: "{{ .Values.composite_service_prefix }}/v3/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/search"
-  strip_path: true
-  plugins:
-  - name: jwt
-  - name: cors
-  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
-  - name: acl
-    config.allow:
-    - contentAdmin
-    - contentTempAccess
-  - name: rate-limiting
-    config.policy: local
-    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
-    config.limit_by: credential
-  - name: request-size-limiting
-    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
-
 - name: compositePrivateSearch
   uris: "{{ .Values.composite_service_prefix }}/v1/private/search"
   url: "{{ .Values.knowledge_mw_service_url }}/v3/private/search"
@@ -1846,25 +1827,6 @@ kong_apis:
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
-- name: PrivateContentReadAPIsv3
-  uris: "{{ .Values.content_prefix }}/v3/read"
-  url: "{{ .Values.content_service_url }}/content/v3/read"
-  strip_path: true
-  plugins:
-  - name: jwt
-  - name: cors
-  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
-  - name: acl
-    config.allow:
-    - contentSuperAdmin
-  - name: rate-limiting
-    config.policy: local
-    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
-    config.limit_by: credential
-  - name: request-size-limiting
-    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
-
-
 - name: PrivateContentUpdateAPIs
   uris: "{{ .Values.private_content_prefix }}/v3/update"
   url: "{{ .Values.content_service_url }}/content/v3/update"
@@ -1919,25 +1881,6 @@ kong_apis:
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
-- name: PrivateContentUploadAPIv3
-  uris: "{{ .Values.content_prefix }}/v3/upload"
-  url: "{{ .Values.content_service_url }}/content/v3/upload"
-  strip_path: true
-  plugins:
-  - name: jwt
-  - name: cors
-  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
-  - name: acl
-    config.allow:
-    - contentSuperAdmin
-  - name: rate-limiting
-    config.policy: local
-    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
-    config.limit_by: credential
-  - name: request-size-limiting
-    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
-
-
 - name: PrivateContentReviewAPI
   uris: "{{ .Values.private_content_prefix }}/v3/review"
   url: "{{ .Values.content_service_url }}/content/v3/review"
@@ -1955,25 +1898,6 @@ kong_apis:
     config.limit_by: credential
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
-
-- name: PrivateContentReviewAPI3
-  uris: "{{ .Values.content_prefix }}/v3/review"
-  url: "{{ .Values.content_service_url }}/content/v3/review"
-  strip_path: true
-  plugins:
-  - name: jwt
-  - name: cors
-  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
-  - name: acl
-    config.allow:
-    - contentSuperAdmin
-  - name: rate-limiting
-    config.policy: local
-    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
-    config.limit_by: credential
-  - name: request-size-limiting
-    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
-
 
 - name: PrivateContentPublishAPI
   uris: "{{ .Values.private_content_prefix }}/v3/publish"
@@ -2013,24 +1937,6 @@ kong_apis:
 
 - name: PrivateContentHierarchyAPI
   uris: "{{ .Values.private_content_prefix }}/v3/hierarchy"
-  url: "{{ .Values.content_service_url }}/content/v3/hierarchy"
-  strip_path: true
-  plugins:
-  - name: jwt
-  - name: cors
-  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
-  - name: acl
-    config.allow:
-    - contentSuperAdmin
-  - name: rate-limiting
-    config.policy: local
-    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
-    config.limit_by: credential
-  - name: request-size-limiting
-    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
-
-- name: PrivateContentHierarchyAPIv3
-  uris: "{{ .Values.content_prefix }}/v3/hierarchy"
   url: "{{ .Values.content_service_url }}/content/v3/hierarchy"
   strip_path: true
   plugins:
