@@ -7,7 +7,7 @@ provisioningAnnotations: &provisioningAnnotations
 certregistry:
   opa_enabled: true
 lern:
-  opa_enabled: 
+  opa_enabled: true
 registry:
   opa_enabled: false
 
