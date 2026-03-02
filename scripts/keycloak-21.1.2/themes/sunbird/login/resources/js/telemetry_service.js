@@ -2713,10 +2713,10 @@ var forgetPassword = (redirectUrlPath) => {
           redirectUrlPath + updatedQuery;
       }
     } else {
-      window.location.href = window.location.protocol + '//' + window.location.host + redirectUrlPath;
+      redirectToLib();
     }
   } else {
-    window.location.href = window.location.protocol + '//' + window.location.host + redirectUrlPath;
+    redirectToLib();
   }
 }
 
