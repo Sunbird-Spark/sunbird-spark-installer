@@ -168,8 +168,8 @@ function generate_postman_env() {
 
 function restart_workloads_using_keys() {
     echo -e "\nRestart workloads using keycloak keys and wait for them to start..."
-    kubectl rollout restart deployment -n sunbird neo4j knowledge-mw player report content adminutil cert-registry groups userorg lms notification registry analytics
-    kubectl rollout status deployment -n sunbird neo4j knowledge-mw player report content adminutil cert-registry groups userorg lms notification registry analytics
+    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
+    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
     echo -e "\nWaiting for all pods to start"
 }
 
