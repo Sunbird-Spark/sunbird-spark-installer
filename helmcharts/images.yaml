@@ -166,7 +166,7 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_4a7e14d"
+    tag: "develop_8425122"
 
 # Internal block with pull secrets
 internal: &internal
