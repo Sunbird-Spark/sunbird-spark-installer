@@ -126,7 +126,7 @@ function install_helm_components() {
 }
 
 function dns_mapping() {
-    domain_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_web_url}')
+    domain_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_cert_domain_url}')
     PUBLIC_IP=$(kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].ip}')
 
     local timeout=$((SECONDS + 1200))
@@ -156,12 +156,12 @@ function generate_postman_env() {
     if [ "$(basename $current_directory)" != "$environment" ]; then
         cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
-    domain_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_web_url}')
-    blob_store_path=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.cloud_private_storage_accountname}')
-    api_key=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_api_auth_token}')
-    keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_portal_session_secret}')
-    keycloak_admin=$(kubectl get cm -n sunbird userorg-env -ojsonpath='{.data.sunbird_sso_username}')
-    keycloak_password=$(kubectl get cm -n sunbird userorg-env -ojsonpath='{.data.sunbird_sso_password}')
+    domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
+    blob_store_path=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
+    api_key=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_authorization}')
+    keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
+    keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
+    keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
     generated_uuid=$(uuidgen)
     temp_file=$(mktemp)
     cp postman.env.json "${temp_file}"

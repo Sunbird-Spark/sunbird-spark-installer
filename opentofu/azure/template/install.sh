@@ -115,7 +115,7 @@ function dns_mapping() {
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
     PUBLIC_IP=$(kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].ip}')
 
-    local timeout=$((SECONDS + 300))
+    local timeout=$((SECONDS + 1200))
     local check_interval=10
 
     echo -e "\nAdd/update your DNS mapping for your domain by adding an A record to this IP: ${PUBLIC_IP}. The script will wait for 20 minutes"
@@ -131,7 +131,7 @@ function dns_mapping() {
         sleep $check_interval
     done
 
-    echo "Timed out after 5 minutes. DNS mapping may not have propagated successfully. Rerun the following staging post DNS mapping propagation."
+    echo "Timed out after 20 minutes. DNS mapping may not have propagated successfully. Rerun the following staging post DNS mapping propagation."
     echo "./install.sh dns_mapping"
     echo "./install.sh generate_postman_env"
     echo "./install.sh run_post_install"
