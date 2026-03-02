@@ -89,9 +89,6 @@ variable "max_small_nodepool_nodes" {
   default     = 1
 }
 
-# Removed: end_date_relative variable (was for Service Principal password expiry)
-# No longer needed with Managed Identity
-
 variable "private_ingressgateway_ip" {
     type        = string
     description = "Nginx private ingress ip."
