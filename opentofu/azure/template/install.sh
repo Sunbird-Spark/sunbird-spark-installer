@@ -143,9 +143,9 @@ function generate_postman_env() {
         cd ../opentofu/azure/$environment 2>/dev/null || true
     fi
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
-    blob_store_path=$(kubectl get cm -n sunbird player-env -o jsonpath='{.data.sunbird_public_storage_account_name}' | sed 's|/$||')
-    public_container_name=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.cloud_storage_resourceBundle_bucketname}') 
-    api_key=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_api_auth_token}')
+    blob_store_path=$(kubectl get cm -n sunbird lern-env -o jsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
+    public_container_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_content_cloud_storage_container}') 
+    api_key=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_authorization}')
     keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
     keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
     keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
