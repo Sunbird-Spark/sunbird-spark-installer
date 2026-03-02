@@ -24,119 +24,15 @@
             <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
         </#list>
     </#if>
-    
-    <#-- Hide page immediately when an actionUri redirect is pending -->
-    <#if actionUri??>
-    <style>body { visibility: hidden !important; }</style>
-    </#if>
-
-    <#-- Hide already logged in messages immediately -->
-    <style type="text/css">
-        .toast-container .toast:has(.toast-message:contains("already logged in")),
-        .toast-container .toast:has(.toast-message:contains("Already logged in")) {
-            display: none !important;
-        }
-        
-        /* Fallback for browsers that don't support :has() */
-        .toast-container .toast {
-            transition: opacity 0.1s;
-        }
-        
-        .toast-container .toast.hide-already-logged-in {
-            display: none !important;
-        }
-    </style>
     <#if properties.scripts?has_content>
         <#list properties.scripts?split(' ') as script>
             <script src="${url.resourcesPath}/${script}" type="text/javascript"></script>
-            <#if script?contains('jquery')>
-                <script type="text/javascript">
-                    (function() {
-                        if (window.jQuery) {
-                            var originalAjax = jQuery.ajax;
-                            jQuery.ajax = function(options) {
-                                if (options.url && options.url.indexOf('/api/org/v2/search') !== -1) {
-                                    var deferred = jQuery.Deferred();
-                                    var mockResponse = {
-                                        "responseCode": "OK",
-                                        "result": {
-                                            "response": {
-                                                "content": [{
-                                                    "hashTagId": "sunbird",
-                                                    "status": 1,
-                                                    "isTenant": true,
-                                                    "slug": "sunbird"
-                                                }]
-                                            }
-                                        }
-                                    };
-                                    setTimeout(function() {
-                                        if (options.success) options.success(mockResponse);
-                                        deferred.resolve(mockResponse);
-                                    }, 10);
-                                    return deferred.promise();
-                                }
-                                return originalAjax.apply(this, arguments);
-                            };
-                        }
-                    })();
-                </script>
-            </#if>
         </#list>
     </#if>
     <#if scripts??>
         <#list scripts as script>
             <script src="${script}" type="text/javascript"></script>
         </#list>
-    </#if>
-    
-    <#-- Early redirect check for already logged in users -->
-    <#if displayMessage && message?has_content>
-    <script type="text/javascript">
-        // Early redirect check - runs immediately in head
-        (function() {
-            try {
-                var summary = '${message.summary?js_string}';
-                if (summary && summary.toLowerCase().indexOf('already logged in') !== -1) {
-                    console.log('Early redirect: Already logged in detected');
-                    
-                    // Get redirect parameters
-                    var urlParams = new URLSearchParams(window.location.search);
-                    var redirect_uri = urlParams.get('redirect_uri') || sessionStorage.getItem('redirect_uri');
-                    var state = urlParams.get('state');
-                    
-                    if (redirect_uri) {
-                        try {
-                            redirect_uri = decodeURIComponent(redirect_uri);
-                        } catch (e) {}
-                        
-                        var redirectUrl = redirect_uri;
-                        if (state) {
-                            var separator = redirect_uri.indexOf('?') !== -1 ? '&' : '?';
-                            redirectUrl += separator + 'state=' + encodeURIComponent(state);
-                        }
-                        
-                        console.log('Early redirect to:', redirectUrl);
-                        window.location.replace(redirectUrl);
-                        return;
-                    }
-                    
-                    // Fallback to client base URL
-                    var base = '${client.baseUrl!}';
-                    if (base && base.length > 0) {
-                        console.log('Early redirect to client base:', base);
-                        window.location.replace(base);
-                        return;
-                    }
-                    
-                    // Last resort
-                    window.location.replace('/');
-                }
-            } catch (e) {
-                console.error('Early redirect error:', e);
-            }
-        })();
-    </script>
     </#if>
 </head>
 
@@ -247,12 +143,6 @@
         if (!window.showToast) {
             window.showToast = function (type, text, duration, title) {
                 try {
-                    // Don't show toast for "already logged in" messages
-                    if (text && text.toLowerCase().indexOf('already logged in') !== -1) {
-                        console.log('Suppressing already logged in toast message');
-                        return null;
-                    }
-                    
                     var container = document.querySelector('.toast-container');
                     if (!container) {
                         container = document.createElement('div');
@@ -298,110 +188,7 @@
             window.showToast('${message.type}', '${message.summary?js_string}');
         }
     </script>
-    <script type="text/javascript">
-        // Function to get value from session storage (similar to telemetry service)
-        function getValueFromSession(key) {
-            try {
-                var urlParams = new URLSearchParams(window.location.search);
-                var value = urlParams.get(key);
-                if (value) {
-                    sessionStorage.setItem(key, value);
-                    return value;
-                } else {
-                    return sessionStorage.getItem(key);
-                }
-            } catch (e) {
-                console.error('Error getting value from session:', e);
-                return null;
-            }
-        }
-        
-        // Immediate execution - don't wait for DOM ready
-        (function () {
-            try {
-                var summary = '${message.summary?js_string}';
-                console.log('Checking message summary:', summary);
-                
-                if (summary && summary.toLowerCase().indexOf('already logged in') !== -1) {
-                    console.log('Already logged in detected, initiating redirect...');
-                    
-                    // Hide any existing toast/modal immediately
-                    var toastContainer = document.querySelector('.toast-container');
-                    if (toastContainer) {
-                        toastContainer.style.display = 'none';
-                    }
-                    
-                    // When already logged in, we should redirect back to the application
-                    // First, try to get redirect_uri from current URL
-                    var urlParams = new URLSearchParams(window.location.search);
-                    var redirect_uri = urlParams.get('redirect_uri');
-                    var state = urlParams.get('state');
-                    var client_id = urlParams.get('client_id');
-                    
-                    console.log('URL params - redirect_uri:', redirect_uri, 'state:', state, 'client_id:', client_id);
-                    
-                    // Use the same redirect logic as the telemetry service
-                    if (typeof getValueFromSession === 'function') {
-                        redirect_uri = getValueFromSession('redirect_uri') || redirect_uri;
-                    }
-                    
-                    console.log('Final redirect_uri:', redirect_uri);
-                    
-                    if (redirect_uri) {
-                        // Decode the redirect_uri if it's encoded
-                        try {
-                            redirect_uri = decodeURIComponent(redirect_uri);
-                        } catch (e) {
-                            // If decoding fails, use as is
-                            console.log('Could not decode redirect_uri, using as is');
-                        }
-                        
-                        // For already logged in scenario, redirect to the application
-                        // Add any necessary parameters
-                        var redirectUrl = redirect_uri;
-                        if (state) {
-                            var separator = redirect_uri.indexOf('?') !== -1 ? '&' : '?';
-                            redirectUrl += separator + 'state=' + encodeURIComponent(state);
-                        }
-                        
-                        console.log('Redirecting already logged in user to:', redirectUrl);
-                        
-                        // Use replace instead of href to avoid back button issues
-                        window.location.replace(redirectUrl);
-                        return;
-                    }
-                    
-                    // Fallback: try client base URL
-                    var base = '${client.baseUrl!}';
-                    if (base && base.length > 0) {
-                        console.log('Redirecting to client base URL:', base);
-                        window.location.replace(base);
-                        return;
-                    }
-                    
-                    // Last resort: redirect to root
-                    console.log('Redirecting to root as last resort');
-                    window.location.replace('/');
-                }
-            } catch (e) {
-                console.error('Error in already logged in redirect:', e);
-                // Fallback redirect
-                var base = '${client.baseUrl!}';
-                if (base && base.length > 0) {
-                    window.location.replace(base);
-                } else {
-                    window.location.replace('/');
-                }
-            }
-        })();
-    </script>
     </#if>
-    <script>
-        window.addEventListener("load", function () {
-            const proceed = document.querySelector("a[href]");
-            if (proceed) proceed.click();
-        });
-    </script>
 </body>
 </html>
 </#macro>
