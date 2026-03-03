@@ -26,12 +26,14 @@ def save_apis(kong_admin_api_url, input_apis, managed_by=None):
     """
     services_url = "{}/services".format(kong_admin_api_url)
 
-    # ALL services in Kong — used to decide create vs update
-    all_saved_services = get_apis(kong_admin_api_url)
+    # Get ALL services in Kong (regardless of ownership) — used to decide create vs update
+    # This ensures we see services created by other charts for proper create/update detection
+    all_saved_services = get_apis(kong_admin_api_url, managed_by=None)
 
-    # Only OUR tagged services — used to decide safe deletes
+    # Get ONLY OUR tagged services — used to decide safe deletes (don't delete other charts' services)
+    # When managed_by is set, we use get_apis with the tag filter for efficiency
     if managed_by:
-        owned_saved_services = [s for s in all_saved_services if "managed-by:{}".format(managed_by) in (s.get("tags") or [])]
+        owned_saved_services = get_apis(kong_admin_api_url, managed_by=managed_by)
     else:
         owned_saved_services = all_saved_services   # no tag: own everything (full sync)
 
@@ -78,11 +80,14 @@ def save_apis(kong_admin_api_url, input_apis, managed_by=None):
     for input_service in potential_updates:
         saved_service = [s for s in all_saved_services if s["name"] == input_service["name"]][0]
         service_data = _convert_api_to_service(input_service, managed_by=managed_by)
-        
+
         if _is_service_different(service_data, saved_service):
             print("Updating service {}".format(input_service["name"]))
+            # Don't send tags in PATCH - Kong doesn't allow modifying tags via PATCH
+            # Tags are only set during creation (POST)
+            service_data_for_patch = {k: v for k, v in service_data.items() if k != "tags"}
             try:
-                json_request("PATCH", services_url + "/" + saved_service["id"], service_data)
+                json_request("PATCH", services_url + "/" + saved_service["id"], service_data_for_patch)
                 stats["services"]["updated"] += 1
             except Exception as e:
                 print("  ✗ Error updating service {}: {}".format(input_service["name"], str(e)))
