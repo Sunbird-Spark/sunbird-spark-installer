@@ -86,16 +86,7 @@ player:
       cpu: 1
       memory: 1G
  
-#knowledgebb
-dial:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi  
-
+#knowledgebb 
 janusgraph:
   resources:
     requests:
@@ -168,16 +159,7 @@ certregistry:
     limits:
       cpu: 1
       memory: 1024Mi
-
-dial:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi  
-
+      
 echo:
   resources:
     requests:
