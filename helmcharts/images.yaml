@@ -72,11 +72,11 @@ images:
 
   kong_apis: &kong_apis
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_5d204eb"
+    tag: "develop_ab1f282"
 
   kong_consumers: &kong_consumers
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_5d204eb"
+    tag: "develop_ab1f282"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
