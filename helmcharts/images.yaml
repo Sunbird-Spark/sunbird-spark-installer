@@ -312,12 +312,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-
-  dial:
-    image: *dial
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
   search:
     image: *search
     imagePullSecrets:
