@@ -160,10 +160,10 @@ images:
     tag: 2025.2.0.0-b131 
 
   janusgraph: &janusgraph
-    registry:  snt1
-    repository: janusgraph
-    tag: v2.0.0
-
+    registry: ghcr.io
+    repository: sunbird-spark/janusgraph
+    tag: develop_cb093d4
+    
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_8425122"
