@@ -67,7 +67,11 @@ global:
       init:
         adminUser:
           username: admin
-          password: *superset-admin-password   
+          password: *superset-admin-password  
+  yugabyte:
+    ysql:
+      user: "yugabyte"  
+      password: "yugabyte" 
   keycloak:
    keycloak_user: admin
    keycloak_password: *keycloak-password  
