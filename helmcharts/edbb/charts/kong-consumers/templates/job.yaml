@@ -34,7 +34,7 @@ spec:
           - /bin/sh
           - -c
           args:
-            - python /kong_yaml_to_json.py && python /kong_consumers.py /tmp/kong-consumers.json --kong-admin-api-url=http://{{    .Values.kong_admin_url }}:{{ .Values.kong_admin_port }}
+            - python /kong_yaml_to_json.py && python /kong_consumers.py /tmp/kong-consumers.json --kong-admin-api-url=http://{{    .Values.kong_admin_url }}:{{ .Values.kong_admin_port }} --managed-by={{ .Values.managed_by | default "core" }}
           volumeMounts:
           {{- if .Values.configmap.enabled }}
           - name: config

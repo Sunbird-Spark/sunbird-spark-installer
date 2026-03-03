@@ -72,11 +72,11 @@ images:
 
   kong_apis: &kong_apis
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_499032f"
+    tag: "develop_5c87617"
 
   kong_consumers: &kong_consumers
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_499032f"
+    tag: "develop_5c87617"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -128,11 +128,6 @@ images:
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
     tag: "spark-v08_081de67"
-
-  dial: &dial
-    repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
-    tag: "release-8.1.0_rc1_8fbeab3"
-
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -218,7 +213,7 @@ internal: &internal
   knowlg:
     image: *knowlg
     imagePullSecrets:
-      - name: "registry-secret-name"
+      - name: "registry-secret-name"      
 
   echo:
     image: *echo

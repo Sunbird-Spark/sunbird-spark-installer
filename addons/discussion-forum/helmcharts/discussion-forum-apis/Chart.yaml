@@ -1,0 +1,9 @@
+apiVersion: v2
+name: discussion-forum-apis
+description: Registers Kong API routes for the Discussion Forum addon (discussionmw + groups-service)
+type: application
+version: 0.1.0
+dependencies:
+  - name: common
+    version: 0.1.0
+    repository: https://nimbushubin.github.io/helmcharts

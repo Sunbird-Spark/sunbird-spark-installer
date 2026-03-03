@@ -97,6 +97,9 @@ affinity: {}
 
 configmap:
   enabled: true
+  addon_config_configmaps:
+    - discussion-forum-nginx-config
+    - dial-public-nginx-config
 
 serviceAccount:
   create: false

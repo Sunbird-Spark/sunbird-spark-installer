@@ -40,36 +40,83 @@ def _ensure_consumer_exists(kong_admin_api_url, consumer):
         consumer_data = {'username': username}
         json_request("POST", consumers_url, consumer_data)
 
-def save_consumers(kong_admin_api_url, consumers):
+def _derive_owned_groups(consumers):
+    """
+    Derive the set of ACL group names that this chart "owns" —
+    i.e. the union of ALL groups listed across every consumer in the input file.
+
+    This is used to scope group deletions: only a group that appears in this
+    set will ever be removed from a consumer.  Groups added by another chart
+    (e.g. an addon that appended 'discussionAccess') are NOT in this set and
+    are therefore never touched by this run.
+    """
+    owned = set()
+    for consumer in consumers:
+        for group in consumer.get("groups", []):
+            owned.add(group)
+    return owned
+
+def save_consumers(kong_admin_api_url, consumers, managed_by="core"):
     consumers_url = "{}/consumers".format(kong_admin_api_url)
-    print(consumers)
+    
+    # Track statistics for the summary
+    stats = {
+        "consumers": {"created": 0, "deleted": 0, "skipped": 0},
+        "credentials": {"created": 0, "updated": 0, "skipped": 0},
+        "groups": {"added": 0, "deleted": 0, "skipped": 0},
+        "rate_limits": {"created": 0, "updated": 0, "deleted": 0, "skipped": 0}
+    }
+
+    # Compute the set of groups this chart is responsible for.
+    owned_groups = _derive_owned_groups(consumers)
+    
+    # Pre-fetch all consumers to show a clean count at the end
+    try:
+        all_saved_consumers = json.loads(urllib.request.urlopen(consumers_url + "?size=1000").read().decode('utf-8'))
+        total_consumers_in_kong = len(all_saved_consumers.get('data', []))
+    except:
+        total_consumers_in_kong = 0
+
     consumers_to_be_present = [consumer for consumer in consumers if consumer['state'] == 'present']
     consumers_to_be_absent = [consumer for consumer in consumers if consumer['state'] == 'absent']
 
     for consumer in consumers_to_be_absent:
         username = consumer['username']
         if(_consumer_exists(kong_admin_api_url, username)):
-            print("Deleting consumer {}".format(username));
-            json_request("DELETE", consumers_url + "/" + username, "")
+            print("Deleting consumer {}".format(username))
+            json_request("DELETE", consumers_url + "/" + username, None)
+            stats["consumers"]["deleted"] += 1
 
     for consumer in consumers_to_be_present:
         username = consumer['username']
-        _ensure_consumer_exists(kong_admin_api_url, consumer)
-        _save_groups_for_consumer(kong_admin_api_url, consumer)
-        jwt_credential = _get_first_or_create_jwt_credential(kong_admin_api_url, consumer)
-        credential_algorithm = jwt_credential['algorithm']
-        if credential_algorithm == 'HS256':
-            jwt_token = jwt.encode({'iss': jwt_credential['key']}, jwt_credential['secret'], algorithm=credential_algorithm)
-            print("JWT token for {} is : {}".format(username, jwt_token))
-        if 'print_credentials' in consumer:
-            print("Credentials for consumer {}, key: {}, secret: {}".format(username, jwt_credential['key'], jwt_credential['secret']))
+        
+        # Check if exists before creating
+        if not _consumer_exists(kong_admin_api_url, username):
+            _ensure_consumer_exists(kong_admin_api_url, consumer)
+            stats["consumers"]["created"] += 1
+        else:
+            stats["consumers"]["skipped"] += 1
+            
+        _save_groups_for_consumer(kong_admin_api_url, consumer, owned_groups, stats, managed_by)
+        _save_credential_for_consumer(kong_admin_api_url, consumer, stats)
 
         saved_consumer = _get_consumer(kong_admin_api_url, username)
         rate_limits = consumer.get('rate_limits')
         if(rate_limits is not None):
-            _save_rate_limits(kong_admin_api_url, saved_consumer, rate_limits)
+            _save_rate_limits(kong_admin_api_url, saved_consumer, rate_limits, stats)
 
-def _save_rate_limits(kong_admin_api_url, saved_consumer, rate_limits):
+    print("\n--- Kong Consumer Onboarding Summary ---")
+    print("Number of input consumers   : {}".format(len(consumers)))
+    print("Total consumers in Kong     : {}".format(total_consumers_in_kong))
+    print("Managed-by label            : {}".format(managed_by))
+    print("Owned ACL groups            : {}".format(sorted(owned_groups)))
+    print("----------------------------------------\n")
+
+def _save_credential_for_consumer(kong_admin_api_url, consumer, stats):
+    """Abstraction for credential management with change detection."""
+    _get_first_or_create_jwt_credential(kong_admin_api_url, consumer, stats)
+
+def _save_rate_limits(kong_admin_api_url, saved_consumer, rate_limits, stats):
     """
     Kong 3.9.1: Save rate-limiting plugin for consumer.
     Plugins are now attached to services, not APIs.
@@ -86,156 +133,197 @@ def _save_rate_limits(kong_admin_api_url, saved_consumer, rate_limits):
 
         rate_limit_state = rate_limit.get('state', 'present')
         plugins_url = kong_admin_api_url + "/services/" + service_name + "/plugins"
+        
         if rate_limit_state == 'present':
             rate_limit_plugin_data = _dict_without_keys(rate_limit, ['api', 'service', 'state'])
             rate_limit_plugin_data['name'] = plugin_name
             rate_limit_plugin_data['consumer_id'] = consumer_id
+            
             if not rate_limit_plugin_for_this_consumer:
-                print("Adding rate_limit for consumer {} for service {}".format(consumer_username, service_name));
-                print("rate_limit_plugin_data: {}".format(rate_limit_plugin_data))
+                print("Adding rate_limit for consumer {} for service {}".format(consumer_username, service_name))
                 json_request("POST", plugins_url, rate_limit_plugin_data)
-
-            if rate_limit_plugin_for_this_consumer:
-                print("Updating rate_limit for consumer {} for service {}".format(consumer_username, service_name));
-                json_request("PATCH", plugins_url + "/" + rate_limit_plugin_for_this_consumer["id"], rate_limit_plugin_data)
+                stats["rate_limits"]["created"] += 1
+            else:
+                # Check for changes in config
+                changed = False
+                existing_config = rate_limit_plugin_for_this_consumer.get('config', {})
+                for key, val in rate_limit_plugin_data.items():
+                    if key.startswith('config.'):
+                        config_key = key.replace('config.', '')
+                        if str(val) != str(existing_config.get(config_key)):
+                            changed = True; break
+                
+                if changed:
+                    print("Updating rate_limit for consumer {} for service {}".format(consumer_username, service_name))
+                    json_request("PATCH", plugins_url + "/" + rate_limit_plugin_for_this_consumer["id"], rate_limit_plugin_data)
+                    stats["rate_limits"]["updated"] += 1
+                else:
+                    stats["rate_limits"]["skipped"] += 1
 
         elif rate_limit_state == 'absent':
             if rate_limit_plugin_for_this_consumer:
-                print("Deleting rate_limit for consumer {} for service {}".format(consumer_username, service_name));
-                json_request("DELETE", plugins_url + "/" + rate_limit_plugin_for_this_consumer["id"], "")
+                print("Deleting rate_limit for consumer {} for service {}".format(consumer_username, service_name))
+                json_request("DELETE", plugins_url + "/" + rate_limit_plugin_for_this_consumer["id"], None)
+                stats["rate_limits"]["deleted"] += 1
 
-def _get_first_or_create_jwt_credential(kong_admin_api_url, consumer):
+def _get_first_or_create_jwt_credential(kong_admin_api_url, consumer, stats):
     username = consumer["username"]
     credential_algorithm = consumer.get('credential_algorithm', 'HS256')
-    # CRITICAL FOR KONG 3.0+: ISS field must be explicitly set
-    # ISS (Issuer) claim defaults to consumer username if not specified
     credential_iss = consumer.get('credential_iss', username)
+    credential_key = consumer.get('key', credential_iss)
 
     consumer_jwt_credentials_url = kong_admin_api_url + "/consumers/" + username + "/jwt"
     saved_credentials_details = json.loads(retrying_urlopen(consumer_jwt_credentials_url).read().decode('utf-8'))
     saved_credentials = saved_credentials_details["data"]
 
-    # Filter credentials based on algorithm
-    saved_credentials_for_algorithm = [
-        saved_credential for saved_credential in saved_credentials
-        if saved_credential['algorithm'] == credential_algorithm
-    ]
-
-    if credential_iss is not None:
-        # Kong 3.0+ Change: Look for ISS field, not just key field
-        saved_credentials_for_algorithm_and_iss = [
-            saved_credential for saved_credential in saved_credentials_for_algorithm
-            if saved_credential.get('iss') == credential_iss
+    # 1. Look for a match by 'key' (this is the most reliable check for Kong 3.x)
+    match_by_key = [c for c in saved_credentials if c.get('key') == credential_key]
+    
+    if not match_by_key:
+        # 2. Re-check by algorithm and ISS (legacy search)
+        match_by_key = [
+            c for c in saved_credentials
+            if c.get('algorithm') == credential_algorithm and c.get('iss') == credential_iss
         ]
-    else:
-        saved_credentials_for_algorithm_and_iss = saved_credentials_for_algorithm
 
-    if len(saved_credentials_for_algorithm_and_iss) > 0:
-        print("Updating credentials for consumer {} for algorithm {} and iss {}".format(username, credential_algorithm, credential_iss))
-        this_credential = saved_credentials_for_algorithm_and_iss[0]
-        # Kong 3.9.1: 'iss' field is read-only, cannot be updated via PATCH
-        # Only update key, secret, and rsa_public_key
-        credential_data = {
-            "rsa_public_key": consumer.get('credential_rsa_public_key', this_credential.get("rsa_public_key", '')),
-            "key": consumer.get('key', this_credential.get("key", '')),
-            "secret": consumer.get('secret', this_credential.get("secret", ''))
-        }
-        this_credential_url = "{}/{}".format(consumer_jwt_credentials_url, this_credential["id"])
-        response = json_request("PATCH", this_credential_url, credential_data)
-        jwt_credential = json.loads(response.read().decode('utf-8'))
+    if match_by_key:
+        this_credential = match_by_key[0]
+        
+        # Check if change is needed
+        new_secret = consumer.get('secret', this_credential.get("secret", ''))
+        new_rsa = consumer.get('credential_rsa_public_key', this_credential.get("rsa_public_key", ''))
+        
+        # Note: key/iss cannot be changed once created in Kong, so we only update secret/rsa
+        if new_secret != this_credential.get('secret') or new_rsa != this_credential.get('rsa_public_key'):
+            print("Updating credentials for consumer {} (key: {})".format(username, credential_key))
+            credential_data = {
+                "rsa_public_key": new_rsa,
+                "secret": new_secret
+            }
+            this_credential_url = "{}/{}".format(consumer_jwt_credentials_url, this_credential["id"])
+            response = json_request("PATCH", this_credential_url, credential_data)
+            jwt_credential = json.loads(response.read().decode('utf-8'))
+            stats["credentials"]["updated"] += 1
+        else:
+            jwt_credential = this_credential
+            stats["credentials"]["skipped"] += 1
+            
+        # Print token for HS256
+        if jwt_credential['algorithm'] == 'HS256':
+            jwt_token = jwt.encode({'iss': jwt_credential['key']}, jwt_credential['secret'], algorithm='HS256')
+            print("JWT token for {} is : {}".format(username, jwt_token))
+        if 'print_credentials' in consumer:
+            print("Credentials for consumer {}, key: {}, secret: {}".format(username, jwt_credential['key'], jwt_credential['secret']))
+            
         return jwt_credential
     else:
-        print("Creating jwt credentials for consumer {} with algorithm {} and iss {}".format(username, credential_algorithm, credential_iss))
-        # Kong 3.9.1: 'iss' field is read-only and automatically set from 'key'
-        # Do NOT send 'iss' in POST request
+        print("Creating jwt credentials for consumer {} with algorithm {} (key: {})".format(username, credential_algorithm, credential_key))
         credential_data = {
             "algorithm": credential_algorithm,
-            "key": credential_iss   # Key will automatically become the ISS value in Kong 3.9.1
+            "key": credential_key
         }
-        if "key" in consumer and consumer["key"]:
-            credential_data["key"] = consumer["key"]
         if "secret" in consumer and consumer["secret"]:
             credential_data["secret"] = consumer["secret"]
         if 'credential_rsa_public_key' in consumer:
             credential_data["rsa_public_key"] = consumer['credential_rsa_public_key']
-        if 'credential_iss' in consumer:
-            # Use credential_iss as the key value, ISS will be set automatically by Kong
-            if "key" not in consumer or not consumer["key"]:
-                credential_data["key"] = consumer['credential_iss']
-        
-        print("\n=== DEBUG: Creating JWT credential ===")
-        print("Credential data being sent:", json.dumps(credential_data, indent=2), flush=True)
-        print("=======================================\n", flush=True)
-        
+
         try:
             response = json_request("POST", consumer_jwt_credentials_url, credential_data)
             jwt_credential = json.loads(response.read().decode('utf-8'))
+            stats["credentials"]["created"] += 1
+            
+            # Print token for HS256
+            if jwt_credential['algorithm'] == 'HS256':
+                jwt_token = jwt.encode({'iss': jwt_credential['key']}, jwt_credential['secret'], algorithm='HS256')
+                print("JWT token for {} is : {}".format(username, jwt_token))
+                
             return jwt_credential
         except urllib.error.HTTPError as e:
             if e.code == 409:
-                # Credential already exists, fetch and return it
-                print(f"  ⚠ Credential already exists for {username}, fetching existing credential")
+                print(f"  ⚠ Credential key {credential_key} already exists, fetching existing one")
                 saved_credentials_details = json.loads(retrying_urlopen(consumer_jwt_credentials_url).read().decode('utf-8'))
-                saved_credentials = saved_credentials_details["data"]
-                # Find credential by key
-                for cred in saved_credentials:
-                    if cred.get('key') == credential_data.get('key'):
+                shared_credentials = saved_credentials_details["data"]
+                
+                for cred in shared_credentials:
+                    if cred.get('key') == credential_key:
+                        stats["credentials"]["skipped"] += 1
+                        if cred['algorithm'] == 'HS256':
+                            jwt_token = jwt.encode({'iss': cred['key']}, cred['secret'], algorithm='HS256')
+                            print("JWT token for {} is : {}".format(username, jwt_token))
                         return cred
-                # If not found by key, return first one with matching algorithm
-                for cred in saved_credentials:
-                    if cred.get('algorithm') == credential_algorithm:
-                        return cred
-                # Fallback: return first credential
-                if saved_credentials:
-                    return saved_credentials[0]
             raise
 
-def _save_groups_for_consumer(kong_admin_api_url, consumer):
+def _save_groups_for_consumer(kong_admin_api_url, consumer, owned_groups, stats, managed_by="core"):
     """
-    Kong 3.9.1: Sync ACL groups for consumer.
-    Handles: create, update, delete of group memberships
+    Scoped ACL group sync for a consumer.
     """
     username = consumer["username"]
-    input_groups = consumer.get("groups", [])
+    input_groups = set(consumer.get("groups", []))
     consumer_acls_url = kong_admin_api_url + "/consumers/" + username + "/acls"
-    
+
     try:
         saved_acls_details = json.loads(retrying_urlopen(consumer_acls_url + "?size=1000").read().decode('utf-8'))
         saved_acls = saved_acls_details["data"]
     except Exception as e:
         print("Warning: Could not fetch ACL groups for consumer {}: {}".format(username, str(e)))
         saved_acls = []
+
+    saved_groups = set(acl["group"] for acl in saved_acls)
     
-    saved_groups = [acl["group"] for acl in saved_acls]
-    print("  ✓ Existing groups for consumer {} : {}".format(username, saved_groups))
-    print("  ✓ Required groups for consumer {} : {}".format(username, input_groups))
+    # Groups to add: in input but not yet in Kong
+    groups_to_add = input_groups - saved_groups
+
+    # Groups to delete: no longer in input AND owned by this chart
+    groups_to_delete = (saved_groups - input_groups) & owned_groups
     
-    input_groups_to_be_created = [input_group for input_group in input_groups if input_group not in saved_groups]
-    saved_groups_to_be_deleted = [saved_group for saved_group in saved_groups if saved_group not in input_groups]
+    # Groups to skip: in input AND already in Kong
+    groups_skipped = input_groups & saved_groups
+    stats["groups"]["skipped"] += len(groups_skipped)
 
-    for input_group in input_groups_to_be_created:
-        print("    ✓ Adding group {} for consumer {}".format(input_group, username))
+    for group in sorted(groups_to_add):
+        print("    ✓ Adding group {} for consumer {}".format(group, username))
         try:
-            json_request("POST", consumer_acls_url, {'group': input_group})
+            json_request("POST", consumer_acls_url, {'group': group})
+            stats["groups"]["added"] += 1
         except Exception as e:
-            print("    ✗ Error adding group {}: {}".format(input_group, str(e)))
+            print("    ✗ Error adding group {}: {}".format(group, str(e)))
 
-    for saved_group in saved_groups_to_be_deleted:
-        print("    ✓ Deleting group {} for consumer {}".format(saved_group, username))
+    for group in sorted(groups_to_delete):
+        print("    ✓ Deleting group {} for consumer {} (owned by {}, no longer in input)".format(group, username, managed_by))
         try:
-            json_request("DELETE", consumer_acls_url + "/" + saved_group, "")
+            json_request("DELETE", consumer_acls_url + "/" + group, None)
+            stats["groups"]["deleted"] += 1
         except Exception as e:
-            print("    ✗ Error deleting group {}: {}".format(saved_group, str(e)))
+            print("    ✗ Error deleting group {}: {}".format(group, str(e)))
 
-if  __name__ == "__main__":
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Configure kong consumers')
-    parser.add_argument('consumers_file_path', help='Path of the json file containing consumer data', default="kong-consumers.json")
-    parser.add_argument('--kong-admin-api-url', help='Admin url for kong', default='http://localhost:8001')
+    parser.add_argument(
+        'consumers_file_path',
+        help='Path of the json file containing consumer data',
+        default="kong-consumers.json"
+    )
+    parser.add_argument(
+        '--kong-admin-api-url',
+        help='Admin url for kong',
+        default='http://localhost:8001'
+    )
+    parser.add_argument(
+        '--managed-by',
+        default='core',
+        dest='managed_by',
+        help=(
+            'Ownership label for this run (e.g. "core", "discussion-forum"). '
+            'Only ACL groups declared in THIS chart\'s input file will ever be '
+            'deleted from consumers. Groups added by other charts are left untouched. '
+            'Default: core'
+        )
+    )
     args = parser.parse_args()
     with open(args.consumers_file_path) as consumers_file:
         input_consumers = json.load(consumers_file)
         try:
-            save_consumers(args.kong_admin_api_url, input_consumers)
+            save_consumers(args.kong_admin_api_url, input_consumers, managed_by=args.managed_by)
         except urllib.error.HTTPError as e:
             error_message = e.read().decode('utf-8')
             print(error_message)
