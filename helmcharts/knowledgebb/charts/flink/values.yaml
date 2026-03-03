@@ -397,64 +397,6 @@ flink_jobs:
 
     job_classname: org.sunbird.job.assetenricment.task.AssetEnrichmentStreamTask
 
-  dialcode-context-updater:
-    enabled: true
-    serviceMonitor: *serviceMonitor
-    config: |+
-      include file("/data/flink/conf/base-config.conf")
-      job {
-        env = "{{ .Values.global.env }}"
-      }
-
-      kafka {
-        input.topic = "{{ .Values.global.env }}.knowlg.dialcode.context.job.request"
-        failed.topic = "{{ .Values.global.env }}.knowlg.dialcode.context.job.request.failed"
-        groupId = "{{ .Values.global.env }}-dialcode-group"
-        zookeeper = ""
-      }
-
-      task {
-        consumer.parallelism = 1
-        parallelism = 1
-        dialcode-context-updater.parallelism = 1
-      }
-
-      dialcode_context_updater {
-          actions="dialcode-context-update"
-          search_mode="Collection"
-          context_map_path = "https://raw.githubusercontent.com/project-sunbird/knowledge-platform-jobs/master/dialcode-context-updater/src/main/resources/contextMapping.json"
-          identifier_search_fields = ["identifier", "primaryCategory", "channel"]
-          dial_code_context_read_api_path = "/dialcode/v4/read/"
-          dial_code_context_update_api_path = "/dialcode/v4/update/"
-      }
-
-      service {
-        search.basePath = "http://search-service:9000"
-        dial_service.basePath = "http://dial-service:9000"
-      }
-
-      es_sync_wait_time = 5000
-      schema.basePath="https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
-
-
-    flink-conf: |+
-      jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
-      taskmanager.numberOfTaskSlots: 1
-      jobManager.numberOfTaskSlots: 1
-      parallelism.default: 1
-      jobmanager.execution.failover-strategy: region
-      taskmanager.memory.network.fraction: 0.1
-      scheduler-mode: reactive
-      heartbeat.timeout: 8000
-      heartbeat.interval: 5000
-      taskmanager.memory.process.size: 1700m
-      jobmanager.memory.process.size: 1600m
-      # classloader.resolve-order: "parent-first"
-      # state.savepoints.dir: file:///tmp
-
-    job_classname: org.sunbird.job.dialcodecontextupdater.task.DialcodeContextUpdaterStreamTask
-
   knowlg-publish:
     enabled: true
     serviceMonitor: *serviceMonitor

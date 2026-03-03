@@ -58,6 +58,8 @@ spec:
           - name: config
             mountPath: {{ .Values.configmap.mountPath }}
             subPath: nginx.conf
+          - name: addon-config
+            mountPath: /etc/nginx/conf.d/addons
           {{- end }}
         {{- with .Values.sidecars }}
         {{- toYaml . | nindent 8 }}
@@ -67,4 +69,12 @@ spec:
       - name: config
         configMap:
           name: {{ include "common.names.fullname" . }}
+      - name: addon-config
+        projected:
+          sources:
+          {{- range .Values.configmap.addon_config_configmaps }}
+          - configMap:
+              name: {{ . }}
+              optional: true
+          {{- end }}
       {{- end }}

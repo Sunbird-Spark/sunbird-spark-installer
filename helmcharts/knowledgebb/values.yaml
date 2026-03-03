@@ -93,9 +93,6 @@ kafka: &kafka
     replicationFactor: 1
     numPartitions: 1
     topics:
-    - name: "{{ .Values.global.env }}.knowlg.qrimage.request"
-      partitions: 1
-      replicationFactor: 1
     - name: "{{ .Values.global.env }}.knowlg.publish.job.request"
       partitions: 1
       replicationFactor: 1
@@ -111,16 +108,7 @@ kafka: &kafka
     - name: "{{ .Values.global.env }}.knowlg.learning.events.failed"
       partitions: 1
       replicationFactor: 1
-    - name: "{{ .Values.global.env }}.knowlg.qrimage.request"
-      partitions: 1
-      replicationFactor: 1
     - name: "{{ .Values.global.env }}.knowlg.telemetry.raw"
-      partitions: 1
-      replicationFactor: 1
-    - name: "{{ .Values.global.env }}.knowlg.dialcode.context.job.request"
-      partitions: 1
-      replicationFactor: 1
-    - name: "{{ .Values.global.env }}.knowlg.dialcode.context.job.request.failed"
       partitions: 1
       replicationFactor: 1
     - name: "{{ .Values.global.env }}.knowlg.auto.creation.job.request"

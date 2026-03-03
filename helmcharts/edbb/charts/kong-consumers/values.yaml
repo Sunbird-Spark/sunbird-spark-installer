@@ -9,6 +9,7 @@ image:
 
 kong_admin_url: kong
 kong_admin_port: 8001
+managed_by: core
 
 mobile_admin_groups: &mobile_admin_groups
   - mobileSuperAdmin
@@ -36,12 +37,7 @@ mobile_device_groups: &mobile_device_groups
   - userAccess
   - userUpdate
   - contentTempAccess
-  - groupCreate
-  - groupUpdate
-  - groupAccess
-  - groupAdmin
   - refreshTokenCreate
-  - discussionAccess
   - anonymousCertificateAccess
   - anonymousContentAccess
   - anonymousCourseAccess
@@ -74,12 +70,8 @@ desktop_device_groups: &desktop_devicev_groups
   - pageAccess
   - dialcodeAccess
   - frameworkAccess
-  - orgAccess
   - deviceCreate
-  - groupCreate
-  - groupAccess
-  - groupUpdate
-  - groupAdmin
+  - orgAccess
   - locationAccess
   - userCreate
   - userUpdate
@@ -165,10 +157,6 @@ kong_all_consumer_groups: &kong_all_consumer_groups
   - userCreate
   - userTempAdmin
   - userUpdate
-  - groupCreate
-  - groupUpdate
-  - groupAccess
-  - groupAdmin
   - dataAccess
   - druidReportCreate
   - druidReportAdmin
@@ -247,8 +235,6 @@ kong_admin_groups:
   - dialcodeAdmin
   - dialcodeCreate
   - dialcodeUpdate
-  - discussionAccess
-  - discussionCreate
   - druidReportAdmin
   - druidReportCreate
   - experimentCreate
@@ -261,10 +247,6 @@ kong_admin_groups:
   - frameworkCreate
   - frameworkUpdate
   - getNotificationTemplate
-  - groupAccess
-  - groupAdmin
-  - groupCreate
-  - groupUpdate
   - igotAdmin
   - igotApp
   - itemSetAdmin

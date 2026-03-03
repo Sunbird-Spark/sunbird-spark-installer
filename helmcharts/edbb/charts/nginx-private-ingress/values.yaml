@@ -85,6 +85,9 @@ affinity: {}
 configmap:
   enabled: true
   mountPath: /etc/nginx/nginx.conf
+  addon_config_configmaps:
+    - discussion-forum-private-nginx-config
+    - dial-private-nginx-config
 
 htpasswd:
   name: htpasswd

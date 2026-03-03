@@ -68,3 +68,5 @@ CREATE TABLE IF NOT EXISTS ${ENV}_dialcode_store.system_config (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
+
+INSERT INTO ${ENV}_dialcode_store.system_config (prop_key, prop_value) values('dialcode_max_index', '1');

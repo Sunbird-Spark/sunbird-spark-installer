@@ -2,6 +2,7 @@ import urllib.request
 import urllib.error
 import argparse
 import json
+import copy
 
 from common import get_apis, json_request, get_api_plugins, get_routes
 
@@ -19,53 +20,118 @@ def _sanitize_plugin(plugin):
         pass
     return plugin
 
-def save_apis(kong_admin_api_url, input_apis):
+def save_apis(kong_admin_api_url, input_apis, managed_by=None):
     """
     Kong 3.9.1 Upgrade: Save services and routes (replaces legacy /apis)
-    Input format compatible with Kong 0.14.1 but now converts to:
-    - Services: Backend target configuration
-    - Routes: Request matching rules (hosts, paths, methods, etc.)
     """
     services_url = "{}/services".format(kong_admin_api_url)
-    saved_services = get_apis(kong_admin_api_url)
 
-    print("Number of input services : {}".format(len(input_apis)))
-    print("Number of existing services : {}".format(len(saved_services)))
+    # ALL services in Kong — used to decide create vs update
+    all_saved_services = get_apis(kong_admin_api_url)
 
-    input_service_names = [api["name"] for api in input_apis]
-    saved_service_names = [service["name"] for service in saved_services]
+    # Only OUR tagged services — used to decide safe deletes
+    if managed_by:
+        owned_saved_services = [s for s in all_saved_services if "managed-by:{}".format(managed_by) in (s.get("tags") or [])]
+    else:
+        owned_saved_services = all_saved_services   # no tag: own everything (full sync)
 
-    print("Input services : {}".format(input_service_names))
-    print("Existing services : {}".format(saved_service_names))
+    input_apis = input_apis or []
+    input_service_names   = [api["name"] for api in input_apis]
+    all_saved_names       = [s["name"]   for s in all_saved_services]
 
-    input_services_to_be_created = [input_api for input_api in input_apis if input_api["name"] not in saved_service_names]
-    input_services_to_be_updated = [input_api for input_api in input_apis if input_api["name"] in saved_service_names]
-    saved_services_to_be_deleted = [saved_service for saved_service in saved_services if saved_service["name"] not in input_service_names]
+    # CREATE: in our input, does not exist anywhere in Kong
+    input_services_to_be_created = [api for api in input_apis if api["name"] not in all_saved_names]
+
+    # UPDATE candidates: in our input, already exists in Kong
+    potential_updates = [api for api in input_apis if api["name"] in all_saved_names]
+
+    # DELETE: we own it (has our tag) but no longer in our input
+    owned_services_to_be_deleted = [s for s in owned_saved_services if s["name"] not in input_service_names]
+
+    stats = {
+        "services": {"created": 0, "updated": 0, "deleted": 0, "skipped": 0},
+        "routes": {"created": 0, "updated": 0, "deleted": 0, "skipped": 0},
+        "plugins": {"created": 0, "updated": 0, "deleted": 0, "skipped": 0}
+    }
+
+    # Helper to check if service changed
+    def _is_service_different(new_data, saved_service):
+        for key in ["url", "retries", "connect_timeout", "write_timeout", "read_timeout"]:
+            if key in new_data and new_data[key] != saved_service.get(key):
+                return True
+        # Check tags (adoption)
+        new_tags = new_data.get("tags", [])
+        saved_tags = saved_service.get("tags") or []
+        if any(t not in saved_tags for t in new_tags):
+            return True
+        return False
 
     for input_service in input_services_to_be_created:
         print("Adding service {}".format(input_service["name"]))
-        service_data = _convert_api_to_service(input_service)
-        json_request("POST", services_url, service_data)
+        service_data = _convert_api_to_service(input_service, managed_by=managed_by)
+        try:
+            json_request("POST", services_url, service_data)
+            stats["services"]["created"] += 1
+        except Exception as e:
+            print("  ✗ Error creating service {}: {}".format(input_service["name"], str(e)))
 
-    for input_service in input_services_to_be_updated:
-        print("Updating service {}".format(input_service["name"]))
-        saved_service_id = [saved_service["id"] for saved_service in saved_services if saved_service["name"] == input_service["name"]][0]
-        service_data = _convert_api_to_service(input_service)
-        service_data["id"] = saved_service_id
-        json_request("PATCH", services_url + "/" + saved_service_id, service_data)
+    for input_service in potential_updates:
+        saved_service = [s for s in all_saved_services if s["name"] == input_service["name"]][0]
+        service_data = _convert_api_to_service(input_service, managed_by=managed_by)
+        
+        if _is_service_different(service_data, saved_service):
+            print("Updating service {}".format(input_service["name"]))
+            try:
+                json_request("PATCH", services_url + "/" + saved_service["id"], service_data)
+                stats["services"]["updated"] += 1
+            except Exception as e:
+                print("  ✗ Error updating service {}: {}".format(input_service["name"], str(e)))
+        else:
+            stats["services"]["skipped"] += 1
 
-    for saved_service in saved_services_to_be_deleted:
-        print("Deleting service {}".format(saved_service["name"]));
-        json_request("DELETE", services_url + "/" + saved_service["id"], "")
+    for saved_service in owned_services_to_be_deleted:
+        service_id = saved_service["id"]
+        service_name = saved_service["name"]
+        print("Deleting owned orphan service {}".format(service_name))
+        
+        # Kong 3.x: Must delete routes BEFORE deleting the service
+        try:
+            assoc_routes = get_routes(kong_admin_api_url, service_name)
+            for route in assoc_routes:
+                print("  ✓ Deleting associated route {} before service removal".format(route["name"]))
+                json_request("DELETE", "{}/{}/routes/{}".format(services_url, service_id, route["id"]), "")
+                stats["routes"]["deleted"] += 1
+        except Exception as e:
+            print("  ⚠ Warning: Could not cleanup routes for service {}: {}".format(service_name, str(e)))
+
+        try:
+            json_request("DELETE", services_url + "/" + service_id, "")
+            stats["services"]["deleted"] += 1
+        except Exception as e:
+            print("  ✗ Error deleting service {}: {}".format(service_name, str(e)))
 
     for input_api in input_apis:
-        _save_routes_for_service(kong_admin_api_url, input_api)
-        _save_plugins_for_service(kong_admin_api_url, input_api)
+        try:
+            _save_routes_for_service(kong_admin_api_url, input_api, stats)
+        except Exception as e:
+            print("  ✗ Error processing routes for {}: {}".format(input_api["name"], str(e)))
+            
+        try:
+            _save_plugins_for_service(kong_admin_api_url, input_api, stats)
+        except Exception as e:
+            print("  ✗ Error processing plugins for {}: {}".format(input_api["name"], str(e)))
 
-def _convert_api_to_service(input_api):
+    print("\n--- Kong API Onboarding Summary ---")
+    print("Number of input services    : {}".format(len(input_apis or [])))
+    print("Total services in Kong      : {}".format(len(all_saved_services or [])))
+    print("Owned services in Kong      : {}".format(len(owned_saved_services or [])))
+    print("Managed-by label            : {}".format(managed_by or "(none — full sync)"))
+    print("----------------------------------\n")
+
+def _convert_api_to_service(input_api, managed_by=None):
     """
     Convert Kong 0.14.1 API object to Kong 3.9.1 Service object.
-    
+
     Kong 0.14.1 API properties → Kong 3.9.1 Service:
     - name → name (kept)
     - upstream_url → url (backend target)
@@ -73,17 +139,20 @@ def _convert_api_to_service(input_api):
     - connect_timeout → connect_timeout (kept)
     - write_timeout → write_timeout (kept)
     - read_timeout → read_timeout (kept)
+
+    managed_by: When set, stamps a 'managed-by:<managed_by>' tag on the
+                service so ownership-based sync knows which chart owns it.
     """
     service_data = {
         "name": input_api.get("name"),
     }
-    
+
     # Map upstream_url to url (Kong 3.x terminology)
     if "upstream_url" in input_api:
         service_data["url"] = input_api["upstream_url"]
     elif "url" in input_api:
         service_data["url"] = input_api["url"]
-    
+
     # Optional timeouts and retries
     if "retries" in input_api:
         service_data["retries"] = input_api["retries"]
@@ -93,10 +162,14 @@ def _convert_api_to_service(input_api):
         service_data["write_timeout"] = input_api["write_timeout"]
     if "read_timeout" in input_api:
         service_data["read_timeout"] = input_api["read_timeout"]
-    
+
+    # Stamp ownership tag so each chart only manages its own services
+    if managed_by:
+        service_data["tags"] = ["managed-by:{}".format(managed_by)]
+
     return service_data
 
-def _save_routes_for_service(kong_admin_api_url, input_api_details):
+def _save_routes_for_service(kong_admin_api_url, input_api_details, stats):
     """
     Kong 3.9.1: Save routes for the service.
     Routes define how requests are matched to the service.
@@ -125,8 +198,20 @@ def _save_routes_for_service(kong_admin_api_url, input_api_details):
             "strip_path": input_api_details.get("strip_uri", True)
         }]
     
-    print("Processing {} routes for service {}".format(len(input_routes), service_name))
-    
+    # helper to check if route changed
+    def _is_route_different(new, old):
+        for key in ["paths", "strip_path", "preserve_host", "hosts", "methods", "protocols", "regex_priority"]:
+            if key in new:
+                new_val = new[key]
+                old_val = old.get(key)
+                # Sort lists for stable comparison (paths, hosts, methods, protocols)
+                if isinstance(new_val, list) and isinstance(old_val, list):
+                    if sorted(new_val) != sorted(old_val):
+                        return True
+                elif new_val != old_val:
+                    return True
+        return False
+
     input_route_names = []
     for idx, input_route in enumerate(input_routes):
         route_name = "{}-route-{}".format(service_name, idx)
@@ -137,6 +222,9 @@ def _save_routes_for_service(kong_admin_api_url, input_api_details):
             "preserve_host": input_route.get("preserve_host", False)
         }
         
+        if isinstance(route_data["paths"], str):
+            route_data["paths"] = [route_data["paths"]]
+
         input_route_names.append(route_data["name"])
         
         # Optional route properties
@@ -153,15 +241,20 @@ def _save_routes_for_service(kong_admin_api_url, input_api_details):
         existing_route = next((r for r in existing_routes if r.get("name") == route_data["name"]), None)
         
         if existing_route:
-            print("  ✓ Updating route {} for service {}".format(route_data["name"], service_name))
-            try:
-                json_request("PATCH", routes_url + "/" + existing_route["id"], route_data)
-            except Exception as e:
-                print("  ✗ Error updating route: {}".format(str(e)))
+            if _is_route_different(route_data, existing_route):
+                print("  ✓ Updating route {} for service {}".format(route_data["name"], service_name))
+                try:
+                    json_request("PATCH", routes_url + "/" + existing_route["id"], route_data)
+                    stats["routes"]["updated"] += 1
+                except Exception as e:
+                    print("  ✗ Error updating route: {}".format(str(e)))
+            else:
+                stats["routes"]["skipped"] += 1
         else:
             print("  ✓ Creating route {} for service {}".format(route_data["name"], service_name))
             try:
                 json_request("POST", routes_url, route_data)
+                stats["routes"]["created"] += 1
             except urllib.error.HTTPError as e:
                 if e.code == 409:
                     # Route already exists, try to update it instead
@@ -173,6 +266,7 @@ def _save_routes_for_service(kong_admin_api_url, input_api_details):
                         if existing_route:
                             print("  ✓ Updating existing route {} for service {}".format(route_data["name"], service_name))
                             json_request("PATCH", routes_url + "/" + existing_route["id"], route_data)
+                            stats["routes"]["updated"] += 1
                         else:
                             print("  ✗ Route exists but could not find it: {}".format(route_data["name"]))
                     except Exception as update_err:
@@ -188,10 +282,11 @@ def _save_routes_for_service(kong_admin_api_url, input_api_details):
         print("  ✓ Deleting route {} for service {}".format(route_to_delete["name"], service_name))
         try:
             json_request("DELETE", routes_url + "/" + route_to_delete["id"], "")
+            stats["routes"]["deleted"] += 1
         except Exception as e:
             print("  ✗ Error deleting route: {}".format(str(e)))
 
-def _save_plugins_for_service(kong_admin_api_url, input_api_details):
+def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
     """
     Kong 3.9.1: Save plugins attached to the service (replaces /apis/{id}/plugins).
     Plugins are now attached to services in Kong 3.x.
@@ -211,11 +306,32 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details):
     input_plugin_names = [input_plugin["name"] for input_plugin in input_plugins]
     saved_plugin_names = [saved_plugin["name"] for saved_plugin in saved_plugins]
 
-    # Special handling: JWT plugin is converted to use anonymous fallback in Kong 3.9.1
-    # No need for special delete/create logic anymore - just update the config
-    has_jwt_to_convert = 'jwt' in input_plugin_names
-    has_existing_jwt = 'jwt' in saved_plugin_names
-    
+    # helper to check if plugin changed
+    def _is_plugin_different(new, old):
+        # We compare the config and enabled status
+        new_config = new.get("config", {})
+        old_config = old.get("config", {})
+        
+        # Simple recursive compare for dicts
+        def dict_compare(d1, d2):
+            if not isinstance(d1, dict) or not isinstance(d2, dict):
+                # Handle lists
+                if isinstance(d1, list) and isinstance(d2, list):
+                    return sorted([str(v) for v in d1]) != sorted([str(v) for v in d2])
+                return d1 != d2
+            for k in set(d1.keys()).union(d2.keys()):
+                if k not in d1 or k not in d2:
+                    return True
+                if dict_compare(d1[k], d2[k]):
+                    return True
+            return False
+
+        if dict_compare(new_config, old_config):
+            return True
+        if new.get("enabled", True) != old.get("enabled", True):
+            return True
+        return False
+
     input_plugins_to_be_created = [input_plugin for input_plugin in input_plugins if input_plugin["name"] not in saved_plugin_names]
     input_plugins_to_be_updated = [input_plugin for input_plugin in input_plugins if input_plugin["name"] in saved_plugin_names]
     saved_plugins_to_be_deleted = [saved_plugin for saved_plugin in saved_plugins if saved_plugin["name"] not in input_plugin_names]
@@ -224,141 +340,131 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details):
     for saved_plugin in saved_plugins_to_be_deleted:
         print("Deleting plugin {} for service {}".format(saved_plugin["name"], service_name));
         json_request("DELETE", plugins_url + "/" + saved_plugin["id"], "")
+        stats["plugins"]["deleted"] += 1
 
     for input_plugin in input_plugins_to_be_created:
         print("Adding plugin {} for service {}".format(input_plugin["name"], service_name));
         input_plugin = _convert_plugin_for_kong_3(input_plugin)
-        print("Plugin data to POST: {}".format(json.dumps(input_plugin, indent=2)))
         try:
             json_request("POST", plugins_url, _sanitize_plugin(input_plugin))
+            stats["plugins"]["created"] += 1
         except Exception as e:
             print("ERROR: Failed to create plugin {} for service {}".format(input_plugin["name"], service_name))
             raise
 
     for input_plugin in input_plugins_to_be_updated:
-        print("Updating plugin {} for service {}".format(input_plugin["name"], service_name));
-        input_plugin = _convert_plugin_for_kong_3(input_plugin)
-        saved_plugin_id = [saved_plugin["id"] for saved_plugin in saved_plugins if saved_plugin["name"] == input_plugin["name"]][0]
-        input_plugin["id"] = saved_plugin_id
-        json_request("PATCH", plugins_url + "/" + saved_plugin_id, _sanitize_plugin(input_plugin))
+        # Deep copy to ensure no shared state leaks between plugins
+        # during transformation in _convert_plugin_for_kong_3
+        converted_plugin = _convert_plugin_for_kong_3(copy.deepcopy(input_plugin))
+        sanitized_plugin = _sanitize_plugin(converted_plugin)
+        
+        saved_plugin = [p for p in saved_plugins if p["name"] == input_plugin["name"]][0]
+        
+        if _is_plugin_different(sanitized_plugin, saved_plugin):
+            print("Updating plugin {} for service {}".format(input_plugin["name"], service_name));
+            sanitized_plugin["id"] = saved_plugin["id"]
+            try:
+                json_request("PATCH", plugins_url + "/" + saved_plugin["id"], sanitized_plugin)
+                stats["plugins"]["updated"] += 1
+            except Exception as e:
+                print("  ✗ Error updating plugin {} for service {}: {}".format(input_plugin["name"], service_name, str(e)))
+                print("    Request body: {}".format(json.dumps(sanitized_plugin)))
+        else:
+            stats["plugins"]["skipped"] += 1
 
-def _convert_plugin_for_kong_3(plugin):
+def _convert_plugin_for_kong_3(plugin_input):
     """
     Convert plugin configuration for Kong 3.0+ compatibility.
-    Based on official Kong breaking changes documentation.
-    - ACL: whitelist → allow (Kong 3.0 breaking change)
-    - JWT: add algorithms, claims_to_verify (Kong 3.0+ enhancement)
-    - Rate-limiting: add error_code, error_message (Kong 3.0+ enhancement)
-    - Normalize dotted config keys (config.host → config: {host: ...})
+    Includes strict schema cleaning to prevent contamination between plugins.
     """
-    # Normalize dotted config keys from YAML (e.g., config.host → nested structure)
-    # Kong 3.x requires proper nested config, not dotted keys at root level
-    # Also handles multi-level nesting: config.remove.headers → config: { remove: { headers: ... } }
+    plugin = copy.deepcopy(plugin_input)
+    plugin_name = plugin.get('name', '')
+    
     if 'config' not in plugin or not plugin['config']:
         plugin['config'] = {}
     
-    dotted_keys_to_move = []
-    for key in list(plugin.keys()):
-        if key.startswith('config.'):
-            dotted_keys_to_move.append(key)
-    
+    # Normalize dotted config keys from YAML (e.g., config.host → nested structure)
+    dotted_keys_to_move = [k for k in plugin.keys() if k.startswith('config.')]
     for dotted_key in dotted_keys_to_move:
-        # Extract path parts: config.remove.headers → ['remove', 'headers']
         path_parts = dotted_key.replace('config.', '', 1).split('.')
         value = plugin.pop(dotted_key)
-        
-        # Navigate/create nested structure
         current = plugin['config']
-        for i, part in enumerate(path_parts[:-1]):
-            if part not in current:
+        for part in path_parts[:-1]:
+            if part not in current or not isinstance(current[part], dict):
                 current[part] = {}
             current = current[part]
-        
-        # Set the final value
-        final_key = path_parts[-1]
-        current[final_key] = value
-    
+        current[path_parts[-1]] = value
+
     plugin_config = plugin.get('config', {})
-    plugin_name = plugin.get('name', '')
     
     # Universal type conversion: Kong 3.9.1 requires proper types for numeric fields
-    # Convert string numbers to integers for common fields across all plugins
     numeric_fields = ['port', 'timeout', 'size', 'hour', 'minute', 'second', 'day', 'month', 'year',
                       'error_code', 'status', 'limit', 'window_size', 'retry_count', 'max_retries',
                       'allowed_payload_size', 'max_body_size', 'max_request_size']
     for field in numeric_fields:
-        if field in plugin_config and isinstance(plugin_config[field], str):
+        if field in plugin_config and isinstance(plugin_config[field], (str, float)):
             try:
                 plugin_config[field] = int(plugin_config[field])
-            except ValueError:
-                pass  # Keep as string if conversion fails
-    
-    # Request-transformer plugin: Kong expects arrays for headers/querystring/body fields
-    if plugin_name == 'request-transformer':
-        for action in ['add', 'append', 'remove', 'replace', 'rename']:
-            if action in plugin_config:
-                for field in ['headers', 'querystring', 'body']:
-                    if field in plugin_config[action] and isinstance(plugin_config[action][field], str):
-                        # Convert single string to array
-                        plugin_config[action][field] = [plugin_config[action][field]]
-    
-    # ACL Plugin: Kong 3.0 breaking change - whitelist → allow
+            except (ValueError, TypeError):
+                pass
+
+    # Plugin-specific schema cleanup and transformations
     if plugin_name == 'acl':
         if 'whitelist' in plugin_config:
             plugin_config['allow'] = plugin_config.pop('whitelist')
         if 'blacklist' in plugin_config:
             plugin_config['deny'] = plugin_config.pop('blacklist')
-        # Remove invalid 'status' field if present (not supported in Kong 3.9.1)
-        plugin_config.pop('status', None)
-    
-    # JWT Plugin: Kong 3.9.1 compatibility - use anonymous consumer fallback
-    # Problem: Portal sends exp as string, Kong validates it as number
-    # Solution: Use anonymous fallback when JWT validation fails
-    if plugin_name == 'jwt':
-        if 'config' not in plugin or not plugin['config']:
-            plugin['config'] = {}
-        plugin_config = plugin['config']
+        # ACL schema doesn't have allowed_payload_size, status, etc.
+        valid_keys = ['allow', 'deny', 'hide_groups_header']
+        plugin_config = {k: v for k, v in plugin_config.items() if k in valid_keys or k.startswith('_')}
         
-        # Remove validation fields that cause type errors
-        plugin_config.pop('algorithms', None)
-        plugin_config.pop('claims_to_verify', None)
-        plugin_config.pop('maximum_expiration', None)
+        # Ensure portal_anonymous is present (replicates Kong 0.14.1 anonymous access)
+        if 'allow' in plugin_config and isinstance(plugin_config['allow'], list):
+            if 'portal_anonymous' not in plugin_config['allow']:
+                plugin_config['allow'].append('portal_anonymous')
+        elif 'allow' not in plugin_config:
+             plugin_config['allow'] = ['portal_anonymous']
+
+    elif plugin_name == 'jwt':
+        # Strip validation fields that cause type errors in Kong 3.x
+        for k in ['algorithms', 'claims_to_verify', 'maximum_expiration']:
+            plugin_config.pop(k, None)
         
-        # Use anonymous consumer fallback for failed JWT validation (like Kong 0.14.1)
-        # SECURITY: portal_anonymous has limited read-only access vs portal_loggedin with admin permissions
+        # Replicate Kong 0.14.1 anonymous="" behavior
         plugin_config['anonymous'] = 'portal_anonymous'
-        
-        # Keep JWT extraction methods
         if 'header_names' not in plugin_config:
             plugin_config['header_names'] = ['authorization']
         if 'uri_param_names' not in plugin_config:
             plugin_config['uri_param_names'] = ['jwt']
-    
-    # ACL Plugin: Kong 3.9.1 compatibility - allow portal_anonymous consumer bypass
-    # In Kong 0.14.1: JWT anonymous="" meant no consumer set, ACL didn't enforce
-    # In Kong 3.x: JWT anonymous='portal_anonymous' sets consumer, ACL enforces strictly
-    # Solution: Add 'portal_anonymous' group to EVERY ACL allow list (bypass for anonymous)
-    # This is SECURE because portal_anonymous consumer only has limited read-only ACL groups
-    if plugin_name == 'acl':
-        if 'config' not in plugin or not plugin['config']:
-            plugin['config'] = {}
-        plugin_config = plugin['config']
-        
-        # Add 'portal_anonymous' to allow list - replicates Kong 0.14.1 anonymous="" behavior
-        if 'allow' in plugin_config and plugin_config['allow']:
-            if 'portal_anonymous' not in plugin_config['allow']:
-                plugin_config['allow'].append('portal_anonymous')
-        
-        if 'hide_groups_header' not in plugin_config:
-            plugin_config['hide_groups_header'] = False
-    
-    # Rate-limiting Plugin: Kong 3.0+ enhancements
-    if plugin_name == 'rate-limiting':
+            
+    elif plugin_name == 'rate-limiting':
         if 'error_code' not in plugin_config:
-            plugin_config['error_code'] = 429  # HTTP 429 Too Many Requests
+            plugin_config['error_code'] = 429
         if 'error_message' not in plugin_config:
             plugin_config['error_message'] = 'API rate limit exceeded'
+        # Strip fields that might have leaked from other plugins
+        valid_keys = ['second', 'minute', 'hour', 'day', 'month', 'year', 'limit_by', 'policy', 
+                      'fault_tolerant', 'redis_host', 'redis_port', 'redis_password', 'redis_timeout',
+                      'redis_database', 'hide_client_headers', 'error_code', 'error_message']
+        plugin_config = {k: v for k, v in plugin_config.items() if k in valid_keys or k.startswith('_')}
+
+    elif plugin_name == 'request-size-limiting':
+        # ONLY allow payload size fields
+        valid_keys = ['allowed_payload_size', 'size_unit']
+        plugin_config = {k: v for k, v in plugin_config.items() if k in valid_keys or k.startswith('_')}
+
+    elif plugin_name == 'statsd':
+        # STRIP contamination like allowed_payload_size which caused HTTP 400
+        valid_keys = ['host', 'port', 'prefix', 'metrics', 'udp_packet_size', 'retry_count']
+        plugin_config = {k: v for k, v in plugin_config.items() if k in valid_keys or k.startswith('_')}
     
+    elif plugin_name == 'request-transformer':
+        for action in ['add', 'append', 'remove', 'replace', 'rename']:
+            if action in plugin_config and isinstance(plugin_config[action], dict):
+                for field in ['headers', 'querystring', 'body']:
+                    if field in plugin_config[action] and isinstance(plugin_config[action][field], str):
+                        plugin_config[action][field] = [plugin_config[action][field]]
+
     plugin['config'] = plugin_config
     return plugin
 
@@ -420,11 +526,17 @@ if  __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Configure kong services and routes (Kong 3.9.1)')
     parser.add_argument('apis_file_path', help='Path of the json file containing services data')
     parser.add_argument('--kong-admin-api-url', help='Admin url for kong', default='http://localhost:8001')
+    parser.add_argument('--managed-by', default=None,
+                        help='Ownership label for this chart (e.g. "core", "discussion-forum"). '
+                             'Services are tagged managed-by:<label> on create/update. '
+                             'Delete is scoped to only services with this tag, so charts '
+                             'running concurrently never delete each other\'s APIs. '
+                             'Omit for original full-sync behaviour (backward compat).')
     args = parser.parse_args()
     with open(args.apis_file_path) as apis_file:
         input_apis = json.load(apis_file)
         try:
-            save_apis(args.kong_admin_api_url, input_apis)
+            save_apis(args.kong_admin_api_url, input_apis, managed_by=args.managed_by)
             # Post-migration fix: Ensure all ACL plugins allow portal_anonymous access
             # This handles both new and existing clusters
             fix_all_acl_plugins_for_anonymous_access(args.kong_admin_api_url)

@@ -1,4 +1,4 @@
-deploy_dial_services:  &deploy_dial_services  "true"
+deployed_dial_addon:  &deployed_dial_addon  "false"
 enable_asset_enrichment: &enable_asset_enrichment "false"
 default_passwords:
   grafana_admin_password: &grafana-admin-password "prom-operator"
@@ -65,7 +65,7 @@ global:
   keycloak:
    keycloak_user: admin
    keycloak_password: *keycloak-password  
-  deploy_dial_services: *deploy_dial_services   
+  deployed_dial_addon: *deployed_dial_addon   
   enable_asset_enrichment: *enable_asset_enrichment
   # The merge domain is optional and is required  `only if user merge workflow is required.
   # For most audience, this workflow is not required. If you need this workflow, then

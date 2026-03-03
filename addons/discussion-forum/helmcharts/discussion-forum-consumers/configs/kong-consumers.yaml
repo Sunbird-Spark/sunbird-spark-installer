@@ -1,0 +1,61 @@
+{{- $randomString := .Values.global.random_string -}}
+{{- if and (ge (len $randomString) 12) (le (len $randomString) 24) -}}
+kong_consumers:
+  # This chart appends discussion-forum and groups-service ACL groups to core consumers.
+  # Because kong_consumers.py runs with --managed-by=discussion-forum, it ONLY owns
+  # the groups listed here. Core groups (contentAccess, userAccess, etc.) are never touched.
+  - username: mobile_device
+    groups: {{ .Values.mobile_device_discussion_groups | toYaml | nindent 6 }}
+    state: present
+    key: mobile_device
+    secret: mobile_device{{ $randomString }}
+    credential_algorithm: HS256
+    credential_iss: mobile_device
+    print_credentials: true
+  - username: mobile_devicev2
+    groups: {{ .Values.mobile_device_discussion_groups | toYaml | nindent 6 }}
+    state: present
+    key: mobile_devicev2
+    secret: mobile_devicev2{{ $randomString }}
+    credential_algorithm: HS256
+    credential_iss: mobile_devicev2
+    print_credentials: true
+  - username: desktop_device
+    groups: {{ .Values.desktop_device_discussion_groups | toYaml | nindent 6 }}
+    state: present
+    key: desktop_device
+    secret: desktop_device{{ $randomString }}
+    credential_algorithm: HS256
+    credential_iss: desktop_device
+    print_credentials: true
+  - username: portal_loggedin
+    groups: {{ .Values.portal_discussion_groups | toYaml | nindent 6 }}
+    state: present
+    key: portal_loggedin
+    secret: portal_loggedin{{ $randomString }}
+    credential_algorithm: HS256
+    credential_iss: portal_loggedin
+    print_credentials: true
+  - username: portal_loggedin_fallback_token
+    groups: {{ .Values.portal_discussion_groups | toYaml | nindent 6 }}
+    state: present
+    key: portal_loggedin_fallback_token
+    secret: portal_loggedin_fallback_token{{ $randomString }}
+    credential_algorithm: HS256
+    credential_iss: portal_loggedin_fallback_token
+    print_credentials: true
+  - username: api_admin
+    groups: {{ .Values.api_admin_discussion_groups | toYaml | nindent 6 }}
+    state: present
+    key: api_admin
+    secret: api_admin{{ $randomString }}
+    credential_algorithm: HS256
+    credential_iss: api_admin
+    print_credentials: true
+{{- if .Values.additional_consumers -}}
+{{ .Values.additional_consumers | toYaml | nindent 2 }}
+{{- end -}}
+{{- else -}}
+{{ fail "random_string length must be between 12 and 24 characters" -}}
+{{- end -}}
+

@@ -1,0 +1,21 @@
+{{- if .Values.nginx.privateIngress.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # This name MUST match what the core nginx-private-ingress deployment.yaml
+  # projected volume references: discussion-forum-private-nginx-config
+  name: discussion-forum-private-nginx-config
+  namespace: {{ .Release.Namespace }}
+data:
+  # nodebb-private.conf is picked up by the core private nginx via:
+  #   include /etc/nginx/conf.d/addons/*.conf;
+  # Removing this addon chart removes this ConfigMap → nginx reloads without it.
+  # To disable without uninstalling the addon, set nginx.privateIngress.enabled=false.
+  nodebb-private.conf: |
+    location /nodebb/ {
+      set $target http://nodebb:4567;
+      rewrite ^/nodebb/(.*) /$1 break;
+      proxy_http_version 1.1;
+      proxy_pass $target;
+    }
+{{- end }}

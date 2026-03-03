@@ -1,0 +1,53 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  pullPolicy: Always
+  pullSecrets: []
+
+kong_admin_url: kong
+kong_admin_port: 8001
+
+# managed_by scopes ACL group deletions to only the groups declared in this chart.
+# Core groups (contentAccess, userAccess, etc.) are never touched.
+managed_by: discussion-forum
+
+mobile_device_discussion_groups: &mobile_device_discussion_groups
+  - discussionAccess
+  - groupAccess
+  - groupCreate
+  - groupUpdate
+
+desktop_device_discussion_groups: &desktop_device_discussion_groups
+  - groupAccess
+  - groupCreate
+  - groupUpdate
+  - groupAdmin
+
+portal_discussion_groups: &portal_discussion_groups
+  - discussionAccess
+  - discussionCreate
+  - groupAccess
+  - groupCreate
+  - groupUpdate
+  - groupAdmin
+
+api_admin_discussion_groups: &api_admin_discussion_groups
+  - discussionAccess
+  - discussionCreate
+  - groupAccess
+  - groupAdmin
+  - groupCreate
+  - groupUpdate
+
+provisioningAnnotations:
+  "helm.sh/hook": post-install,post-upgrade
+  "helm.sh/hook-weight": "5"
+  "helm.sh/hook-delete-policy": before-hook-creation
+
+configmap:
+  enabled: true
+  mountPath: /config
+
+global:
+  random_string: "randomstring123"

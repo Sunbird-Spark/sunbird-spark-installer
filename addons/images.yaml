@@ -1,0 +1,33 @@
+# Images are referenced via .Values.global.images in helmchart templates
+
+global:
+  images:
+    dial_service:
+      registry: ghcr.io
+      repository: sunbird-knowlg/sunbird-dial-service
+      tag: "release-8.1.0_rc1_8fbeab3"
+
+    kong_api_scripts:
+      registry: ghcr.io
+      repository: sunbird-spark/kong-api-scripts
+      tag: "develop_5c87617"
+    
+    discussionmw:
+      registry: sunbirded.azurecr.io
+      repository: discussion-middleware
+      tag: "release-7.0.0_RC1_850b795_3"
+    
+    groups:
+      registry: ghcr.io
+      repository: sunbird-lern/groups-service
+      tag: "release-8.0.0_rc5_952df5d_5"
+    
+    knowledge_platform_jobs:
+      registry: ghcr.io
+      repository: sunbird-knowlg/knowledge-platform-jobs
+      tag: "spark-v0.1_b7e896f"
+    
+    nodebb:
+      registry: sunbirded.azurecr.io
+      repository: nodebb
+      tag: "release-5.0.0_RC1_1_v1.18.6"
