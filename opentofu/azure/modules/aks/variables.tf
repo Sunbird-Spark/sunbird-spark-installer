@@ -89,12 +89,6 @@ variable "max_small_nodepool_nodes" {
   default     = 1
 }
 
-variable "end_date_relative" {
-  type        = string
-  description = "Service principal expiry. Default value set to 3 years."
-  default     = "26280h"
-}
-
 variable "private_ingressgateway_ip" {
     type        = string
     description = "Nginx private ingress ip."
