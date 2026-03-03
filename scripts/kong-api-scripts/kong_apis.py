@@ -248,8 +248,12 @@ def _save_routes_for_service(kong_admin_api_url, input_api_details, stats):
         if existing_route:
             if _is_route_different(route_data, existing_route):
                 print("  ✓ Updating route {} for service {}".format(route_data["name"], service_name))
+                # Don't send read-only fields in PATCH request
+                # Kong rejects PATCH with 'id', 'service_id', 'created_at', 'updated_at', etc.
+                route_data_for_patch = {k: v for k, v in route_data.items()
+                                       if k not in ['id', 'service_id', 'created_at', 'updated_at']}
                 try:
-                    json_request("PATCH", routes_url + "/" + existing_route["id"], route_data)
+                    json_request("PATCH", routes_url + "/" + existing_route["id"], route_data_for_patch)
                     stats["routes"]["updated"] += 1
                 except Exception as e:
                     print("  ✗ Error updating route: {}".format(str(e)))
@@ -270,7 +274,10 @@ def _save_routes_for_service(kong_admin_api_url, input_api_details, stats):
                         existing_route = next((r for r in all_routes_response.get("data", []) if r.get("name") == route_data["name"]), None)
                         if existing_route:
                             print("  ✓ Updating existing route {} for service {}".format(route_data["name"], service_name))
-                            json_request("PATCH", routes_url + "/" + existing_route["id"], route_data)
+                            # Filter read-only fields before PATCH (same as above)
+                            route_data_for_patch = {k: v for k, v in route_data.items()
+                                                   if k not in ['id', 'service_id', 'created_at', 'updated_at']}
+                            json_request("PATCH", routes_url + "/" + existing_route["id"], route_data_for_patch)
                             stats["routes"]["updated"] += 1
                         else:
                             print("  ✗ Route exists but could not find it: {}".format(route_data["name"]))
@@ -367,11 +374,13 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
 
         if _is_plugin_different(sanitized_plugin, saved_plugin):
             print("Updating plugin {} for service {}".format(input_plugin["name"], service_name));
-            # Don't send read-only fields in PATCH request
-            # Kong rejects PATCH with 'id', 'name', 'created_at', 'updated_at', etc.
-            plugin_data_for_patch = {k: v for k, v in sanitized_plugin.items()
-                                     if k not in ['id', 'name', 'service_id', 'route_id', 'consumer_id',
-                                                   'created_at', 'updated_at', 'protocols']}
+            # Kong PATCH only accepts mutable fields: config and enabled
+            # All other fields (id, name, created_at, updated_at, service_id, etc.) are read-only
+            plugin_data_for_patch = {}
+            if 'config' in sanitized_plugin:
+                plugin_data_for_patch['config'] = sanitized_plugin['config']
+            if 'enabled' in sanitized_plugin:
+                plugin_data_for_patch['enabled'] = sanitized_plugin['enabled']
             try:
                 json_request("PATCH", plugins_url + "/" + saved_plugin["id"], plugin_data_for_patch)
                 stats["plugins"]["updated"] += 1
@@ -498,7 +507,7 @@ def fix_all_acl_plugins_for_anonymous_access(kong_admin_api_url):
     # Get all plugins (includes service-level, route-level, and global plugins)
     plugins_url = "{}/plugins?size=1000".format(kong_admin_api_url)
     try:
-        response = urllib.request.urlopen(plugins_url)
+        response = retrying_urlopen(plugins_url)  # Use retrying_urlopen for proper retry logic
         all_plugins = json.loads(response.read())
         acl_plugins = [p for p in all_plugins.get('data', []) if p.get('name') == 'acl']
         
@@ -507,8 +516,9 @@ def fix_all_acl_plugins_for_anonymous_access(kong_admin_api_url):
         updated_count = 0
         for plugin in acl_plugins:
             plugin_id = plugin['id']
-            allow_list = plugin.get('config', {}).get('allow', [])
-            
+            # Create a copy to avoid mutating the original plugin object
+            allow_list = list(plugin.get('config', {}).get('allow', []))
+
             if 'portal_anonymous' not in allow_list:
                 # Add portal_anonymous to allow list
                 allow_list.append('portal_anonymous')

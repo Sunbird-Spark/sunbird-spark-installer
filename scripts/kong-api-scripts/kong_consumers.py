@@ -156,7 +156,18 @@ def _save_rate_limits(kong_admin_api_url, saved_consumer, rate_limits, stats):
                 
                 if changed:
                     print("Updating rate_limit for consumer {} for service {}".format(consumer_username, service_name))
-                    json_request("PATCH", plugins_url + "/" + rate_limit_plugin_for_this_consumer["id"], rate_limit_plugin_data)
+                    # Kong PATCH only accepts mutable fields: config and enabled
+                    # All other fields (id, name, created_at, updated_at, service_id, etc.) are read-only
+                    plugin_data_for_patch = {}
+                    if 'config' in rate_limit_plugin_data:
+                        plugin_data_for_patch['config'] = rate_limit_plugin_data['config']
+                    if 'enabled' in rate_limit_plugin_data:
+                        plugin_data_for_patch['enabled'] = rate_limit_plugin_data['enabled']
+                    # Also include any other rate-limit-specific fields that might be mutable
+                    for key in ['ratelimit_config']:
+                        if key in rate_limit_plugin_data:
+                            plugin_data_for_patch[key] = rate_limit_plugin_data[key]
+                    json_request("PATCH", plugins_url + "/" + rate_limit_plugin_for_this_consumer["id"], plugin_data_for_patch)
                     stats["rate_limits"]["updated"] += 1
                 else:
                     stats["rate_limits"]["skipped"] += 1
