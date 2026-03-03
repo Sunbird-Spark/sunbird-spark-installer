@@ -362,18 +362,22 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
         # during transformation in _convert_plugin_for_kong_3
         converted_plugin = _convert_plugin_for_kong_3(copy.deepcopy(input_plugin))
         sanitized_plugin = _sanitize_plugin(converted_plugin)
-        
+
         saved_plugin = [p for p in saved_plugins if p["name"] == input_plugin["name"]][0]
-        
+
         if _is_plugin_different(sanitized_plugin, saved_plugin):
             print("Updating plugin {} for service {}".format(input_plugin["name"], service_name));
-            sanitized_plugin["id"] = saved_plugin["id"]
+            # Don't send read-only fields in PATCH request
+            # Kong rejects PATCH with 'id', 'name', 'created_at', 'updated_at', etc.
+            plugin_data_for_patch = {k: v for k, v in sanitized_plugin.items()
+                                     if k not in ['id', 'name', 'service_id', 'route_id', 'consumer_id',
+                                                   'created_at', 'updated_at', 'protocols']}
             try:
-                json_request("PATCH", plugins_url + "/" + saved_plugin["id"], sanitized_plugin)
+                json_request("PATCH", plugins_url + "/" + saved_plugin["id"], plugin_data_for_patch)
                 stats["plugins"]["updated"] += 1
             except Exception as e:
                 print("  ✗ Error updating plugin {} for service {}: {}".format(input_plugin["name"], service_name, str(e)))
-                print("    Request body: {}".format(json.dumps(sanitized_plugin)))
+                print("    Request body: {}".format(json.dumps(plugin_data_for_patch)))
         else:
             stats["plugins"]["skipped"] += 1
 
