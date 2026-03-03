@@ -169,9 +169,9 @@ base_config: |
     host = "{{ .Values.global.yugabyte.host }}"
     port = "{{ .Values.global.yugabyte.port }}"
   }
-  neo4j {
-    routePath = "bolt://{{ .Values.global.neo4j.host }}:{{ .Values.global.neo4j.port }}"
-    graph = "domain"
+  janusgraph {
+    host = "{{ .Values.global.janusgraph.host }}"
+    port = "{{ .Values.global.janusgraph.port }}"
   }
   es {
     basePath = "{{ .Values.global.elasticsearch.host }}:{{ .Values.global.elasticsearch.port }}"
