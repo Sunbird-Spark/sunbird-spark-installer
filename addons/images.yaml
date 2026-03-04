@@ -25,7 +25,7 @@ global:
     knowledge_platform_jobs:
       registry: ghcr.io
       repository: sunbird-knowlg/knowledge-platform-jobs
-      tag: "spark-v0.1_b7e896f"
+      tag: "spark-v0.5_d5cc4ee"
     
     nodebb:
       registry: sunbirded.azurecr.io
