@@ -86,7 +86,7 @@ player:
       cpu: 1
       memory: 1G
  
-#knowledgebb 
+#knowledgebb
 janusgraph:
   resources:
     requests:
@@ -159,7 +159,7 @@ certregistry:
     limits:
       cpu: 1
       memory: 1024Mi
-      
+
 echo:
   resources:
     requests:
