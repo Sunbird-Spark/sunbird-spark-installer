@@ -157,9 +157,17 @@ base_config: |
     host = "{{ .Values.global.yugabyte.host }}"
     port = "{{ .Values.global.yugabyte.port }}"
   }
-  neo4j {
-    routePath = "bolt://{{ .Values.global.neo4j.host }}:{{ .Values.global.neo4j.port }}"
+  janusgraph {
+    host = "{{ .Values.global.janusgraph.host }}"
+    port = "{{ .Values.global.janusgraph.port }}"
+    storage.backend = "cql"
+    storage.host = "{{ .Values.global.yugabyte.host }}"
+    storage.port = "{{ .Values.global.yugabyte.port }}"
     graph = "domain"
+    storage.cql.read-consistency-level = "ONE"
+    storage.cql.write-consistency-level = "ONE"
+    storage.cql.local-datacenter = "datacenter1"
+    log.learning_graph_events.backend = "default"
   }
   es {
     basePath = "{{ .Values.global.elasticsearch.host }}:{{ .Values.global.elasticsearch.port }}"
