@@ -54,7 +54,7 @@ images:
 
   player: &player
     repository: "sunbirded.azurecr.io/sunbird-portal"
-    tag: "spark-v0.54_9fd166b"
+    tag: "spark-v0.57_d99a74f"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -150,9 +150,9 @@ images:
     tag: 2025.2.0.0-b131 
 
   janusgraph: &janusgraph
-    registry:  snt1
-    repository: janusgraph
-    tag: v2.0.0
+    registry: ghcr.io
+    repository: sunbird-spark/janusgraph
+    tag: develop_cb093d4
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
@@ -296,17 +296,10 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-
-  dial:
-    image: *dial
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
   search:
     image: *search
     imagePullSecrets:
       - name: "registry-secret-name"
-
 
   telemetry:
     image: *telemetry

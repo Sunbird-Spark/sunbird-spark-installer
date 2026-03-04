@@ -4,7 +4,7 @@ set -e
 # PATHS
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ADDON_DIR="$(dirname "$SCRIPT_DIR")"
-CHART_DIR="$ADDON_DIR/helmchart/video-stream-generator"
+CHART_DIR="$ADDON_DIR/helmcharts/video-stream-generator"
 REPO_ROOT="$(cd "$ADDON_DIR/../.." && pwd)"
 
 # DEFAULTS
