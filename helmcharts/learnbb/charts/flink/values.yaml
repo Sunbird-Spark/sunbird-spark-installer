@@ -363,10 +363,6 @@ base_config: |
         port = "{{ .Values.global.yugabyte.port }}"
         isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
     }
-    neo4j {
-      routePath = "bolt://{{.Values.global.neo4j.host}}:{{.Values.global.neo4j.port}}"
-      graph = "domain"
-    }
     es {
         basePath = "{{.Values.global.elasticsearch.host}}:{{.Values.global.elasticsearch.port}}"
     }
