@@ -131,6 +131,9 @@ redis: &redis
   port: 6379
 global:
   redis: *redis
+  dnsService: "kube-dns"
+  dnsNamespace: "kube-system"
+  clusterDomain: "cluster.local"
 
 commonAnnotations:
   reloader.stakater.com/auto: "true"
