@@ -100,7 +100,7 @@ velero:
                 - cassandra
                 - neo4j
                 - redis
-                - postgresql
+                - yugabyte
         snapshotVolumes: true
 
 
