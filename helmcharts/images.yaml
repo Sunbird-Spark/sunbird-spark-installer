@@ -119,7 +119,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v0.8_b272084_11"
+    tag: "sspark-v0.9_1f288bd_12"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
