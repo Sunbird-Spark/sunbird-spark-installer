@@ -110,7 +110,7 @@ While the installer may work with other versions, these are the versions that ha
 
      - **To Enable Integration**: Set `deployed_dial_addon: true` in your `global-values.yaml` file. This tells the core installation script to include addon-specific configurations.
      
-     - **When to set this**: Enable this flag if you have deployed or intend to deploy the DIAL addon.
+     - **When to set this**: Enable this flag and deploy core services, if you have deployed or intend to deploy the DIAL addon.
 
      Example in `global-values.yaml`:
 
