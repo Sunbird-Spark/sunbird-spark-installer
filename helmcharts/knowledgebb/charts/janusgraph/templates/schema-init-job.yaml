@@ -5,6 +5,10 @@ metadata:
   name: {{ include "common.names.fullname" . }}-schema-init
   namespace: {{ .Release.Namespace }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook-weight": "0"
 spec:
   backoffLimit: 3
   template:

@@ -22,8 +22,8 @@ Primary distributed database used across all building blocks. Deployed as **6 po
 
 | Component | Pods | CPU req / limit | Memory req / limit | Disk per pod |
 |-----------|------|-----------------|--------------------|--------------|
-| Master | 3 | 2 / 2 | 2 Gi / 2 Gi | 25 Gi |
-| TServer | 3 | 2 / 2 | 4 Gi / 4 Gi | 25 Gi |
+| Master | 3 | 2 / 2 | 2 Gi / 2 Gi | 10 Gi |
+| TServer | 3 | 2 / 2 | 4 Gi / 4 Gi | 10 Gi |
 
 | Port | Usage |
 |------|-------|
@@ -129,11 +129,14 @@ All services run with **1 replica** by default. Most services use CPU 100m / 1 c
 
 | Building Block | Services | Count |
 |----------------|----------|-------|
-| EdBB | knowledge-mw, player (portal), kong (API gateway), nginx-public-ingress | 4 |
+| EdBB | echo, knowledge-mw, player (portal), kong (API gateway), nginx-public-ingress | 5 |
 | KnowledgeBB | knowlg-service, search-service | 2 |
 | LearnBB | lern-service, keycloak, adminutil, cert-service, cert-registry, certificateapi, certificatesign, registry (Sunbird-RC) | 8 |
 | ObsrvBB | telemetry-service, superset | 2 |
-| **Total** | | **16** |
+| Monitoring | grafana-alloy, loki, monitoring-grafana, prometheus | 4 |
+| **Total** | | **21** |
+
+> **Additional — Velero:** Installed for cluster backup and disaster recovery. Runs as a deployment + node-agent daemonset. Not counted in workload resource totals above as it is infrastructure-level and its footprint is minimal.
 
 ---
 
@@ -141,17 +144,17 @@ All services run with **1 replica** by default. Most services use CPU 100m / 1 c
 
 | Category | CPU Request | CPU Limit | Memory Request | Memory Limit | Disk |
 |----------|-------------|-----------|----------------|--------------|------|
-| Databases | ~17 cores | ~21 cores | ~28 Gi | ~38 Gi | ~249 Gi |
+| Databases | ~17 cores | ~21 cores | ~28 Gi | ~38 Gi | ~159 Gi |
 | Flink Jobs (5 enabled) | ~1 core | ~10 cores | ~10 Gi | ~20 Gi | — |
-| Application Services | ~2 cores | ~15 cores | ~2 Gi | ~17 Gi | — |
-| **Grand Total** | **~20 cores** | **~46 cores** | **~40 Gi** | **~75 Gi** | **~249 Gi** |
+| Application Services (21 services) | ~2.5 cores | ~21 cores | ~2.5 Gi | ~21 Gi | — |
+| **Grand Total** | **~21 cores** | **~52 cores** | **~41 Gi** | **~79 Gi** | **~159 Gi** |
 
 **Disk breakdown:**
-- YugabyteDB: 6 pods × 25 Gi = 150 Gi
+- YugabyteDB: 6 pods × 10 Gi = 60 Gi
 - Kafka: 3 pods × 8 Gi = 24 Gi
 - Redis: 2 pods × 25 Gi = 50 Gi
 - Elasticsearch: 1 pod × 25 Gi = 25 Gi
-- **Total disk: ~249 Gi**
+- **Total disk: ~159 Gi**
 
 ---
 
@@ -192,10 +195,10 @@ Flink job that converts uploaded videos to HLS streaming format.
 
 | Category | CPU Request | CPU Limit | Memory Request | Memory Limit | Disk |
 |----------|-------------|-----------|----------------|--------------|------|
-| Base Platform | ~20 cores | ~46 cores | ~40 Gi | ~75 Gi | ~249 Gi |
+| Base Platform | ~21 cores | ~52 cores | ~41 Gi | ~79 Gi | ~159 Gi |
 | DIAL Addon | ~0.5 cores | ~5 cores | ~2 Gi | ~9 Gi | — |
 | Discussion Forum Addon | ~0.3 cores | ~3 cores | ~0.3 Gi | ~4 Gi | — |
 | Video Stream Generator Addon | ~0.2 cores | ~2 cores | ~1 Gi | ~4 Gi | — |
-| **Grand Total (all addons)** | **~21 cores** | **~56 cores** | **~43 Gi** | **~92 Gi** | **~249 Gi** |
+| **Grand Total (all addons)** | **~22 cores** | **~62 cores** | **~44 Gi** | **~96 Gi** | **~159 Gi** |
 
 > All addons together add only ~1 CPU core and ~3 Gi of memory requests. **No additional nodes are needed** — the same 2-node cluster handles base + all addons.
