@@ -12,18 +12,11 @@
              <#if skipLink??>
              <#else>
                <#if actionUri??>
-                 <div class="ui text active centered inline large loader">Loading.. Please wait..</div>
-                 <div id="kc-info-message-hide" style="display:none">
-                   <p><a id="click-here-to-proceed" href="${actionUri}">${kcSanitize(msg("proceedWithAction"))?no_esc}</a></p>
-                   <script type="text/javascript">
-                     window.onload = function(){
-                       function autoClick() {
-                         document.getElementById("click-here-to-proceed").click();
-                       }
-                     setInterval(autoClick, 500);
-                     }
-                   </script>
-                 </div>
+                 <style>body { visibility: hidden !important; }</style>
+                 <p style="display:none"><a id="click-here-to-proceed" href="${actionUri}">${kcSanitize(msg("proceedWithAction"))?no_esc}</a></p>
+                 <script type="text/javascript">
+                   window.location.href = "${actionUri}";
+                 </script>
                <#elseif pageRedirectUri??>
                  <style>body { visibility: hidden !important; }</style>
                  <p><a href="${pageRedirectUri}" class="kc-button">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
