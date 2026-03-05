@@ -90,20 +90,6 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
-neo4j: &neo4j
-  enabled: true
-  host: "neo4j"
-  port: 7687
-  boltPort: 8687
-  shard_id: 1
-  image:
-    repository: sunbirded.azurecr.io/neo4j
-    tag: "3.3.0"
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  provisioning:
-    annotations: *provisioningAnnotations
-
 redis: &redis
   enabled: true
   fullnameOverride: "redis"
@@ -159,7 +145,6 @@ global:
   keycloak_key_configmap: keycloak-key
   keycloak_kid_keys_configmap: keycloak-kids-keys
   kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
-  neo4j: *neo4j
   provisioningAnnotations: *provisioningAnnotations
   redis: *redis
   yugabyte: *yugabyte
