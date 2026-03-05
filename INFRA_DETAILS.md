@@ -20,10 +20,11 @@ All databases run as Kubernetes workloads inside the cluster.
 
 Primary distributed database used across all building blocks. Deployed as **6 pods** (3 masters + 3 tservers).
 
-| Component | Pods | CPU req / limit | Memory req / limit | Disk per pod |
-|-----------|------|-----------------|--------------------|--------------|
-| Master | 3 | 2 / 2 | 2 Gi / 2 Gi | 20 Gi (2 PVCs × 10 Gi) |
-| TServer | 3 | 2 / 2 | 4 Gi / 4 Gi | 20 Gi (2 PVCs × 10 Gi) |
+| Component | Pods | CPU req / limit | Memory req / limit | Disk per pod | Total Disk |
+|-----------|------|-----------------|--------------------|--------------|------------|
+| Master | 3 | 2 / 2 | 2 Gi / 2 Gi | 20 Gi (2 PVCs × 10 Gi) | 60 Gi |
+| TServer | 3 | 2 / 2 | 4 Gi / 4 Gi | 20 Gi (2 PVCs × 10 Gi) | 60 Gi |
+| **YugabyteDB Total** | **6** | | | | **120 Gi** |
 
 | Port | Usage |
 |------|-------|
