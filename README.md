@@ -14,8 +14,7 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 | Flink Jobs (enabled by default) | 5 |
 | Application Services | 17 |
 | Monitoring Stack (Grafana, Loki, Prometheus, Grafana Alloy) | 4 |
-
-> **Additional:** Velero is installed for cluster backup and disaster recovery (not counted in workload resources above).
+| Velero (backup & disaster recovery) | 1 |
 
 ### Resources without addons
 
@@ -23,7 +22,7 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 |----------|---------|-------|------|
 | CPU | ~21 cores | ~52 cores | — |
 | Memory | ~41 Gi | ~79 Gi | — |
-| Disk | — | — | ~159 Gi |
+| Disk | — | — | ~244 Gi |
 
 ### Optional addons
 
@@ -39,7 +38,7 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 |----------|---------|-------|------|
 | CPU | ~22 cores | ~62 cores | — |
 | Memory | ~44 Gi | ~96 Gi | — |
-| Disk | — | — | ~159 Gi |
+| Disk | — | — | ~244 Gi |
 
 > No additional nodes needed — the same 2-node cluster handles base + all addons.
 
