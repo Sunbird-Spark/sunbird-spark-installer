@@ -12,11 +12,11 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 |----------|-------|
 | Databases (YugabyteDB, Redis*, Elasticsearch, JanusGraph) | 4 |
 | Flink Jobs (enabled by default) | 5 |
-| Application Services + Kafka | 13 |
+| Application Services  | 14 |
 | Monitoring Stack (Grafana, Loki, Prometheus, Grafana Alloy) | 4 |
 | Velero (backup & disaster recovery) | 1 |
 
-> *Redis is optional — can be replaced with an external Redis instance.
+> *Redis is optional 
 
 ### Resources without addons
 
