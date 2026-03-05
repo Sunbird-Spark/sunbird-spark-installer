@@ -16,13 +16,15 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 | Monitoring Stack (Grafana, Loki, Prometheus, Grafana Alloy) | 4 |
 | Velero (backup & disaster recovery) | 1 |
 
+> *Redis is optional — can be replaced with an external Redis instance.
+
 ### Resources without addons
 
 | Resource | Request | Limit | Disk |
 |----------|---------|-------|------|
 | CPU | ~21 cores | ~50 cores | — |
-| Memory | ~41 Gi | ~76 Gi | — |
-| Disk | — | — | ~244 Gi |
+| Memory | ~40 Gi | ~74 Gi | — |
+| Disk | — | — | ~219 Gi |
 
 ### Optional addons
 
@@ -37,8 +39,8 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 | Resource | Request | Limit | Disk |
 |----------|---------|-------|------|
 | CPU | ~22 cores | ~60 cores | — |
-| Memory | ~44 Gi | ~93 Gi | — |
-| Disk | — | — | ~244 Gi |
+| Memory | ~43 Gi | ~91 Gi | — |
+| Disk | — | — | ~219 Gi |
 
 > No additional nodes needed — the same 2-node cluster handles base + all addons.
 

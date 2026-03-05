@@ -34,7 +34,7 @@ Primary distributed database used across all building blocks. Deployed as **6 po
 
 | Building Block | Databases |
 |----------------|-----------|
-| EdBB | kong, druid_raw, superset, registry, portal |
+| EdBB | kong, superset, registry, portal |
 | LearnBB | keycloak, quartz, enc-keys, registry |
 | ObsrvBB | superset |
 | KnowledgeBB | hierarchy_store, content_store (CQL keyspaces) |
@@ -116,12 +116,11 @@ All services run with **1 replica** by default. Most services use CPU 100m / 1 c
 
 | Building Block | Services | Count |
 |----------------|----------|-------|
-| EdBB | echo, knowledge-mw, player (portal), kong (API gateway), nginx-public-ingress | 5 |
+| EdBB | echo, knowledge-mw, player (portal), kong (API gateway), nginx-public-ingress ,kafka| 5 |
 | KnowledgeBB | knowlg-service, search-service | 2 |
 | LearnBB | lern-service, keycloak+adminutil, cert (cert-service, cert-registry, certificateapi, certificatesign), registry (Sunbird-RC) | 4 |
-| ObsrvBB | telemetry-service | 1 |
+| ObsrvBB | telemetry-service,superset | 1 |
 | Monitoring | grafana-alloy, loki, monitoring-grafana, prometheus | 4 |
-| Infrastructure | kafka | 1 |
 | **Total** | | **17** |
 
 #### Kafka
@@ -151,19 +150,19 @@ Runs as a deployment + node-agent daemonset (1 pod per node).
 
 | Category | CPU Request | CPU Limit | Memory Request | Memory Limit | Disk |
 |----------|-------------|-----------|----------------|--------------|------|
-| Databases | ~15 cores | ~18 cores | ~24 Gi | ~30 Gi | ~220 Gi |
+| Databases (excl. optional Redis) | ~15 cores | ~18 cores | ~23 Gi | ~28 Gi | ~195 Gi |
 | Flink Jobs (5 enabled) | ~1 core | ~10 cores | ~10 Gi | ~20 Gi | — |
 | Application Services + Kafka (22 services) | ~5 cores | ~22 cores | ~6.5 Gi | ~26 Gi | ~24 Gi |
-| **Grand Total** | **~21 cores** | **~50 cores** | **~41 Gi** | **~76 Gi** | **~244 Gi** |
+| **Grand Total** | **~21 cores** | **~50 cores** | **~40 Gi** | **~74 Gi** | **~219 Gi** |
 
 **Disk breakdown:**
 - YugabyteDB: 6 pods × 2 PVCs × 10 Gi = 120 Gi
-- Redis: 1 pod × 25 Gi = 25 Gi *(optional)*
 - Elasticsearch: 1 pod × 25 Gi = 25 Gi
 - Prometheus: 1 × 25 Gi = 25 Gi
 - Loki: 1 × 25 Gi = 25 Gi
 - Kafka: 3 pods × 8 Gi = 24 Gi *(counted under Application Services)*
-- **Total disk: ~244 Gi**
+- **Total disk: ~219 Gi**
+- Redis: 1 pod × 25 Gi = 25 Gi *(optional — not included in total above)*
 
 ---
 
@@ -204,10 +203,10 @@ Flink job that converts uploaded videos to HLS streaming format.
 
 | Category | CPU Request | CPU Limit | Memory Request | Memory Limit | Disk |
 |----------|-------------|-----------|----------------|--------------|------|
-| Base Platform | ~21 cores | ~50 cores | ~41 Gi | ~76 Gi | ~244 Gi |
+| Base Platform | ~21 cores | ~50 cores | ~40 Gi | ~74 Gi | ~219 Gi |
 | DIAL Addon | ~0.5 cores | ~5 cores | ~2 Gi | ~9 Gi | — |
 | Discussion Forum Addon | ~0.3 cores | ~3 cores | ~0.3 Gi | ~4 Gi | — |
 | Video Stream Generator Addon | ~0.2 cores | ~2 cores | ~1 Gi | ~4 Gi | — |
-| **Grand Total (all addons)** | **~22 cores** | **~60 cores** | **~44 Gi** | **~93 Gi** | **~244 Gi** |
+| **Grand Total (all addons)** | **~22 cores** | **~60 cores** | **~43 Gi** | **~91 Gi** | **~219 Gi** |
 
 > All addons together add only ~1 CPU core and ~3 Gi of memory requests. **No additional nodes are needed** — the same 2-node cluster handles base + all addons.
