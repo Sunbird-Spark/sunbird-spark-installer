@@ -23,11 +23,6 @@ images:
     repository: sanketikahub/kafka
     tag: "4.0.0"
 
-  postgresql: &postgresql
-    registry: "sunbirded.azurecr.io"
-    repository: "postgresql"
-    tag: "11.14.0"
-
   redis: &redis
     registry: "sunbirded.azurecr.io"
     repository: "redis"
@@ -127,7 +122,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v08_081de67"
+    tag: "spark-v12_8775a54"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -177,11 +172,6 @@ internal: &internal
 
   kafka:
     image: *kafka
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  postgresql:
-    image: *postgresql
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -258,11 +248,6 @@ internal: &internal
 
   nginx-public-ingress:
     image: *nginx_public_ingress
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  postgresql:
-    image: *postgresql
     imagePullSecrets:
       - name: "registry-secret-name"    
 

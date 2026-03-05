@@ -1,8 +1,8 @@
 # sunbird-spark-installer
 
 Minimum resources required to install and run Sunbird-ED on any cloud provider
-- **vCPUs**: 48  
-- **RAM**: 192 GB
+- **vCPUs**: 32
+- **RAM**: 128 GB
 
 ## Installing Sunbird on Any Cloud Provider
 
