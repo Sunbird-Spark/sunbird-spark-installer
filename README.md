@@ -20,8 +20,8 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 
 | Resource | Request | Limit | Disk |
 |----------|---------|-------|------|
-| CPU | ~21 cores | ~52 cores | — |
-| Memory | ~41 Gi | ~79 Gi | — |
+| CPU | ~21 cores | ~50 cores | — |
+| Memory | ~41 Gi | ~76 Gi | — |
 | Disk | — | — | ~244 Gi |
 
 ### Optional addons
@@ -36,8 +36,8 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 
 | Resource | Request | Limit | Disk |
 |----------|---------|-------|------|
-| CPU | ~22 cores | ~62 cores | — |
-| Memory | ~44 Gi | ~96 Gi | — |
+| CPU | ~22 cores | ~60 cores | — |
+| Memory | ~44 Gi | ~93 Gi | — |
 | Disk | — | — | ~244 Gi |
 
 > No additional nodes needed — the same 2-node cluster handles base + all addons.

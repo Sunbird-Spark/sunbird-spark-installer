@@ -150,10 +150,10 @@ Runs as a deployment + node-agent daemonset (1 pod per node).
 
 | Category | CPU Request | CPU Limit | Memory Request | Memory Limit | Disk |
 |----------|-------------|-----------|----------------|--------------|------|
-| Databases | ~17 cores | ~21 cores | ~28 Gi | ~38 Gi | ~244 Gi |
+| Databases | ~17 cores | ~21 cores | ~27 Gi | ~36 Gi | ~244 Gi |
 | Flink Jobs (5 enabled) | ~1 core | ~10 cores | ~10 Gi | ~20 Gi | — |
-| Application Services (21 services) | ~2.5 cores | ~21 cores | ~2.5 Gi | ~21 Gi | — |
-| **Grand Total** | **~21 cores** | **~52 cores** | **~41 Gi** | **~79 Gi** | **~244 Gi** |
+| Application Services (21 services) | ~2.5 cores | ~19 cores | ~3.5 Gi | ~20 Gi | — |
+| **Grand Total** | **~21 cores** | **~50 cores** | **~41 Gi** | **~76 Gi** | **~244 Gi** |
 
 **Disk breakdown:**
 - YugabyteDB: 6 pods × 2 PVCs × 10 Gi = 120 Gi
@@ -203,10 +203,10 @@ Flink job that converts uploaded videos to HLS streaming format.
 
 | Category | CPU Request | CPU Limit | Memory Request | Memory Limit | Disk |
 |----------|-------------|-----------|----------------|--------------|------|
-| Base Platform | ~21 cores | ~52 cores | ~41 Gi | ~79 Gi | ~244 Gi |
+| Base Platform | ~21 cores | ~50 cores | ~41 Gi | ~76 Gi | ~244 Gi |
 | DIAL Addon | ~0.5 cores | ~5 cores | ~2 Gi | ~9 Gi | — |
 | Discussion Forum Addon | ~0.3 cores | ~3 cores | ~0.3 Gi | ~4 Gi | — |
 | Video Stream Generator Addon | ~0.2 cores | ~2 cores | ~1 Gi | ~4 Gi | — |
-| **Grand Total (all addons)** | **~22 cores** | **~62 cores** | **~44 Gi** | **~96 Gi** | **~244 Gi** |
+| **Grand Total (all addons)** | **~22 cores** | **~60 cores** | **~44 Gi** | **~93 Gi** | **~244 Gi** |
 
 > All addons together add only ~1 CPU core and ~3 Gi of memory requests. **No additional nodes are needed** — the same 2-node cluster handles base + all addons.
