@@ -39,21 +39,9 @@ Primary distributed database used across all building blocks. Deployed as **6 po
 | ObsrvBB | superset |
 | KnowledgeBB | hierarchy_store, content_store (CQL keyspaces) |
 
-### Kafka
+### Redis (Optional)
 
-Runs in KRaft mode. **3 controller pods** (each acts as broker + controller).
-
-| Parameter | Value |
-|-----------|-------|
-| Pods | 3 (controllers) |
-| CPU request / limit | 750m / 1 |
-| Memory request / limit | 1024 Mi / 2048 Mi |
-| Disk per pod | 8 Gi |
-| Port | 9092 |
-
-### Redis
-
-**1 pod** (master only, replica disabled).
+**1 pod** (master only, replica disabled). Can be disabled if an external Redis is used.
 
 | Component | CPU req / limit | Memory req / limit | Disk |
 |-----------|-----------------|--------------------|------|
@@ -130,10 +118,23 @@ All services run with **1 replica** by default. Most services use CPU 100m / 1 c
 |----------------|----------|-------|
 | EdBB | echo, knowledge-mw, player (portal), kong (API gateway), nginx-public-ingress | 5 |
 | KnowledgeBB | knowlg-service, search-service | 2 |
-| LearnBB | lern-service, keycloak, adminutil, cert-service, cert-registry, certificateapi, certificatesign, registry (Sunbird-RC) | 8 |
-| ObsrvBB | telemetry-service, superset | 2 |
+| LearnBB | lern-service, keycloak+adminutil, cert (cert-service, cert-registry, certificateapi, certificatesign), registry (Sunbird-RC) | 4 |
+| ObsrvBB | telemetry-service | 1 |
 | Monitoring | grafana-alloy, loki, monitoring-grafana, prometheus | 4 |
-| **Total** | | **21** |
+| Infrastructure | kafka | 1 |
+| **Total** | | **17** |
+
+#### Kafka
+
+Runs in KRaft mode. **3 controller pods** (each acts as broker + controller).
+
+| Parameter | Value |
+|-----------|-------|
+| Pods | 3 (controllers) |
+| CPU request / limit | 750m / 1 |
+| Memory request / limit | 1024 Mi / 2048 Mi |
+| Disk per pod | 8 Gi |
+| Port | 9092 |
 
 ### Velero (Backup & Disaster Recovery)
 
@@ -150,18 +151,18 @@ Runs as a deployment + node-agent daemonset (1 pod per node).
 
 | Category | CPU Request | CPU Limit | Memory Request | Memory Limit | Disk |
 |----------|-------------|-----------|----------------|--------------|------|
-| Databases | ~17 cores | ~21 cores | ~27 Gi | ~36 Gi | ~244 Gi |
+| Databases | ~15 cores | ~18 cores | ~24 Gi | ~30 Gi | ~220 Gi |
 | Flink Jobs (5 enabled) | ~1 core | ~10 cores | ~10 Gi | ~20 Gi | — |
-| Application Services (21 services) | ~2.5 cores | ~19 cores | ~3.5 Gi | ~20 Gi | — |
+| Application Services + Kafka (22 services) | ~5 cores | ~22 cores | ~6.5 Gi | ~26 Gi | ~24 Gi |
 | **Grand Total** | **~21 cores** | **~50 cores** | **~41 Gi** | **~76 Gi** | **~244 Gi** |
 
 **Disk breakdown:**
 - YugabyteDB: 6 pods × 2 PVCs × 10 Gi = 120 Gi
-- Kafka: 3 pods × 8 Gi = 24 Gi
-- Redis: 1 pod × 25 Gi = 25 Gi
+- Redis: 1 pod × 25 Gi = 25 Gi *(optional)*
 - Elasticsearch: 1 pod × 25 Gi = 25 Gi
 - Prometheus: 1 × 25 Gi = 25 Gi
 - Loki: 1 × 25 Gi = 25 Gi
+- Kafka: 3 pods × 8 Gi = 24 Gi *(counted under Application Services)*
 - **Total disk: ~244 Gi**
 
 ---
