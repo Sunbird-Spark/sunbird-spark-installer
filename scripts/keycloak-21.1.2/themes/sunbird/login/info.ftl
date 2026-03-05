@@ -9,7 +9,6 @@
     <#elseif section = "form">
         <div id="kc-info-message">
 <!--           <p class="instruction">${message.summary}<#if requiredActions??><#list requiredActions>: <b><#items as reqActionItem>${msg("requiredAction.${reqActionItem}")}<#sep>, </#items></b></#list><#else></#if></p> -->
-<!-- DEBUG: actionUri=${actionUri!""} | pageRedirectUri=${pageRedirectUri!""} | baseUrl=${client.baseUrl!""} -->
              <#if skipLink??>
              <#else>
                <#if actionUri??>
@@ -26,7 +25,11 @@
                    </script>
                  </div>
                <#elseif pageRedirectUri??>
+                 <style>body { visibility: hidden !important; }</style>
                  <p><a href="${pageRedirectUri}" class="kc-button">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
+                 <script type="text/javascript">
+                   window.location.href = "${pageRedirectUri}";
+                 </script>
                <#elseif client.baseUrl??>
                  <p><a href="${client.baseUrl}" class="kc-button">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
                </#if>
