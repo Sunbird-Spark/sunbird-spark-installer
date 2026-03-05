@@ -23,11 +23,6 @@ images:
     repository: sanketikahub/kafka
     tag: "4.0.0"
 
-  postgresql: &postgresql
-    registry: "sunbirded.azurecr.io"
-    repository: "postgresql"
-    tag: "11.14.0"
-
   redis: &redis
     registry: "sunbirded.azurecr.io"
     repository: "redis"
@@ -181,11 +176,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  postgresql:
-    image: *postgresql
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
   redis:
     image: *redis
     imagePullSecrets:
@@ -259,11 +249,6 @@ internal: &internal
 
   nginx-public-ingress:
     image: *nginx_public_ingress
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  postgresql:
-    image: *postgresql
     imagePullSecrets:
       - name: "registry-secret-name"    
 

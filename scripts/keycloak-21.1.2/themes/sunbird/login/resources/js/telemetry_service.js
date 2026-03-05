@@ -2445,16 +2445,9 @@ function doLogin(e) {
 }
 
 $("body").ready(function ($) {
-  $(".login-button").click(function (e) {
-    e.preventDefault();
-    logInteractEvent("login");
-    logLoginImpressionEvent("pageexit");
-    setTimeout(function () {
-      $("#kc-form-login").submit();
-    }, 500);
-
-    return false;
-  })
+  // login-button click is handled by onclick="doLogin(event)" on the button.
+  // Removed duplicate jQuery handler that caused two form POSTs on slow networks,
+  // triggering Keycloak's "You took too long to sign in" error (action URL consumed twice).
 
   $("#google-login-button").click(function (e) {
     e.preventDefault();

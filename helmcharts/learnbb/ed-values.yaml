@@ -2,7 +2,5 @@ kafka:
   enabled: false
 redis:
   enabled: false
-neo4j:
-  enabled: false
 yugabyte:
   enabled: false

@@ -97,10 +97,8 @@ velero:
             - key: app.kubernetes.io/name
               operator: In
               values:
-                - cassandra
-                - neo4j
                 - redis
-                - postgresql
+                - yugabyte
         snapshotVolumes: true
 
 
