@@ -69,13 +69,6 @@ yugabyte: &yugabyte
     "helm.sh/hook-weight": "-5"
   provisioning:
     annotations: *provisioningAnnotations  
-  storage:
-    master:
-      count: 2
-      size: 10Gi
-    tserver:
-      count: 2
-      size: 10Gi
   # Force single replica for Yugabyte masters and tservers (override subchart defaults)
   replicas:
     master: 3
