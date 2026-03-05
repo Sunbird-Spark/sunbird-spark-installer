@@ -1,0 +1,296 @@
+nameOverride: "video-stream-generator"
+fullnameOverride: "video-stream-generator"
+
+replicaCount: 1
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsUser: 0
+  fsGroup: 0
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8081
+
+commonLabels:
+  release: monitoring
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 500Mi
+  limits:
+    cpu: 1
+    memory: 2048Mi
+
+autoscaling:
+  enabled: false
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+configmap:
+  enabled: false
+
+serviceAccount:
+  create: false
+
+serviceMonitor:
+  enabled: false
+  jobmanager:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: monitoring
+    honorLabels: true
+    jobLabel: "app.kubernetes.io/name"
+    port: prom
+  taskmanager:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: monitoring
+    honorLabels: true
+    jobLabel: "app.kubernetes.io/name"
+    port: prom
+
+serviceAccount:
+  create: false
+
+ingress: {}
+
+jobmanager:
+  rpc_port: 6123
+  blob_port: 6124
+  query_port: 6125
+  ui_port: 8081
+  prom_port: 9250
+  heap_memory: 1024
+
+rest_port: 80
+resttcp_port: 8081
+
+taskmanager:
+  prom_port: 9251
+  rpc_port: 6122
+  heap_memory: 1024
+  replicas: 1
+  cpu_requests: 0.3
+
+log4j_console_properties: |
+  rootLogger.level = INFO
+  rootLogger.appenderRef.console.ref = ConsoleAppender
+  logger.pekko.name = pekko
+  logger.pekko.level = ERROR
+  logger.kafka.name= org.apache.kafka
+  logger.kafka.level = ERROR
+  logger.hadoop.name = org.apache.hadoop
+  logger.hadoop.level = ERROR
+  appender.console.name = ConsoleAppender
+  appender.console.type = CONSOLE
+  appender.console.layout.type = PatternLayout
+  appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+  logger.netty.name = org.apache.flink.shaded.pekko.org.jboss.netty.channel.DefaultChannelPipeline
+  logger.netty.level = OFF
+
+base_config: |
+  kafka {
+    broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+    producer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+    consumer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+    zookeeper = ""
+    producer {
+      max-request-size = 1572864
+      batch.size = 98304
+      linger.ms = 10
+      compression = "snappy"
+    }
+    output.system.event.topic = "{{ .Values.global.env }}.knowlg.system.events"
+  }
+  job {
+    env = "{{ .Values.global.env }}"
+    enable.distributed.checkpointing = true
+    {{- if eq "azure" .Values.global.checkpoint_store_type }}
+    statebackend {
+      base.url = "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+    }
+    {{- else if eq "gcs" .Values.global.checkpoint_store_type }}
+    statebackend {
+      base.url = "gs://{{ .Values.global.private_container_name }}/checkpoint"
+    }
+    {{- end }}
+  }
+  task {
+    parallelism = 1
+    consumer.parallelism = 1
+    checkpointing.compressed = true
+    checkpointing.interval = 60000
+    checkpointing.pause.between.seconds = 3000
+    restart-strategy.attempts = 3
+    restart-strategy.delay = 30000
+  }
+  redis {
+    host = "{{ .Values.global.redis.host }}"
+    port = "{{ .Values.global.redis.port }}"
+    connection {
+      max = 2
+      idle.min = 1
+      idle.max = 2
+      minEvictableIdleTimeSeconds = 120
+      timeBetweenEvictionRunsSeconds = 300
+    }
+  }
+  lms-cassandra {
+    host = "{{ .Values.global.yugabyte.host }}"
+    port = "{{ .Values.global.yugabyte.port }}"
+  }
+  janusgraph {
+    host = "{{ .Values.global.janusgraph.host }}"
+    port = "{{ .Values.global.janusgraph.port }}"
+    storage.backend = "cql"
+    storage.host = "{{ .Values.global.yugabyte.host }}"
+    storage.port = "{{ .Values.global.yugabyte.port }}"
+    graph = "domain"
+    storage.cql.read-consistency-level = "ONE"
+    storage.cql.write-consistency-level = "ONE"
+    storage.cql.local-datacenter = "datacenter1"
+    log.learning_graph_events.backend = "default"
+  }
+  es {
+    basePath = "{{ .Values.global.elasticsearch.host }}:{{ .Values.global.elasticsearch.port }}"
+  }
+
+flink_jobs:
+  video-stream-generator:
+    enabled: true
+    config: |+
+      include file("/data/flink/conf/base-config.conf")
+      job {
+        env = "{{ .Values.global.env }}"
+      }
+
+      kafka {
+        input.topic = "{{ .Values.global.env }}.knowlg.content.postpublish.request"
+        groupId = "{{ .Values.global.env }}-video-stream-generator-group"
+      }
+
+      task {
+        consumer.parallelism = 1
+        parallelism = 1
+        timer.duration = 60
+        max.retries = 10
+      }
+
+      lms-cassandra {
+        keyspace = "{{ .Values.global.env }}_platform_db"
+        table = "job_request"
+      }
+
+      service {
+        content {
+          basePath = "https://content:9000"
+        }
+      }
+
+      # Azure Media Service Config
+      azure {
+        location = "centralindia"
+        tenant = "tenant"
+        subscription_id = "subscription id "
+
+        login {
+          endpoint="https://login.microsoftonline.com"
+        }
+
+        api {
+          endpoint="https://management.azure.com"
+          version = "2018-07-01"
+        }
+
+        account_name = "account name"
+        resource_group_name = "group name"
+
+        transform {
+          default = "media_transform_default"
+          hls = "media_transform_hls"
+        }
+
+        stream {
+          base_url = "https://sunbirdspikemedia-inct.streaming.media.azure.net"
+          endpoint_name = "default"
+          protocol = "Hls"
+          policy_name = "Predefined_ClearStreamingOnly"
+        }
+
+        token {
+          client_key = "client key"
+          client_secret = "client secret"
+        }
+      }
+
+      azure_tenant="tenant"
+      azure_subscription_id="subscription id"
+      azure_account_name="{{ .Values.global.cloud_storage_access_key }}"
+      azure_resource_group_name="group name"
+      azure_token_client_key="client key"
+      azure_token_client_secret="client secret"
+
+      # CSP Name. e.g: aws or azure
+      media_service_type="aws"
+
+      #AWS Elemental Media Convert Config
+      aws {
+        region="ap-south-1"
+        content_bucket_name="awsmedia-spike"
+        token {
+          access_key="access key"
+          access_secret="access secret"
+        }
+        api {
+          endpoint="API Endpoint for media convert"
+          version="2017-08-29"
+        }
+        service {
+          name="mediaconvert"
+          queue="Media Convert Queue Id"
+          role="Media Convert Role Name"
+        }
+        stream {
+          protocol="Hls"
+        }
+      }
+
+      media_service_job_success_status=["FINISHED", "COMPLETE"]
+      schema.basePath="https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
+
+    flink-conf: |+
+      jobmanager.memory.flink.size: 1024m
+      taskmanager.memory.flink.size: 1024m
+      taskmanager.numberOfTaskSlots: 1
+      jobManager.numberOfTaskSlots: 1
+      parallelism.default: 1
+      jobmanager.execution.failover-strategy: region
+      taskmanager.memory.network.fraction: 0.1
+      scheduler-mode: reactive
+      heartbeat.timeout: 8000
+      heartbeat.interval: 5000
+      taskmanager.memory.process.size: 1700m
+      jobmanager.memory.process.size: 1600m
+
+    job_classname: org.sunbird.job.videostream.task.VideoStreamGeneratorStreamTask
+
+commonAnnotations:
+  reloader.stakater.com/auto: "true"

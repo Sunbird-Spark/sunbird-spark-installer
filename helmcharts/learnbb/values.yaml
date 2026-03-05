@@ -1,6 +1,9 @@
-devops_release_branch: release-8.0.0
-postgres_migration_image: sunbirded.azurecr.io/postgresql:11.14.0
 cassandra_migration_version: main
+devops_release_branch: release-8.0.0
+
+provisioningAnnotations: &provisioningAnnotations
+  "helm.sh/hook-weight": "-4"
+
 certregistry:
   opa_enabled: true
 lern:
@@ -8,9 +11,15 @@ lern:
 registry:
   opa_enabled: false
 
-provisioningAnnotations: &provisioningAnnotations
-  "helm.sh/hook-weight": "-4"
+migration:
+  yugabyte:
+    waitTime: 120
+  elasticsearch:
+    waitTime: 120
+  postgresql:
+    waitTime: 120
 
+postgres_migration_image: sunbirded.azurecr.io/postgresql:11.14.0
 
 elasticsearch: &es
   enabled: true
@@ -49,56 +58,6 @@ elasticsearch: &es
     repository: bitnami-shell-archived
     tag: 11-debian-11-r54
 
-redis: &redis
-  enabled: true
-  fullnameOverride: "redis"
-  auth:
-    enabled: false
-  host: "redis-master"
-  port: 6379
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  replica:
-    replicaCount: 0
-  master:
-    persistence:
-      size: 25Gi
-
-yugabyte: &yugabyte
-  enabled: true
-  nameOverride: "yugabyte"
-  fullnameOverride: "yugabyte"
-  host: "yb-tserver-service" 
-  port: 9042
-  postgresql_port: 5433
-  databases:
-    - name: "keycloak"
-    - name: "quartz"
-    - name: "enc-keys"
-    - name: "registry"
-
-  image:
-    registry: yugabytedb
-    repository: yugabyte
-    tag: 2025.2.0.0-b131 
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  provisioning:
-    annotations: *provisioningAnnotations  
-  persistence:
-    size: 25Gi  
-  # Force single replica for Yugabyte masters and tservers (override subchart defaults)
-  replicas:
-    master: 3
-    tserver: 3
-  username: yugabyte  
-  password: yugabyte
-
-yugabytecql:
-  image:
-    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_499032f"
-
 kafka: &kafka
   enabled: true
   fullnameOverride: "kafka"
@@ -131,36 +90,61 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
-
-neo4j: &neo4j
+redis: &redis
   enabled: true
-  host: "neo4j"
-  port: 7687
-  boltPort: 8687
-  shard_id: 1
+  fullnameOverride: "redis"
+  auth:
+    enabled: false
+  host: "redis-master"
+  port: 6379
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+  replica:
+    replicaCount: 0
+  master:
+    persistence:
+      size: 25Gi
+
+yugabyte: &yugabyte
+  enabled: true
+  nameOverride: "yugabyte"
+  fullnameOverride: "yugabyte"
+  host: "yb-tserver-service" 
+  port: 9042
+  postgresql_port: 5433
+  databases:
+    - name: "keycloak"
+    - name: "quartz"
+    - name: "enc-keys"
+    - name: "registry"
   image:
-    repository: sunbirded.azurecr.io/neo4j
-    tag: "3.3.0"
+    registry: yugabytedb
+    repository: yugabyte
+    tag: 2025.2.0.0-b131 
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
   provisioning:
-    annotations: *provisioningAnnotations
+    annotations: *provisioningAnnotations  
+  persistence:
+    size: 25Gi  
+  # Force single replica for Yugabyte masters and tservers (override subchart defaults)
+  replicas:
+    master: 3
+    tserver: 3
+  username: yugabyte  
+  password: yugabyte
+
+yugabytecql:
+  image:
+    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
+    tag: "develop_499032f"
 
 global:
-  redis: *redis
   elasticsearch: *es
-  yugabyte: *yugabyte
   kafka: *kafka
-  neo4j: *neo4j
-  provisioningAnnotations: *provisioningAnnotations
-  keycloak_kid_keys_configmap: keycloak-kids-keys
   keycloak_key_configmap: keycloak-key
+  keycloak_kid_keys_configmap: keycloak-kids-keys
   kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
-
-migration:
-  yugabyte:
-    waitTime: 120
-  elasticsearch:
-    waitTime: 120
-  postgresql:
-    waitTime: 120
+  provisioningAnnotations: *provisioningAnnotations
+  redis: *redis
+  yugabyte: *yugabyte

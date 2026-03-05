@@ -1,0 +1,9 @@
+apiVersion: v2
+name: discussion-forum-consumers
+description: Registers discussion-forum ACL groups on core Kong consumers
+type: application
+version: 0.1.0
+dependencies:
+  - name: common
+    version: 0.1.0
+    repository: https://nimbushubin.github.io/helmcharts

@@ -1,5 +1,7 @@
 replicaCount: 1
 fullname: obsrvbb
+env: &env
+default: "dev"
 
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
@@ -22,8 +24,7 @@ kafka: &kafka
   provisioning:
     nameOverride: "provisioning"
     fullnameOverride: "provisioning"
-    annotations:
-      "helm.sh/hook-weight": "-4"
+    annotations: *provisioningAnnotations
     replicationFactor: 1
     numPartitions: 1
     topics:
@@ -48,7 +49,6 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
-      
 superset:
   enabled: true
 
@@ -61,7 +61,6 @@ yugabyte: &yugabyte
   postgresql_port: 5433
   databases:
     - name: "superset"
-
   image:
     registry: yugabytedb
     repository: yugabyte
@@ -77,11 +76,8 @@ yugabyte: &yugabyte
     master: 3
     tserver: 3
   username: yugabyte  
-  password: yugabyte    
+  password: yugabyte
 
-env: &env
-default: "dev"
 global:
   kafka: *kafka
   yugabyte: *yugabyte
-

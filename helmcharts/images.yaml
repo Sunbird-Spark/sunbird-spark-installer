@@ -23,11 +23,6 @@ images:
     repository: sanketikahub/kafka
     tag: "4.0.0"
 
-  postgresql: &postgresql
-    registry: "sunbirded.azurecr.io"
-    repository: "postgresql"
-    tag: "11.14.0"
-
   redis: &redis
     registry: "sunbirded.azurecr.io"
     repository: "redis"
@@ -58,8 +53,8 @@ images:
     tag: "release-7.7.0_rc1_50b5b2d_2"
 
   player: &player
-    repository: "ghcr.io/sunbird-ed/sunbirded-portal/player"
-    tag: "release-8.1.0_rc5_61af49d"
+    repository: "sunbirded.azurecr.io/sunbird-portal"
+    tag: "spark-v0.57_d99a74f"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -72,11 +67,11 @@ images:
 
   kong_apis: &kong_apis
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_499032f"
+    tag: "develop_5c87617"
 
   kong_consumers: &kong_consumers
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_499032f"
+    tag: "develop_5c87617"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -110,8 +105,8 @@ images:
     tag: "release-5.1.0_2bc7760_9"
 
   keycloak: &keycloak
-    repository: "sunbirded.azurecr.io/keycloak"
-    tag: "release-8.0.0_1acd65c"
+    repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
+    tag: "develop_af3556f"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
@@ -127,12 +122,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v08_081de67"
-
-  dial: &dial
-    repository: "ghcr.io/sunbird-knowlg/sunbird-dial-service"
-    tag: "release-8.1.0_rc1_8fbeab3"
-
+    tag: "spark-v12_8775a54"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -160,13 +150,13 @@ images:
     tag: 2025.2.0.0-b131 
 
   janusgraph: &janusgraph
-    registry:  snt1
-    repository: janusgraph
-    tag: v2.0.0
+    registry: ghcr.io
+    repository: sunbird-spark/janusgraph
+    tag: develop_cb093d4
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_7c0a40d"
+    tag: "develop_8425122"
 
 # Internal block with pull secrets
 internal: &internal
@@ -182,11 +172,6 @@ internal: &internal
 
   kafka:
     image: *kafka
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  postgresql:
-    image: *postgresql
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -218,7 +203,7 @@ internal: &internal
   knowlg:
     image: *knowlg
     imagePullSecrets:
-      - name: "registry-secret-name"
+      - name: "registry-secret-name"      
 
   echo:
     image: *echo
@@ -263,11 +248,6 @@ internal: &internal
 
   nginx-public-ingress:
     image: *nginx_public_ingress
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  postgresql:
-    image: *postgresql
     imagePullSecrets:
       - name: "registry-secret-name"    
 
@@ -316,17 +296,10 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-
-  dial:
-    image: *dial
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
   search:
     image: *search
     imagePullSecrets:
       - name: "registry-secret-name"
-
 
   telemetry:
     image: *telemetry
