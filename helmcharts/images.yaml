@@ -106,7 +106,7 @@ images:
 
   keycloak: &keycloak
     repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "develop_af3556f"
+    tag: "develop_4ea9920"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
