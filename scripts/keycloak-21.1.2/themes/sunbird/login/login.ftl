@@ -58,7 +58,6 @@
 
                 <div class="forgot-password">
                     <#if realm.resetPasswordAllowed>
-                        <a id="fgtKeycloakFlow" class="hide" tabindex="3" onclick="javascript:storeLocation(); javascript:makeDivUnclickable(); javascript:storeForgotPasswordLocation(event);" href="${url.loginResetCredentialsUrl}">${msg("doForgotPassword")}</a>
                         <a id="fgtPortalFlow" class="hide" tabindex="3" href="#" onclick="javascript:makeDivUnclickable(); javascript:createTelemetryEvent(event); javascript:forgetPassword('/forgot-password'); return false;">${msg("doForgotPassword")}</a>
                     </#if>
                 </div>
