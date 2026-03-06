@@ -15,13 +15,13 @@
                  <style>body { visibility: hidden !important; }</style>
                  <p style="display:none"><a id="click-here-to-proceed" href="${actionUri}">${kcSanitize(msg("proceedWithAction"))?no_esc}</a></p>
                  <script type="text/javascript">
-                   window.location.href = "${actionUri}";
+                   window.location.href = "${actionUri?no_esc}";
                  </script>
                <#elseif pageRedirectUri??>
                  <style>body { visibility: hidden !important; }</style>
                  <p><a href="${pageRedirectUri}" class="kc-button">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
                  <script type="text/javascript">
-                   window.location.href = "${pageRedirectUri}";
+                   window.location.href = "${pageRedirectUri?no_esc}";
                  </script>
                <#elseif client.baseUrl??>
                  <p><a href="${client.baseUrl}" class="kc-button">${kcSanitize(msg("backToApplication"))?no_esc}</a></p>
