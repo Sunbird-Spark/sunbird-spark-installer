@@ -399,13 +399,6 @@ flink_jobs:
 
   knowlg-publish:
     enabled: true
-    resources:
-      requests:
-        cpu: 100m
-        memory: 1024Mi
-      limits:
-        cpu: 1
-        memory: 3Gi
     serviceMonitor: *serviceMonitor
     config: |+
       include file("/data/flink/conf/base-config.conf")
