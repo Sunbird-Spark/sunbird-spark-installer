@@ -33,7 +33,7 @@ flink: &flink
       memory: 1024Mi
     limits:
       cpu: 1
-      memory: 2048Mi  
+      memory: 2048Mi
   flink_jobs:
     knowlg-publish:
       resources:
@@ -190,14 +190,6 @@ elasticsearch:
     persistence:
       size: 25Gi   
 
-flink: &flink
-  resources:
-    requests:
-      cpu: 100m
-      memory: 1024Mi
-    limits:
-      cpu: 1
-      memory: 2048Mi   
 
 kafka:
   broker:
