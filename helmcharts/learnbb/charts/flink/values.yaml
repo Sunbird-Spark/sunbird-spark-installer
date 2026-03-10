@@ -413,12 +413,12 @@ flink_jobs:
         }
       }
       lms-cassandra {
-        keyspace = "{{ .Values.middleware_course_keyspace }}"
+        keyspace = "sunbird_courses"
         user_enrolments.table = "user_enrolments"
         course_batch.table = "course_batch"
         sbkeyspace = "{{ .Values.registry_sunbird_keyspace }}"
-        assessment_aggregator.table = "{{ .Values.middleware_cassandra_assessment_aggregator_table}}"
-        user_activity_agg.table = "{{ .Values.middleware_cassandra_user_activity_agg_table }}"
+        assessment_aggregator.table = "assessment_aggregator"
+        user_activity_agg.table = "user_activity_agg"
         certreg.table ="{{ .Values.cert_registry_table }}"
       }
       cert_domain_url = "https://{{ .Values.global.domain }}"
