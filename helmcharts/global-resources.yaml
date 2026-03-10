@@ -35,8 +35,17 @@ flink: &flink
       cpu: 1
       memory: 2048Mi  
   
-knowledgebb:
-  flink: *flink
+#knowledgebb
+flink:
+  flink_jobs:
+    knowlg-publish:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 1024Mi
+        limits:
+          cpu: 1
+          memory: 4Gi
 
 knowledgemw:
   resources:
