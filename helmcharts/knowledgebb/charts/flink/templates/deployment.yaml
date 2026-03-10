@@ -79,7 +79,11 @@ spec:
           - containerPort: {{ .Values.taskmanager.rpc_port }}
             name: rpc
           resources:
+            {{- if $jobData.resources }}
+            {{- toYaml $jobData.resources | nindent 12 }}
+            {{- else }}
             {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
@@ -180,7 +184,11 @@ spec:
               containerPort: {{ .targetPort }}
             {{- end }}
           resources:
+            {{- if $jobData.resources }}
+            {{- toYaml $jobData.resources | nindent 12 }}
+            {{- else }}
             {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
