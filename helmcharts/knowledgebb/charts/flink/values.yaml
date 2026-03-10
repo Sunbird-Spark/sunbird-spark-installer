@@ -399,6 +399,13 @@ flink_jobs:
 
   knowlg-publish:
     enabled: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 1024Mi
+      limits:
+        cpu: 1
+        memory: 3Gi
     serviceMonitor: *serviceMonitor
     config: |+
       include file("/data/flink/conf/base-config.conf")
@@ -601,7 +608,7 @@ flink_jobs:
 
     flink-conf: |+
       jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
+      taskmanager.memory.flink.size: 2048m
       taskmanager.numberOfTaskSlots: 1
       jobManager.numberOfTaskSlots: 1
       parallelism.default: 1
@@ -610,7 +617,7 @@ flink_jobs:
       scheduler-mode: reactive
       heartbeat.timeout: 8000
       heartbeat.interval: 5000
-      taskmanager.memory.process.size: 1700m
+      taskmanager.memory.process.size: 2800m
       jobmanager.memory.process.size: 1600m
       # classloader.resolve-order: "parent-first"
       # state.savepoints.dir: file:///tmp
