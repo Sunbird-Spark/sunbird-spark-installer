@@ -416,7 +416,7 @@ flink_jobs:
         }
       }
       lms-cassandra {
-        keyspace = "{{.Values.middleware_course_keyspace }}"
+        keyspace = "{{ .Values.middleware_course_keyspace }}"
         user_enrolments.table = "user_enrolments"
         course_batch.table = "course_batch"
         sbkeyspace = "{{ .Values.registry_sunbird_keyspace }}"
