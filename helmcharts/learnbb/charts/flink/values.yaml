@@ -240,6 +240,9 @@ registry_sunbird_keyspace: "sunbird"
 cert_registry_table: "cert_registry"
 legacy_certificate_migrator_consumer_parallelism: 1
 legacy_certificate_migrator_parallelism: 1
+middleware_course_keyspace: "sunbird_courses"
+middleware_cassandra_assessment_aggregator_table: "assessment_aggregator"
+middleware_cassandra_user_activity_agg_table: "user_activity_agg"
 
 ###  Merge User Courses Job related Vars
 merge_user_courses_consumer_parallelism: 1
@@ -417,7 +420,7 @@ flink_jobs:
         user_enrolments.table = "user_enrolments"
         course_batch.table = "course_batch"
         sbkeyspace = "{{ .Values.registry_sunbird_keyspace }}"
-        assessment_aggregator.table = "{{ .Values.middleware_cassandra_assessment_aggregator_table}}"
+        assessment_aggregator.table = "{{ .Values.middleware_cassandra_assessment_aggregator_table }}"
         user_activity_agg.table = "{{ .Values.middleware_cassandra_user_activity_agg_table }}"
         certreg.table ="{{ .Values.cert_registry_table }}"
       }
