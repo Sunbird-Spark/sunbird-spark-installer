@@ -173,5 +173,7 @@ spec:
           - configMap:
               name: {{ .Values.global.keycloak_kid_keys_configmap }}
               items:
-              - key: KEYCLOAK_PUBLIC_KEY_KID
-                path: KEYCLOAK_PUBLIC_KEY_KID
+                - key: KEYCLOAK_PUBLIC_KEY_KID
+                  path: KEYCLOAK_PUBLIC_KEY_KID
+                - key: KEYCLOAK_PUBLIC_KEY
+                  path: KEYCLOAK_PUBLIC_KEY
