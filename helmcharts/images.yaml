@@ -75,7 +75,8 @@ images:
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "release-8.1.0_rc2_0c57074_10"
+    tag: "spark-v0.1_bf6ceb4_12"
+    
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
     tag: "release-7.0.0_8e6b2db_23"
