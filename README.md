@@ -1,8 +1,52 @@
 # sunbird-spark-installer
 
 Minimum resources required to install and run Sunbird-ED on any cloud provider
-- **vCPUs**: 32
-- **RAM**: 128 GB
+
+## Infrastructure Overview
+
+**Node:** 2 × Azure Standard_B16as_v2 (16 vCPU / 64 GB RAM) → **32 vCPU / 128 GB RAM total**
+
+### What runs in the cluster
+
+| Category | Count |
+|----------|-------|
+| Databases (YugabyteDB, Redis*, Elasticsearch, JanusGraph) | 4 |
+| Flink Jobs (enabled by default) | 5 |
+| Application Services  | 14 |
+| Monitoring Stack (Grafana, Loki, Prometheus, Grafana Alloy) | 4 |
+| Velero (backup & disaster recovery) | 1 |
+
+> *Redis is optional 
+
+### Resources without addons
+
+| Resource | Request | Limit | Disk |
+|----------|---------|-------|------|
+| CPU | ~21 cores | ~50 cores | — |
+| Memory | ~40 Gi | ~74 Gi | — |
+| Disk | — | — | ~219 Gi |
+
+### Optional addons
+
+| Addon | What it adds |
+|-------|-------------|
+| DIAL | 1 service + 2 Flink jobs |
+| Discussion Forum | 3 services |
+| Video Stream Generator | 1 Flink job |
+
+### Resources with all addons installed
+
+| Resource | Request | Limit | Disk |
+|----------|---------|-------|------|
+| CPU | ~22 cores | ~60 cores | — |
+| Memory | ~43 Gi | ~91 Gi | — |
+| Disk | — | — | ~219 Gi |
+
+> No additional nodes needed — the same 2-node cluster handles base + all addons.
+
+> For per-component resource breakdown, see [INFRA_DETAILS.md](INFRA_DETAILS.md).
+
+---
 
 ## Installing Sunbird on Any Cloud Provider
 
@@ -66,7 +110,7 @@ While the installer may work with other versions, these are the versions that ha
 
      - **To Enable Integration**: Set `deployed_dial_addon: true` in your `global-values.yaml` file. This tells the core installation script to include addon-specific configurations.
      
-     - **When to set this**: Enable this flag if you have deployed or intend to deploy the DIAL addon.
+     - **When to set this**: Enable this flag and deploy core services, if you have deployed or intend to deploy the DIAL addon.
 
      Example in `global-values.yaml`:
 

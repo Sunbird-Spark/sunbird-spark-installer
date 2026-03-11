@@ -475,3 +475,10 @@ yugabyte:
       limits:
         cpu: "2"
         memory: 4Gi
+  storage:
+    master:
+      count: 2
+      size: 10Gi
+    tserver:
+      count: 2
+      size: 10Gi
