@@ -293,7 +293,7 @@ flink_jobs:
           dialcode-metrics-indexer = false
       }
       compositesearch.index.name = "compositesearch"
-      nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "batches", "provider", "osMetadata", "actions"]
+      nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "provider", "osMetadata", "actions"]
       schema.definition_cache.expiry = 14400
       restrict {
         metadata.objectTypes = []
