@@ -1,0 +1,32 @@
+# This chart installs the custom grafana dashboards and datasources
+# Namespace set to sunbird so Sunbird's Grafana sidecar picks up the dashboard ConfigMaps
+namespace: "sunbird"
+dashboards:
+  label:
+    grafana_dashboard: "1"
+    system.monitoring: "true"
+datasources:
+  label:
+    grafana_datasource: "1"
+    system.monitoring: "true"
+
+# You can additional data sourcres below
+additionalDataSources:
+- name: Loki
+  type: loki
+  access: proxy
+  uid: loki
+  url: http://loki.sunbird.svc.cluster.local:3100
+  jsonData:
+    maxLines: 1000
+- name: Prometheus
+  type: prometheus
+  access: proxy
+  uid: prometheus
+  url: http://monitoring-kube-prometheus-prometheus.sunbird.svc.cluster.local:9090
+  jsonData:
+    timeInterval: "5s"
+    httpMethod: "POST"
+# To add new dashboards, place the exported json in dashboards directory
+# If any dashboards are added / modified / removed,
+# bump up the chart version number in order to pick up changes
