@@ -453,7 +453,7 @@ flink_jobs:
       }
 
       service {
-        dial.basePath = "{{ .Values.dialservice_base_url }}"
+        dial.basePath = "{{ .Values.global.dialservice.base_url }}"
         dial_code.reserve.url = "/dialcode/v1/reserve"
         dial_code.update.url = "/dialcode/v4/update"
       }
