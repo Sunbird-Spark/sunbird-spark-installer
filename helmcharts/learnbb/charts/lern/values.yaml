@@ -170,7 +170,8 @@ redis_connection_minEvictableIdleTimeSeconds: "120"
 redis_connection_timeBetweenEvictionRunsSeconds: "300"
 redis_experimentIndex: "10"
 redis_dbIndex: "2"
-user_enrolments_response_cache_enable: "true"
+user_enrolments_response_cache_enable: "false"
+frameworkvalidation: "false"
 user_enrolments_response_cache_ttl: "300"
 collection_summary_agg_data_source: 'audit-rollup-syncts'
 collection_summary_agg_cache_ttl: "21600"
@@ -190,9 +191,6 @@ dedup_redis_expiry: "604800"
 activity_input_dedup_enabled: "false"
 filter_processed_enrolments: "true"
 assessment_direct_aggregation_enabled: "true"
-
-frameworkvalidation: "false"
-user_enrolments_response_cache_enable: "false"
 
 # Notification Specific
 sunbird_cassandra_notification_keyspace: sunbird_notifications

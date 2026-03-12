@@ -115,7 +115,6 @@ yugabyte: &yugabyte
   postgresql_port: 5433
   databases:
       - name: "kong"
-      - name: "druid_raw"
       - name: "superset"
       - name: "registry"
       - name: "portal"
@@ -129,10 +128,8 @@ yugabyte: &yugabyte
     tag: 2025.2.0.0-b131 
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
-  persistence:
-    size: 25Gi  
   provisioning:
-    annotations: *provisioningAnnotations  
+    annotations: *provisioningAnnotations
   # Force single replica for Yugabyte masters and tservers (override subchart defaults)
   replicas:
     master: 3
