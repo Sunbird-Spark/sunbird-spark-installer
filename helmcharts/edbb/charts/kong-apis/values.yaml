@@ -128,6 +128,7 @@ assessment_prefix: /assessment
 programs_service_prefix: /programs
 resource_prefix: /resource
 learning_service_prefix: /learning
+observability_prefix: /observability
 
 # Service URLs
 knowledge_mw_service_url: "http://knowledge-mw-service:5000"
