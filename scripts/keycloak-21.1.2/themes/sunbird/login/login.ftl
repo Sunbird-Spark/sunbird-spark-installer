@@ -9,20 +9,12 @@
             <p class="welcome-subtitle">Your learning journey starts here—log in to continue.</p>
         </div>
     <#elseif section = "form">
-    <div id="kc-form" <#if realm.password && social.providers??>class="${properties.kcContentWrapperClass!}"</#if>>
-      <div id="kc-form-wrapper" <#if realm.password && social.providers??>class="${properties.kcFormSocialAccountContentClass!} ${properties.kcFormSocialAccountClass!}"</#if>>
+    <div id="kc-form">
+      <div id="kc-form-wrapper">
         
-        <#-- Google Sign In Button (always shown) -->
-        <#assign googleLoginUrl = "">
-        <#if social.providers??>
-            <#list social.providers as p>
-                <#if p.providerId == "google">
-                    <#assign googleLoginUrl = p.loginUrl>
-                </#if>
-            </#list>
-        </#if>
+        <#-- Google Sign In Button -->
         <div id="kc-social-providers-top">
-            <a href="${googleLoginUrl}" id="google-login-button" class="google-signin-btn" onclick="navigate('google'); return false;">
+            <a href="#" id="google-login-button" class="google-signin-btn" onclick="navigate('google'); return false;">
                 <img src="${url.resourcesPath}/img/google-icon.svg" alt="Google" class="google-icon" />
                 <span>Sign in with Google</span>
             </a>
