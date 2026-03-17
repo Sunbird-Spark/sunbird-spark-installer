@@ -13,13 +13,11 @@
       <div id="kc-form-wrapper">
         
         <#-- Google Sign In Button -->
-        <div id="kc-social-providers-top">
-            <a href="#" id="google-login-button" class="google-signin-btn" onclick="navigate('google'); return false;">
-                <img src="${url.resourcesPath}/img/google-icon.svg" alt="Google" class="google-icon" />
-                <span>Sign in with Google</span>
-            </a>
-        </div>
-
+        <a href="#" id="googleSignInBtn" class="google-signin-btn" onclick="navigate('google'); return false;" aria-label="${msg('signIn')} ${msg('doSignWithGoogle')}">
+            <img src="${url.resourcesPath}/img/google-icon.svg" alt="Google" class="google-icon" />
+            <span>${msg("signIn")} ${msg("doSignWithGoogle")}</span>
+        </a>
+            
         <#-- OR Divider -->
         <div class="or-divider">
             <span>OR</span>
