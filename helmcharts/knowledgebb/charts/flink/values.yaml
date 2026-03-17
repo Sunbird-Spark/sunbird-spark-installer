@@ -411,6 +411,8 @@ flink_jobs:
         input.topic = "{{ .Values.global.env }}.knowlg.publish.job.request"
         post_publish.topic = "{{ .Values.global.env }}.knowlg.content.postpublish.request"
         mvc.topic = "{{ .Values.global.env }}.knowlg.mvc.processor.job.request"
+        qrimage.topic = "{{ .Values.global.env }}.qrimage.request"
+        dialcode.context.topic = "{{ .Values.global.env }}.dialcode.context.job.request"
         error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
         groupId = "{{ .Values.global.env }}-knowlg-publish-group"
         content_metadata.topic = "dv.telemetry.coss"
@@ -444,6 +446,19 @@ flink_jobs:
         keyspace = "{{ .Values.global.env }}_hierarchy_store"
         table = "hierarchy_relations"
       }
+
+      dialcode-cassandra {
+        keyspace = "sunbird_dialcodes"
+        imageTable = "dialcode_images"
+      }
+
+      service {
+        dial.basePath = "https://{{ .Values.global.domain }}/dial"
+        dial_code.reserve.url = "/dialcode/v1/reserve"
+        dial_code.update.url = "/dialcode/v4/update"
+      }
+
+      dialcode.storage.container = "{{ .Values.global.dial_state_container_public }}"
 
       content {
         bundleLocation = "/tmp/contentBundle"
