@@ -196,9 +196,7 @@ assessment_direct_aggregation_enabled: "true"
 sunbird_cassandra_notification_keyspace: sunbird_notifications
 
 # Yugabytesql Values
-sunbird_postgres_host: yb-tserver-service
-sunbird_postgres_port: 5433
-sunbird_postgres_db: sunbird
+sunbird_postgres_db: "sunbird"
 
 # OPA / Envoy
 opa_enabled: false
