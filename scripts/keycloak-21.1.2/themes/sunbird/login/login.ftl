@@ -12,24 +12,26 @@
     <div id="kc-form" <#if realm.password && social.providers??>class="${properties.kcContentWrapperClass!}"</#if>>
       <div id="kc-form-wrapper" <#if realm.password && social.providers??>class="${properties.kcFormSocialAccountContentClass!} ${properties.kcFormSocialAccountClass!}"</#if>>
         
-        <#-- Google Sign In Button (if social providers exist) -->
+        <#-- Google Sign In Button (always shown) -->
+        <#assign googleLoginUrl = "">
         <#if social.providers??>
-            <div id="kc-social-providers-top">
-                <#list social.providers as p>
-                    <#if p.providerId == "google">
-                        <a href="${p.loginUrl}" id="google-login-button" class="google-signin-btn" onclick="navigate('google'); return false;">
-                            <img src="${url.resourcesPath}/img/google-icon.svg" alt="Google" class="google-icon" />
-                            <span>Sign in with Google</span>
-                        </a>
-                    </#if>
-                </#list>
-            </div>
-            
-            <#-- OR Divider -->
-            <div class="or-divider">
-                <span>OR</span>
-            </div>
+            <#list social.providers as p>
+                <#if p.providerId == "google">
+                    <#assign googleLoginUrl = p.loginUrl>
+                </#if>
+            </#list>
         </#if>
+        <div id="kc-social-providers-top">
+            <a href="${googleLoginUrl}" id="google-login-button" class="google-signin-btn" onclick="navigate('google'); return false;">
+                <img src="${url.resourcesPath}/img/google-icon.svg" alt="Google" class="google-icon" />
+                <span>Sign in with Google</span>
+            </a>
+        </div>
+
+        <#-- OR Divider -->
+        <div class="or-divider">
+            <span>OR</span>
+        </div>
         
         <#if realm.password>
             <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
