@@ -55,7 +55,7 @@ spec:
       {{end}}
       containers:
         - name: {{ $jobName }}-secor
-          image: "{{ include "base.image" . }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           env:
             - name: "CONFIG_FILE"
