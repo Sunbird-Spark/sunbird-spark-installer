@@ -121,7 +121,7 @@ kong_url: http://kong:8000
 sunbird_google_keycloak_client_id: "google-auth"
 google_auth_client_secret: "google-auth"
 sunbird_android_keycloak_client_id: ""
-sunbird_google_android_keycloak_client_id: google-auth-android
+sunbird_google_android_keycloak_client_id: "google-auth-android"
 sunbird_google_android_keycloak_secret: "google_android_keycloak"
 android_client_secret: "android"
 global:
