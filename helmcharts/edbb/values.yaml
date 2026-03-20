@@ -106,6 +106,9 @@ redis: &redis
 router:
   enabled: false
 
+secor:
+  enabled: true
+
 yugabyte: &yugabyte
   enabled: true
   nameOverride: "yugabyte"

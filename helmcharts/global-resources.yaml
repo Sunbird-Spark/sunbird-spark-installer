@@ -516,6 +516,15 @@ report:
       cpu: 1000m
       memory: 1G
 
+secor:
+  resources:
+    requests:
+      cpu: 128m
+      memory: 512Mi
+    limits:
+      cpu: 512m
+      memory: 1Gi
+
 search:
   resources:
     requests:
@@ -523,7 +532,7 @@ search:
       memory: 100Mi
     limits:
       cpu: 1
-      memory: 1024Mi 
+      memory: 1024Mi
 
 spark: 
   master:
