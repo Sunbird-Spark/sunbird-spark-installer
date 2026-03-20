@@ -260,6 +260,15 @@ superset:
       cpu: 250m
       memory: 512Mi  
 
+secor:
+  resources:
+    requests:
+      cpu: 128m
+      memory: 512Mi
+    limits:
+      cpu: 512m
+      memory: 1Gi
+
 telemetry:
   resources:
     requests:

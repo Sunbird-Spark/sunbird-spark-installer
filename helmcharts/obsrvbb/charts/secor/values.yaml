@@ -1,0 +1,105 @@
+# Azure Container Details
+azure_account: "{{ .Values.global.cloud_storage_access_key }}"
+azure_secret: "{{ .Values.global.cloud_storage_secret_key }}"
+azure_container_name: "{{ .Values.global.private_container_name }}"
+
+
+s3_access_key: ""
+s3_secret_id: ""
+s3_region: ""
+s3_endpoint: ""
+s3_path_style_access: false
+s3_bucket_name: "telemetry-data-store"
+timezone: "UTC"
+jvm_memory: "1024m"
+
+gcp_bucket_name: "telemetry-data-store"
+
+serviceAccount:
+  create: true
+  name: secor-sa
+  annotations: {}
+
+storage_type: "s3"
+storageClass: ""
+
+kafka: &kafka
+  host: "{{ .Values.global.kafka.host }}"
+  port: "{{ .Values.global.kafka.port }}"
+
+base_path: "telemetry-data"
+
+base_config: &base_config
+  enabled: true
+  replicas: 1
+  threads: 2
+  timestamp_key: "obsrv_meta.syncts"
+  fallback_timestamp_key: "ets"
+  kafka_broker_host: "{{ .Values.global.kafka.host }}"
+  max_file_size: "100000000"
+  max_file_age: "14400"
+  partition_prefix_enabled: "false"
+  partition_prefix_key: ""
+  partition_prefix_mapping: "{}"
+  message_channel_identifier: "dataset"
+  output_file_pattern: "{partition}-{currentTimestamp}.json"
+  message_parser: "com.pinterest.secor.parser.ChannelDateMessageParser"
+  storage:
+    size: 1Gi
+  requests:
+    cpu: 128m
+    memory: 512Mi
+  limits:
+    cpu: 128m
+    memory: 512Mi
+  lag_threshold_warning: 50000
+  lag_threshold_critical: 100000
+
+secor_jobs:
+  telemetry-ingest-backup:
+    <<: *base_config
+    enabled: true
+    topic: "{{ .Values.global.env }}.telemetry.ingest"
+    service_name: "telemetry-ingest-backup"
+    consumer_group: "telemetry-ingest"
+    base_path: "{{ .Values.base_path }}/telemetry-ingest"
+    timestamp_key: "obsrv_meta.syncts"
+
+namespace: "secor"
+
+repository: secor
+tag: 1.0.0-GA
+imagePullPolicy: IfNotPresent
+imagePullSecrets: []
+
+exporter:
+  image:
+    repository: prom/statsd-exporter
+    tag: latest
+    pullPolicy: IfNotPresent
+
+prometheus_rule_selector_app: prometheus-operator
+prometheus_rule_selector_release: prometheus-operator
+
+# If you enable this, secor lag alert rules will be created in the flink cluster.
+# In our case the consumer group lag metrics available in core prometheus.
+# So we need to create the secor lag alert rule in core prometheus.
+# By adding this condition we are avoiding creating the secor lag alert rule in flink cluster.
+alertrules:
+  enabled: false
+
+# This condition is whether to create the secor lag alert rule or not.
+secor_alertrule:
+  enabled: false
+
+
+commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+
+persistence:
+  existingClaim: ""
+
+nodeSelector:
+
+setPvOwnership:
+  enabled: true

@@ -159,6 +159,10 @@ images:
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_8425122"
 
+  secor: &secor
+    repository: "secor"
+    tag: "0.29.2-kafka-4.0"
+
 # Internal block with pull secrets
 internal: &internal
   velero:
@@ -332,6 +336,11 @@ internal: &internal
 
   janusgraph:
     image: *janusgraph
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  secor:
+    image: *secor
     imagePullSecrets:
       - name: "registry-secret-name"
 

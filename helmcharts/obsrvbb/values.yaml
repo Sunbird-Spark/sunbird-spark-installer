@@ -52,6 +52,9 @@ kafka: &kafka
 superset:
   enabled: true
 
+secor:
+  enabled: true
+
 yugabyte: &yugabyte
   enabled: true
   nameOverride: "yugabyte"
