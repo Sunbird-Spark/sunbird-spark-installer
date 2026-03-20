@@ -160,7 +160,7 @@ images:
     tag: "develop_8425122"
 
   secor: &secor
-    repository: "secor"
+    repository: "sanketikahub/secor"
     tag: "0.29.2-kafka-4.0"
 
 # Internal block with pull secrets
