@@ -16,11 +16,14 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.serviceAccount.create }}
+        azure.workload.identity/use: "true"
+        {{- end }}
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
     spec:
        {{- if .Values.serviceAccount.create }}
-      serviceAccountName: {{ include "common.names.fullname" . }}
+      serviceAccountName: workload-identity
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}

@@ -21,3 +21,7 @@ output "cluster_ca_certificate" {
 output "private_ingressgateway_ip" {
   value = var.private_ingressgateway_ip
 }
+
+output "oidc_issuer_url" {
+  value = azurerm_kubernetes_cluster.aks.oidc_issuer_url
+}

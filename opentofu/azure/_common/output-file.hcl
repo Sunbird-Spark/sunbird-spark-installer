@@ -38,6 +38,13 @@ dependency "keys" {
     }
 }
 
+dependency "workload_identity" {
+    config_path = "../workload-identity"
+    mock_outputs = {
+      client_id = "00000000-0000-0000-0000-000000000000"
+    }
+}
+
 inputs = {
   env                                = local.env
   environment                        = local.environment
@@ -52,5 +59,6 @@ inputs = {
   random_string                      = dependency.keys.outputs.random_string
   velero_container_name              = dependency.storage.outputs.azurerm_velero_container_name
   cloud_storage_provider             = local.cloud_storage_provider
+  azure_client_id                    = dependency.workload_identity.outputs.client_id
 
 }

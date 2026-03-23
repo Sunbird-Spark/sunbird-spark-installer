@@ -71,3 +71,9 @@ variable "velero_container_name" {
   type        = string
   default     = ""
 }
+
+variable "azure_client_id" {
+  type        = string
+  description = "Client ID of the user-assigned managed identity for Workload Identity (for Azure blob storage access)."
+  default     = ""
+}
