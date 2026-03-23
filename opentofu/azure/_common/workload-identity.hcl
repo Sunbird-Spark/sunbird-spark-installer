@@ -32,11 +32,13 @@ dependency "storage" {
 }
 
 inputs = {
-  environment         = local.environment
-  building_block      = local.building_block
-  subscription_id     = local.subscription_id
-  location            = local.location
-  resource_group_name = dependency.network.outputs.resource_group_name
-  oidc_issuer_url     = dependency.aks.outputs.oidc_issuer_url
-  storage_account_id  = dependency.storage.outputs.azurerm_storage_account_id
+  environment              = local.environment
+  building_block           = local.building_block
+  subscription_id          = local.subscription_id
+  location                 = local.location
+  resource_group_name      = dependency.network.outputs.resource_group_name
+  oidc_issuer_url          = dependency.aks.outputs.oidc_issuer_url
+  storage_account_id       = dependency.storage.outputs.azurerm_storage_account_id
+  k8s_namespace            = "sunbird"
+  k8s_service_account_name = "workload-identity"
 }

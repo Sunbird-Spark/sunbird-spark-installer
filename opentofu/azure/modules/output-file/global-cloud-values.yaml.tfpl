@@ -15,9 +15,7 @@ global:
   storage_class: managed-premium
   cloud_storage_provider:  ${cloud_storage_provider}
   azure_client_id: ${azure_client_id}
-  serviceAccount:
-    create: false
-
+  workload_identity_service_account_name: ${k8s_service_account_name}
 
 velero:
   enabled: true

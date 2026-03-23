@@ -29,7 +29,8 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
     encryption_string            = var.encryption_string,
     random_string                = var.random_string,
     cloud_storage_provider       = var.cloud_storage_provider,
-    azure_client_id              = var.azure_client_id
+    azure_client_id              = var.azure_client_id,
+    k8s_service_account_name     = var.k8s_service_account_name
   })
   filename = local.global_values_cloud_file
 }

@@ -23,7 +23,7 @@ spec:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
     spec:
        {{- if .Values.serviceAccount.create }}
-      serviceAccountName: workload-identity
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name | default "workload-identity" }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
