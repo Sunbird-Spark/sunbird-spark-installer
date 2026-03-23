@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9fc40771-3b30-4f90-a2f3-0f70262f1150",
+		"_postman_id": "f4944eac-6599-43df-b43d-b4a71ab596b1",
 		"name": "Oneclick Installer Release 7.0.0 - Daylight Release",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "50198284"
@@ -8598,7 +8598,7 @@
 					"name": "Spark",
 					"item": [
 						{
-							"name": "4 - Onboarding Exclusion List",
+							"name": "1 - Explore Page Filters",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -8608,12 +8608,12 @@
 									},
 									{
 										"key": "Authorization",
-										"value": "Bearer {{YOUR_ACCESS_TOKEN}}"
+										"value": "Bearer {{apikey}}"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"request\": {\n    \"type\": \"user\",\n    \"subType\": \"exclusion\",\n    \"action\": \"onboarding\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"portal\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"get\",\n      \"fields\": [\n        \"/certs/\",\n        \"/signup/\",\n        \"/recover/\",\n        \"/sign-in/\",\n        \"/get/dial/\"\n      ]\n    }\n  }\n}",
+									"raw": "{\n  \"request\": {\n    \"type\": \"portal\",\n    \"subType\": \"explorepage\",\n    \"action\": \"filters\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"portal\",\n    \"data\": {\n      \"filters\": [\n        {\n          \"id\": \"collection\",\n          \"index\": 1,\n          \"label\": \"Collections\",\n          \"options\": [\n            {\"id\": \"content_playlist\", \"index\": 2, \"label\": \"Content Playlist\", \"code\": \"primaryCategory\", \"value\": \"Content Playlist\"},\n            {\"id\": \"course\", \"index\": 1, \"label\": \"Courses\", \"code\": \"primaryCategory\", \"value\": \"Course\"},\n            {\"id\": \"digital_textbook\", \"index\": 3, \"label\": \"Digital Textbook\", \"code\": \"primaryCategory\", \"value\": \"Digital Textbook\"}\n          ]\n        },\n        {\n          \"id\": \"categories\",\n          \"index\": 2,\n          \"label\": \"Categories\",\n          \"list\": [\n            {\"id\": \"usf_industry_it\", \"index\": 1, \"label\": \"Information Technology\", \"code\": \"industry\", \"value\": \"Information Technology\"},\n            {\"id\": \"usf_industry_dsai\", \"index\": 2, \"label\": \"Data Science and AI\", \"code\": \"industry\", \"value\": \"Data Science and AI\"},\n            {\"id\": \"usf_industry_bm\", \"index\": 3, \"label\": \"Business and Management\", \"code\": \"industry\", \"value\": \"Business and Management\"},\n            {\"id\": \"usf_industry_fa\", \"index\": 4, \"label\": \"Finance and Accounting\", \"code\": \"industry\", \"value\": \"Finance and Accounting\"},\n            {\"id\": \"usf_industry_edu\", \"index\": 5, \"label\": \"Education\", \"code\": \"industry\", \"value\": \"Education\"}\n          ]\n        },\n        {\n          \"id\": \"content\",\n          \"index\": 3,\n          \"label\": \"ContentTypes\",\n          \"list\": [\n            {\"id\": \"video\", \"index\": 1, \"label\": \"Video\", \"code\": \"mimeType\", \"value\": [\"video/mp4\", \"video/webm\"]},\n            {\"id\": \"audio\", \"index\": 2, \"label\": \"Audio\", \"code\": \"mimeType\", \"value\": [\"audio/mp3\", \"audio/webm\"]},\n            {\"id\": \"pdf\", \"index\": 3, \"label\": \"PDF\", \"code\": \"mimeType\", \"value\": [\"application/pdf\"]},\n            {\"id\": \"epub\", \"index\": 4, \"label\": \"Epub\", \"code\": \"mimeType\", \"value\": [\"application/epub\"]},\n            {\"id\": \"youtube\", \"index\": 5, \"label\": \"Youtube\", \"code\": \"mimeType\", \"value\": [\"video/x-youtube\"]},\n            {\"id\": \"html\", \"index\": 6, \"label\": \"HTML\", \"code\": \"mimeType\", \"value\": [\"application/vnd.ekstep.html-archive\"]},\n            {\"id\": \"interactive\", \"index\": 7, \"label\": \"Interactive\", \"code\": \"mimeType\", \"value\": [\"application/vnd.ekstep.ecml-archive\"]}\n          ]\n        }\n      ]\n    }\n  }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -8621,12 +8621,9 @@
 									}
 								},
 								"url": {
-									"raw": "https://dev.sunbirded.org/api/data/v1/form/create",
-									"protocol": "https",
+									"raw": "{{host}}/api/data/v1/form/create",
 									"host": [
-										"dev",
-										"sunbirded",
-										"org"
+										"{{host}}"
 									],
 									"path": [
 										"api",
@@ -8635,8 +8632,46 @@
 										"form",
 										"create"
 									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "2 - Onboarding Workflow Configuration",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"user\",\n    \"subType\": \"onboarding\",\n    \"action\": \"workflow\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"portal\",\n    \"data\": {\n      \"isEnabled\": true,\n      \"initialScreenId\": \"language_selection\",\n      \"screens\": {\n        \"language_selection\": {\n          \"title\": \"What is your language preference?\",\n          \"selectionType\": \"single\",\n          \"nextScreenId\": \"role_selection\",\n          \"fields\": [\n            {\"id\": \"en\", \"index\": 1, \"label\": \"English\"},\n            {\"id\": \"hi\", \"index\": 4, \"label\": \"Hindi\"}\n          ]\n        },\n        \"role_selection\": {\n          \"title\": \"What role describes you the best?\",\n          \"selectionType\": \"single\",\n          \"fields\": [\n            {\"id\": \"teacher\", \"index\": 2, \"label\": \"Teacher\", \"nextScreenId\": \"skills_teacher\"},\n            {\"id\": \"developer\", \"index\": 1, \"label\": \"Developer\", \"nextScreenId\": \"skills_developer\"},\n            {\"id\": \"other\", \"index\": 6, \"label\": \"Other\"}\n          ]\n        }\n      }\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
 								},
-								"description": "**This form specifies the portal routes (like signup or password recovery) where the onboarding process should be bypassed**"
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
@@ -8664,12 +8699,9 @@
 									}
 								},
 								"url": {
-									"raw": "https://dev.sunbirded.org/api/data/v1/form/create",
-									"protocol": "https",
+									"raw": "{{host}}/api/data/v1/form/create",
 									"host": [
-										"dev",
-										"sunbirded",
-										"org"
+										"{{host}}"
 									],
 									"path": [
 										"api",
@@ -8684,26 +8716,159 @@
 							"response": []
 						},
 						{
+							"name": "4 - Onboarding Exclusion List",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{YOUR_ACCESS_TOKEN}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"user\",\n    \"subType\": \"exclusion\",\n    \"action\": \"onboarding\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"portal\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"get\",\n      \"fields\": [\n        \"/certs/\",\n        \"/signup/\",\n        \"/recover/\",\n        \"/sign-in/\",\n        \"/get/dial/\"\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
+								"description": "**This form specifies the portal routes (like signup or password recovery) where the onboarding process should be bypassed**"
+							},
+							"response": []
+						},
+						{
 							"name": "5 - Resource Create (Portal Component)",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"resource\",\n    \"action\": \"create\",\n    \"rootOrgId\": \"0145163635568803841\",\n    \"framework\": \"USF\",\n    \"component\": \"portal\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"create\",\n      \"fields\": [\n        {\"code\": \"name\", \"dataType\": \"text\", \"name\": \"Name\", \"inputType\": \"text\", \"required\": false, \"visible\": true, \"index\": 1},\n        {\"code\": \"industry\", \"dataType\": \"text\", \"name\": \"Industry\", \"inputType\": \"select\", \"required\": false, \"visible\": true, \"index\": 2, \"depends\": [\"domain\"]},\n        {\"code\": \"domain\", \"dataType\": \"text\", \"name\": \"Domain\", \"inputType\": \"multiSelect\", \"required\": false, \"visible\": true, \"index\": 3, \"depends\": [\"skill\"]},\n        {\"code\": \"skill\", \"dataType\": \"text\", \"name\": \"Skill\", \"inputType\": \"multiSelect\", \"required\": false, \"visible\": true, \"index\": 4},\n        {\"code\": \"concept\", \"dataType\": \"text\", \"name\": \"Concepts\", \"inputType\": \"Concept\", \"required\": false, \"visible\": true, \"index\": 6},\n        {\"code\": \"resourceType\", \"dataType\": \"text\", \"name\": \"Resource Type\", \"inputType\": \"select\", \"required\": false, \"visible\": true, \"index\": 7, \"range\": [{\"key\": \"Teach\", \"name\": \"Teach\"}, {\"key\": \"Practice\", \"name\": \"Practice\"}, {\"key\": \"Learn\", \"name\": \"Learn\"}, {\"key\": \"Test\", \"name\": \"Test\"}, {\"key\": \"Play\", \"name\": \"Play\"}, {\"key\": \"Read\", \"name\": \"Read\"}, {\"key\": \"Experiment\", \"name\": \"Experiment\"}]}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "6 - Resource Review",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"resource\",\n    \"action\": \"review\",\n    \"rootOrgId\": \"0145163635568803841\",\n    \"framework\": \"USF\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"review\",\n      \"fields\": [\n        {\"code\": \"appicon\", \"visible\": true, \"editable\": true, \"dataType\": \"url\", \"inputType\": \"file\", \"label\": \"Icon\", \"index\": 1},\n        {\"code\": \"name\", \"visible\": true, \"editable\": true, \"dataType\": \"text\", \"inputType\": \"text\", \"label\": \"Title\", \"required\": true, \"index\": 2},\n        {\"code\": \"description\", \"visible\": true, \"editable\": true, \"dataType\": \"text\", \"inputType\": \"textarea\", \"label\": \"Description\", \"index\": 3},\n        {\"code\": \"industry\", \"visible\": true, \"depends\": [\"domain\", \"skil\"], \"editable\": true, \"dataType\": \"text\", \"label\": \"Industry\", \"index\": 5},\n        {\"code\": \"domain\", \"visible\": true, \"depends\": [\"skill\"], \"editable\": true, \"dataType\": \"list\", \"label\": \"Domain\", \"index\": 6},\n        {\"code\": \"skill\", \"visible\": true, \"editable\": true, \"dataType\": \"list\", \"label\": \"Skill\", \"index\": 7}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "7 - Question Filter View",
 							"request": {
-								"method": "GET",
-								"header": [],
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"questions\",\n    \"action\": \"question-filter-view\",\n    \"rootOrgId\": \"0145163635568803841\",\n    \"framework\": \"USF\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"filterMetaDataTemplate\",\n      \"action\": \"question-filter-view\",\n      \"fields\": [\n        {\"code\": \"primaryCategory\", \"dataType\": \"text\", \"inputType\": \"text\", \"label\": \"Collection Type\", \"required\": true, \"visible\": true},\n        {\"code\": \"additionalCategories\", \"dataType\": \"list\", \"inputType\": \"multiselect\", \"label\": \"Additional Category\", \"range\": [\"Textbook\", \"Lesson Plan\"]},\n        {\"code\": \"industry\", \"visible\": true, \"depends\": [\"domain\", \"skill\", \"topic\"], \"dataType\": \"text\", \"label\": \"Industry\", \"index\": 0},\n        {\"code\": \"domain\", \"visible\": true, \"depends\": [\"skill\", \"topic\"], \"dataType\": \"list\", \"label\": \"Domain\", \"index\": 1},\n        {\"code\": \"skill\", \"visible\": true, \"depends\": [\"topic\"], \"dataType\": \"list\", \"label\": \"Skill\", \"index\": 2}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
 								"description": "**These forms handle the filtering and metadata saving for assessment questions within the USF framework.**"
 							},
 							"response": []
@@ -8711,25 +8876,119 @@
 						{
 							"name": "8 - Question Meta-Save",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"questions\",\n    \"action\": \"question-meta-save\",\n    \"rootOrgId\": \"0145163635568803841\",\n    \"framework\": \"USF\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"questionMetaDataTemplate\",\n      \"action\": \"question-meta-save\",\n      \"fields\": [\n        {\"code\": \"name\", \"visible\": true, \"dataType\": \"text\", \"inputType\": \"text\", \"label\": \"Title\", \"required\": true, \"index\": 0},\n        {\"code\": \"industry\", \"visible\": true, \"depends\": [\"domain\", \"skill\", \"topic\"], \"dataType\": \"text\", \"label\": \"Industry\", \"index\": 2},\n        {\"code\": \"qlevel\", \"visible\": true, \"dataType\": \"text\", \"range\": [\"EASY\", \"MEDIUM\", \"DIFFICULT\"], \"label\": \"Level\", \"required\": true, \"index\": 7},\n        {\"code\": \"max_score\", \"visible\": true, \"dataType\": \"number\", \"label\": \"Max Score\", \"required\": true, \"index\": 8}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
+								"description": "**This configuration defines the searchable filters used to find resources specifically for lesson plans.**"
 							},
 							"response": []
 						},
 						{
 							"name": "9 - Lesson Plan Resource Filters",
 							"request": {
-								"method": "GET",
-								"header": [],
-								"description": "**This configuration defines the searchable filters used to find resources specifically for lesson plans.**"
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"lessonplan\",\n    \"action\": \"resource-filters\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"resourceFilterTemplate\",\n      \"action\": \"resource-filters\",\n      \"fields\": [\n        {\"code\": \"contentType\", \"dataType\": \"list\", \"range\": [\"Resource\", \"Collection\", \"Content\"], \"label\": \"contentType\", \"inputType\": \"multiselect\", \"index\": 1},\n        {\"code\": \"board\", \"dataType\": \"list\", \"label\": \"Curriculum\", \"inputType\": \"multiselect\", \"index\": 2},\n        {\"code\": \"gradeLevel\", \"dataType\": \"list\", \"label\": \"Class\", \"inputType\": \"multiselect\", \"index\": 3},\n        {\"code\": \"subject\", \"dataType\": \"list\", \"label\": \"Subject\", \"inputType\": \"multiselect\", \"index\": 4},\n        {\"code\": \"medium\", \"dataType\": \"list\", \"label\": \"Medium\", \"inputType\": \"multiselect\", \"index\": 5},\n        {\"code\": \"topic\", \"dataType\": \"list\", \"label\": \"Topics\", \"inputType\": \"topicselector\", \"index\": 6}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
+								"description": "**This configuration defines the searchable filters used to find resources specifically for lesson plans.This configuration defines the available downloadable reports for course batches, such as progress exhausts and profile reports**"
 							},
 							"response": []
 						},
 						{
 							"name": "10 - Batch Report Types",
 							"request": {
-								"method": "GET",
-								"header": [],
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"batch\",\n    \"subType\": \"report_types\",\n    \"action\": \"list\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"list\",\n      \"fields\": [\n        {\"title\": \"Course progress exhaust\", \"dataset\": \"progress-exhaust\", \"lang_key\": \"frmelmnts.lbl.progressExhaustReport\", \"encrypt\": \"false\"},\n        {\"title\": \"User profile exhaust\", \"dataset\": \"userinfo-exhaust\", \"lang_key\": \"frmelmnts.lbl.userExhaustReport\", \"encrypt\": \"true\"},\n        {\"title\": \"Question set report\", \"dataset\": \"response-exhaust\", \"lang_key\": \"frmelmnts.lbl.qsResponseReport\", \"encrypt\": \"false\"}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
 								"description": "**This configuration defines the available downloadable reports for course batches, such as progress exhausts and profile reports**"
 							},
 							"response": []
@@ -8737,8 +8996,39 @@
 						{
 							"name": "11 - Workspace Categories",
 							"request": {
-								"method": "GET",
-								"header": [],
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"workspace\",\n    \"subType\": \"categories\",\n    \"action\": \"get\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"display\",\n      \"fields\": [\n        {\"code\": \"book\", \"name\": \"Book\", \"visible\": true},\n        {\"code\": \"course\", \"name\": \"Course\", \"visible\": true},\n        {\"code\": \"resource\", \"name\": \"Resource\", \"visible\": true},\n        {\"code\": \"collection\", \"name\": \"Collection\", \"visible\": true},\n        {\"code\": \"lessonPlan\", \"name\": \"Lesson Plan\", \"visible\": true},\n        {\"code\": \"contentupload\", \"name\": \"Upload Content\", \"visible\": true},\n        {\"code\": \"contentuploadlarge\", \"name\": \"Upload Large Videos(>50MB)\", \"visible\": true},\n        {\"code\": \"assessment\", \"name\": \"Cource Assesment\", \"visible\": true},\n        {\"code\": \"questionsets\", \"name\": \"Questionsets\", \"visible\": true}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
 								"description": "**This form controls which content creation and management categories are visible in the user's workspace (e.g., Book, Course, Lesson Plan)**"
 							},
 							"response": []
@@ -8746,17 +9036,79 @@
 						{
 							"name": "12 - Resource Review",
 							"request": {
-								"method": "GET",
-								"header": [],
-								"description": "**Defines the metadata fields visible to a moderator during the review process.**"
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"resource\",\n    \"action\": \"review\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"review\",\n      \"fields\": [\n        {\"code\": \"appicon\", \"visible\": true, \"editable\": true, \"dataType\": \"url\", \"index\": 1, \"inputType\": \"file\", \"label\": \"Icon\", \"required\": true},\n        {\"code\": \"name\", \"visible\": true, \"editable\": true, \"dataType\": \"text\", \"index\": 2, \"inputType\": \"text\", \"label\": \"Title\", \"required\": true},\n        {\"code\": \"description\", \"visible\": true, \"editable\": true, \"dataType\": \"text\", \"index\": 3, \"inputType\": \"textarea\", \"label\": \"Description\"},\n        {\"code\": \"board\", \"visible\": true, \"editable\": true, \"dataType\": \"text\", \"index\": 5, \"label\": \"Board/Syllabus\", \"inputType\": \"select\"}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
+								"description": "**Defines the metadata fields visible to a moderator during the review process.Defines the metadata fields visible to a moderator during the review process.**"
 							},
 							"response": []
 						},
 						{
 							"name": "13 - Resource Request for Changes",
 							"request": {
-								"method": "GET",
-								"header": [],
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"resource\",\n    \"action\": \"requestforchanges\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"requestforchanges\",\n      \"fields\": [\n        {\n          \"otherReason\": \"Other Issue(s)\",\n          \"contents\": [\n            {\"name\": \"Appropriateness\", \"checkList\": [\"Incorrect Board, Grade, Subject or Medium\"]},\n            {\"name\": \"Content details\", \"checkList\": [\"Inappropriate tags such as Resource Type or Concepts\", \"Irrelevant Keywords\"]},\n            {\"name\": \"Usability\", \"checkList\": [\"Content is NOT playing correctly\", \"Spelling mistakes found in text used\"]}\n          ],\n          \"title\": \"Please tick the reasons for requesting changes and provide detailed comments:\"\n        }\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
 								"description": "**Provides the checklist of reasons for rejecting a resource and sending it back to the creator.**"
 							},
 							"response": []
@@ -8764,8 +9116,39 @@
 						{
 							"name": "14 - Resource Publish",
 							"request": {
-								"method": "GET",
-								"header": [],
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"resource\",\n    \"action\": \"publish\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"review\",\n      \"fields\": [\n        {\n          \"contents\": [\n            {\"name\": \"Appropriateness\", \"checkList\": [\"Is suitable for children\"]},\n            {\"name\": \"Content details\", \"checkList\": [\"Appropriate Title, Description\"]},\n            {\"name\": \"Usability\", \"checkList\": [\"Content plays correctly\"]}\n          ],\n          \"title\": \"Please confirm that ALL the following items are verified (by ticking the check-boxes) before you can publish:\"\n        }\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
 								"description": "**The final confirmation checklist a moderator must complete before a resource goes live.**"
 							},
 							"response": []
@@ -8773,8 +9156,39 @@
 						{
 							"name": "15 - Lesson Plan Request for Changes",
 							"request": {
-								"method": "GET",
-								"header": [],
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"lessonplan\",\n    \"action\": \"requestforchanges\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"requestforchanges\",\n      \"fields\": [\n        {\n          \"contents\": [\n            {\"name\": \"Appropriateness\", \"checkList\": [\"Has Hate speech, Abuse, Violence, Profanity\", \"Has Sexual content, Nudity or Vulgarity\", \"Has Discriminatory or Defamatory content\", \"Is not suitable for children\"]},\n            {\"name\": \"Content details\", \"checkList\": [\"Inappropriate Title or Description\", \"Incorrect Board, Grade, Subject or Medium\", \"Irrelevant Keywords\"]},\n            {\"name\": \"Usability\", \"checkList\": [\"Content is NOT playing correctly\", \"Audio is NOT clear or NOT easy to understand\", \"Language is NOT simple to understand\"]}\n          ],\n          \"title\": \"Please tick the reasons for requesting changes and provide detailed comments:\"\n        }\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
 								"description": "**Detailed rejection checklist specific to lesson plans.**"
 							},
 							"response": []
@@ -8782,8 +9196,39 @@
 						{
 							"name": "16 - Lesson Plan Publish",
 							"request": {
-								"method": "GET",
-								"header": [],
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"lessonplan\",\n    \"action\": \"publish\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"publish\",\n      \"fields\": [\n        [\n          {\n            \"contents\": [\n              {\"name\": \"Appropriateness\", \"checkList\": [\"No Hate speech, Abuse, Violence, Profanity\", \"No Sexual content, Nudity or Vulgarity\", \"No Discrimination or Defamation\", \"Is suitable for children\"]},\n              {\"name\": \"Content details\", \"checkList\": [\"Appropriate Title, Description\", \"Correct Board, Grade, Subject, Medium\", \"Relevant Keywords\"]},\n              {\"name\": \"Usability\", \"checkList\": [\"Content plays correctly\", \"Can see the content clearly on Desktop and App\", \"Audio (if any) is clear and easy to understand\", \"No Spelling mistakes in the text\", \"Language is simple to understand\"]}\n            ],\n            \"title\": \"Please confirm that ALL the following items are verified (by ticking the check-boxes) before you can publish:\"\n          }\n        ]\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
 								"description": "**Comprehensive verification checklist for lesson plans, covering desktop/app visibility and language simplicity.**"
 							},
 							"response": []
@@ -8791,8 +9236,39 @@
 						{
 							"name": "17 - Generic Content Save (Drafts)",
 							"request": {
-								"method": "GET",
-								"header": [],
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"*\",\n    \"action\": \"save\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"save\",\n      \"fields\": [\n        {\"code\": \"appicon\", \"visible\": true, \"editable\": true, \"dataType\": \"url\", \"index\": 1, \"inputType\": \"file\", \"label\": \"Icon\"},\n        {\"code\": \"name\", \"visible\": true, \"editable\": true, \"dataType\": \"text\", \"index\": 2, \"inputType\": \"text\", \"label\": \"Title\", \"required\": true},\n        {\"code\": \"description\", \"visible\": true, \"editable\": true, \"dataType\": \"text\", \"index\": 3, \"inputType\": \"textarea\", \"label\": \"Description\"},\n        {\"code\": \"primaryCategory\", \"visible\": true, \"editable\": false, \"dataType\": \"text\", \"index\": 5, \"label\": \"Content Type\", \"required\": true}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								},
 								"description": "**This configuration defines the minimum metadata required to save any content type as a draft in the workspace.**"
 							},
 							"response": []
@@ -8800,88 +9276,429 @@
 						{
 							"name": "18 - Search Schema Configuration",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"schemas\",\n    \"subType\": \"search\",\n    \"action\": \"get\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"get\",\n      \"fields\": [\n        {\n          \"id\": \"content\",\n          \"schema\": {\n            \"properties\": [\"name\",\"code\",\"status\",\"channel\",\"mimeType\",\"visibility\",\"audience\",\"appIcon\",\"primaryCategory\",\"additionalCategories\",\"board\",\"medium\",\"gradeLevel\",\"subject\",\"topic\"]\n          }\n        }\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "19 - Content Ownership Definition",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"all\",\n    \"action\": \"ownership\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"ownership\",\n      \"fields\": [{\"ownershipType\": [\"createdBy\", \"createdFor\"]}]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "20 - Portal User Types (Legacy Support)",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"config\",\n    \"subType\": \"usertype\",\n    \"action\": \"get\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"portal\",\n    \"data\": {\n      \"templateName\": \"userType\",\n      \"action\": \"get\",\n      \"fields\": [\n        {\"code\": \"teacher\", \"name\": \"Teacher\", \"label\": \"frmelmnts.lbl.teacher\", \"index\": 0},\n        {\"code\": \"student\", \"name\": \"Student\", \"label\": \"frmelmnts.lbl.student\", \"index\": 1},\n        {\"code\": \"administrator\", \"name\": \"Head teacher & Official\", \"label\": \"frmelmnts.lbl.administrator\", \"index\": 3},\n        {\"code\": \"parent\", \"name\": \"Parent\", \"label\": \"frmelmnts.lbl.parent\", \"index\": 2},\n        {\"code\": \"other\", \"name\": \"Other\", \"label\": \"frmelmnts.lbl.other\", \"index\": 4}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "21 - Course Certificate SVG Editor Toggle",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"certificate\",\n    \"subType\": \"course\",\n    \"action\": \"certificatecreate\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"portal\",\n    \"data\": {\n      \"enableSVGEditor\": false\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "22 - Landing Page Sections",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"page\",\n    \"subType\": \"landing\",\n    \"action\": \"sections\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"portal\",\n    \"data\": {\n      \"sections\": [\n        {\"id\": \"most_popular_contents\", \"index\": 2, \"title\": \"Most Popular Contents\", \"type\": \"content\"},\n        {\"id\": \"browser_through_categories\", \"index\": 1, \"title\": \"Browse Through Categories\", \"type\": \"categories\", \"list\": [\n          {\"title\": \"Information Technology\", \"code\": \"industry\", \"value\": \"Information Technology\"},\n          {\"title\": \"Data Science and AI\", \"code\": \"industry\", \"value\": \"Data Science and AI\"}\n        ]}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "23 - Administrative Review Filters",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"resource\",\n    \"action\": \"filters\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"review\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"review\",\n      \"fields\": [\n        {\"code\": \"board\", \"visible\": true, \"dataType\": \"text\", \"index\": 5, \"label\": \"Board/Syllabus\", \"inputType\": \"select\"},\n        {\"code\": \"medium\", \"visible\": true, \"dataType\": \"list\", \"index\": 6, \"label\": \"Medium\", \"inputType\": \"multiselect\"},\n        {\"code\": \"gradeLevel\", \"visible\": true, \"dataType\": \"list\", \"index\": 7, \"label\": \"Class\", \"inputType\": \"multiselect\"}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "24 - Generic Resource Creation (Component: *)",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"resource\",\n    \"action\": \"create\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"create\",\n      \"fields\": [\n        {\"code\": \"name\", \"dataType\": \"text\", \"name\": \"Name\", \"inputType\": \"text\", \"index\": 1},\n        {\"code\": \"board\", \"dataType\": \"text\", \"name\": \"Board\", \"inputType\": \"select\", \"index\": 2},\n        {\"code\": \"resourceType\", \"dataType\": \"text\", \"name\": \"Resource Type\", \"inputType\": \"select\", \"index\": 7, \"range\": [{\"key\": \"Teach\", \"name\": \"Teach\"}, {\"key\": \"Practice\", \"name\": \"Practice\"}]}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "25 - Lesson Plan Review Form",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"content\",\n    \"subType\": \"lessonplan\",\n    \"action\": \"review\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"review\",\n      \"fields\": [\n        {\"code\": \"primaryCategory\", \"dataType\": \"text\", \"label\": \"Collection Type\", \"required\": true, \"index\": 0},\n        {\"code\": \"name\", \"dataType\": \"text\", \"label\": \"Name\", \"required\": true},\n        {\"code\": \"board\", \"dataType\": \"text\", \"label\": \"Board/Syllabus\", \"required\": true, \"index\": 0}\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "26 - Generalise Resource Bundles",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"generaliseresourcebundles\",\n    \"subType\": \"global\",\n    \"action\": \"list\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"portal\",\n    \"data\": {\n      \"templateName\": \"collectionResourceBundles\",\n      \"action\": \"list\",\n      \"fields\": [\n        {\n          \"course\": { \"key\": \"crs\", \"trackable\": { \"en\": \"all_labels_en.json\", \"hi\": \"all_labels_hi.json\" } },\n          \"textbook\": { \"key\": \"tbk\", \"trackable\": { \"en\": \"all_labels_en.json\", \"hi\": \"all_labels_hi.json\" } },\n          \"tvclass\": { \"key\": \"tvc\", \"trackable\": { \"en\": \"all_labels_en.json\", \"hi\": \"all_labels_hi.json\" } }\n        }\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "27 - Group Forum Creation",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"forum\",\n    \"subType\": \"group\",\n    \"action\": \"create\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"create\",\n      \"fields\": [\n        {\n          \"category\": {\n            \"name\": \"Discussion Forum for Groups\",\n            \"pid\": \"2\",\n            \"uid\": \"1\",\n            \"description\": \"\",\n            \"context\": [{\"type\": \"group\", \"identifier\": \"_groupId\"}]\n          }\n        }\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						},
 						{
 							"name": "28 - External ID Verification Labels",
 							"request": {
-								"method": "GET",
-								"header": []
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"request\": {\n    \"type\": \"user\",\n    \"subType\": \"externalidverification\",\n    \"action\": \"onboarding\",\n    \"rootOrgId\": \"*\",\n    \"framework\": \"*\",\n    \"component\": \"*\",\n    \"data\": {\n      \"templateName\": \"defaultTemplate\",\n      \"action\": \"onboarding\",\n      \"fields\": [\n        {\n          \"code\": \"externalIdVerificationLabels\",\n          \"range\": [\n            {\n              \"headerLabel\": \"Are you a government school teacher ?\",\n              \"fieldLabel\": \"Enter your teacher ID for verification\",\n              \"verificationSuccessfulLabel\": \"Teacher profile verified successfully\"\n            }\n          ]\n        }\n      ]\n    }\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/api/data/v1/form/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"data",
+										"v1",
+										"form",
+										"create"
+									]
+								}
 							},
 							"response": []
 						}
