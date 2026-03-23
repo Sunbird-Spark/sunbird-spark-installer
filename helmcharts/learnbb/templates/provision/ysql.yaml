@@ -42,7 +42,7 @@ spec:
             mountPath: /opt/shared-volume
       containers:
       - name: migration
-        image: yugabytedb/yugabyte:latest
+        image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
         imagePullPolicy: IfNotPresent
         command: ['bash', '-c']
         securityContext:
@@ -116,4 +116,13 @@ spec:
             done
             {{- end }}
             echo "PostgreSQL setup completed."
+
+            # Run sunbird-lern specific SQL migrations against sunbird database
+            echo "Running sunbird-lern SQL migrations..."
+            cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern/reports
+            for sql_file in *.sql; do
+              echo "Applying $sql_file to sunbird..."
+              run_sql_file "$sql_file" "sunbird" || true
+            done
+            echo "Sunbird-lern SQL migrations completed."
   backoffLimit: 30

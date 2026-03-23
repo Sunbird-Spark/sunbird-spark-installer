@@ -173,6 +173,7 @@ CREATE TABLE IF NOT EXISTS sunbird_courses.assessment_aggregator (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
+CREATE INDEX IF NOT EXISTS assessment_aggregator_by_user ON sunbird_courses.assessment_aggregator (user_id, course_id, batch_id, content_id, attempt_id) INCLUDE (total_score, total_max_score, last_attempted_on) WITH CLUSTERING ORDER BY (course_id ASC, batch_id ASC, content_id ASC, attempt_id ASC) AND transactions = {'enabled': 'true'};
 
 CREATE TABLE IF NOT EXISTS sunbird_courses.course_batch (
     courseid text,
@@ -270,6 +271,7 @@ CREATE TABLE IF NOT EXISTS sunbird_courses.user_enrolments (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
+CREATE INDEX IF NOT EXISTS user_enrolments_by_course ON sunbird_courses.user_enrolments (courseid) INCLUDE (status, completionpercentage, enrolled_date, datetime);
 
 CREATE TABLE IF NOT EXISTS sunbird_courses.bulk_upload_process (
     id text PRIMARY KEY,
@@ -371,4 +373,3 @@ CREATE TABLE IF NOT EXISTS sunbird_courses.user_courses (
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
 CREATE INDEX IF NOT EXISTS inx_ucs_status ON sunbird_courses.user_courses (status);
-
