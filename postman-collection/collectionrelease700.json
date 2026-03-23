@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f4944eac-6599-43df-b43d-b4a71ab596b1",
+		"_postman_id": "4c89a0ee-6935-4faf-8513-4546e6f45d9a",
 		"name": "Oneclick Installer Release 7.0.0 - Daylight Release",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "50198284"
@@ -1475,6 +1475,429 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"request\": {\n        \"id\": \"verifyOtpOnDelete\",\n        \"field\": \"verifyOtpOnDelete\",\n        \"value\": \"true\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "26 - System Settings - slug",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{apikey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n                \"id\": \"slug\",\n                \"field\": \"slug\",\n                \"value\": \"sunbird\"\n    }\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "27 - System Settings - errorLogSyncSettings",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{apikey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n                \"id\": \"errorLogSyncSettings\",\n                \"field\": \"errorLogSyncSettings\",\n                \"value\": \"{\\\"bandwidth\\\":10,\\\"frequency\\\":86400000}\"\n    }\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "28 - System Settings -  appFaqURL",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{apikey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"id\": \"appFaqURL\",\n    \"field\": \"appFaqURL\",\n    \"value\": \"{{blob_store_path}}{{public_container_name}}/public/app-faq/resources/res\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "29 - System Settings -  privacyPolicyConfig",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{apikey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"id\": \"privacyPolicyConfig\",\n    \"field\": \"privacyPolicyConfig\",\n    \"value\": \"{\\\"latestVersion\\\":\\\"1.0.0\\\",\\\"1.0.0\\\":{\\\"url\\\":\\\"{{blob_store_path}}\\/{{public_container_name}}/termsandcondtions\\/terms-and-conditions-v9.html#termsOfUse\\\"}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "30 - System Settings -  userProfileConfig",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{apikey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"id\": \"userProfileConfig\",\n    \"field\": \"userProfileConfig\",\n    \"value\": \"{\\\"csv\\\":{\\\"supportedColumns\\\":{\\\"First Name\\\":\\\"firstName\\\",\\\"Last Name\\\":\\\"lastName\\\",\\\"Email ID\\\":\\\"email\\\",\\\"Mobile Number\\\":\\\"phone\\\",\\\"Login ID\\\":\\\"userName\\\",\\\"Roles\\\":\\\"roles\\\",\\\"Date of Birth\\\":\\\"dob\\\"},\\\"mandatoryColumns\\\":[\\\"firstName\\\",\\\"userName\\\"]}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "31 - System Settings -  portalFaqURL",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{apikey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"id\": \"portalFaqURL\",\n    \"field\": \"portalFaqURL\",\n    \"value\": \"{{blob_store_path}}{{public_container_name}}/public/portal-faq/resources/res\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "32 - System Settings -  portalgooglerecaptchasitekey",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{apikey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"id\": \"portal_google_recaptcha_site_key\",\n    \"field\": \"portal_google_recaptcha_site_key\",\n    \"value\": \"6LeJtnksAAAAAB4EB6ImtvZKJBWd583BuzQIWDxZ\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "33 - System Settings - defaultChannel",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{apikey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"id\": \"default_channel\",\n    \"field\": \"default_channel\",\n    \"value\": \"sunbird\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "34 - System Settings - orgAdminTnc",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{apikey}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "X-Authenticated-User-Token",
+								"value": "{{access_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"id\": \"orgAdminTnc\",\n    \"field\": \"orgAdminTnc\",\n    \"value\": \"{\\\"latestVersion\\\":\\\"1.0.0\\\",\\\"1.0.0\\\":{\\\"url\\\":\\\"{{blob_store_path}}{{public_container_name}}/termsandcondtions/terms-and-conditions-v9.html#termsOfUse\\\"}}\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
