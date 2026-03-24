@@ -45,3 +45,26 @@ variable "k8s_service_account_name" {
   description = "Name of the Kubernetes service account."
   default     = "workload-identity"
 }
+
+variable "kubernetes_host" {
+  type        = string
+  description = "Kubernetes API server host."
+}
+
+variable "kubernetes_client_certificate" {
+  type        = string
+  description = "Kubernetes client certificate (base64 encoded)."
+  sensitive   = true
+}
+
+variable "kubernetes_client_key" {
+  type        = string
+  description = "Kubernetes client key (base64 encoded)."
+  sensitive   = true
+}
+
+variable "kubernetes_cluster_ca_certificate" {
+  type        = string
+  description = "Kubernetes cluster CA certificate (base64 encoded)."
+  sensitive   = true
+}

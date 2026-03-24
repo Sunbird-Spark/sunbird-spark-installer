@@ -90,9 +90,8 @@ commonAnnotations:
   reloader.stakater.com/auto: "true"
 
 serviceAccount:
-  create: true
-  annotations: {}
-
+  create: false
+  
 serviceMonitor:
   enabled: true
   interval: 30s

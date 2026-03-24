@@ -4,6 +4,6 @@ output "client_id" {
 }
 
 output "k8s_service_account_name" {
-  value       = var.k8s_service_account_name
-  description = "Name of the Kubernetes service account for workload identity."
+  value       = kubernetes_service_account.workload_identity.metadata[0].name
+  description = "Name of the Kubernetes service account created by infrastructure."
 }
