@@ -21,6 +21,37 @@ az login --tenant <AZURE_TENANT_ID>
 
 Note: Make sure you replace the AZURE_TENANT_ID with the tenant id from Azure Console. 
 
+## AKS Kubernetes Version Upgrade
+
+The AKS cluster is provisioned with a default Kubernetes version defined in `opentofu/azure/modules/aks/variables.tf`. AKS versions have a support lifecycle of approximately **12 months** after GA. When a version approaches end of life, you must upgrade to a supported version.
+
+### When to Upgrade
+
+AKS supports the **3 latest GA minor versions** at any time. Once your version falls outside this window, Microsoft may auto-upgrade your cluster. It is recommended to upgrade proactively before that happens.
+
+Check the currently supported AKS versions at: https://learn.microsoft.com/en-us/azure/aks/supported-kubernetes-versions
+
+### How to Upgrade
+
+**Step 1 — Update the `aks_version` default in `opentofu/azure/modules/aks/variables.tf`:**
+```hcl
+variable "aks_version" {
+  type        = string
+  description = "AKS cluster version"
+  default     = "<new-version>"  # e.g. "1.34.0"
+}
+```
+
+**Step 2 — Apply via OpenTofu:**
+```bash
+cd opentofu/azure/<env>/aks
+terragrunt apply
+```
+
+> **Note:** AKS only supports upgrading **one minor version at a time** (e.g., 1.33 → 1.34 → 1.35). You cannot skip versions.
+
+---
+
 #### Azure Infra Setup
 
 Post login, update the `opentofu/azure/<env>/global-values.yaml` with the variables as per your environment

@@ -44,6 +44,37 @@ export GOOGLE_PROJECT_ID=<your_project_id>
 
 Note: Make sure you select the correct project and authenticate with the appropriate credentials.
 
+## GKE Kubernetes Version Upgrade
+
+The GKE cluster is provisioned with a Kubernetes version defined in `opentofu/gcp/modules/gke/variables.tf`. By default it is set to `"latest"`, which picks the latest available version in the selected region at cluster creation time. GKE versions have a support lifecycle of approximately **12 months** after GA. When a version approaches end of life, you must upgrade to a supported version.
+
+### When to Upgrade
+
+GKE supports the **3 latest GA minor versions** at any time. Once your version falls outside this window, Google may auto-upgrade your cluster. It is recommended to upgrade proactively before that happens.
+
+Check the currently supported GKE versions at: https://cloud.google.com/kubernetes-engine/docs/release-notes
+
+### How to Upgrade
+
+**Step 1 — Update the `kubernetes_version` default in `opentofu/gcp/modules/gke/variables.tf`:**
+```hcl
+variable "kubernetes_version" {
+  description = "The Kubernetes version of the masters."
+  type        = string
+  default     = "<new-version>"  # e.g. "1.34"
+}
+```
+
+**Step 2 — Apply via OpenTofu:**
+```bash
+cd opentofu/gcp/<env>/gke
+terragrunt apply
+```
+
+> **Note:** GKE only supports upgrading **one minor version at a time** (e.g., 1.33 → 1.34 → 1.35). You cannot skip versions.
+
+---
+
 ### Creating infrastructure using OpenTofu
 
 The installer can be run on one of the following platforms:
