@@ -300,10 +300,10 @@ flink_jobs:
         objectTypes = ["EventSet", "Questionnaire", "Misconception", "FrameworkType", "EventSet", "Event"]
       }
       cloudstorage.metadata.replace_absolute_path=true
-      cloudstorage.relative_path_prefix= "CONTENT_STORAGE_BASE_PATH"
+      cloudstorage.relative_path_prefix="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_relative_path_prefix "context" $) }}"
       cloudstorage.read_base_path="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_read_base_path "context" $) }}"
-      cloudstorage.write_base_path=["https://{{ .Values.global.object_storage_endpoint }}"] 
-      cloudstorage.mecloudstorage.metadata.list={{ .Values.cloudstorage_metadatalist }}
+      cloudstorage.write_base_path={{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_write_base_path "context" $) }}
+      cloudstorage.metadata.list={{ .Values.cloudstorage_metadatalist }}
       cloud_storage_container="{{ .Values.global.public_container_name }}"
 
     flink-conf: |+
