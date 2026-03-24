@@ -1,5 +1,44 @@
 # Obsrv Add-on Setup
 
+## Extra Node Requirements
+
+The Obsrv addon deploys additional workloads that require extra nodes beyond what Sunbird already uses. Sunbird's existing nodes are assumed to be at capacity.
+
+### Per-Component Resource Estimates
+
+| Component | Replicas | CPU Request | Memory Request | Total CPU | Total Memory |
+|-----------|----------|-------------|----------------|-----------|--------------|
+| **druid-raw-cluster** (historical) | 1 | 4 | 8 Gi | 4 | 8 Gi |
+| **druid-raw-cluster** (middleManager) | 1 | 2 | 4 Gi | 2 | 4 Gi |
+| **druid-raw-cluster** (broker) | 1 | 1 | 2 Gi | 1 | 2 Gi |
+| **druid-raw-cluster** (coordinator) | 1 | 0.5 | 1 Gi | 0.5 | 1 Gi |
+| **druid-raw-cluster** (router) | 1 | 0.5 | 1 Gi | 0.5 | 1 Gi |
+| **flink** (taskmanager) | 2 | 2 | 4 Gi | 4 | 8 Gi |
+| **flink** (jobmanager) | 1 | 1 | 2 Gi | 1 | 2 Gi |
+| **postgresql** | 1 | 1 | 2 Gi | 1 | 2 Gi |
+| **superset** | 1 | 1 | 1 Gi | 1 | 1 Gi |
+| **secor** | 1 | 0.5 | 512 Mi | 0.5 | 0.5 Gi |
+| **dataset-api** | 1 | 0.5 | 512 Mi | 0.5 | 0.5 Gi |
+| **kong IC** | 1 | 0.5 | 512 Mi | 0.5 | 0.5 Gi |
+| **command-api** | 1 | 0.25 | 256 Mi | 0.25 | 0.25 Gi |
+| **config-api** | 1 | 0.25 | 256 Mi | 0.25 | 0.25 Gi |
+| **web-console** | 1 | 0.25 | 256 Mi | 0.25 | 0.25 Gi |
+| **valkey-dedup** | 1 | 0.25 | 256 Mi | 0.25 | 0.25 Gi |
+| **valkey-denorm** | 1 | 0.25 | 256 Mi | 0.25 | 0.25 Gi |
+| **druid-operator** | 1 | 0.25 | 256 Mi | 0.25 | 0.25 Gi |
+| **TOTAL** | | | | **~18 CPU** | **~32 Gi** |
+
+### Recommended Extra Nodes (Azure)
+
+| Node Type | vCPU | RAM | Extra Nodes Needed |
+|-----------|------|-----|--------------------|
+| `Standard_B16as_v2` | 16 | 64 Gi | **2** |
+
+> Druid historicals and Flink taskmanagers are the dominant consumers (~10 CPU, ~20 Gi combined).
+> Scale historicals and taskmanager replicas up if ingestion throughput needs to increase.
+
+---
+
 ## Prerequisites
 
 Clone the obsrv-automation repo into this folder and checkout the latest release tag:
