@@ -156,7 +156,7 @@ images:
     tag: develop_cb093d4
 
   secor: &secor
-    repository: "sanketikahub/secor"
+    repository: "docker.io/divyagovindaiah123/secor"
     tag: "0.29.2-kafka-4.0"
 
   yugabytecql: &yugabytecql

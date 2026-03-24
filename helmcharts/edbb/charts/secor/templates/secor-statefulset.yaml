@@ -31,6 +31,7 @@ spec:
       labels:
         app: secor
         release: {{ $jobName }}
+        azure.workload.identity/use: "true"
     spec:
       {{- if .Values.nodeSelector }}
       nodeSelector:
