@@ -27,12 +27,15 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
         app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
         checksum/job-config: {{ $jobData | toYaml | sha256sum }}
     spec:
-      {{- if .Values.global.serviceAccount.create }}
-      serviceAccountName: {{ .Values.global.serviceAccount.name }}
+      {{- if .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -51,9 +54,6 @@ spec:
           workingDir: {{ .Values.taskmanager.flink_work_dir }}
           command: ["/opt/flink/bin/taskmanager.sh"]
           args: ["start-foreground",
-  {{- if eq .Values.global.checkpoint_store_type "azure" }}
-            "-Dfs.azure.account.key.{{ .Values.global.object_storage_endpoint }}={{ .Values.global.cloud_storage_secret_key }}",
-  {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "gcs" }}
     "-Dgoogle.cloud.auth.service.account.enable=true",
     "-Dfs.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem",
@@ -77,6 +77,11 @@ spec:
             - name: {{ .name }}
               containerPort: {{ .targetPort }}
             {{- end }}
+          env:
+          {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+          - name: AZURE_CLIENT_ID
+            value: "{{ .Values.global.azure_client_id }}"
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
@@ -122,12 +127,15 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
         app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
         checksum/job-config: {{ $jobData | toYaml | sha256sum }}
     spec:
-      {{- if .Values.global.serviceAccount.create }}
-      serviceAccountName: {{ .Values.global.serviceAccount.name }}
+      {{- if .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -146,9 +154,6 @@ spec:
           workingDir: {{ .Values.jobmanager.flink_work_dir }}
           command: ["/opt/flink/bin/standalone-job.sh"]
           args: ["start-foreground",
-  {{- if eq .Values.global.checkpoint_store_type "azure" }}
-            "-Dfs.azure.account.key.{{ .Values.global.object_storage_endpoint }}={{ .Values.global.cloud_storage_secret_key }}",
-  {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "gcs" }}
     "-Dgoogle.cloud.auth.service.account.enable=true",
     "-Dfs.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem",
@@ -177,6 +182,11 @@ spec:
             - name: {{ .name }}
               containerPort: {{ .targetPort }}
             {{- end }}
+          env:
+          {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+          - name: AZURE_CLIENT_ID
+            value: "{{ .Values.global.azure_client_id }}"
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
