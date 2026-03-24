@@ -184,6 +184,11 @@ spec:
             - name: {{ .name }}
               containerPort: {{ .targetPort }}
             {{- end }}
+          env:
+          {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+          - name: AZURE_CLIENT_ID
+            value: "{{ .Values.global.azure_client_id }}"
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           securityContext:

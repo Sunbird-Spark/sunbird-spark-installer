@@ -20,18 +20,18 @@ dependency "network" {
 dependency "aks" {
   config_path = "../aks"
   mock_outputs = {
-    oidc_issuer_url             = "https://dummy-oidc.eastus.cloudapp.azure.com/"
-    kubernetes_host             = "https://dummy.hcp.eastus.azmk8s.io:443"
-    client_certificate          = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t..."
-    client_key                  = "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVkt..."
-    cluster_ca_certificate      = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t..."
+    oidc_issuer_url        = "https://dummy-oidc.eastus.cloudapp.azure.com/"
+    kubernetes_host        = "https://dummy.hcp.eastus.azmk8s.io:443"
+    client_certificate     = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t..."
+    client_key             = "LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVkt..."
+    cluster_ca_certificate = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t..."
   }
 }
 
 dependency "storage" {
   config_path = "../storage"
   mock_outputs = {
-    azurerm_storage_account_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dummy-rg/providers/Microsoft.Storage/storageAccounts/dummy"
+    azurerm_storage_account_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dummy-rg/providers/Microsoft.Storage/storageAccounts/dummy"
   }
 }
 
@@ -42,7 +42,9 @@ inputs = {
   location                           = local.location
   resource_group_name                = dependency.network.outputs.resource_group_name
   oidc_issuer_url                    = dependency.aks.outputs.oidc_issuer_url
-  storage_account_id                 = dependency.storage.outputs.azurerm_storage_account_id
+  storage_account_id                 = dependency.storage.outputs.azurerm_storage_account_resource_id
+  # NOTE: Keep k8s_namespace and k8s_service_account_name in sync with variables.tf defaults.
+  # These can be overridden in template/*/terragrunt.hcl for per-environment customization.
   k8s_namespace                      = "sunbird"
   k8s_service_account_name           = "workload-identity"
   kubernetes_host                    = dependency.aks.outputs.kubernetes_host

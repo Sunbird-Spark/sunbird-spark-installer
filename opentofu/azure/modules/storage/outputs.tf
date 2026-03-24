@@ -19,6 +19,6 @@ output "azurerm_velero_container_name" {
   value = azurerm_storage_container.velero_storage_container_private.name
 }
 
-output "azurerm_storage_account_id" {
+output "azurerm_storage_account_resource_id" {
   value = azurerm_storage_account.storage_account.id
 }

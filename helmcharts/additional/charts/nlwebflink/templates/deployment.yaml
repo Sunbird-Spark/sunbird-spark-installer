@@ -195,11 +195,9 @@ spec:
               # Keep container running
               wait
           env:
-          {{- if and .Values.checkpoint_enabled (eq .Values.global.checkpoint_store_type "azure") }}
-          - name: AZURE_STORAGE_ACCOUNT
-            value: "{{ .Values.global.cloud_storage_access_key }}"
-          - name: AZURE_STORAGE_ACCESS_KEY
-            value: "{{ .Values.global.cloud_storage_secret_key }}"  
+          {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+          - name: AZURE_CLIENT_ID
+            value: "{{ .Values.global.azure_client_id }}"
           - name: CHECKPOINT_DIR
             value: "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
           {{- end }}
