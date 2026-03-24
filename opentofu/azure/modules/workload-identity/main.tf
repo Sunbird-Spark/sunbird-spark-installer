@@ -62,5 +62,8 @@ resource "kubernetes_service_account" "workload_identity" {
     }
   }
 
-  depends_on = [azurerm_user_assigned_identity.workload_identity]
+  depends_on = [
+    azurerm_user_assigned_identity.workload_identity,
+    azurerm_federated_identity_credential.workload_identity
+  ]
 }

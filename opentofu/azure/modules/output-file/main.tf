@@ -15,7 +15,21 @@ locals {
   global_values_cloud_file = "${var.base_location}/../global-cloud-values.yaml"
 }
 
+# Validation: ensure azure_client_id is provided when using Azure Workload Identity
+resource "null_resource" "validate_azure_client_id" {
+  count = var.cloud_storage_provider == "azure" && var.azure_client_id == "" ? 1 : 0
+
+  provisioner "local-exec" {
+    command = "echo 'ERROR: azure_client_id must be provided when cloud_storage_provider is azure' && exit 1"
+  }
+
+  lifecycle {
+    create_before_destroy = false
+  }
+}
+
 resource "local_sensitive_file" "global_cloud_values_yaml" {
+  depends_on = [null_resource.validate_azure_client_id]
   content = templatefile("${path.module}/global-cloud-values.yaml.tfpl", {
     env                          = var.env,
     environment                  = var.environment,
