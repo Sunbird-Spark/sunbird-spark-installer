@@ -56,19 +56,25 @@ nlwebflink:
 velero:
   enabled: true
   credentials:
-    useSecret: true
-    secretContents:
-      cloud: |
-        AZURE_STORAGE_ACCOUNT_NAME: {{ .Values.global.cloud_storage_access_key }}
-        AZURE_STORAGE_ACCOUNT_KEY: {{ .Values.global.cloud_storage_secret_key }}
+    useSecret: false
+  serviceAccount:
+    server:
+      create: true
+      name: "workload-identity"
+      annotations:
+        azure.workload.identity/client-id: "cada95cd-3bbb-4500-b055-2621fd0c4e66"
+      labels:
+        azure.workload.identity/use: "true"
+  podLabels:
+    azure.workload.identity/use: "true"
   configuration:
     backupStorageLocation:
       - name: default
         provider: "azure"
         bucket: backups
         config:
-          storageAccount: 
-          storageAccountKeyEnvVar: AZURE_STORAGE_ACCOUNT_KEY
+          storageAccount: {{ .Values.global.cloud_storage_account_name }}
+          useWorkloadIdentityAuth: "true"
     volumeSnapshotLocation:
       - name: default
         provider: "azure"
