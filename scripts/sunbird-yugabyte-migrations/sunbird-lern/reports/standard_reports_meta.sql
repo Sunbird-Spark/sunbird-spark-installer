@@ -320,3 +320,33 @@ INSERT INTO standard_reports_meta (
     TRUE,
     NULL
 ) ON CONFLICT (report_id) DO NOTHING;
+
+-- ============================================================
+-- Report: user-consent-summary
+-- Data Source: YUGABYTE_CQL
+-- Keyspace: sunbird
+-- ============================================================
+--
+-- Scans all rows in the user_consent table. No filters applied — returns full table.
+
+INSERT INTO standard_reports_meta (
+    report_id,
+    title,
+    description,
+    domain,
+    data_source,
+    query_template,
+    supported_filters,
+    enabled,
+    aggregation_spec
+) VALUES (
+    'user-consent-summary',
+    'User Consent',
+    'Returns all user consent records including status, consumer, object, and timestamps.',
+    'user',
+    'YUGABYTE_CQL',
+    'SELECT user_id, object_id, status, created_on, expiry FROM sunbird.user_consent',
+    '[]',
+    TRUE,
+    NULL
+) ON CONFLICT (report_id) DO NOTHING;
