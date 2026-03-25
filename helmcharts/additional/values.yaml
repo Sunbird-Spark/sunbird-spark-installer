@@ -66,8 +66,6 @@ velero:
         bucket: backups
         config:
           storageAccount:
-          # Workload Identity (Azure): uses AAD/managed identity - no storage key needed
-          # Key-based auth (non-workload-identity): replace with storageAccountKeyEnvVar: AZURE_STORAGE_ACCOUNT_KEY
           useAAD: "true"
     volumeSnapshotLocation:
       - name: default
