@@ -34,18 +34,6 @@ variable "storage_account_id" {
   description = "Resource ID of the storage account to grant Storage Blob Data Contributor on."
 }
 
-variable "k8s_namespace" {
-  type        = string
-  description = "Kubernetes namespace where the service account lives."
-  default     = "sunbird"
-}
-
-variable "k8s_service_account_name" {
-  type        = string
-  description = "Name of the Kubernetes service account."
-  default     = "workload-identity"
-}
-
 variable "kubernetes_host" {
   type        = string
   description = "Kubernetes API server host."
