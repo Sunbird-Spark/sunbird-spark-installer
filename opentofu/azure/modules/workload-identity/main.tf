@@ -23,6 +23,8 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(var.kubernetes_cluster_ca_certificate)
 }
 
+data "azurerm_client_config" "current" {}
+
 locals {
   environment_name = "${var.building_block}-${var.environment}"
 }
