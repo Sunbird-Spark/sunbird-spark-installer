@@ -123,7 +123,6 @@ google_auth_client_secret: "google-auth"
 global:
   azure_private_container_name: ""
   azure_storage_account_name: sunbird
-  azure_storage_account_key: xxxxxxx
   sunbird_admin_api_token: ""
   sunbird_anonymous_register_token: ""
   sunbird_loggedin_register_token: ""

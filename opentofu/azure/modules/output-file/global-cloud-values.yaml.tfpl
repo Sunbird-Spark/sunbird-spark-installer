@@ -3,7 +3,6 @@ global:
   environment: ${environment}
   building_block: ${building_block}
   cloud_storage_access_key: ${azure_storage_account_name}
-  %{ if cloud_storage_provider != "azure" }cloud_storage_secret_key: ${azure_storage_account_key}%{ endif }
   public_container_name: ${azure_public_container_name}
   private_container_name: ${azure_private_container_name}
   dial_state_container_public: ${azure_dial_state_container_name}
@@ -32,7 +31,7 @@ velero:
           prefix:
           config:
             storageAccount: ${azure_storage_account_name}
-            %{ if cloud_storage_provider == "azure" }useAAD: "true"%{ else }storageAccountKeyEnvVar: AZURE_STORAGE_ACCOUNT_KEY%{ endif }
+            useAAD: "true"
       dbbackupStorageLocation:
         - name: dbbackup
           provider: "${cloud_storage_provider}"
@@ -40,7 +39,7 @@ velero:
           prefix:
           config:
             storageAccount: ${azure_storage_account_name}
-            %{ if cloud_storage_provider == "azure" }useAAD: "true"%{ else }storageAccountKeyEnvVar: AZURE_STORAGE_ACCOUNT_KEY%{ endif }      
+            useAAD: "true"      
       volumeSnapshotLocation:
         - name: default
           provider: "${cloud_storage_provider}" 

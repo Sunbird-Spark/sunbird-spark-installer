@@ -28,7 +28,6 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
     environment                  = var.environment,
     building_block               = var.building_block,
     azure_storage_account_name   = var.storage_account_name,
-    azure_storage_account_key    = var.storage_account_primary_access_key,
     azure_public_container_name  = var.storage_container_public,
     azure_private_container_name = var.storage_container_private,
     azure_velero_container_name  = var.velero_container_name,
@@ -47,7 +46,7 @@ resource "null_resource" "upload_global_cloud_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload --account-name ${var.storage_account_name} --account-key ${var.storage_account_primary_access_key} --container-name ${var.storage_container_private} --file ${local.global_values_cloud_file} --name ${var.environment}-global-cloud-values.yaml --overwrite"
+    command = "az storage blob upload --account-name ${var.storage_account_name} --auth-mode login --container-name ${var.storage_container_private} --file ${local.global_values_cloud_file} --name ${var.environment}-global-cloud-values.yaml --overwrite"
   }
   depends_on = [local_sensitive_file.global_cloud_values_yaml]
 }
