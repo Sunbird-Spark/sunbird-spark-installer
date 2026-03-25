@@ -1,6 +1,6 @@
 # Azure Container Details
 azure_account: "{{ .Values.global.cloud_storage_access_key }}"
-azure_secret: ""
+azure_secret: "{{ .Values.global.cloud_storage_secret_key }}"
 azure_container_name: "{{ .Values.global.private_container_name }}"
 
 
@@ -36,7 +36,7 @@ base_config: &base_config
   timestamp_key: "syncts"
   fallback_timestamp_key: "@timestamp"
   kafka_broker_host: "{{ .Values.global.kafka.host }}"
-  max_file_size: "100000000"
+  max_file_size: "5000000"
   max_file_age: "60"
   partition_prefix_enabled: "false"
   partition_prefix_key: "nil"
