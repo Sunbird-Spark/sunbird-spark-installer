@@ -69,13 +69,10 @@ variable "aks_version" {
 ```
 
 **Step 2 — Apply via OpenTofu:**
-``bash
-cd opentofu/azure//aks
+```bash
+cd opentofu/azure/aks
 terragrunt plan
 ```
-
-Check the plan output. If it shows `1 to change` with your version update, it is safe to proceed:
-
 ```
 ~ resource "azurerm_kubernetes_cluster" "aks" {
     ~ kubernetes_version = "1.33.0" -> "1.34.0"
