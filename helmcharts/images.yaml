@@ -54,7 +54,7 @@ images:
 
   player: &player
     repository: "sunbirded.azurecr.io/sunbird-portal"
-    tag: "sspark-v103_6becc5b"
+    tag: "spark-v103_6becc5b"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -343,9 +343,9 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v11_24b3f1f"
+    tag: "spark-v12_569f0fe"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v0.4_9f511fa"
+    tag: "spark-v0.5_0254304"
