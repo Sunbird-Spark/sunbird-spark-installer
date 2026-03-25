@@ -54,7 +54,7 @@ images:
 
   player: &player
     repository: "sunbirded.azurecr.io/sunbird-portal"
-    tag: "spark-v0.58_a04c97e"
+    tag: "spark-v0.57_d99a74f"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -153,15 +153,11 @@ images:
   janusgraph: &janusgraph
     registry: ghcr.io
     repository: sunbird-spark/janusgraph
-    tag: develop_b96ef55
+    tag: develop_cb093d4
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_8425122"
-
-  secor: &secor
-    repository: "sanketikahub/secor"
-    tag: "0.29.2-kafka-4.0"
 
 # Internal block with pull secrets
 internal: &internal
@@ -339,11 +335,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  secor:
-    image: *secor
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
 # Merge internal into root for direct access
 <<: *internal
 
@@ -351,8 +342,8 @@ internal: &internal
 global:
   knowledgeflink:
     registry: "ghcr.io"
-    repository: "aimansharief/knowledge-platform-jobs"
-    tag: "spark-op-1_a32f981"
+    repository: "sunbird-knowlg/knowledge-platform-jobs"
+    tag: "spark-v12_569f0fe"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
