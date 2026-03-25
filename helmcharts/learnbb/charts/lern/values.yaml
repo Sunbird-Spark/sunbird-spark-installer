@@ -195,6 +195,9 @@ assessment_direct_aggregation_enabled: "true"
 # Notification Specific
 sunbird_cassandra_notification_keyspace: sunbird_notifications
 
+# Yugabytesql Values
+sunbird_postgres_db: "sunbird"
+
 # OPA / Envoy
 opa_enabled: false
 

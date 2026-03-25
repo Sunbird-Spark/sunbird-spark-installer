@@ -269,8 +269,10 @@ flink_jobs:
         window.time = 60
         router.parallelism = 1
         compositeSearch.parallelism = 1
+        {{- if eq *deployed_dial_addon "true" }}
         dialcodeIndexer.parallelism = 1
         dialcodemetricsIndexer.parallelism = 1
+        {{- end }}
       }
 
       schema {
@@ -289,8 +291,8 @@ flink_jobs:
           audit-history-indexer = true
           obsrv-metadata-generator = true
           composite-search-indexer = true
-          dialcode-indexer = false
-          dialcode-metrics-indexer = false
+          dialcode-indexer = {{ eq *deployed_dial_addon "true" }}
+          dialcode-metrics-indexer = {{ eq *deployed_dial_addon "true" }}
       }
       compositesearch.index.name = "compositesearch"
       nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "provider", "osMetadata", "actions"]
@@ -452,13 +454,15 @@ flink_jobs:
         imageTable = "dialcode_images"
       }
 
+      {{- if eq *deployed_dial_addon "true" }}
       service {
-        dial.basePath = "{{ .Values.global.dialservice.base_url }}"
+        dial.basePath = "https://{{ .Values.global.domain }}/dial"
         dial_code.reserve.url = "/dialcode/v1/reserve"
         dial_code.update.url = "/dialcode/v4/update"
       }
 
       dialcode.storage.container = "{{ .Values.global.dial_state_container_public }}"
+      {{- end }}
 
       content {
         bundleLocation = "/tmp/contentBundle"
@@ -593,7 +597,9 @@ flink_jobs:
       }
 
       max_allowed_content_name = 120
+      {{- if eq *deployed_dial_addon "true" }}
       enableDIALContextUpdate = "Yes"
+      {{- end }}
 
       cloudstorage.metadata.replace_absolute_path=true
       cloudstorage.relative_path_prefix="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_relative_path_prefix "context" $) }}"
