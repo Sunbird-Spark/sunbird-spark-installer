@@ -181,6 +181,7 @@ hierarchy_relations_table: "hierarchy_relations"
 cloud_storage_path_prefix_dial: "dial"
 cloud_store_base_path_placeholder: ""
 sunbird_dial_service_search_url: "/dialcode/v3/search"
+learner_in_memory_cache_ttl: "300"
 
 enable_activity_aggregator_actor: "true"
 enable_module_aggregation: "true"
