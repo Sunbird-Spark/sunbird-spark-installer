@@ -269,7 +269,7 @@ flink_jobs:
         window.time = 60
         router.parallelism = 1
         compositeSearch.parallelism = 1
-        {{- if eq *deployed_dial_addon "true" }}
+        {{- if eq .Values.deployed_dial_addon "true" }}
         dialcodeIndexer.parallelism = 1
         dialcodemetricsIndexer.parallelism = 1
         {{- end }}
@@ -291,8 +291,8 @@ flink_jobs:
           audit-history-indexer = true
           obsrv-metadata-generator = true
           composite-search-indexer = true
-          dialcode-indexer = {{ eq *deployed_dial_addon "true" }}
-          dialcode-metrics-indexer = {{ eq *deployed_dial_addon "true" }}
+          dialcode-indexer = {{ eq .Values.deployed_dial_addon "true" }}
+          dialcode-metrics-indexer = {{ eq .Values.deployed_dial_addon "true" }}
       }
       compositesearch.index.name = "compositesearch"
       nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "provider", "osMetadata", "actions"]
@@ -454,7 +454,7 @@ flink_jobs:
         imageTable = "dialcode_images"
       }
 
-      {{- if eq *deployed_dial_addon "true" }}
+      {{- if eq .Values.deployed_dial_addon "true" }}
       service {
         dial.basePath = "https://{{ .Values.global.domain }}/dial"
         dial_code.reserve.url = "/dialcode/v1/reserve"
@@ -597,7 +597,7 @@ flink_jobs:
       }
 
       max_allowed_content_name = 120
-      {{- if eq *deployed_dial_addon "true" }}
+      {{- if eq .Values.deployed_dial_addon "true" }}
       enableDIALContextUpdate = "Yes"
       {{- end }}
 
