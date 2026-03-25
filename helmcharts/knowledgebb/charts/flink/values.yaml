@@ -269,8 +269,10 @@ flink_jobs:
         window.time = 60
         router.parallelism = 1
         compositeSearch.parallelism = 1
+        {{- if eq .Values.global.deployed_dial_addon "true" }}
         dialcodeIndexer.parallelism = 1
         dialcodemetricsIndexer.parallelism = 1
+        {{- end }}
       }
 
       schema {
@@ -289,8 +291,8 @@ flink_jobs:
           audit-history-indexer = true
           obsrv-metadata-generator = true
           composite-search-indexer = true
-          dialcode-indexer = false
-          dialcode-metrics-indexer = false
+          dialcode-indexer = {{ eq .Values.global.deployed_dial_addon "true" }}
+          dialcode-metrics-indexer = {{ eq .Values.global.deployed_dial_addon "true" }}
       }
       compositesearch.index.name = "compositesearch"
       nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "provider", "osMetadata", "actions"]
@@ -411,6 +413,8 @@ flink_jobs:
         input.topic = "{{ .Values.global.env }}.knowlg.publish.job.request"
         post_publish.topic = "{{ .Values.global.env }}.knowlg.content.postpublish.request"
         mvc.topic = "{{ .Values.global.env }}.knowlg.mvc.processor.job.request"
+        qrimage.topic = "{{ .Values.global.env }}.qrimage.request"
+        dialcode.context.topic = "{{ .Values.global.env }}.dialcode.context.job.request"
         error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
         groupId = "{{ .Values.global.env }}-knowlg-publish-group"
         content_metadata.topic = "dv.telemetry.coss"
@@ -444,6 +448,21 @@ flink_jobs:
         keyspace = "{{ .Values.global.env }}_hierarchy_store"
         table = "hierarchy_relations"
       }
+
+      dialcode-cassandra {
+        keyspace = "sunbird_dialcodes"
+        imageTable = "dialcode_images"
+      }
+
+      {{- if eq .Values.global.deployed_dial_addon "true" }}
+      service {
+        dial.basePath = "https://{{ .Values.global.domain }}/dial"
+        dial_code.reserve.url = "/dialcode/v1/reserve"
+        dial_code.update.url = "/dialcode/v4/update"
+      }
+
+      dialcode.storage.container = "{{ .Values.global.dial_state_container_public }}"
+      {{- end }}
 
       content {
         bundleLocation = "/tmp/contentBundle"
@@ -578,7 +597,9 @@ flink_jobs:
       }
 
       max_allowed_content_name = 120
+      {{- if eq .Values.global.deployed_dial_addon "true" }}
       enableDIALContextUpdate = "Yes"
+      {{- end }}
 
       cloudstorage.metadata.replace_absolute_path=true
       cloudstorage.relative_path_prefix="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_relative_path_prefix "context" $) }}"
@@ -601,7 +622,7 @@ flink_jobs:
 
     flink-conf: |+
       jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 1024m
+      taskmanager.memory.flink.size: 2048m
       taskmanager.numberOfTaskSlots: 1
       jobManager.numberOfTaskSlots: 1
       parallelism.default: 1
@@ -610,7 +631,7 @@ flink_jobs:
       scheduler-mode: reactive
       heartbeat.timeout: 8000
       heartbeat.interval: 5000
-      taskmanager.memory.process.size: 1700m
+      taskmanager.memory.process.size: 2800m
       jobmanager.memory.process.size: 1600m
       # classloader.resolve-order: "parent-first"
       # state.savepoints.dir: file:///tmp

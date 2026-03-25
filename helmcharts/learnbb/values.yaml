@@ -117,6 +117,7 @@ yugabyte: &yugabyte
     - name: "quartz"
     - name: "enc-keys"
     - name: "registry"
+    - name: "sunbird"
   image:
     registry: yugabytedb
     repository: yugabyte
