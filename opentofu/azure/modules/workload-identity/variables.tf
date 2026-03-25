@@ -80,24 +80,3 @@ variable "k8s_service_accounts" {
     }
   }
 }
-
-variable "public_container_name" {
-  type        = string
-  description = "Name of the public blob container (for schemas, content, artifacts)."
-}
-
-variable "private_container_name" {
-  type        = string
-  description = "Name of the private blob container (for checkpoints, analytics)."
-}
-
-variable "dial_state_container_public" {
-  type        = string
-  description = "Name of the DIAL state public blob container (created by addons/dial/opentofu, used by knowlg services)."
-  default     = ""
-}
-
-variable "velero_container_name" {
-  type        = string
-  description = "Name of the velero blob container (for backups)."
-}

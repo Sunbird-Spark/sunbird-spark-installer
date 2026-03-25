@@ -75,33 +75,15 @@ resource "azurerm_role_definition" "blob_operator_least_privilege" {
   }
 }
 
-# Role assignments scoped to specific containers for least-privilege access
-# Managed identity can only access these 4 containers
-
-resource "azurerm_role_assignment" "workload_identity_public_container" {
+resource "azurerm_role_assignment" "workload_identity_blob_operator" {
   principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = "${var.storage_account_id}/blobServices/default/containers/${var.public_container_name}"
+  scope                = var.storage_account_id
   role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
-}
 
-resource "azurerm_role_assignment" "workload_identity_private_container" {
-  principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = "${var.storage_account_id}/blobServices/default/containers/${var.private_container_name}"
-  role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
-}
-
-resource "azurerm_role_assignment" "workload_identity_dial_container" {
-  count = var.dial_state_container_public != "" ? 1 : 0
-
-  principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = "${var.storage_account_id}/blobServices/default/containers/${var.dial_state_container_public}"
-  role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
-}
-
-resource "azurerm_role_assignment" "workload_identity_velero_container" {
-  principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = "${var.storage_account_id}/blobServices/default/containers/${var.velero_container_name}"
-  role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
+  depends_on = [
+    azurerm_user_assigned_identity.workload_identity,
+    azurerm_role_definition.blob_operator_least_privilege
+  ]
 }
 
 resource "kubernetes_service_account" "workload_identity" {
