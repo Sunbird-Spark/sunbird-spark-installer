@@ -21,49 +21,6 @@ az login --tenant <AZURE_TENANT_ID>
 
 Note: Make sure you replace the AZURE_TENANT_ID with the tenant id from Azure Console. 
 
-## AKS Kubernetes Version Upgrade
-
-The AKS cluster is provisioned with a default Kubernetes version defined in `opentofu/azure/modules/aks/variables.tf`. AKS versions have a support lifecycle of approximately **12 months** after GA. When a version approaches end of life, you must upgrade to a supported version.
-
-### When to Upgrade
-
-AKS supports the **3 latest GA minor versions** at any time. Once your version falls outside this window, Microsoft may auto-upgrade your cluster. It is recommended to upgrade proactively before that happens.
-
-Check the currently supported AKS versions at: https://learn.microsoft.com/en-us/azure/aks/supported-kubernetes-versions
-
-### How to Upgrade
-
-**Step 1 — Update the `aks_version` default in `opentofu/azure/modules/aks/variables.tf`:**
-```hcl
-variable "aks_version" {
-  type        = string
-  description = "AKS cluster version"
-  default     = "<new-version>"  # e.g. "1.34.0"
-}
-```
-
-**Step 2 — Apply via OpenTofu:**
-```bash
-cd opentofu/azure/<env>/aks
-
-Always run the plan first and review the output before applying:
-cd opentofu/azure/<env>/aks
-terragrunt plan
-then if showing 1 to change that verion change
-terragrunt apply
-```
-
-> **Note:** AKS only supports upgrading **one minor version at a time** (e.g., 1.33 → 1.34 → 1.35). You cannot skip versions.
-
-### Upgrade Behavior: No Downtime Expected
-
-When `aks_version` is updated, OpenTofu sends an in-place update to the AKS resource — **the cluster is not destroyed or recreated**. Azure performs a rolling upgrade:
-
-1. **Control plane upgrades first** — the API server, etcd, and other control plane components are updated with no node disruption.
-2. **Node pools upgrade in a rolling fashion** — Azure adds a temporary surge node (by default 1 extra node, or 33% of the pool), cordons and drains an old node, upgrades it, then moves on to the next.
-3. **Workloads are rescheduled** — pods are gracefully evicted onto available nodes before each node is upgraded, so running workloads are preserved throughout.
-
-
 ---
 
 #### Azure Infra Setup
@@ -94,4 +51,59 @@ Post login, update the `opentofu/azure/<env>/global-values.yaml` with the variab
   proxy_certificate: |
    <certificate_generated_when_setting_up_ssl>
 ```
+## AKS Kubernetes Version Upgrade
+
+The AKS cluster is provisioned with a default Kubernetes version defined in `opentofu/azure/modules/aks/variables.tf`. AKS versions have a support lifecycle of approximately **12 months** after GA. When a version approaches end of life, you must upgrade to a supported version.
+
+### When to Upgrade
+
+AKS supports the **3 latest GA minor versions** at any time. Once your version falls outside this window, Microsoft may auto-upgrade your cluster. It is recommended to upgrade proactively before that happens.
+
+Check the currently supported AKS versions at: https://learn.microsoft.com/en-us/azure/aks/supported-kubernetes-versions
+
+### How to Upgrade
+
+**Step 1 — Update the `aks_version` default in `opentofu/azure/modules/aks/variables.tf`:**
+```hcl
+variable "aks_version" {
+  type        = string
+  description = "AKS cluster version"
+  default     = "<new-version>"  # e.g. "1.34.0"
+}
+```
+
+**Step 2 — Apply via OpenTofu:**
+```bash
+cd opentofu/azure/<env>/aks
+
+Always run the plan first and review the output before applying:
+cd opentofu/azure/<env>/aks
+terragrunt plan
+Check the plan output. If it shows `1 to change` with your version update, it is safe to proceed:
+
+```
+# ✅ Safe — proceed with apply
+~ resource "azurerm_kubernetes_cluster" "aks" {
+    ~ kubernetes_version = "1.33.0" -> "1.34.0"
+}
+Plan: 0 to add, 1 to change, 0 to destroy.
+```
+
+> **❌ Do NOT apply** if the plan shows `1 to destroy` — this means the cluster will be destroyed and recreated, causing downtime. Investigate before proceeding.
+
+**Step 3 — If the plan shows `1 to change`, apply:**
+
+```bash
+terragrunt apply
+```
+
+> **Note:** AKS only supports upgrading **one minor version at a time** (e.g., 1.33 → 1.34 → 1.35). You cannot skip versions.
+
+### Upgrade Behavior: No Downtime Expected
+
+When `aks_version` is updated, OpenTofu sends an in-place update to the AKS resource — **the cluster is not destroyed or recreated**. Azure performs a rolling upgrade:
+
+1. **Control plane upgrades first** — the API server, etcd, and other control plane components are updated with no node disruption.
+2. **Node pools upgrade in a rolling fashion** — Azure adds a temporary surge node (by default 1 extra node, or 33% of the pool), cordons and drains an old node, upgrades it, then moves on to the next.
+3. **Workloads are rescheduled** — pods are gracefully evicted onto available nodes before each node is upgraded, so running workloads are preserved throughout.
 
