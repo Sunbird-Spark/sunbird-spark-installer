@@ -176,7 +176,7 @@ rc_bad_char_list: "char_list"
 
 cert_cloud_storage_type: "azure"
 cert_cloud_storage_secret: ""
-cert_cloud_storage_auth_type: "OIDC"
+cert_cloud_storage_auth_type: "{{ .Values.global.cloud_storage_auth_type }}"
 cert_cloud_storage_key: "{{ .Values.global.cloud_storage_access_key }}"
 cert_cloud_storage_endpoint: ""
 cloud_storage_base_url: "https://{{ .Values.global.object_storage_endpoint }}"

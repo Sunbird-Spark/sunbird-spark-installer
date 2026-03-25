@@ -57,10 +57,12 @@ velero:
   enabled: true
   credentials:
     useSecret: true
+    {{- if ne .Values.global.cloud_storage_provider "azure" }}
     secretContents:
       cloud: |
         AZURE_STORAGE_ACCOUNT_NAME: {{ .Values.global.cloud_storage_access_key }}
         AZURE_STORAGE_ACCOUNT_KEY: {{ .Values.global.cloud_storage_secret_key }}
+    {{- end }}
   configuration:
     backupStorageLocation:
       - name: default

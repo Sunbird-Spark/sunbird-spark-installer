@@ -16,10 +16,15 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
+        {{- if .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
     spec:
-       {{- if .Values.serviceAccount.create }}
+      {{- if .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- else if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "common.names.fullname" . }}
       {{- end }}
       securityContext:

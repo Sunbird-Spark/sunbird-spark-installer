@@ -14,6 +14,7 @@ global:
   object_storage_endpoint: ${azure_storage_account_name}.blob.core.windows.net
   storage_class: managed-premium
   cloud_storage_provider:  ${cloud_storage_provider}
+  cloud_storage_auth_type: "OIDC"
   azure_client_id: ${azure_client_id}
   workload_identity_service_account_name: ${k8s_service_account_name}
 
