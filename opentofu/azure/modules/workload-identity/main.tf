@@ -70,11 +70,6 @@ resource "azurerm_role_definition" "blob_operator_least_privilege" {
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action",
       "Microsoft.Storage/storageAccounts/blobServices/generateUserDelegationKey/action"
     ]
-
-    not_data_actions = [
-      "Microsoft.Storage/storageAccounts/blobServices/containers/delete",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/write"
-    ]
   }
 }
 

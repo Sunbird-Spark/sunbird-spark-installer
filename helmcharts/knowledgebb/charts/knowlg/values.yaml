@@ -91,7 +91,7 @@ commonAnnotations:
 
 serviceAccount:
   create: false
-  
+
 serviceMonitor:
   enabled: true
   interval: 30s

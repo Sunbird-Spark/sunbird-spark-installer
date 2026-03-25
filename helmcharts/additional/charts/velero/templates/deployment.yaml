@@ -67,7 +67,11 @@ spec:
       {{- end }}
     {{- end }}
       restartPolicy: Always
+      {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- else }}
       serviceAccountName: {{ include "velero.serverServiceAccount" . }}
+      {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ include "velero.priorityClassName" . }}
       {{- end }}

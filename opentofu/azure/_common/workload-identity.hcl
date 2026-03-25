@@ -43,10 +43,6 @@ inputs = {
   resource_group_name                = dependency.network.outputs.resource_group_name
   oidc_issuer_url                    = dependency.aks.outputs.oidc_issuer_url
   storage_account_id                 = dependency.storage.outputs.azurerm_storage_account_resource_id
-  # NOTE: Keep k8s_namespace and k8s_service_account_name in sync with variables.tf defaults.
-  # These can be overridden in template/*/terragrunt.hcl for per-environment customization.
-  k8s_namespace                      = "sunbird"
-  k8s_service_account_name           = "workload-identity"
   kubernetes_host                    = dependency.aks.outputs.kubernetes_host
   kubernetes_client_certificate      = dependency.aks.outputs.client_certificate
   kubernetes_client_key              = dependency.aks.outputs.client_key
