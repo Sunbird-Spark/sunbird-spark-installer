@@ -45,10 +45,24 @@ variable "aks_version" {
 **Step 2 — Apply via OpenTofu:**
 ```bash
 cd opentofu/azure/<env>/aks
+
+Always run the plan first and review the output before applying:
+cd opentofu/azure/<env>/aks
+terragrunt plan
+then if showing 1 to change that verion change
 terragrunt apply
 ```
 
 > **Note:** AKS only supports upgrading **one minor version at a time** (e.g., 1.33 → 1.34 → 1.35). You cannot skip versions.
+
+### Upgrade Behavior: No Downtime Expected
+
+When `aks_version` is updated, OpenTofu sends an in-place update to the AKS resource — **the cluster is not destroyed or recreated**. Azure performs a rolling upgrade:
+
+1. **Control plane upgrades first** — the API server, etcd, and other control plane components are updated with no node disruption.
+2. **Node pools upgrade in a rolling fashion** — Azure adds a temporary surge node (by default 1 extra node, or 33% of the pool), cordons and drains an old node, upgrades it, then moves on to the next.
+3. **Workloads are rescheduled** — pods are gracefully evicted onto available nodes before each node is upgraded, so running workloads are preserved throughout.
+
 
 ---
 
