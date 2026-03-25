@@ -71,3 +71,21 @@ variable "velero_container_name" {
   type        = string
   default     = ""
 }
+
+variable "azure_subscription_id" {
+  description = "Azure subscription ID."
+  type        = string
+  default     = ""
+}
+
+variable "azure_resource_group" {
+  description = "Azure resource group name."
+  type        = string
+  default     = ""
+}
+
+variable "azure_managed_identity_client_id" {
+  description = "Azure managed identity client ID for workload identity."
+  type        = string
+  default     = ""
+}

@@ -28,7 +28,10 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
     private_ingressgateway_ip    = var.private_ingressgateway_ip,
     encryption_string            = var.encryption_string,
     random_string                = var.random_string
-    cloud_storage_provider       = var.cloud_storage_provider
+    cloud_storage_provider           = var.cloud_storage_provider
+    azure_subscription_id            = var.azure_subscription_id
+    azure_resource_group             = var.azure_resource_group
+    azure_managed_identity_client_id = var.azure_managed_identity_client_id
   })
   filename = local.global_values_cloud_file
 }

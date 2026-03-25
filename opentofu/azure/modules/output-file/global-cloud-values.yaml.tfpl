@@ -21,34 +21,46 @@ global:
 velero:
   enabled: true
   credentials:
-    useSecret: true
-    secretContents:
-      cloud: |
-        AZURE_STORAGE_ACCOUNT_NAME: ${azure_storage_account_name}
-        AZURE_STORAGE_ACCOUNT_KEY: ${azure_storage_account_key}                  
+    useSecret: false
+  serviceAccount:
+    server:
+      create: true
+      name: "workload-identity"
+      annotations:
+        azure.workload.identity/client-id: ${azure_managed_identity_client_id}
+      labels:
+        azure.workload.identity/use: "true"
+  podLabels:
+    azure.workload.identity/use: "true"
   configuration:
       backupStorageLocation:
         - name: default
           provider: "${cloud_storage_provider}"
           bucket: "${azure_velero_container_name}"
-          prefix: 
+          prefix:
           config:
-            storageAccount: ${azure_storage_account_name} 
-            storageAccountKeyEnvVar: AZURE_STORAGE_ACCOUNT_KEY
+            storageAccount: ${azure_storage_account_name}
+            subscriptionId: ${azure_subscription_id}
+            resourceGroup: ${azure_resource_group}
+            storageAccountURI: https://${azure_storage_account_name}.blob.core.windows.net
+            useAAD: "true"
       dbbackupStorageLocation:
         - name: dbbackup
           provider: "${cloud_storage_provider}"
           bucket: "${azure_velero_container_name}"
-          prefix: 
+          prefix:
           config:
-            storageAccount: ${azure_storage_account_name} 
-            storageAccountKeyEnvVar: AZURE_STORAGE_ACCOUNT_KEY      
+            storageAccount: ${azure_storage_account_name}
+            subscriptionId: ${azure_subscription_id}
+            resourceGroup: ${azure_resource_group}
+            storageAccountURI: https://${azure_storage_account_name}.blob.core.windows.net
+            useAAD: "true"
       volumeSnapshotLocation:
         - name: default
-          provider: "${cloud_storage_provider}" 
+          provider: "${cloud_storage_provider}"
   initContainers:
   - name: velero-plugin-for-azure
-    image: velero/velero-plugin-for-microsoft-azure:v1.2.0
+    image: velero/velero-plugin-for-microsoft-azure:v1.14.0
     imagePullPolicy: IfNotPresent
     volumeMounts:
       - mountPath: /target

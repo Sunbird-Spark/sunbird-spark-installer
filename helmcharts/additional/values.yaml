@@ -62,7 +62,7 @@ velero:
       create: true
       name: "workload-identity"
       annotations:
-        azure.workload.identity/client-id: "cada95cd-3bbb-4500-b055-2621fd0c4e66"
+        azure.workload.identity/client-id: "{{ .Values.global.managed_identity_client_id }}"
       labels:
         azure.workload.identity/use: "true"
   podLabels:
@@ -71,13 +71,33 @@ velero:
     backupStorageLocation:
       - name: default
         provider: "azure"
-        bucket: backups
+        bucket: "{{ .Values.global.velero_storage_container_private }}"
         config:
-          storageAccount: {{ .Values.global.cloud_storage_account_name }}
-          useWorkloadIdentityAuth: "true"
+          storageAccount: "{{ .Values.global.cloud_storage_access_key }}"
+          subscriptionId: "{{ .Values.global.subscription_id }}"
+          resourceGroup: "{{ .Values.global.resource_group }}"
+          storageAccountURI: "https://{{ .Values.global.cloud_storage_access_key }}.blob.core.windows.net"
+          useAAD: "true"
+    dbbackupStorageLocation:
+      - name: dbbackup
+        provider: "azure"
+        bucket: "{{ .Values.global.velero_storage_container_private }}"
+        config:
+          storageAccount: "{{ .Values.global.cloud_storage_access_key }}"
+          subscriptionId: "{{ .Values.global.subscription_id }}"
+          resourceGroup: "{{ .Values.global.resource_group }}"
+          storageAccountURI: "https://{{ .Values.global.cloud_storage_access_key }}.blob.core.windows.net"
+          useAAD: "true"
     volumeSnapshotLocation:
       - name: default
         provider: "azure"
+  initContainers:
+  - name: velero-plugin-for-azure
+    image: velero/velero-plugin-for-microsoft-azure:v1.14.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
   schedules:
     edcluster-backup:
       disabled: false
@@ -87,7 +107,7 @@ velero:
         ttl: "240h"
         includedNamespaces:
           - "sunbird"
-        snapshotVolumes: true  
+        snapshotVolumes: true
 
 # This section is for the Velero configuration for database backup. To enable DB backup, set disabled to false
     database-backup:

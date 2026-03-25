@@ -7,6 +7,8 @@ locals {
   building_block = local.global_vars.global.building_block
   subscription_id = local.global_vars.global.subscription_id
   cloud_storage_provider = local.global_vars.global.cloud_storage_provider
+  resource_group = local.global_vars.global.resource_group
+  managed_identity_client_id = local.global_vars.global.managed_identity_client_id
   # random_string  = local.environment_vars.locals.random_string
 }
 
@@ -52,5 +54,8 @@ inputs = {
   random_string                      = dependency.keys.outputs.random_string
   velero_container_name              = dependency.storage.outputs.azurerm_velero_container_name
   cloud_storage_provider             = local.cloud_storage_provider
+  azure_subscription_id              = local.subscription_id
+  azure_resource_group               = local.resource_group
+  azure_managed_identity_client_id   = local.managed_identity_client_id
 
 }
