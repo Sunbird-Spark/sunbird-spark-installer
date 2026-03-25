@@ -1,6 +1,6 @@
 # Azure Container Details
-azure_account: "{{ .Values.global.cloud_storage_access_key }}"
-azure_secret: "{{ .Values.global.cloud_storage_secret_key }}"
+azure_account: ""
+azure_secret: ""
 azure_container_name: "{{ .Values.global.private_container_name }}"
 
 
@@ -16,8 +16,8 @@ jvm_memory: "1024m"
 gcp_bucket_name: "telemetry-data-store"
 
 serviceAccount:
-  create: true
-  name: secor-sa
+  create: false
+  name: workload-identity
   annotations: {}
 
 storage_type: "s3"
@@ -37,7 +37,7 @@ base_config: &base_config
   fallback_timestamp_key: "@timestamp"
   kafka_broker_host: "{{ .Values.global.kafka.host }}"
   max_file_size: "100000000"
-  max_file_age: "14400"
+  max_file_age: "60"
   partition_prefix_enabled: "false"
   partition_prefix_key: "nil"
   partition_prefix_mapping: "{}"
