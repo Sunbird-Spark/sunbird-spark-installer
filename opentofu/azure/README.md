@@ -69,20 +69,28 @@ variable "aks_version" {
 ```
 
 **Step 2 — Apply via OpenTofu:**
-```bash
-cd opentofu/azure/<env>/aks
-
-Always run the plan first and review the output before applying:
-cd opentofu/azure/<env>/aks
+``bash
+cd opentofu/azure//aks
 terragrunt plan
+```
+
 Check the plan output. If it shows `1 to change` with your version update, it is safe to proceed:
 
 ```
-# ✅ Safe — proceed with apply
 ~ resource "azurerm_kubernetes_cluster" "aks" {
     ~ kubernetes_version = "1.33.0" -> "1.34.0"
 }
 Plan: 0 to add, 1 to change, 0 to destroy.
+```
+
+✅ **Safe to apply** — the plan shows `1 to change` with the version update.
+
+❌ **Do NOT apply** if the plan shows `1 to destroy` — this means the cluster will be destroyed and recreated, causing downtime. Investigate before proceeding.
+
+**Step 3 — If the plan shows `1 to change`, apply:**
+
+```bash
+terragrunt apply
 ```
 
 > **❌ Do NOT apply** if the plan shows `1 to destroy` — this means the cluster will be destroyed and recreated, causing downtime. Investigate before proceeding.
