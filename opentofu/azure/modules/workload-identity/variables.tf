@@ -68,3 +68,27 @@ variable "kubernetes_cluster_ca_certificate" {
   description = "Kubernetes cluster CA certificate (base64 encoded)."
   sensitive   = true
 }
+
+variable "k8s_namespaces" {
+  type        = list(string)
+  description = "List of Kubernetes namespaces to create."
+  default     = ["sunbird", "velero"]
+}
+
+variable "k8s_service_accounts" {
+  type = map(object({
+    namespace = string
+    name      = string
+  }))
+  description = "Map of Kubernetes service accounts to create per namespace."
+  default = {
+    sunbird = {
+      namespace = "sunbird"
+      name      = "azure-managed-identity-sa"
+    }
+    velero = {
+      namespace = "velero"
+      name      = "azure-managed-identity-sa"
+    }
+  }
+}
