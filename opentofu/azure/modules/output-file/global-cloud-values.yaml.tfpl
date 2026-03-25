@@ -14,7 +14,7 @@ global:
   object_storage_endpoint: ${azure_storage_account_name}.blob.core.windows.net
   storage_class: managed-premium
   cloud_storage_provider:  ${cloud_storage_provider}
-  cloud_storage_auth_type: "OIDC"
+  %{ if cloud_storage_provider == "azure" }cloud_storage_auth_type: "OIDC"%{ endif }
   azure_client_id: ${azure_client_id}
   workload_identity_service_account_name: ${k8s_service_account_name}
 
@@ -22,10 +22,8 @@ velero:
   enabled: true
   credentials:
     useSecret: true
-    secretContents:
-      cloud: |
-        AZURE_STORAGE_ACCOUNT_NAME: ${azure_storage_account_name}
-        AZURE_STORAGE_ACCOUNT_KEY: ${azure_storage_account_key}                  
+    # For Azure (Workload Identity): secret not needed, uses managed identity SA
+    # For non-Azure: secretContents set in templates/secret.yaml
   configuration:
       backupStorageLocation:
         - name: default

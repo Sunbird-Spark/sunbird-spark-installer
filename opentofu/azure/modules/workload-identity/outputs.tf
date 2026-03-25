@@ -9,6 +9,6 @@ output "k8s_service_account_names" {
 }
 
 output "k8s_service_account_name" {
-  value       = kubernetes_service_account.workload_identity["sunbird"].metadata[0].name
-  description = "Name of the Kubernetes service account for sunbird namespace."
+  value       = try(kubernetes_service_account.workload_identity["sunbird"].metadata[0].name, "")
+  description = "Name of the Kubernetes service account for sunbird namespace (empty if sunbird key not in k8s_service_accounts map)."
 }
