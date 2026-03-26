@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "~> 2.24"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.9"
+    }
   }
 }
 
@@ -119,6 +123,14 @@ resource "azurerm_role_assignment" "deployer_blob_containers" {
   principal_id         = data.azurerm_client_config.current.object_id
   scope                = "${var.storage_account_id}/blobServices/default/containers/${each.value}"
   role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
+}
+
+# Azure role assignments take time to propagate across the control plane.
+# Downstream modules (keys, upload-files) depend on this sleep via workload-identity
+# dependency so they never run before the roles are active.
+resource "time_sleep" "wait_for_deployer_role_propagation" {
+  create_duration = "60s"
+  depends_on      = [azurerm_role_assignment.deployer_blob_containers]
 }
 
 # Check if the DIAL container exists in Azure by querying the storage account directly.

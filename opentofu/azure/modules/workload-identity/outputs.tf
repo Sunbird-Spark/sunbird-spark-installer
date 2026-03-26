@@ -18,3 +18,8 @@ output "managed_identity_principal_id" {
   description = "Principal ID of the user-assigned managed identity."
 }
 
+output "deployer_role_ready" {
+  value       = time_sleep.wait_for_deployer_role_propagation.id
+  description = "Signals that deployer blob role assignments have propagated. Depend on this before running blob uploads."
+}
+

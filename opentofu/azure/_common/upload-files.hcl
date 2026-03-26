@@ -10,6 +10,13 @@ dependency "storage" {
     }
 }
 
+dependency "workload_identity" {
+  config_path = "../workload-identity"
+  mock_outputs = {
+    deployer_role_ready = "mock"
+  }
+}
+
 inputs = {
   storage_account_name            = dependency.storage.outputs.azurerm_storage_account_name
   storage_container_public        = dependency.storage.outputs.azurerm_storage_container_public
