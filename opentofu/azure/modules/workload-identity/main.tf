@@ -63,7 +63,9 @@ resource "azurerm_role_definition" "blob_operator_least_privilege" {
   assignable_scopes = [var.storage_account_id]
 
   permissions {
-    actions = []
+    actions = [
+      "Microsoft.Storage/storageAccounts/blobServices/containers/read",
+    ]
 
     data_actions = [
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
@@ -71,7 +73,6 @@ resource "azurerm_role_definition" "blob_operator_least_privilege" {
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action",
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/read",
     ]
   }
 }
@@ -86,11 +87,11 @@ resource "azurerm_role_definition" "user_delegation_key" {
   assignable_scopes = [var.storage_account_id]
 
   permissions {
-    actions = []
-
-    data_actions = [
+    actions = [
       "Microsoft.Storage/storageAccounts/blobServices/generateUserDelegationKey/action"
     ]
+
+    data_actions = []
   }
 }
 
