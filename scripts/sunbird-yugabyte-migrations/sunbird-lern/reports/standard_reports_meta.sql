@@ -89,7 +89,7 @@ INSERT INTO standard_reports_meta (
     'Per-user assessment summary for a course and batch',
     'consumption',
     'YUGABYTE_CQL_AGG',
-    'SELECT user_id, course_id, batch_id, total_score, total_max_score, last_attempted_on
+    'SELECT user_id, course_id, batch_id, content_id, attempt_id, total_score, total_max_score, last_attempted_on
   FROM sunbird_courses.assessment_aggregator
   WHERE course_id = {{courseid}}
   {{#batchid}}AND batch_id = {{batchid}}{{/batchid}}',
