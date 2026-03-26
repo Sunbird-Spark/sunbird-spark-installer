@@ -30,13 +30,12 @@ locals {
   storage_account_name = reverse(split("/", var.storage_account_id))[0]
 }
 
-resource "kubernetes_namespace" "namespaces" {
-  for_each = toset(var.k8s_namespaces)
-
-  metadata {
-    name = each.value
-  }
-}
+# resource "kubernetes_namespace" "namespaces" {
+#   for_each = toset(var.k8s_namespaces)
+#   metadata {
+#     name = each.value
+#   }
+# }
 
 resource "azurerm_user_assigned_identity" "workload_identity" {
   name                = "${local.environment_name}-workload-identity"
@@ -144,7 +143,6 @@ resource "kubernetes_service_account" "workload_identity" {
   }
 
   depends_on = [
-    kubernetes_namespace.namespaces,
     azurerm_user_assigned_identity.workload_identity,
     azurerm_federated_identity_credential.workload_identity
   ]
