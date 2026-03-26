@@ -57,7 +57,7 @@ resource "null_resource" "upload_global_jwt_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "AZURE_CLIENT_ID=${var.managed_identity_client_id} AZURE_TENANT_ID=${var.tenant_id} rclone copyto ${var.base_location}/../../../../scripts/global-values-jwt-tokens.yaml \":azureblob,account=${var.storage_account_name},env_auth=true:${var.storage_container_private}/${var.environment}-global-values-jwt-tokens.yaml\""
+    command = "az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-jwt-tokens.yaml --file ${local.global_values_jwt_file_location} --auth-mode login --overwrite"
   }
   depends_on = [ null_resource.generate_jwt_keys ]
 }
@@ -67,7 +67,7 @@ resource "null_resource" "upload_global_rsa_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "AZURE_CLIENT_ID=${var.managed_identity_client_id} AZURE_TENANT_ID=${var.tenant_id} rclone copyto ${var.base_location}/../../../../scripts/global-values-rsa-keys.yaml \":azureblob,account=${var.storage_account_name},env_auth=true:${var.storage_container_private}/${var.environment}-global-values-rsa-keys.yaml\""
+    command = "az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-rsa-keys.yaml --file ${local.global_values_rsa_file_location} --auth-mode login --overwrite"
   }
   depends_on = [ null_resource.generate_rsa_keys ]
 }
