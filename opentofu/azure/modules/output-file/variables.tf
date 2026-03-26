@@ -75,6 +75,12 @@ variable "azure_client_id" {
 
 variable "k8s_service_account_name" {
   type        = string
-  description = "Name of the Kubernetes service account for Workload Identity."
-  default     = "workload-identity"
+  description = "Name of the Kubernetes service account for Workload Identity (created by workload-identity module)."
+  default     = "azure-managed-identity-sa"
+}
+
+variable "dial_state_container_name" {
+  type        = string
+  description = "Name of the DIAL state container (optional - set when DIAL addon is deployed)."
+  default     = ""
 }

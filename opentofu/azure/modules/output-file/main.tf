@@ -24,19 +24,20 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
   }
 
   content = templatefile("${path.module}/global-cloud-values.yaml.tfpl", {
-    env                          = var.env,
-    environment                  = var.environment,
-    building_block               = var.building_block,
-    azure_storage_account_name   = var.storage_account_name,
-    azure_public_container_name  = var.storage_container_public,
-    azure_private_container_name = var.storage_container_private,
-    azure_velero_container_name  = var.velero_container_name,
-    private_ingressgateway_ip    = var.private_ingressgateway_ip,
-    encryption_string            = var.encryption_string,
-    random_string                = var.random_string,
-    cloud_storage_provider       = var.cloud_storage_provider,
-    azure_client_id              = var.azure_client_id,
-    k8s_service_account_name     = var.k8s_service_account_name
+    env                             = var.env,
+    environment                     = var.environment,
+    building_block                  = var.building_block,
+    azure_storage_account_name      = var.storage_account_name,
+    azure_public_container_name     = var.storage_container_public,
+    azure_private_container_name    = var.storage_container_private,
+    azure_dial_state_container_name = var.dial_state_container_name,
+    azure_velero_container_name     = var.velero_container_name,
+    private_ingressgateway_ip       = var.private_ingressgateway_ip,
+    encryption_string               = var.encryption_string,
+    random_string                   = var.random_string,
+    cloud_storage_provider          = var.cloud_storage_provider,
+    azure_client_id                 = var.azure_client_id,
+    k8s_service_account_name        = var.k8s_service_account_name
   })
   filename = local.global_values_cloud_file
 }
