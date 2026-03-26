@@ -4,6 +4,17 @@ locals {
   building_block  = local.global_vars.global.building_block
   subscription_id = local.global_vars.global.subscription_id
   location        = local.global_vars.global.cloud_storage_region
+
+  # Only velero, public, private, and dial containers get access.
+  # dial_state_container_name is "" when DIAL is not deployed → filtered out.
+  container_names_filtered = [
+    for container in [
+      dependency.storage.outputs.azurerm_storage_container_public,
+      dependency.storage.outputs.azurerm_storage_container_private,
+      dependency.storage.outputs.azurerm_velero_container_name,
+      dependency.dial_storage.outputs.dial_state_container_name,
+    ] : container if container != ""
+  ]
 }
 
 terraform {
@@ -41,7 +52,7 @@ dependency "storage" {
 # Optional dependency — only present when the DIAL addon has been deployed.
 # mock_outputs_merge_strategy_with_state = "shallow" means:
 #   - if dial state exists  → use real output (actual container name)
-#   - if dial not deployed  → use mock (""), which gets filtered out below
+#   - if dial not deployed  → use mock (""), which gets filtered out above
 dependency "dial_storage" {
   config_path = "../../../../addons/dial/opentofu/azure/storage"
   mock_outputs = {
@@ -49,19 +60,6 @@ dependency "dial_storage" {
   }
   mock_outputs_allowed_terraform_commands = ["validate", "plan", "apply", "destroy"]
   mock_outputs_merge_strategy_with_state  = "shallow"
-}
-
-locals {
-  # Only velero, public, private, and dial containers get access.
-  # dial_state_container_name is "" when DIAL is not deployed → filtered out.
-  container_names_filtered = [
-    for container in [
-      dependency.storage.outputs.azurerm_storage_container_public,
-      dependency.storage.outputs.azurerm_storage_container_private,
-      dependency.storage.outputs.azurerm_velero_container_name,
-      dependency.dial_storage.outputs.dial_state_container_name,
-    ] : container if container != ""
-  ]
 }
 
 inputs = {
