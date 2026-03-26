@@ -31,7 +31,7 @@ variable "oidc_issuer_url" {
 
 variable "storage_account_id" {
   type        = string
-  description = "Resource ID of the storage account to grant Storage Blob Data Contributor on."
+  description = "Resource ID of the storage account to grant blob access on."
 }
 
 variable "kubernetes_host" {
@@ -79,4 +79,10 @@ variable "k8s_service_accounts" {
       name      = "azure-managed-identity-sa"
     }
   }
+}
+
+variable "container_names" {
+  type        = list(string)
+  description = "List of blob container names to grant access to. Supports dynamic addition (e.g., when dial addon is deployed)."
+  default     = []
 }

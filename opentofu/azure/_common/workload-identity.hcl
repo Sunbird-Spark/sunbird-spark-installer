@@ -32,7 +32,36 @@ dependency "storage" {
   config_path = "../storage"
   mock_outputs = {
     azurerm_storage_account_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dummy-rg/providers/Microsoft.Storage/storageAccounts/dummy"
+    azurerm_storage_container_public    = "dummy-public"
+    azurerm_storage_container_private   = "dummy-private"
+    azurerm_velero_container_name       = "dummy-velero"
   }
+}
+
+# Optional dependency — only present when the DIAL addon has been deployed.
+# mock_outputs_merge_strategy_with_state = "shallow" means:
+#   - if dial state exists  → use real output (actual container name)
+#   - if dial not deployed  → use mock (""), which gets filtered out below
+dependency "dial_storage" {
+  config_path = "../../../../addons/dial/opentofu/azure/storage"
+  mock_outputs = {
+    dial_state_container_name = ""
+  }
+  mock_outputs_allowed_terraform_commands = ["validate", "plan", "apply", "destroy"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+}
+
+locals {
+  # Only velero, public, private, and dial containers get access.
+  # dial_state_container_name is "" when DIAL is not deployed → filtered out.
+  container_names_filtered = [
+    for container in [
+      dependency.storage.outputs.azurerm_storage_container_public,
+      dependency.storage.outputs.azurerm_storage_container_private,
+      dependency.storage.outputs.azurerm_velero_container_name,
+      dependency.dial_storage.outputs.dial_state_container_name,
+    ] : container if container != ""
+  ]
 }
 
 inputs = {
@@ -47,4 +76,5 @@ inputs = {
   kubernetes_client_certificate      = dependency.aks.outputs.client_certificate
   kubernetes_client_key              = dependency.aks.outputs.client_key
   kubernetes_cluster_ca_certificate  = dependency.aks.outputs.cluster_ca_certificate
+  container_names = local.container_names_filtered
 }

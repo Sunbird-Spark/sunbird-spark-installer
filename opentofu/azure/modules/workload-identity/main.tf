@@ -57,7 +57,7 @@ resource "azurerm_federated_identity_credential" "workload_identity" {
 resource "azurerm_role_definition" "blob_operator_least_privilege" {
   name        = "${local.environment_name}-blob-operator-least-privilege"
   scope       = var.storage_account_id
-  description = "Custom role for blob operations with least privilege - read, write, delete, move blobs and generate user delegation keys. Cannot create/delete/manage containers."
+  description = "Custom role for blob operations with least privilege - read, write, delete, move blobs. Cannot create/delete/manage containers."
 
   assignable_scopes = [var.storage_account_id]
 
@@ -70,20 +70,42 @@ resource "azurerm_role_definition" "blob_operator_least_privilege" {
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action",
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action",
+    ]
+  }
+}
+
+# Storage account-level role for generating user delegation keys (required for SAS tokens).
+# This permission cannot be granted at container scope — it must be at the storage account level.
+resource "azurerm_role_definition" "user_delegation_key" {
+  name        = "${local.environment_name}-user-delegation-key"
+  scope       = var.storage_account_id
+  description = "Allows generating user delegation keys for SAS token creation."
+
+  assignable_scopes = [var.storage_account_id]
+
+  permissions {
+    actions = []
+
+    data_actions = [
       "Microsoft.Storage/storageAccounts/blobServices/generateUserDelegationKey/action"
     ]
   }
 }
 
-resource "azurerm_role_assignment" "workload_identity_blob_operator" {
-  principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = var.storage_account_id
-  role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
+resource "azurerm_role_assignment" "workload_identity_user_delegation_key" {
+  principal_id       = azurerm_user_assigned_identity.workload_identity.principal_id
+  scope              = var.storage_account_id
+  role_definition_id = azurerm_role_definition.user_delegation_key.role_definition_resource_id
+}
 
-  depends_on = [
-    azurerm_user_assigned_identity.workload_identity,
-    azurerm_role_definition.blob_operator_least_privilege
-  ]
+# Container-level role assignments for least-privilege access
+# Managed identity can only access specified containers
+resource "azurerm_role_assignment" "workload_identity_containers" {
+  for_each = toset(var.container_names)
+
+  principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
+  scope                = "${var.storage_account_id}/blobServices/default/containers/${each.value}"
+  role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
 }
 
 resource "kubernetes_service_account" "workload_identity" {
