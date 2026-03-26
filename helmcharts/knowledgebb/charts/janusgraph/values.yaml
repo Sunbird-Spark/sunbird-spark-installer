@@ -470,6 +470,9 @@ extraVolumeMounts:
   - name: janusgraph-configs
     mountPath: /opt/bitnami/janusgraph/scripts/empty-sample.groovy
     subPath: empty-sample.groovy
+  - name: janusgraph-configs
+    mountPath: /opt/bitnami/janusgraph/scripts/schema_init.groovy
+    subPath: schema-init.groovy
   - name: etc-passwd
     mountPath: /etc
   - name: janusgraph-configs

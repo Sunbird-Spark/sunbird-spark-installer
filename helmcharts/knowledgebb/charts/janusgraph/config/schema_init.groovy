@@ -1,8 +1,9 @@
 // schema_init.groovy
-// Purpose: Initialize JanusGraph Schema & Indexes BEFORE data load.
-// Usage: /opt/bitnami/janusgraph/bin/gremlin.sh -e /schema-init-script/schema_init.groovy
+// Purpose: Initialize JanusGraph Schema & Indexes on server startup.
+// Loaded via ScriptFileGremlinPlugin in gremlin-server.yaml — runs inside the
+// gremlin server's own JanusGraph instance, avoiding the two-instance coordination
+// delay that causes INSTALLED→REGISTERED to stall.
 
-import org.janusgraph.core.JanusGraphFactory
 import org.janusgraph.core.schema.SchemaAction
 import org.janusgraph.core.schema.SchemaStatus
 import org.janusgraph.core.Cardinality
@@ -10,10 +11,9 @@ import org.janusgraph.core.Multiplicity
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import java.time.temporal.ChronoUnit
 
-// 1. Connect to Graph
-// Uses standard container configuration (assuming /opt/janusgraph/conf/janusgraph-cql-server.properties or similar is default)
-// If running from inside container with Environment variables set:
-jg = JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph.properties')
+// 1. Use the graph instance already opened by the gremlin server
+// ('graph' is bound by gremlin-server.yaml: graphs: {graph: janusgraph.properties})
+jg = graph
 mgmt = jg.openManagement()
 
 println "--- STARTING SCHEMA INITIALIZATION ---"
