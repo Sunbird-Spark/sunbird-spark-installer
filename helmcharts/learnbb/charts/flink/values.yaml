@@ -217,7 +217,6 @@ restart_delay: 30000 # in milli-seconds
 producer_max_request_size: 1572864
 producer_batch_size: 98304
 producer_linger_ms: 10
-redis_timeout: 30000
 
 ###  Certificate Job related Vars
 certificate_generator_consumer_parallelism: 1
@@ -353,14 +352,8 @@ base_config: |
       restart-strategy.attempts = 3
       restart-strategy.delay = 30000 # in milli-seconds
     }
-    redisdb.connection.timeout = 30000
     redis {
-      host = "{{ .Values.global.redis.host }}"
-      port = "{{ .Values.global.redis.port }}"
-    }
-    redis-meta {
-      host = "{{ .Values.metadata2_redis_host | default .Values.global.redis.host }}"
-      port = 6379
+      enabled = false
     }
     lms-cassandra {
         host = "{{ .Values.global.yugabyte.host }}"
@@ -410,12 +403,7 @@ flink_jobs:
         parallelism = "{{ .Values.collection_certificate_generator_parallelism }}"
         generate_certificate.parallelism = 1
       }
-      redis {
-        database {
-          contentCache.id = 5
-          collectionCache.id = 0
-        }
-      }
+
       lms-cassandra {
         keyspace = "{{ .Values.middleware_course_keyspace }}"
         user_enrolments.table = "user_enrolments"
