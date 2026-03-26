@@ -5,7 +5,6 @@ global:
   cloud_storage_access_key: ${azure_storage_account_name}
   public_container_name: ${azure_public_container_name}
   private_container_name: ${azure_private_container_name}
-  dial_state_container_public: ${azure_dial_state_container_name}
   velero_storage_container_private: ${azure_velero_container_name}
   private_ingressgateway_ip: ${private_ingressgateway_ip}
   encryption__string: ${encryption_string}

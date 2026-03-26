@@ -30,7 +30,6 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
     azure_storage_account_name      = var.storage_account_name,
     azure_public_container_name     = var.storage_container_public,
     azure_private_container_name    = var.storage_container_private,
-    azure_dial_state_container_name = var.dial_state_container_name,
     azure_velero_container_name     = var.velero_container_name,
     private_ingressgateway_ip       = var.private_ingressgateway_ip,
     encryption_string               = var.encryption_string,

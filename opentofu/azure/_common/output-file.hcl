@@ -44,15 +44,6 @@ dependency "workload_identity" {
     }
 }
 
-dependency "dial_storage" {
-    config_path = "../../../../addons/dial/opentofu/azure/storage"
-    mock_outputs = {
-      dial_state_container_name = ""
-    }
-    mock_outputs_allowed_terraform_commands = ["validate", "plan", "apply", "destroy"]
-    mock_outputs_merge_strategy_with_state  = "shallow"
-}
-
 inputs = {
   env                                = local.env
   environment                        = local.environment
@@ -68,5 +59,4 @@ inputs = {
   cloud_storage_provider             = local.cloud_storage_provider
   azure_client_id                    = dependency.workload_identity.outputs.client_id
   k8s_service_account_name           = "azure-managed-identity-sa"
-  dial_state_container_name          = dependency.dial_storage.outputs.dial_state_container_name
 }
