@@ -21,11 +21,21 @@ dependency "storage" {
     }
 }
 
+dependency "workload_identity" {
+    config_path = "../workload-identity"
+    mock_outputs = {
+      client_id = "00000000-0000-0000-0000-000000000000"
+      tenant_id = "00000000-0000-0000-0000-000000000000"
+    }
+}
+
 inputs = {
-  environment                                = local.environment
+  environment                        = local.environment
   building_block                     = local.building_block
   storage_account_name               = dependency.storage.outputs.azurerm_storage_account_name
   storage_container_public           = dependency.storage.outputs.azurerm_storage_container_public
   storage_container_private          = dependency.storage.outputs.azurerm_storage_container_private
-  # random_string                      = local.random_string
+  managed_identity_client_id         = dependency.workload_identity.outputs.client_id
+  tenant_id                          = dependency.workload_identity.outputs.tenant_id
+  # random_string                    = local.random_string
 }

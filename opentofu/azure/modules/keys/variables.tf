@@ -34,4 +34,14 @@ variable "rsa_keys_count" {
     default     = 2
 }
 
+variable "managed_identity_client_id" {
+    type        = string
+    description = "Client ID of the user-assigned managed identity (from workload-identity module)."
+}
+
+variable "tenant_id" {
+    type        = string
+    description = "Azure tenant ID for DefaultAzureCredential chain."
+}
+
  
