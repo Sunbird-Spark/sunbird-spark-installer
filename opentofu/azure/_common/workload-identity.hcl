@@ -4,17 +4,6 @@ locals {
   building_block  = local.global_vars.global.building_block
   subscription_id = local.global_vars.global.subscription_id
   location        = local.global_vars.global.cloud_storage_region
-
-  # Only velero, public, private, and dial containers get access.
-  # dial_state_container_name is "" when DIAL is not deployed → filtered out.
-  container_names_filtered = [
-    for container in [
-      dependency.storage.outputs.azurerm_storage_container_public,
-      dependency.storage.outputs.azurerm_storage_container_private,
-      dependency.storage.outputs.azurerm_velero_container_name,
-      dependency.dial_storage.outputs.dial_state_container_name,
-    ] : container if container != ""
-  ]
 }
 
 terraform {
@@ -74,5 +63,14 @@ inputs = {
   kubernetes_client_certificate      = dependency.aks.outputs.client_certificate
   kubernetes_client_key              = dependency.aks.outputs.client_key
   kubernetes_cluster_ca_certificate  = dependency.aks.outputs.cluster_ca_certificate
-  container_names = local.container_names_filtered
+  # Only velero, public, private, and dial containers get access.
+  # dial_state_container_name is "" when DIAL is not deployed → filtered out.
+  container_names = [
+    for container in [
+      dependency.storage.outputs.azurerm_storage_container_public,
+      dependency.storage.outputs.azurerm_storage_container_private,
+      dependency.storage.outputs.azurerm_velero_container_name,
+      dependency.dial_storage.outputs.dial_state_container_name,
+    ] : container if container != ""
+  ]
 }
