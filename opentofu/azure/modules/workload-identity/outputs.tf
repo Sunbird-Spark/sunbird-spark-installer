@@ -17,3 +17,4 @@ output "managed_identity_principal_id" {
   value       = azurerm_user_assigned_identity.workload_identity.principal_id
   description = "Principal ID of the user-assigned managed identity."
 }
+

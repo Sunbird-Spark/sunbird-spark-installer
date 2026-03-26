@@ -83,6 +83,6 @@ variable "k8s_service_accounts" {
 
 variable "container_names" {
   type        = list(string)
-  description = "List of blob container names to grant access to. Supports dynamic addition (e.g., when dial addon is deployed)."
+  description = "List of blob container names to grant access to."
   default     = []
 }
