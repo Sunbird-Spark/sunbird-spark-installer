@@ -70,6 +70,7 @@ resource "azurerm_role_definition" "blob_operator_least_privilege" {
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action",
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action",
+      "Microsoft.Storage/storageAccounts/blobServices/containers/read",
     ]
   }
 }
