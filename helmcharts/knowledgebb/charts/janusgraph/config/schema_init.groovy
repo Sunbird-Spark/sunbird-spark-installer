@@ -100,7 +100,7 @@ makeELabel('associatedTo', Multiplicity.MULTI)
 // 5. Define Indexes (CRITICAL: Index-First Strategy)
 // allIndexNames is the single source of truth — used both for creation and for
 // the enable/await phases below. Add new indexes here and nowhere else.
-def allIndexNames = []
+allIndexNames = []
 
 makeCompositeIndex = { name, keyName, unique ->
     allIndexNames << name
@@ -164,7 +164,7 @@ allIndexNames.each { indexName ->
 // 8. Enable all indexes that are still in REGISTERED state
 println "Enabling all REGISTERED indexes..."
 mgmt2 = jg.openManagement()
-def enableFailed = false
+enableFailed = false
 allIndexNames.each { indexName ->
     try {
         def idx = mgmt2.getGraphIndex(indexName)
@@ -194,7 +194,7 @@ println "Enable actions committed."
 
 // 9. Wait for all indexes to reach ENABLED
 println "Waiting for all indexes to reach ENABLED status..."
-def enabledFailed = false
+enabledFailed = false
 allIndexNames.each { indexName ->
     try {
         println "Awaiting ENABLED for index: $indexName ..."
