@@ -8,7 +8,7 @@ import org.janusgraph.core.schema.SchemaStatus
 import org.janusgraph.core.Cardinality
 import org.janusgraph.core.Multiplicity
 import org.apache.tinkerpop.gremlin.structure.Vertex
-import org.apache.tinkerpop.gremlin.structure.Direction
+import java.time.temporal.ChronoUnit
 
 // 1. Connect to Graph
 // Uses standard container configuration (assuming /opt/janusgraph/conf/janusgraph-cql-server.properties or similar is default)
@@ -147,12 +147,12 @@ allIndexNames.each { indexName ->
         def report = org.janusgraph.graphdb.database.management.ManagementSystem
             .awaitGraphIndexStatus(jg, indexName)
             .status(SchemaStatus.REGISTERED, SchemaStatus.ENABLED)
-            .timeout(5, java.util.concurrent.TimeUnit.MINUTES)
+            .timeout(5L, ChronoUnit.MINUTES)
             .call()
         if (report.isSucceeded()) {
             println "Index $indexName reached REGISTERED or ENABLED."
         } else {
-            throw new RuntimeException("Index $indexName did not reach REGISTERED within timeout (current status: ${report.getActualStatus()})")
+            throw new RuntimeException("Index $indexName did not reach REGISTERED within timeout: ${report}")
         }
     } catch (RuntimeException e) {
         throw e
@@ -201,12 +201,12 @@ allIndexNames.each { indexName ->
         def report = org.janusgraph.graphdb.database.management.ManagementSystem
             .awaitGraphIndexStatus(jg, indexName)
             .status(SchemaStatus.ENABLED)
-            .timeout(5, java.util.concurrent.TimeUnit.MINUTES)
+            .timeout(5L, ChronoUnit.MINUTES)
             .call()
         if (report.isSucceeded()) {
             println "Index $indexName is ENABLED."
         } else {
-            println "ERROR: Index $indexName did not reach ENABLED within timeout (current status: ${report.getActualStatus()})"
+            println "ERROR: Index $indexName did not reach ENABLED within timeout: ${report}"
             enabledFailed = true
         }
     } catch (Exception e) {
@@ -214,6 +214,7 @@ allIndexNames.each { indexName ->
         enabledFailed = true
     }
 }
+
 // 10. Final status report
 println "--- FINAL INDEX STATUS REPORT ---"
 mgmt3 = jg.openManagement()
