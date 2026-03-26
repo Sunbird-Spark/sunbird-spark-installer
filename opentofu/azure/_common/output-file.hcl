@@ -18,11 +18,12 @@ terraform {
 dependency "storage" {
     config_path = "../storage"
     mock_outputs = {
-      azurerm_storage_account_name = "dummy-account"
-      azurerm_storage_container_public = "dummy-container-public"
+      azurerm_storage_account_name      = "dummy-account"
+      azurerm_storage_container_public  = "dummy-container-public"
       azurerm_storage_container_private = "dummy-container-private"
-      azurerm_velero_container_name = "dummy-velero-container"
+      azurerm_velero_container_name     = "dummy-velero-container"
     }
+    mock_outputs_merge_strategy_with_state = "shallow"
 }
 
 dependency "aks" {
