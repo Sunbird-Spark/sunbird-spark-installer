@@ -11,9 +11,19 @@ import org.janusgraph.core.Multiplicity
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import java.time.temporal.ChronoUnit
 
-// 1. Use the graph instance already opened by the gremlin server
-// ('graph' is bound by gremlin-server.yaml: graphs: {graph: janusgraph.properties})
-jg = graph
+// 1. Connect to graph
+// When loaded via ScriptFileGremlinPlugin at server startup, 'graph' is already
+// bound by the gremlin server — use it directly (single instance, no coordination delay).
+// When run via gremlin.sh -e in the schema-init Job, 'graph' is not bound —
+// fall back to opening a direct connection (all indexes already ENABLED at this
+// point so no inter-instance coordination is needed).
+try {
+    jg = graph
+    println "Using gremlin server's graph instance."
+} catch (MissingPropertyException e) {
+    jg = org.janusgraph.core.JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph.properties')
+    println "Using direct JanusGraphFactory connection (schema-init Job context)."
+}
 mgmt = jg.openManagement()
 
 println "--- STARTING SCHEMA INITIALIZATION ---"
