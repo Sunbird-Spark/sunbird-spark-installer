@@ -1,6 +1,6 @@
 // schema_init.groovy
 // Purpose: Initialize JanusGraph Schema & Indexes BEFORE data load.
-// Usage: docker exec sunbird_janusgraph ./bin/gremlin.sh -e /tmp/schema_init.groovy
+// Usage: /opt/bitnami/janusgraph/bin/gremlin.sh -e /schema-init-script/schema_init.groovy
 
 import org.janusgraph.core.JanusGraphFactory
 import org.janusgraph.core.schema.SchemaAction
@@ -98,12 +98,15 @@ makeELabel('hasSequenceMember', Multiplicity.MULTI)
 makeELabel('associatedTo', Multiplicity.MULTI)
 
 // 5. Define Indexes (CRITICAL: Index-First Strategy)
-// Helper for Composite Index
+// allIndexNames is the single source of truth — used both for creation and for
+// the enable/await phases below. Add new indexes here and nowhere else.
+def allIndexNames = []
+
 makeCompositeIndex = { name, keyName, unique ->
+    allIndexNames << name
     if (!mgmt.containsGraphIndex(name)) {
         println "Creating Composite Index: $name (Unique: $unique)"
         def builder = mgmt.buildIndex(name, Vertex.class)
-        // Handle index creation
         def key = mgmt.getPropertyKey(keyName)
         if (key) {
            builder.addKey(key)
@@ -121,7 +124,7 @@ makeCompositeIndex = { name, keyName, unique ->
 // 5a. Unique Indexes
 makeCompositeIndex('byUniqueId', 'IL_UNIQUE_ID', true)
 
-// 5b. Non-Unique Indexes (Explicitly forcing 'byCode' to be non-unique)
+// 5b. Non-Unique Indexes
 makeCompositeIndex('byCode', 'code', false)
 makeCompositeIndex('byIdentifier', 'identifier', false)
 makeCompositeIndex('byChannel', 'channel', false)
@@ -136,28 +139,104 @@ makeCompositeIndex('byNodeType', 'IL_SYS_NODE_TYPE', false)
 println "Committing Transaction..."
 mgmt.commit()
 
-// 7. Verify & Wait for REGISTERED/ENABLED status
-println "Waiting for Index Registration..."
-waitIndex = { indexName ->
+// 7. Wait for all indexes to reach REGISTERED (or ENABLED if already there)
+println "Waiting for all indexes to reach REGISTERED status..."
+allIndexNames.each { indexName ->
     try {
-        def index = mgmt.getGraphIndex(indexName)
-        if (index) {
-            def status = index.getIndexStatus(index.getFieldKeys()[0])
-            if (status == SchemaStatus.ENABLED || status == SchemaStatus.REGISTERED) {
-                println "Index $indexName is already $status."
-                return
-            }
+        println "Awaiting REGISTERED for index: $indexName ..."
+        def report = org.janusgraph.graphdb.database.management.ManagementSystem
+            .awaitGraphIndexStatus(jg, indexName)
+            .status(SchemaStatus.REGISTERED, SchemaStatus.ENABLED)
+            .timeout(5, java.util.concurrent.TimeUnit.MINUTES)
+            .call()
+        if (report.isSucceeded()) {
+            println "Index $indexName reached REGISTERED or ENABLED."
+        } else {
+            throw new RuntimeException("Index $indexName did not reach REGISTERED within timeout (current status: ${report.getActualStatus()})")
         }
-        println "Waiting for index $indexName to reach REGISTERED status..."
-        org.janusgraph.graphdb.database.management.ManagementSystem.awaitGraphIndexStatus(jg, indexName).status(SchemaStatus.REGISTERED).call()
-        println "Index $indexName wait complete."
+    } catch (RuntimeException e) {
+        throw e
     } catch (Exception e) {
-        println "Notice: Index $indexName status check completed: ${e.message}"
+        throw new RuntimeException("Index $indexName failed to reach REGISTERED: ${e.message}", e)
     }
 }
 
-waitIndex('byUniqueId')
-waitIndex('byCode')
-waitIndex('byIdentifier')
+// 8. Enable all indexes that are still in REGISTERED state
+println "Enabling all REGISTERED indexes..."
+mgmt2 = jg.openManagement()
+def enableFailed = false
+allIndexNames.each { indexName ->
+    try {
+        def idx = mgmt2.getGraphIndex(indexName)
+        if (idx) {
+            def status = idx.getIndexStatus(idx.getFieldKeys()[0])
+            if (status == SchemaStatus.REGISTERED) {
+                println "Enabling index: $indexName (currently REGISTERED)"
+                mgmt2.updateIndex(idx, SchemaAction.ENABLE_INDEX).get()
+            } else {
+                println "Index $indexName is already $status — skipping enable."
+            }
+        } else {
+            println "ERROR: Index $indexName not found."
+            enableFailed = true
+        }
+    } catch (Exception e) {
+        println "ERROR: Could not enable index $indexName: ${e.message}"
+        enableFailed = true
+    }
+}
+if (enableFailed) {
+    mgmt2.rollback()
+    throw new RuntimeException("One or more indexes failed to enable — rolled back. Check errors above.")
+}
+mgmt2.commit()
+println "Enable actions committed."
+
+// 9. Wait for all indexes to reach ENABLED
+println "Waiting for all indexes to reach ENABLED status..."
+def enabledFailed = false
+allIndexNames.each { indexName ->
+    try {
+        println "Awaiting ENABLED for index: $indexName ..."
+        def report = org.janusgraph.graphdb.database.management.ManagementSystem
+            .awaitGraphIndexStatus(jg, indexName)
+            .status(SchemaStatus.ENABLED)
+            .timeout(5, java.util.concurrent.TimeUnit.MINUTES)
+            .call()
+        if (report.isSucceeded()) {
+            println "Index $indexName is ENABLED."
+        } else {
+            println "ERROR: Index $indexName did not reach ENABLED within timeout (current status: ${report.getActualStatus()})"
+            enabledFailed = true
+        }
+    } catch (Exception e) {
+        println "ERROR: awaitGraphIndexStatus ENABLED for $indexName: ${e.message}"
+        enabledFailed = true
+    }
+}
+// 10. Final status report
+println "--- FINAL INDEX STATUS REPORT ---"
+mgmt3 = jg.openManagement()
+try {
+    allIndexNames.each { indexName ->
+        try {
+            def idx = mgmt3.getGraphIndex(indexName)
+            if (idx) {
+                def status = idx.getIndexStatus(idx.getFieldKeys()[0])
+                println "Index $indexName: $status"
+            } else {
+                println "Index $indexName: NOT FOUND"
+            }
+        } catch (Exception e) {
+            println "Index $indexName: ERROR - ${e.message}"
+        }
+    }
+} finally {
+    mgmt3.rollback()
+}
+
+if (enabledFailed) {
+    throw new RuntimeException("One or more indexes did not reach ENABLED status. Check errors above.")
+}
 
 println "--- SCHEMA INITIALIZATION COMPLETE ---"
