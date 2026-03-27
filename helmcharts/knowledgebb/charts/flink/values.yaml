@@ -297,7 +297,7 @@ flink_jobs:
       cloudstorage.relative_path_prefix= "CONTENT_STORAGE_BASE_PATH"
       cloudstorage.read_base_path="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_read_base_path "context" $) }}"
       cloudstorage.write_base_path=["https://{{ .Values.global.object_storage_endpoint }}"] 
-      cloudstorage.mecloudstorage.metadata.list={{ .Values.cloudstorage_metadatalist }}
+      cloudstorage.metadata.list={{ .Values.cloudstorage_metadatalist }}
       cloud_storage_container="{{ .Values.global.public_container_name }}"
 
     flink-conf: |+
@@ -370,6 +370,8 @@ flink_jobs:
       {{- if eq .Values.global.cloud_storage_provider "azure" }}
       cloud_storage_secret=""
       cloud_storage_auth_type="{{ .Values.global.cloud_storage_auth_type }}"
+      {{- else }}
+      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
       {{- end }}
       cloud_storage_container="{{ .Values.global.public_container_name }}"
       cloud_storage_endpoint=""
@@ -600,6 +602,8 @@ flink_jobs:
       {{- if eq .Values.global.cloud_storage_provider "azure" }}
       cloud_storage_secret=""
       cloud_storage_auth_type="{{ .Values.global.cloud_storage_auth_type }}"
+      {{- else }}
+      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
       {{- end }}
       cloud_storage_container="{{ .Values.global.public_container_name }}"
       cloud_storage_endpoint=""
