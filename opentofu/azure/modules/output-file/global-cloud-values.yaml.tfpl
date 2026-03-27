@@ -15,6 +15,8 @@ global:
   %{ if cloud_storage_provider == "azure" }cloud_storage_auth_type: "OIDC"%{ endif }
   azure_client_id: ${azure_client_id}
   workload_identity_service_account_name: ${k8s_service_account_name}
+  serviceAccount: 
+    create: false
 
 velero:
   enabled: true
