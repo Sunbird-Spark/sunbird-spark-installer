@@ -21,6 +21,7 @@ dependency "storage" {
       azurerm_storage_account_name      = "dummy-account"
       azurerm_storage_container_public  = "dummy-container-public"
       azurerm_storage_container_private = "dummy-container-private"
+      azurerm_storage_account_key       = "dummy-key"
       azurerm_velero_container_name     = "dummy-velero-container"
     }
     mock_outputs_merge_strategy_with_state = "shallow"
@@ -54,6 +55,7 @@ inputs = {
   storage_account_name               = dependency.storage.outputs.azurerm_storage_account_name
   storage_container_public           = dependency.storage.outputs.azurerm_storage_container_public
   storage_container_private          = dependency.storage.outputs.azurerm_storage_container_private
+  storage_account_primary_access_key = dependency.storage.outputs.azurerm_storage_account_key
   encryption_string                  = dependency.keys.outputs.encryption_string
   random_string                      = dependency.keys.outputs.random_string
   velero_container_name              = dependency.storage.outputs.azurerm_velero_container_name

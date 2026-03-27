@@ -3,6 +3,7 @@ global:
   environment: ${environment}
   building_block: ${building_block}
   cloud_storage_access_key: ${azure_storage_account_name}
+  cloud_storage_secret_key: ${azure_storage_account_key}
   public_container_name: ${azure_public_container_name}
   private_container_name: ${azure_private_container_name}
   velero_storage_container_private: ${azure_velero_container_name}

@@ -28,6 +28,12 @@ variable "storage_container_private" {
   description = "Private storage container name."
 }
 
+variable "storage_account_primary_access_key" {
+  type        = string
+  description = "Storage account primary access key."
+  default     = ""
+}
+
 variable "base_location" {
   type        = string
   description = "Location of terrafrom execution folder."

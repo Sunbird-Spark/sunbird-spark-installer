@@ -28,6 +28,7 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
     environment                     = var.environment,
     building_block                  = var.building_block,
     azure_storage_account_name      = var.storage_account_name,
+    azure_storage_account_key       = var.storage_account_primary_access_key,
     azure_public_container_name     = var.storage_container_public,
     azure_private_container_name    = var.storage_container_private,
     azure_velero_container_name     = var.velero_container_name,
