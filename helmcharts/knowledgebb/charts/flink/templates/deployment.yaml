@@ -29,15 +29,19 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
         app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+        {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
         {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
         azure.workload.identity/use: "true"
+        {{- end }}
         {{- end }}
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
         checksum/job-config: {{ $jobData | toYaml | sha256sum }}
     spec:
+      {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
       {{- if .Values.global.workload_identity_service_account_name }}
       serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- end }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -62,7 +66,7 @@ spec:
             "-Dfs.AbstractFileSystem.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
             "-DHADOOP_CONF_DIR=/opt/flink/conf",
   {{- end }}
-  {{- if and (eq .Values.global.checkpoint_store_type "azure") (not .Values.global.azure_client_id) }}
+  {{- if eq .Values.global.checkpoint_store_type "azure" }}
             "-Dfs.azure.account.key.{{ .Values.global.object_storage_endpoint }}={{ .Values.global.cloud_storage_secret_key }}",
   {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "s3" }}
@@ -82,9 +86,11 @@ spec:
           - containerPort: {{ .Values.taskmanager.rpc_port }}
             name: rpc
           env:
+          {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
           {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
           - name: AZURE_CLIENT_ID
             value: "{{ .Values.global.azure_client_id }}"
+          {{- end }}
           {{- end }}
           resources:
             {{- if $jobData.resources }}
@@ -135,15 +141,19 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
         app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+        {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
         {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
         azure.workload.identity/use: "true"
+        {{- end }}
         {{- end }}
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
         checksum/job-config: {{ $jobData | toYaml | sha256sum }}
     spec:
+      {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
       {{- if .Values.global.workload_identity_service_account_name }}
       serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- end }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -168,7 +178,7 @@ spec:
             "-Dfs.AbstractFileSystem.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
             "-DHADOOP_CONF_DIR=/opt/flink/conf",
   {{- end }}
-  {{- if and (eq .Values.global.checkpoint_store_type "azure") (not .Values.global.azure_client_id) }}
+  {{- if eq .Values.global.checkpoint_store_type "azure" }}
             "-Dfs.azure.account.key.{{ .Values.global.object_storage_endpoint }}={{ .Values.global.cloud_storage_secret_key }}",
   {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "s3" }}
@@ -195,9 +205,11 @@ spec:
               containerPort: {{ .targetPort }}
             {{- end }}
           env:
+          {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
           {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
           - name: AZURE_CLIENT_ID
             value: "{{ .Values.global.azure_client_id }}"
+          {{- end }}
           {{- end }}
           resources:
             {{- if $jobData.resources }}
