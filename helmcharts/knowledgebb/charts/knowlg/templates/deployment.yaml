@@ -113,7 +113,7 @@ spec:
               --set=plugins.envoy_ext_authz_grpc.path=main/allow \
               --set=decision_logs.plugin=print_decision_logs_on_failure \
               --set=plugins.print_decision_logs_on_failure.stdout=true \
-              --log-level=error \
+              --log-level=debug \
               --ignore=.*
           image: sunbirded.azurecr.io/opa:0.34.2-envoy
           imagePullPolicy: IfNotPresent
