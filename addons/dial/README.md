@@ -32,7 +32,7 @@ cd addons/dial
 
 **What the script does (when fully enabled):**
 1. **Provision Resources**: Runs Terragrunt in `addons/dial/opentofu/azure/storage` to create a dedicated DIAL storage container. *(To enable this, uncomment `provision_resources` in the `install()` function of `addon.sh`)*.
-2. **Inject Values**: Automatically updates `addons/global-values.yaml` with the name of the newly created container.
+2. **Inject Values**: Automatically writes the name of the newly created container to `addons/global-cloud-values.yaml`.
 3. **Deploy Charts**: Installs the `dial` and `dialcode-context-updater` Helm charts.
 4. **Inject Routing**: Creates ConfigMaps that the core Gateways (Public/Private) use to route `/dial/` traffic.
 
