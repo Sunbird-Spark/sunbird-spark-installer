@@ -8,6 +8,7 @@ on:
       - 'scripts/kong-api-scripts/**'
       - 'scripts/sunbird-yugabyte-migrations/**'
       - 'scripts/janusgraph/**'
+      - 'scripts/batch-status-updater/**'
 
 jobs:
   prepare:
@@ -31,6 +32,7 @@ jobs:
             kong-api-scripts: 'scripts/kong-api-scripts/**'
             sunbird-yugabyte-migrations: 'scripts/sunbird-yugabyte-migrations/**'
             janusgraph: 'scripts/janusgraph/**'
+            batch-status-updater: 'scripts/batch-status-updater/**'
 
   docker-build-push:
     needs: prepare
