@@ -222,6 +222,18 @@ flink_jobs:
       }
 
       es_sync_wait_time = 5000
+
+      cloud_storage_type="{{ .Values.global.sunbird_cloud_storage_provider }}"
+      cloud_storage_key="{{ .Values.global.cloud_storage_access_key }}"
+      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
+      {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
+      {{- if eq .Values.global.cloud_storage_provider "azure" }}
+      cloud_storage_secret=""
+      cloud_storage_auth_type="{{ .Values.global.cloud_storage_auth_type }}"
+      {{- end }}
+      {{- end }}
+      cloud_storage_container="{{ .Values.global.public_container_name }}"
+      cloud_storage_endpoint=""
       schema.basePath="https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
 
     flink-conf: |+
@@ -288,6 +300,12 @@ flink_jobs:
       cloud_storage_type="{{ .Values.global.sunbird_cloud_storage_provider }}"
       cloud_storage_key="{{ .Values.global.cloud_storage_access_key }}"
       cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
+      {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
+      {{- if eq .Values.global.cloud_storage_provider "azure" }}
+      cloud_storage_secret=""
+      cloud_storage_auth_type="{{ .Values.global.cloud_storage_auth_type }}"
+      {{- end }}
+      {{- end }}
       cloud_storage_container="{{ .Values.global.public_container_name }}"
       cloud_storage_endpoint=""
       schema.basePath="https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
