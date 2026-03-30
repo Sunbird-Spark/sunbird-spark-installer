@@ -260,8 +260,8 @@ cronjobs:
     # Timezone for batch status comparison (default: Asia/Kolkata)
     timezone: "Asia/Kolkata"
     image:
-      repository: chethann07/course-batch-updater-cronjob
-      tag: v3
+      repository: ghcr.io/sunbird-spark/batch-status-updater
+      tag: develop_70512b8
       pullPolicy: IfNotPresent
     resources:
       requests:
