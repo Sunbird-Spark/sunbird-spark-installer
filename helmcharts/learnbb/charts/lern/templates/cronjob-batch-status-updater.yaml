@@ -1,0 +1,117 @@
+{{- if .Values.cronjobs.batchStatusUpdater.enabled }}
+---
+# CronJob: Batch Status Updater
+# Purpose: Updates course batch status based on start/end dates
+# Syncs changes to YugabyteDB and Elasticsearch
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: batch-status-updater
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: batch-status-updater
+    service: lern
+    release: {{ .Release.Name }}
+spec:
+  schedule: "{{ .Values.cronjobs.batchStatusUpdater.schedule }}"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    metadata:
+      labels:
+        app: batch-status-updater
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app: batch-status-updater
+        spec:
+          serviceAccountName: batch-status-updater
+          restartPolicy: Never
+          containers:
+            - name: batch-status-updater
+              image: "{{ .Values.cronjobs.batchStatusUpdater.image.repository }}:{{ .Values.cronjobs.batchStatusUpdater.image.tag }}"
+              imagePullPolicy: {{ .Values.cronjobs.batchStatusUpdater.image.pullPolicy | default "IfNotPresent" }}
+              env:
+                # YugabyteDB Configuration (CQL)
+                - name: YUGABYTE_HOST
+                  value: {{ .Values.global.yugabyte.host | default "yb-tserver-service" }}
+                - name: YUGABYTE_PORT
+                  value: {{ .Values.global.yugabyte.port | default "9042" | quote }}
+                - name: YUGABYTE_USER
+                  value: {{ .Values.global.yugabyte.user | default "yugabyte" }}
+                - name: YUGABYTE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.global.yugabyte_secret | default "yugabyte-credentials" }}
+                      key: password
+                      optional: true
+                - name: YUGABYTE_KEYSPACE
+                  value: {{ .Values.global.cassandra_keyspace_courses | default "sunbird_courses" }}
+
+                # Elasticsearch Configuration
+                - name: ES_HOST
+                  value: http://{{ .Values.global.elasticsearch.host | default "elasticsearch" }}:{{ .Values.global.elasticsearch.port | default "9200" }}
+
+                # Timezone Configuration
+                - name: TZ
+                  value: {{ .Values.cronjobs.batchStatusUpdater.timezone | default "Asia/Kolkata" }}
+
+              resources:
+                requests:
+                  cpu: {{ .Values.cronjobs.batchStatusUpdater.resources.requests.cpu | default "100m" }}
+                  memory: {{ .Values.cronjobs.batchStatusUpdater.resources.requests.memory | default "256Mi" }}
+                limits:
+                  cpu: {{ .Values.cronjobs.batchStatusUpdater.resources.limits.cpu | default "500m" }}
+                  memory: {{ .Values.cronjobs.batchStatusUpdater.resources.limits.memory | default "512Mi" }}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: batch-status-updater
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: batch-status-updater
+    service: lern
+    release: {{ .Release.Name }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: batch-status-updater
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: batch-status-updater
+    service: lern
+    release: {{ .Release.Name }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: batch-status-updater
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: batch-status-updater
+    service: lern
+    release: {{ .Release.Name }}
+subjects:
+  - kind: ServiceAccount
+    name: batch-status-updater
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: batch-status-updater
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

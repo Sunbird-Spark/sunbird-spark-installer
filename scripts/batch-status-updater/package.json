@@ -1,0 +1,21 @@
+{
+  "name": "batch-status-updater",
+  "version": "1.0.0",
+  "description": "Updates course batch status based on start/end dates and syncs to YugabyteDB and Elasticsearch",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js"
+  },
+  "keywords": ["batch", "status", "updater", "cron"],
+  "author": "Sunbird Team",
+  "license": "MIT",
+  "dependencies": {
+    "cassandra-driver": "^4.8.0",
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

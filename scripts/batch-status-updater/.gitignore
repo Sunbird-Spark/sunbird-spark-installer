@@ -1,0 +1,30 @@
+package-lock.json
+node_modules/
+
+# Environment variables (NEVER commit credentials)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp
