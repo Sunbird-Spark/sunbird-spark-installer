@@ -15,10 +15,6 @@ jvm_memory: "1024m"
 
 gcp_bucket_name: "telemetry-data-store"
 
-serviceAccount:
-  create: false
-  name: workload-identity
-  annotations: {}
 
 storage_type: "s3"
 storageClass: ""

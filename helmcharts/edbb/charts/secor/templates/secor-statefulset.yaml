@@ -31,13 +31,19 @@ spec:
       labels:
         app: secor
         release: {{ $jobName }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
         azure.workload.identity/use: "true"
+        {{- end }}
     spec:
       {{- if .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}
+      {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- else }}
       serviceAccountName: {{ include "base.serviceaccountname" . }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -65,6 +71,10 @@ spec:
               value: "{{ .Values.jvm_memory }}"
             - name: "TIMEZONE"
               value: "{{ .Values.timezone }}"
+            {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+            - name: AZURE_CLIENT_ID
+              value: {{ .Values.global.azure_client_id }}
+            {{- end }}
           volumeMounts:
            - mountPath: /opt/secor/config
              name: secor-config
