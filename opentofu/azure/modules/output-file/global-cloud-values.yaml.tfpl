@@ -22,15 +22,7 @@ global:
 velero:
   enabled: true
   credentials:
-    useSecret: %{ if cloud_storage_provider == "azure" }false%{ else }true%{ endif }
-  %{ if cloud_storage_provider == "azure" ~}
-  serviceAccount:
-    server:
-      create: false
-      name: ${k8s_service_account_name}
-  podLabels:
-    azure.workload.identity/use: "true"
-  %{ endif ~}
+    useSecret: true
   configuration:
       backupStorageLocation:
         - name: default
