@@ -29,7 +29,5 @@ global:
   channel:
     default: "sunbird"
 
-  dial_state_container_public: "dummy values"
-
   keycloak_kid_keys_configmap: keycloak-kids-keys
   keycloak_key_configmap: keycloak-key
