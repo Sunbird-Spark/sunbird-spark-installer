@@ -220,7 +220,7 @@ spec:
           volumeMounts:
             - name: plugins
               mountPath: /plugins
-            {{- if .Values.credentials.useSecret }}
+            {{- if and .Values.credentials.useSecret (ne .Values.global.cloud_storage_provider "azure") }}
             - name: cloud-credentials
               mountPath: /credentials
             {{- end }}
@@ -252,7 +252,7 @@ spec:
                   fieldPath: metadata.namespace
             - name: LD_LIBRARY_PATH
               value: /plugins
-          {{- if .Values.credentials.useSecret }}
+          {{- if and .Values.credentials.useSecret (ne .Values.global.cloud_storage_provider "azure") }}
             - name: AWS_SHARED_CREDENTIALS_FILE
               value: /credentials/cloud
             - name: GOOGLE_APPLICATION_CREDENTIALS
@@ -290,7 +290,7 @@ spec:
         {{- end }}
 {{- end }}
       volumes:
-        {{- if .Values.credentials.useSecret }}
+        {{- if and .Values.credentials.useSecret (ne .Values.global.cloud_storage_provider "azure") }}
         - name: cloud-credentials
           secret:
             secretName: {{ include "velero.secretName" . }}
