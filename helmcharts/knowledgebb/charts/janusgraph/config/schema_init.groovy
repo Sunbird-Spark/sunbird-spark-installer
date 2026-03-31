@@ -3,7 +3,6 @@
 // Loaded via ScriptFileGremlinPlugin in gremlin-server.yaml — runs inside the
 // gremlin server's own JanusGraph instance, avoiding the two-instance coordination
 // delay that causes INSTALLED→REGISTERED to stall.
-
 import org.janusgraph.core.schema.SchemaAction
 import org.janusgraph.core.schema.SchemaStatus
 import org.janusgraph.core.Cardinality
