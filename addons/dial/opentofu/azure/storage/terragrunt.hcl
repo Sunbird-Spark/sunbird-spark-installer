@@ -32,5 +32,5 @@ inputs = {
   subscription_id      = local.global_vars.global.subscription_id
   unique_uuid          = local.cloud_vars.global.random_string
   building_block       = local.cloud_vars.global.building_block
-  global_values_file   = "${get_repo_root()}/addons/global-values.yaml"
+  global_cloud_values_file = "${get_repo_root()}/addons/global-cloud-values.yaml"
 }
