@@ -44,6 +44,9 @@ deploy_chart() {
     local HELM_ARGS="-f $CLOUD_DIR/global-values.yaml"
     HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
     HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-values.yaml"
+    if [ -f "$REPO_ROOT/addons/global-cloud-values.yaml" ]; then
+        HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-cloud-values.yaml"
+    fi
     HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/images.yaml"
 
     for chart in "${CHARTS[@]}"; do
