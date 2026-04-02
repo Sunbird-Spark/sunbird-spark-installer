@@ -33,7 +33,7 @@ base_config: &base_config
   fallback_timestamp_key: "@timestamp"
   kafka_broker_host: "{{ .Values.global.kafka.host }}"
   max_file_size: "100000000"
-  max_file_age: "14000"
+  max_file_age: "120"
   partition_prefix_enabled: "false"
   partition_prefix_key: "nil"
   partition_prefix_mapping: "{}"
