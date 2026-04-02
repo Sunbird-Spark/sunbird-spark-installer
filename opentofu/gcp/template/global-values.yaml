@@ -3,7 +3,6 @@ default_passwords:
   grafana_admin_password: &grafana-admin-password "prom-operator"
   superset_admin_password: &superset-admin-password "admin"
   keycloak_password: &keycloak-password "admin"
-  postgresql_password: &postgresql-password "postgres"
 kube-prometheus-stack:
   grafana:
     adminUser: admin
@@ -13,11 +12,6 @@ keycloak:
   keycloak_password: *keycloak-password
 keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
-postgresql:
-  postgresqlUsername: postgres
-  postgresqlPassword: *postgresql-password
-kong:
-  kong_pg_password: *postgresql-password
 global:
   building_block: "" 
   env: "" 
@@ -57,12 +51,6 @@ global:
   youtube_apikey: ""
   mail_from_certbot_notifications: ""  #The "from" email address used by the Certbot renewal job for sending SSL renewal status notifications via SendGrid SMTP
   youtube_apikey: ""
-  postgresql:
-    postgresqlUsername: postgres
-    postgresqlPassword: *postgresql-password
-  postgresql:
-    postgresqlUsername: postgres
-    postgresqlPassword: *postgresql-password
   superset:
       init:
         adminUser:
