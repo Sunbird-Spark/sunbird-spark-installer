@@ -18,12 +18,13 @@ terraform {
 dependency "storage" {
     config_path = "../storage"
     mock_outputs = {
-      azurerm_storage_account_name = "dummy-account"
-      azurerm_storage_container_public = "dummy-container-public"
+      azurerm_storage_account_name      = "dummy-account"
+      azurerm_storage_container_public  = "dummy-container-public"
       azurerm_storage_container_private = "dummy-container-private"
-      azurerm_storage_account_key = "dummy-key"
-      azurerm_velero_container_name = "dummy-velero-container"
+      azurerm_storage_account_key       = "dummy-key"
+      azurerm_velero_container_name     = "dummy-velero-container"
     }
+    mock_outputs_merge_strategy_with_state = "shallow"
 }
 
 dependency "aks" {
@@ -35,6 +36,13 @@ dependency "keys" {
     mock_outputs = {
       random_string = "dummy-string"
       encryption_string = "dummy-encryption-string"
+    }
+}
+
+dependency "workload_identity" {
+    config_path = "../workload-identity"
+    mock_outputs = {
+      client_id = "00000000-0000-0000-0000-000000000000"
     }
 }
 
@@ -52,5 +60,6 @@ inputs = {
   random_string                      = dependency.keys.outputs.random_string
   velero_container_name              = dependency.storage.outputs.azurerm_velero_container_name
   cloud_storage_provider             = local.cloud_storage_provider
-
+  azure_client_id                    = dependency.workload_identity.outputs.client_id
+  k8s_service_account_name           = "azure-managed-identity-sa"
 }
