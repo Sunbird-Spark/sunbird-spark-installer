@@ -35,7 +35,7 @@ ID=$(az account show | jq -r .tenantId | cut -d '-' -f1)
 SUBSCRIPTION_ID=$(az account show | jq -r .id)
 
 # Construct resource names
-RESOURCE_GROUP_NAME="edsandboxda72f12a"
+RESOURCE_GROUP_NAME="ed-sandbox"
 STORAGE_ACCOUNT_NAME="${environment_name}tfstate$ID"
 CONTAINER_NAME="${environment_name}tfstate"
 
