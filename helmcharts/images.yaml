@@ -54,7 +54,7 @@ images:
 
   player: &player
     repository: "sunbirded.azurecr.io/sunbird-portal"
-    tag: "spark-v0.57_d99a74f"
+    tag: "spark-v103_6becc5b"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -115,7 +115,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v0.9_1f288bd_12"
+    tag: "spark-v0.12_8145d45_16"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -123,11 +123,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v12_8775a54"
+    tag: "spark-v16_ad7adbb"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v08_081de67"
+    tag: "spark-v16_ad7adbb"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
@@ -161,7 +161,7 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_8425122"
+    tag: "develop_e3f9f55"
 
 # Internal block with pull secrets
 internal: &internal
@@ -352,9 +352,9 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v0.5_d5cc4ee"
+    tag: "spark-ics-1_4cb45f4"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v0.2_7258208"
+    tag: "spark-v0.6_3734950"

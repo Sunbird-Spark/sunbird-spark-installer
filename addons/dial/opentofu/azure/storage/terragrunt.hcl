@@ -8,9 +8,9 @@ generate "backend" {
   contents = <<EOF
   terraform {
     backend "azurerm" {
-      resource_group_name  = "${get_env("AZURE_TERRAFORM_BACKEND_RG")}"
-      storage_account_name = "${get_env("AZURE_TERRAFORM_BACKEND_STORAGE_ACCOUNT")}"
-      container_name       = "${get_env("AZURE_TERRAFORM_BACKEND_CONTAINER")}"
+      resource_group_name  = "${get_env("AZURE_OPENTOFU_BACKEND_RG")}"
+      storage_account_name = "${get_env("AZURE_OPENTOFU_BACKEND_STORAGE_ACCOUNT")}"
+      container_name       = "${get_env("AZURE_OPENTOFU_BACKEND_CONTAINER")}"
       key                  = "addons/dial/storage/tofu.tfstate"
     }
   }
@@ -32,5 +32,5 @@ inputs = {
   subscription_id      = local.global_vars.global.subscription_id
   unique_uuid          = local.cloud_vars.global.random_string
   building_block       = local.cloud_vars.global.building_block
-  global_values_file   = "${get_repo_root()}/addons/global-values.yaml"
+  global_cloud_values_file = "${get_repo_root()}/addons/global-cloud-values.yaml"
 }

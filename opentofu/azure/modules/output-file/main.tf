@@ -16,19 +16,28 @@ locals {
 }
 
 resource "local_sensitive_file" "global_cloud_values_yaml" {
+  lifecycle {
+    precondition {
+      condition     = !(var.cloud_storage_provider == "azure" && var.azure_client_id == "")
+      error_message = "azure_client_id must be provided when cloud_storage_provider is azure."
+    }
+  }
+
   content = templatefile("${path.module}/global-cloud-values.yaml.tfpl", {
-    env                          = var.env,
-    environment                  = var.environment,
-    building_block               = var.building_block,
-    azure_storage_account_name   = var.storage_account_name,
-    azure_storage_account_key    = var.storage_account_primary_access_key,
-    azure_public_container_name  = var.storage_container_public,
-    azure_private_container_name = var.storage_container_private,
-    azure_velero_container_name  = var.velero_container_name,
-    private_ingressgateway_ip    = var.private_ingressgateway_ip,
-    encryption_string            = var.encryption_string,
-    random_string                = var.random_string
-    cloud_storage_provider       = var.cloud_storage_provider
+    env                             = var.env,
+    environment                     = var.environment,
+    building_block                  = var.building_block,
+    azure_storage_account_name      = var.storage_account_name,
+    azure_storage_account_key       = var.storage_account_primary_access_key,
+    azure_public_container_name     = var.storage_container_public,
+    azure_private_container_name    = var.storage_container_private,
+    azure_velero_container_name     = var.velero_container_name,
+    private_ingressgateway_ip       = var.private_ingressgateway_ip,
+    encryption_string               = var.encryption_string,
+    random_string                   = var.random_string,
+    cloud_storage_provider          = var.cloud_storage_provider,
+    azure_client_id                 = var.azure_client_id,
+    k8s_service_account_name        = var.k8s_service_account_name
   })
   filename = local.global_values_cloud_file
 }
@@ -38,7 +47,7 @@ resource "null_resource" "upload_global_cloud_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload --account-name ${var.storage_account_name} --account-key ${var.storage_account_primary_access_key} --container-name ${var.storage_container_private} --file ${local.global_values_cloud_file} --name ${var.environment}-global-cloud-values.yaml --overwrite"
+    command = "az storage blob upload --account-name ${var.storage_account_name} --auth-mode login --container-name ${var.storage_container_private} --file ${local.global_values_cloud_file} --name ${var.environment}-global-cloud-values.yaml --overwrite"
   }
   depends_on = [local_sensitive_file.global_cloud_values_yaml]
 }

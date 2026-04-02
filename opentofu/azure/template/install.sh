@@ -20,9 +20,10 @@ function backup_configs() {
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    tofu init -upgrade
-    terragrunt init -upgrade
-    terragrunt run-all apply --terragrunt-non-interactive
+    tofu init -reconfigure
+    terragrunt init --all --reconfigure --non-interactive
+    # terragrunt plan --all --non-interactive
+    terragrunt run --all apply --non-interactive
     chmod 600 ~/.kube/config
 }
 function certificate_keys() {
@@ -73,8 +74,7 @@ function install_component() {
         cd ../../../helmcharts 2>/dev/null || true
     fi
     local component="$1"
-    kubectl create namespace sunbird 2>/dev/null || true
-    kubectl create namespace velero 2>/dev/null || true
+    # namespaces sunbird and velero are created by workload-identity Terraform module
     kubectl create namespace volume-autoscaler 2>/dev/null || true
     kubectl create namespace nlweb 2>/dev/null || true
 
@@ -98,8 +98,8 @@ function install_component() {
       fi
     local addon_values_flag=""
     if [ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]; then
-        if [ -f "../addons/global-values.yaml" ]; then
-            addon_values_flag="-f ../addons/global-values.yaml"
+        if [ -f "../addons/global-cloud-values.yaml" ]; then
+            addon_values_flag="-f ../addons/global-cloud-values.yaml"
         fi
     fi
 

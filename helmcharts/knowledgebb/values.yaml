@@ -5,7 +5,7 @@ knowlg_automation_repo_branch: main
 channel: &channel
   default: "in.ekstep"
 
-content:
+knowlg:
   opa_enabled: true
 
 provisioningAnnotations: &provisioningAnnotations
@@ -188,6 +188,9 @@ yugabytecql:
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_499032f"
 
+dialservice: &dialservice
+  base_url: "http://dial-service:9000"
+
 global:
   channel: *channel
   elasticsearch: *es
@@ -203,3 +206,4 @@ global:
   redis: *redis
   schema: *schema
   yugabyte: *yugabyte
+  dialservice: *dialservice

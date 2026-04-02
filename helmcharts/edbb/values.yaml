@@ -68,7 +68,7 @@ kafka: &kafka
     existingSecret: ""
 
 knowledgemw:
-  opa_enabled: true
+  opa_enabled: false
 
 migration:
   yugabyte:
@@ -78,7 +78,7 @@ nginx-private-ingress:
   enabled: false
 
 redis: &redis
-  enabled: true
+  enabled: false
   registry: "sunbirded.azurecr.io"
   repository: "redis"
   replica:
@@ -121,6 +121,7 @@ yugabyte: &yugabyte
       - name: "superset"
       - name: "registry"
       - name: "portal"
+      - name: "sunbird"
   gflags:
     tserver: 
       cdc_enable_replicate_intents: "true"    

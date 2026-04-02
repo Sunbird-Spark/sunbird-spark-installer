@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     azurerm = {
-      version = "~> 4.0.1"
+      version = "~> 4.0"
       source  = "hashicorp/azurerm"
     }
     null = {
@@ -34,6 +34,6 @@ resource "null_resource" "update_global_values" {
   }
 
   provisioner "local-exec" {
-    command = "yq -i '.global.dial_state_container_public = \"${azurerm_storage_container.dial_state_container_public.name}\"' ${var.global_values_file}"
+    command = "[ -f ${var.global_cloud_values_file} ] || echo 'global: {}' > ${var.global_cloud_values_file}; yq -i '.global.dial_state_container_public = \"${azurerm_storage_container.dial_state_container_public.name}\"' ${var.global_cloud_values_file}"
   }
 }
