@@ -702,6 +702,7 @@ init:
     firstname: Superset
     lastname: Admin
     email: admin@superset.com
+    password: admin
   # -- List of initContainers
   # @default -- a container waiting for postgres
   initContainers:
@@ -733,12 +734,12 @@ init:
                     --firstname {{ .Values.init.adminUser.firstname }} \
                     --lastname {{ .Values.init.adminUser.lastname }} \
                     --email {{ .Values.init.adminUser.email }} \
-                    --password {{ .Values.global.superset.init.adminUser.password }}
+                    --password {{ .Values.global.superset.init.adminUser.password | default .Values.init.adminUser.password }}
 
     echo "Ensuring password matches configuration..."
     superset fab reset-password \
                   --username {{ .Values.init.adminUser.username }} \
-                  --password {{ .Values.global.superset.init.adminUser.password }}
+                  --password {{ .Values.global.superset.init.adminUser.password | default .Values.init.adminUser.password }}
     set -e
     {{- end }}
     {{ if .Values.init.loadExamples }}
