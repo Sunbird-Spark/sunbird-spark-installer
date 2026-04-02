@@ -20,11 +20,17 @@ function backup_configs() {
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    tofu init -upgrade
-    terragrunt init -upgrade
-    terragrunt run-all apply --terragrunt-non-interactive
+    for module in network aks keys output-file; do
+        echo -e "\n--- Deploying module: $module ---"
+        cd "$module"
+        terragrunt init -upgrade
+        terragrunt apply --terragrunt-non-interactive
+        cd ..
+    done
     chmod 600 ~/.kube/config
 }
+
+
 function certificate_keys() {
     #  # If keys already present in global-values.yaml → skip writing
     if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/azure/$environment/global-values.yaml 2>/dev/null; then
@@ -221,6 +227,34 @@ function destroy_tf_resources() {
     terragrunt run-all destroy
 }
 
+function deploy_tf_module() {
+    local module="$1"
+    source tf.sh
+    echo -e "\n--- Deploying module: $module ---"
+    cd "$module"
+    terragrunt init -upgrade
+    terragrunt apply --terragrunt-non-interactive
+    cd ..
+    if [ "$module" = "aks" ]; then
+        chmod 600 ~/.kube/config
+    fi
+}
+
+function migrate_cni() {
+    # Migrate AKS cluster from kubenet to Azure CNI Overlay
+    # Note: Kubenet will no longer be supported after March 31, 2028
+    # This is an in-place migration — no cluster recreation required
+    local cluster_name=$(yq '.global.environment' global-values.yaml)
+    local resource_group="$(yq '.global.building_block' global-values.yaml)-$(yq '.global.environment' global-values.yaml)"
+    echo -e "\nMigrating AKS cluster '$cluster_name' from kubenet to Azure CNI Overlay..."
+    az aks update \
+        --name "$cluster_name" \
+        --resource-group "$resource_group" \
+        --network-plugin azure \
+        --network-plugin-mode overlay
+    echo -e "\nCNI migration complete. Cluster is now using Azure CNI Overlay."
+}
+
 function invoke_functions() {
     for func in "$@"; do
         $func
@@ -279,6 +313,13 @@ else
         ;;
     "create_tf_resources")
         create_tf_resources
+        ;;
+    "deploy_tf_module")
+        shift
+        deploy_tf_module "$1"
+        ;;
+    "migrate_cni")
+        migrate_cni
         ;;
     "generate_postman_env")
         generate_postman_env

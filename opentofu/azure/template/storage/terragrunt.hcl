@@ -1,12 +1,14 @@
-include "root" {
-  path = find_in_parent_folders("terragrunt.hcl")
-}
+# Skipped: reusing existing storage account
+# Uncomment below to re-enable storage account creation
+# include "root" {
+#   path = find_in_parent_folders("terragrunt.hcl")
+# }
+#
+# include "environment" {
+#   path = "${get_terragrunt_dir()}/../../_common/storage.hcl"
+# }
 
-include "environment" {
-  path = "${get_terragrunt_dir()}/../../_common/storage.hcl"
-# This section will be enabled after final code is pushed and tagged
-#  expose = true
-}
+skip = true
 
 # This section will be enabled after final code is pushed and tagged
 # terraform {
