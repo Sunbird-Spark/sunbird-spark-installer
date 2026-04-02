@@ -25,6 +25,12 @@ resource "random_password" "superset_admin" {
   override_special = true
 }
 
+# keycloak password generation commented out — set manually in global-values.yaml
+# resource "random_password" "keycloak" {
+#   length           = 16
+#   override_special = true
+# }
+
 locals {
   patch_passwords_yaml = templatefile("${path.module}/patch-passwords.yaml.tpl", {
     grafana_admin_password  = random_password.grafana_admin.result

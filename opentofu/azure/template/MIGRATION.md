@@ -10,14 +10,13 @@ Resource group creation is now skipped if it already exists. Update the resource
 RESOURCE_GROUP_NAME="edsandboxda72f12a"   # <-- set your existing RG name here
 ```
 
-### 2. Random Password Generation — Keycloak and PostgreSQL Removed
+### 2. Random Password Generation
 **File:** `random_passwords/main.tf`, `random_passwords/patch-passwords.yaml.tpl`
 
-Random password generation for `keycloak` and `postgresql` removed. Only `grafana` and `superset` passwords are auto-generated. Set keycloak and postgresql passwords manually in `global-values.yaml`:
+Only `grafana` and `superset` passwords are auto-generated. Set keycloak and postgresql passwords manually in `global-values.yaml`:
 ```yaml
 default_passwords:
   keycloak_password: "your-password"
-  postgresql_password: "your-password"
 ```
 
 ### 3. Skip Storage Account Creation
@@ -44,14 +43,3 @@ network → aks → keys → output-file
 ./install.sh deploy_tf_module upload-files
 ```
 
-### 5. Superset values.yaml Fix
-**File:** `helmcharts/obsrvbb/charts/superset/values.yaml`
-
-Removed invalid Helm template syntax from `values.yaml` (line 705). Changed:
-```yaml
-# Before (invalid — template syntax not allowed in values.yaml)
-password: {{ .Values.global.superset.init.adminUser.password }}
-
-# After
-password: admin
-```
