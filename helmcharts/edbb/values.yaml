@@ -108,6 +108,8 @@ router:
 
 secor:
   enabled: true
+  serviceAccount:
+    create: false
 
 yugabyte: &yugabyte
   enabled: true
