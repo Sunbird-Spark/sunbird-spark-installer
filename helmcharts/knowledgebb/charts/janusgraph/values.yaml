@@ -507,6 +507,14 @@ sidecars:
         value: "1"
       - name: PIPELINE_BATCH_SIZE
         value: "1"
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 9600
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
     volumeMounts:
       - name: janusgraph-configs
         mountPath: /usr/share/logstash/pipeline/logstash.conf
