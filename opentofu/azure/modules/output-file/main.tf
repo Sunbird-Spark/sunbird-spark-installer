@@ -26,7 +26,6 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
     azure_private_container_name = var.storage_container_private,
     azure_velero_container_name  = var.velero_container_name,
     private_ingressgateway_ip    = var.private_ingressgateway_ip,
-    encryption_string            = var.encryption_string,
     random_string                = var.random_string
     cloud_storage_provider       = var.cloud_storage_provider
   })

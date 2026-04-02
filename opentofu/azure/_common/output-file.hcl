@@ -34,7 +34,6 @@ dependency "keys" {
     config_path = "../keys"
     mock_outputs = {
       random_string = "dummy-string"
-      encryption_string = "dummy-encryption-string"
     }
 }
 
@@ -48,7 +47,6 @@ inputs = {
   storage_container_public           = dependency.storage.outputs.azurerm_storage_container_public
   storage_container_private          = dependency.storage.outputs.azurerm_storage_container_private
   storage_account_primary_access_key = dependency.storage.outputs.azurerm_storage_account_key
-  encryption_string                  = dependency.keys.outputs.encryption_string
   random_string                      = dependency.keys.outputs.random_string
   velero_container_name              = dependency.storage.outputs.azurerm_velero_container_name
   cloud_storage_provider             = local.cloud_storage_provider

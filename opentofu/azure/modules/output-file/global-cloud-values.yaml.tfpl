@@ -9,7 +9,6 @@ global:
   dial_state_container_public: ${azure_dial_state_container_name}
   velero_storage_container_private: ${azure_velero_container_name}
   private_ingressgateway_ip: ${private_ingressgateway_ip}
-  encryption__string: ${encryption_string}
   random_string: ${random_string}
   object_storage_endpoint: ${azure_storage_account_name}.blob.core.windows.net
   storage_class: managed-premium

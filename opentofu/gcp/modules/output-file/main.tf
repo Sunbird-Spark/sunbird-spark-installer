@@ -15,7 +15,6 @@ content  = templatefile("${path.module}/global-cloud-values.yaml.tfpl", {
     gcp_velero_storage_container_private = var.velero_storage_container_private,
     random_string                                 = var.random_string,
     private_ingressgateway_ip                     = var.private_ingressgateway_ip,
-    encryption_string                             = var.encryption_string,
     gcp_project_id                                = var.gcp_project_id
     storage_class                                 = var.storage_class
     cloud_storage_provider                        = var.cloud_storage_provider

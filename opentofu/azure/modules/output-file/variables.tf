@@ -50,15 +50,6 @@ variable "private_ingressgateway_ip" {
   type        = string
   description = "Private LB IP."
 }
-variable "encryption_string" {
-  type        = string
-  description = "This string will be used to encrypt / mask various values. Use a strong random string in order to secure the applications. The string should be exactly 32 characters in length. If you forget the string, the application will stop working and the string cannot be retrieved."
-
-  validation {
-    condition     = length(var.encryption_string) == 32
-    error_message = "The string must have a length of exactly 32 characters."
-  }
-}
 variable "cloud_storage_provider" {
   description = "The cloud storage provider to use."
   type        = string
