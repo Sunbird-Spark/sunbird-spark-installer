@@ -20,7 +20,7 @@ function backup_configs() {
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    for module in network aks keys output-file; do
+    for module in network aks keys random_passwords output-file; do
         echo -e "\n--- Deploying module: $module ---"
         cd "$module"
         terragrunt init -upgrade

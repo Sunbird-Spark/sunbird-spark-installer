@@ -25,22 +25,10 @@ resource "random_password" "superset_admin" {
   override_special = true
 }
 
-resource "random_password" "keycloak" {
-  length           = 16
-  override_special = true
-}
-
-resource "random_password" "postgresql" {
-  length           = 16
-  override_special = false
-}
-
 locals {
   patch_passwords_yaml = templatefile("${path.module}/patch-passwords.yaml.tpl", {
     grafana_admin_password  = random_password.grafana_admin.result
     superset_admin_password = random_password.superset_admin.result
-    keycloak_password       = random_password.keycloak.result
-    postgresql_password     = random_password.postgresql.result
   })
 }
 
