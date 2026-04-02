@@ -28,7 +28,7 @@ variable "building_block" {
   description = "Building block name (e.g., ed)"
 }
 
-variable "global_values_file" {
+variable "global_cloud_values_file" {
   type        = string
-  description = "Absolute path to global-values.yaml"
+  description = "Absolute path to global-cloud-values.yaml"
 }

@@ -343,9 +343,9 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v12_569f0fe"
+    tag: "spark-ics-1_4cb45f4"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v0.5_0254304"
+    tag: "spark-v0.6_3734950"
