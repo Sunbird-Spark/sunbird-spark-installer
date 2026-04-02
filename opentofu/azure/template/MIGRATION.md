@@ -13,11 +13,7 @@ RESOURCE_GROUP_NAME="edsandboxda72f12a"   # <-- set your existing RG name here
 ### 2. Random Password Generation
 **File:** `random_passwords/main.tf`, `random_passwords/patch-passwords.yaml.tpl`
 
-Only `grafana` and `superset` passwords are auto-generated. Set keycloak and postgresql passwords manually in `global-values.yaml`:
-```yaml
-default_passwords:
-  keycloak_password: "your-password"
-```
+`grafana`, `superset`, and `keycloak` passwords are auto-generated and written locally into `global-values.yaml` via a patch script. `postgresql` password generation has been removed.
 
 ### 3. Skip Storage Account Creation
 **File:** `storage/terragrunt.hcl`
