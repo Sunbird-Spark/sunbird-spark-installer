@@ -507,6 +507,8 @@ sidecars:
         value: "1"
       - name: PIPELINE_BATCH_SIZE
         value: "1"
+      - name: LS_JAVA_OPTS
+        value: "-Dnetworkaddress.cache.ttl=30 -Dnetworkaddress.cache.negative.ttl=10"
     livenessProbe:
       httpGet:
         path: /
