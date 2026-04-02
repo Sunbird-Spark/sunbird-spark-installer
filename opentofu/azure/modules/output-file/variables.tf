@@ -31,6 +31,7 @@ variable "storage_container_private" {
 variable "storage_account_primary_access_key" {
   type        = string
   description = "Storage account primary access key."
+  default     = ""
 }
 
 variable "base_location" {
@@ -62,3 +63,16 @@ variable "velero_container_name" {
   type        = string
   default     = ""
 }
+
+variable "azure_client_id" {
+  type        = string
+  description = "Client ID of the user-assigned managed identity for Workload Identity (for Azure blob storage access). Required when cloud_storage_provider is 'azure'."
+  default     = ""
+}
+
+variable "k8s_service_account_name" {
+  type        = string
+  description = "Name of the Kubernetes service account for Workload Identity (created by workload-identity module)."
+  default     = "azure-managed-identity-sa"
+}
+

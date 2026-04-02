@@ -145,7 +145,6 @@ commonAnnotations:
 
 global:
   cloud_storage_access_key: "" # not using anywhere
-  cloud_storage_secret_key: "" # not using anywhere
 
 provisioningAnnotations:
   "helm.sh/hook-weight": "-4"

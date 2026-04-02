@@ -5,7 +5,7 @@ knowlg_automation_repo_branch: main
 channel: &channel
   default: "in.ekstep"
 
-content:
+knowlg:
   opa_enabled: true
 
 provisioningAnnotations: &provisioningAnnotations

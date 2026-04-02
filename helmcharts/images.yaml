@@ -339,4 +339,4 @@ global:
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v0.5_0254304"
+    tag: "spark-v0.6_3734950"
