@@ -1,4 +1,3 @@
-# For local development
 terraform {
   source = "../../modules//upload-files/"
 }
@@ -8,6 +7,13 @@ locals {
   storage_account_name   = local.global_vars.global.azure_storage_account_name
   storage_container_public = local.global_vars.global.azure_storage_container_public
   storage_account_key    = local.global_vars.global.azure_storage_account_key
+}
+
+dependency "workload_identity" {
+  config_path = "../workload-identity"
+  mock_outputs = {
+    deployer_role_ready = "mock"
+  }
 }
 
 inputs = {

@@ -1,24 +1,60 @@
 // schema_init.groovy
-// Purpose: Initialize JanusGraph Schema & Indexes BEFORE data load.
-// Usage: docker exec sunbird_janusgraph ./bin/gremlin.sh -e /tmp/schema_init.groovy
-
-import org.janusgraph.core.JanusGraphFactory
+// Purpose: Initialize JanusGraph Schema & Indexes on server startup.
+// Loaded via ScriptFileGremlinPlugin in gremlin-server.yaml — runs inside the
+// gremlin server's own JanusGraph instance, avoiding the two-instance coordination
+// delay that causes INSTALLED→REGISTERED to stall.
 import org.janusgraph.core.schema.SchemaAction
 import org.janusgraph.core.schema.SchemaStatus
 import org.janusgraph.core.Cardinality
 import org.janusgraph.core.Multiplicity
 import org.apache.tinkerpop.gremlin.structure.Vertex
-import org.apache.tinkerpop.gremlin.structure.Direction
+import java.time.temporal.ChronoUnit
 
-// 1. Connect to Graph
-// Uses standard container configuration (assuming /opt/janusgraph/conf/janusgraph-cql-server.properties or similar is default)
-// If running from inside container with Environment variables set:
-jg = JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph.properties')
+// 1. Connect to graph.
+// When loaded via ScriptFileGremlinPlugin at server startup, 'graph' is already
+// bound by the gremlin server — use it directly (single instance, no coordination delay).
+// When run via gremlin.sh -e in the schema-init Job, 'graph' is not bound —
+// fall back to a direct connection for post-deploy verification.
+isServerContext = false
+try {
+    jg = graph
+    isServerContext = true
+    println "Running in gremlin server context (ScriptFileGremlinPlugin)."
+} catch (MissingPropertyException e) {
+    jg = org.janusgraph.core.JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph.properties')
+    println "Running in schema-init Job context (verification only)."
+}
+
+// 2. Force-close stale JanusGraph instances left by previous failed runs.
+// ONLY safe to run from server context — in Job context the live gremlin server
+// instance would appear as "non-current" and get incorrectly force-closed.
+if (isServerContext) {
+    println "Checking for stale JanusGraph instances..."
+    mgmtClean = jg.openManagement()
+    try {
+        def openInstances = mgmtClean.getOpenInstances()
+        println "Registered instances: ${openInstances}"
+        openInstances.each { instance ->
+            if (!instance.endsWith("(current)")) {
+                println "Force-closing stale instance: $instance"
+                mgmtClean.forceCloseInstance(instance)
+            }
+        }
+        mgmtClean.commit()
+        println "Stale instance cleanup complete."
+    } catch (Exception e) {
+        mgmtClean.rollback()
+        println "Warning: stale instance cleanup failed (non-fatal): ${e.message}"
+    }
+} else {
+    println "Skipping stale instance cleanup (Job context — server instance must not be disturbed)."
+}
+
 mgmt = jg.openManagement()
 
 println "--- STARTING SCHEMA INITIALIZATION ---"
 
-// 2. Define Property Keys
+// 3. Define Property Keys
 // Helper closure to create property if missing
 makeProperty = { key, dataType, cardinality ->
     if (!mgmt.containsPropertyKey(key)) {
@@ -61,10 +97,8 @@ makeProperty('compatibilityLevel', Integer.class, Cardinality.SINGLE)
 makeProperty('osId', String.class, Cardinality.SINGLE)
 makeProperty('language', String.class, Cardinality.LIST)
 
-// ... (Add other common properties as needed)
 
-
-// 3. Define Vertex Labels
+// 4. Define Vertex Labels
 makeVLabel = { name ->
     if (!mgmt.containsVertexLabel(name)) {
         println "Creating VertexLabel: $name"
@@ -86,7 +120,7 @@ makeVLabel('Asset')
 makeVLabel('Domain')
 makeVLabel('Dimension')
 
-// 4. Define Edge Labels
+// 5. Define Edge Labels
 makeELabel = { name, multiplicity ->
     if (!mgmt.containsEdgeLabel(name)) {
         println "Creating EdgeLabel: $name"
@@ -97,13 +131,16 @@ makeELabel = { name, multiplicity ->
 makeELabel('hasSequenceMember', Multiplicity.MULTI)
 makeELabel('associatedTo', Multiplicity.MULTI)
 
-// 5. Define Indexes (CRITICAL: Index-First Strategy)
-// Helper for Composite Index
+// 6. Define Indexes (CRITICAL: Index-First Strategy)
+// allIndexNames is the single source of truth — used both for creation and for
+// the enable/await phases below. Add new indexes here and nowhere else.
+allIndexNames = []
+
 makeCompositeIndex = { name, keyName, unique ->
+    allIndexNames << name
     if (!mgmt.containsGraphIndex(name)) {
         println "Creating Composite Index: $name (Unique: $unique)"
         def builder = mgmt.buildIndex(name, Vertex.class)
-        // Handle index creation
         def key = mgmt.getPropertyKey(keyName)
         if (key) {
            builder.addKey(key)
@@ -118,10 +155,10 @@ makeCompositeIndex = { name, keyName, unique ->
     }
 }
 
-// 5a. Unique Indexes
+// 6a. Unique Indexes
 makeCompositeIndex('byUniqueId', 'IL_UNIQUE_ID', true)
 
-// 5b. Non-Unique Indexes (Explicitly forcing 'byCode' to be non-unique)
+// 6b. Non-Unique Indexes
 makeCompositeIndex('byCode', 'code', false)
 makeCompositeIndex('byIdentifier', 'identifier', false)
 makeCompositeIndex('byChannel', 'channel', false)
@@ -129,35 +166,143 @@ makeCompositeIndex('byFramework', 'framework', false)
 makeCompositeIndex('byMimeType', 'mimeType', false)
 makeCompositeIndex('byContentType', 'contentType', false)
 makeCompositeIndex('byVisibility', 'visibility', false)
-makeCompositeIndex('byObjectTypeAndStatus', 'IL_FUNC_OBJECT_TYPE', false) // Note: Simplified to single key for base
+makeCompositeIndex('byObjectTypeAndStatus', 'IL_FUNC_OBJECT_TYPE', false)
 makeCompositeIndex('byNodeType', 'IL_SYS_NODE_TYPE', false)
 
-// 6. Commit Changes
+// 7. Commit Changes
 println "Committing Transaction..."
 mgmt.commit()
 
-// 7. Verify & Wait for REGISTERED/ENABLED status
-println "Waiting for Index Registration..."
-waitIndex = { indexName ->
+// 8. Explicitly register any indexes still at INSTALLED
+println "Registering INSTALLED indexes..."
+mgmtR = jg.openManagement()
+registerFailed = false
+allIndexNames.each { indexName ->
     try {
-        def index = mgmt.getGraphIndex(indexName)
-        if (index) {
-            def status = index.getIndexStatus(index.getFieldKeys()[0])
-            if (status == SchemaStatus.ENABLED || status == SchemaStatus.REGISTERED) {
-                println "Index $indexName is already $status."
-                return
+        def idx = mgmtR.getGraphIndex(indexName)
+        if (idx) {
+            def status = idx.getIndexStatus(idx.getFieldKeys()[0])
+            if (status == SchemaStatus.INSTALLED) {
+                println "Registering index: $indexName (currently INSTALLED)"
+                mgmtR.updateIndex(idx, SchemaAction.REGISTER_INDEX).get()
+            } else {
+                println "Index $indexName is already $status — skipping register."
             }
+        } else {
+            println "ERROR: Index $indexName not found during registration."
+            registerFailed = true
         }
-        println "Waiting for index $indexName to reach REGISTERED status..."
-        org.janusgraph.graphdb.database.management.ManagementSystem.awaitGraphIndexStatus(jg, indexName).status(SchemaStatus.REGISTERED).call()
-        println "Index $indexName wait complete."
     } catch (Exception e) {
-        println "Notice: Index $indexName status check completed: ${e.message}"
+        println "ERROR: Could not register index $indexName: ${e.message}"
+        registerFailed = true
+    }
+}
+if (registerFailed) {
+    mgmtR.rollback()
+    throw new RuntimeException("One or more indexes failed to register — rolled back. Check errors above.")
+}
+mgmtR.commit()
+println "Registration committed."
+
+// 9. Wait for all indexes to reach REGISTERED (or ENABLED if already there)
+println "Waiting for all indexes to reach REGISTERED status..."
+allIndexNames.each { indexName ->
+    try {
+        println "Awaiting REGISTERED for index: $indexName ..."
+        def report = org.janusgraph.graphdb.database.management.ManagementSystem
+            .awaitGraphIndexStatus(jg, indexName)
+            .status(SchemaStatus.REGISTERED, SchemaStatus.ENABLED)
+            .timeout(5L, ChronoUnit.MINUTES)
+            .call()
+        if (report.getSucceeded()) {
+            println "Index $indexName reached REGISTERED or ENABLED."
+        } else {
+            throw new RuntimeException("Index $indexName did not reach REGISTERED within timeout: ${report}")
+        }
+    } catch (RuntimeException e) {
+        throw e
+    } catch (Exception e) {
+        throw new RuntimeException("Index $indexName failed to reach REGISTERED: ${e.message}", e)
     }
 }
 
-waitIndex('byUniqueId')
-waitIndex('byCode')
-waitIndex('byIdentifier')
+// 10. Enable all indexes that are still in REGISTERED state
+println "Enabling all REGISTERED indexes..."
+mgmt2 = jg.openManagement()
+enableFailed = false
+allIndexNames.each { indexName ->
+    try {
+        def idx = mgmt2.getGraphIndex(indexName)
+        if (idx) {
+            def status = idx.getIndexStatus(idx.getFieldKeys()[0])
+            if (status == SchemaStatus.REGISTERED) {
+                println "Enabling index: $indexName (currently REGISTERED)"
+                mgmt2.updateIndex(idx, SchemaAction.ENABLE_INDEX).get()
+            } else {
+                println "Index $indexName is already $status — skipping enable."
+            }
+        } else {
+            println "ERROR: Index $indexName not found."
+            enableFailed = true
+        }
+    } catch (Exception e) {
+        println "ERROR: Could not enable index $indexName: ${e.message}"
+        enableFailed = true
+    }
+}
+if (enableFailed) {
+    mgmt2.rollback()
+    throw new RuntimeException("One or more indexes failed to enable — rolled back. Check errors above.")
+}
+mgmt2.commit()
+println "Enable actions committed."
+
+// 11. Wait for all indexes to reach ENABLED
+println "Waiting for all indexes to reach ENABLED status..."
+enabledFailed = false
+allIndexNames.each { indexName ->
+    try {
+        println "Awaiting ENABLED for index: $indexName ..."
+        def report = org.janusgraph.graphdb.database.management.ManagementSystem
+            .awaitGraphIndexStatus(jg, indexName)
+            .status(SchemaStatus.ENABLED)
+            .timeout(5L, ChronoUnit.MINUTES)
+            .call()
+        if (report.getSucceeded()) {
+            println "Index $indexName is ENABLED."
+        } else {
+            println "ERROR: Index $indexName did not reach ENABLED within timeout: ${report}"
+            enabledFailed = true
+        }
+    } catch (Exception e) {
+        println "ERROR: awaitGraphIndexStatus ENABLED for $indexName: ${e.message}"
+        enabledFailed = true
+    }
+}
+
+// 12. Final status report
+println "--- FINAL INDEX STATUS REPORT ---"
+mgmt3 = jg.openManagement()
+try {
+    allIndexNames.each { indexName ->
+        try {
+            def idx = mgmt3.getGraphIndex(indexName)
+            if (idx) {
+                def status = idx.getIndexStatus(idx.getFieldKeys()[0])
+                println "Index $indexName: $status"
+            } else {
+                println "Index $indexName: NOT FOUND"
+            }
+        } catch (Exception e) {
+            println "Index $indexName: ERROR - ${e.message}"
+        }
+    }
+} finally {
+    mgmt3.rollback()
+}
+
+if (enabledFailed) {
+    throw new RuntimeException("One or more indexes did not reach ENABLED status. Check errors above.")
+}
 
 println "--- SCHEMA INITIALIZATION COMPLETE ---"
