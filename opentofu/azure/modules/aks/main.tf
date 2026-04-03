@@ -37,9 +37,10 @@ provider "azurerm" {
     }
 
     network_profile {
-      network_plugin = var.network_plugin
-      service_cidr   = var.service_cidr
-      dns_service_ip = var.dns_service_ip
+      network_plugin      = var.network_plugin
+      network_plugin_mode = "overlay"
+      service_cidr        = var.service_cidr
+      dns_service_ip      = var.dns_service_ip
     }
 
     # Use System-Assigned Managed Identity

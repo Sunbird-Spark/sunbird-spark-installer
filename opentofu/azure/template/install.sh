@@ -17,16 +17,32 @@ function backup_configs() {
     export KUBECONFIG=~/.kube/config
 }
 
+function deploy_tf_module() {
+    local module=$1
+    echo -e "\nDeploying module: $module"
+    cd $module
+    terragrunt init --reconfigure
+    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    cd ..
+}
+
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    export TG_TF_PATH=tofu
-    tofu init -reconfigure
-    terragrunt init --all --reconfigure --non-interactive
-    # terragrunt plan --all --non-interactive
-    terragrunt run --all apply --non-interactive
+    # storage is skipped (skip = true in storage/terragrunt.hcl) — reusing existing
+    deploy_tf_module network
+    deploy_tf_module aks
+    deploy_tf_module workload-identity
+    deploy_tf_module random_passwords
+    deploy_tf_module output-file
+    deploy_tf_module keys
+    echo -e "\nUpdate global-cloud-values.yaml with real storage values, then run:"
+    echo -e "  ./install.sh deploy_tf_module upload-files"
+    echo -e "  ./install.sh deploy_tf_module workload-identity"
     chmod 600 ~/.kube/config
 }
+
+
 function certificate_keys() {
     #  # If keys already present in global-values.yaml → skip writing
     if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/azure/$environment/global-values.yaml 2>/dev/null; then
@@ -264,15 +280,15 @@ if [ $# -eq 0 ]; then
     create_tf_backend
     backup_configs
     create_tf_resources
-    cd ../../../helmcharts
-    install_helm_components
-    cd ../terraform/azure/$environment
-    restart_workloads_using_keys
-    certificate_config
-    dns_mapping
-    generate_postman_env
-    run_post_install
-    create_client_forms
+    # cd ../../../helmcharts
+    # install_helm_components
+    # cd ../terraform/azure/$environment
+    # restart_workloads_using_keys
+    # certificate_config
+    # dns_mapping
+    # generate_postman_env
+    # run_post_install
+    # create_client_forms
 else
     case "$1" in
     "create_tf_backend")

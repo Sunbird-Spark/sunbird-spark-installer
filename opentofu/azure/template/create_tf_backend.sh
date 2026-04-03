@@ -35,7 +35,7 @@ ID=$(az account show | jq -r .tenantId | cut -d '-' -f1)
 SUBSCRIPTION_ID=$(az account show | jq -r .id)
 
 # Construct resource names
-RESOURCE_GROUP_NAME="${building_block}-${environment_name}"
+RESOURCE_GROUP_NAME="ed-sandbox"
 STORAGE_ACCOUNT_NAME="${environment_name}tfstate$ID"
 CONTAINER_NAME="${environment_name}tfstate"
 
@@ -45,12 +45,17 @@ echo "STORAGE_ACCOUNT_NAME: $STORAGE_ACCOUNT_NAME"
 echo "CONTAINER_NAME: $CONTAINER_NAME"
 echo "SUBSCRIPTION_ID: $SUBSCRIPTION_ID"
 
-# Create resource group
-az group create --name "$RESOURCE_GROUP_NAME" --location "$location"
+# Create resource group only if it does not already exist
+if az group show --name "$RESOURCE_GROUP_NAME" &>/dev/null; then
+  echo "Resource group '$RESOURCE_GROUP_NAME' already exists — skipping creation."
+else
+  az group create --name "$RESOURCE_GROUP_NAME" --location "$location"
+fi
 
 # Create the storage account
 az storage account create --resource-group "$RESOURCE_GROUP_NAME" \
-  --name "$STORAGE_ACCOUNT_NAME" --sku Standard_LRS --encryption-services blob
+  --name "$STORAGE_ACCOUNT_NAME" --sku Standard_LRS --encryption-services blob \
+  --min-tls-version TLS1_2
 
 # Create the blob container
 az storage container create --name "$CONTAINER_NAME" --account-name "$STORAGE_ACCOUNT_NAME"

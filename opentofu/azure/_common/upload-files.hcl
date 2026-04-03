@@ -2,12 +2,12 @@ terraform {
   source = "../../modules//upload-files/"
 }
 
-dependency "storage" {
-    config_path = "../storage"
-    mock_outputs = {
-      azurerm_storage_account_name = "dummy-account"
-      azurerm_storage_container_public = "dummy-container-public"
-    }
+locals {
+  global_vars            = yamldecode(file(find_in_parent_folders("global-values.yaml")))
+  cloud_vars             = yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml"))
+  storage_account_name   = local.cloud_vars.global.cloud_storage_access_key
+  storage_container_public = local.cloud_vars.global.public_container_name
+  storage_account_key    = local.cloud_vars.global.cloud_storage_secret_key
 }
 
 dependency "workload_identity" {
@@ -18,6 +18,7 @@ dependency "workload_identity" {
 }
 
 inputs = {
-  storage_account_name            = dependency.storage.outputs.azurerm_storage_account_name
-  storage_container_public        = dependency.storage.outputs.azurerm_storage_container_public
+  storage_account_name               = local.storage_account_name
+  storage_container_public           = local.storage_container_public
+  storage_account_primary_access_key = local.storage_account_key
 }
