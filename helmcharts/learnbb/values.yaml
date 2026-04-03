@@ -160,7 +160,7 @@ keycloak-kids-keys:
 flink:
   enabled: true
 
-adminutil:
+adminutils:
   enabled: true
 
 cert:
