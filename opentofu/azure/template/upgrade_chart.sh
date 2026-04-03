@@ -4,6 +4,7 @@
 #
 # Usage (run from your environment directory):
 #   ./upgrade_chart.sh <bundle> <chart>
+#   ./upgrade_chart.sh <bundle> _jobs
 #
 # Examples:
 #   ./upgrade_chart.sh learnbb lern
@@ -13,6 +14,9 @@
 #   ./upgrade_chart.sh edbb kong
 #   ./upgrade_chart.sh knowledgebb knowlg
 #   ./upgrade_chart.sh knowledgebb search
+#   ./upgrade_chart.sh learnbb _jobs
+#   ./upgrade_chart.sh edbb _jobs
+#   ./upgrade_chart.sh knowledgebb _jobs
 #
 # How it works:
 #   Phase A — No existing Helm release for the bundle:
@@ -25,6 +29,13 @@
 #     (all previously deployed charts remain untouched), then adds
 #     --set <target>.enabled=true to bring up or update only the target chart.
 #
+#   _jobs mode — Run only the Jobs/ConfigMaps in <bundle>/templates/:
+#     Disables every conditional subchart so their templates are never evaluated
+#     (prevents lookup/render errors from subcharts like nginx-public-ingress).
+#     Uses helm template (dry-run) to render only the umbrella templates/ files,
+#     then pipes to kubectl apply. The Helm release state is never modified and
+#     no running service is restarted or affected.
+#
 # Note: install.sh is not modified. All existing install.sh functionality is unchanged.
 
 set -euo pipefail
@@ -33,7 +44,7 @@ set -euo pipefail
 # Validate arguments
 # ---------------------------------------------------------------------------
 if [ $# -ne 2 ]; then
-    echo "Usage: ./upgrade_chart.sh <bundle> <chart>"
+    echo "Usage: ./upgrade_chart.sh <bundle> <chart|_jobs>"
     echo ""
     echo "Bundles and their available charts:"
     echo "  learnbb     — lern, keycloak, keycloak-kids-keys, flink, adminutil,"
@@ -47,6 +58,11 @@ if [ $# -ne 2 ]; then
     echo "  obsrvbb     — telemetry, superset, kafka, yugabyte"
     echo "  additional  — nlweb, nlwebflink, velero, volume-autoscaler"
     echo "  monitoring  — (deploy the full bundle via install.sh install_component)"
+    echo ""
+    echo "Special chart name:"
+    echo "  _jobs       — apply only Jobs/ConfigMaps from <bundle>/templates/."
+    echo "                No subcharts are deployed. No Helm release state is modified."
+    echo "                No running service is restarted or affected."
     exit 1
 fi
 
@@ -65,14 +81,18 @@ if [ "$(basename "$current_directory")" != "helmcharts" ]; then
     cd ../../../helmcharts 2>/dev/null || true
 fi
 
-# Verify the bundle and chart exist
+# Verify the bundle exists
 if [ ! -d "$bundle" ]; then
     echo "Error: bundle '$bundle' not found in helmcharts/"
     exit 1
 fi
-if [ ! -d "$bundle/charts/$target_chart" ] && ! ls "$bundle/charts/$target_chart"-*.tgz &>/dev/null 2>&1; then
-    echo "Error: chart '$target_chart' not found in helmcharts/$bundle/charts/"
-    exit 1
+
+# For regular charts (not _jobs) verify the chart exists as a directory or .tgz
+if [ "$target_chart" != "_jobs" ]; then
+    if [ ! -d "$bundle/charts/$target_chart" ] && ! ls "$bundle/charts/$target_chart"-*.tgz &>/dev/null 2>&1; then
+        echo "Error: chart '$target_chart' not found in helmcharts/$bundle/charts/"
+        exit 1
+    fi
 fi
 
 # ---------------------------------------------------------------------------
@@ -93,6 +113,51 @@ if [ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.
     fi
 fi
 
+
+# ---------------------------------------------------------------------------
+# _jobs mode — apply only umbrella Jobs/ConfigMaps without touching any subchart
+# ---------------------------------------------------------------------------
+if [ "$target_chart" = "_jobs" ]; then
+    echo -e "\nRunning provision jobs for '$bundle' (_jobs mode)"
+    echo "  Helm release state will NOT be modified"
+    echo "  No running service will be restarted or affected"
+
+    # Disable every conditional subchart so Helm skips their templates entirely.
+    # This prevents errors from subcharts that contain cluster-dependent calls
+    # (e.g. nginx-public-ingress uses a kube-dns lookup during template rendering).
+    disable_flags=""
+    while IFS= read -r chart_name; do
+        disable_flags="$disable_flags --set ${chart_name}.enabled=false"
+    done < <(yq '.dependencies[] | select(has("condition")) | .name' "$bundle/Chart.yaml")
+
+    # Build -s flags pointing to every file in bundle/templates/ so only those
+    # resources appear in the helm template output.
+    show_flags=""
+    while IFS= read -r f; do
+        show_flags="$show_flags -s $f"
+    done < <(find "$bundle/templates" \( -name "*.yaml" -o -name "*.yml" \) 2>/dev/null \
+             | sed "s|^$bundle/||" | sort)
+
+    if [ -z "$show_flags" ]; then
+        echo "No template files found in $bundle/templates/ — nothing to apply"
+        exit 0
+    fi
+
+    helm template "$bundle" "$bundle" \
+        --namespace sunbird \
+        $ed_values_flag \
+        $addon_values_flag \
+        -f images.yaml \
+        -f "global-resources.yaml" \
+        -f "../opentofu/azure/$environment/global-values.yaml" \
+        -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
+        $disable_flags \
+        $show_flags \
+        | kubectl apply -f - --namespace sunbird
+
+    echo -e "\nDone — provision jobs applied for '$bundle'"
+    exit 0
+fi
 
 # ---------------------------------------------------------------------------
 # Phase A / Phase B — check if the bundle's Helm release already exists
