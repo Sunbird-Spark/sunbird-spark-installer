@@ -1,13 +1,9 @@
 locals {
-  global_vars              = yamldecode(file(find_in_parent_folders("global-values.yaml")))
-  environment              = local.global_vars.global.environment
-  building_block           = local.global_vars.global.building_block
-  subscription_id          = local.global_vars.global.subscription_id
-  location                 = local.global_vars.global.cloud_storage_region
-  storage_account_resource_id = local.global_vars.global.storage_account_resource_id
-  storage_container_public    = local.global_vars.global.storage_container_public
-  storage_container_private   = local.global_vars.global.storage_container_private
-  storage_velero_container    = local.global_vars.global.storage_velero_container
+  global_vars     = yamldecode(file(find_in_parent_folders("global-values.yaml")))
+  environment     = local.global_vars.global.environment
+  building_block  = local.global_vars.global.building_block
+  subscription_id = local.global_vars.global.subscription_id
+  location        = local.global_vars.global.cloud_storage_region
 }
 
 terraform {
@@ -32,6 +28,17 @@ dependency "aks" {
   }
 }
 
+dependency "storage" {
+  config_path = "../storage"
+  mock_outputs = {
+    azurerm_storage_account_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dummy-rg/providers/Microsoft.Storage/storageAccounts/dummy"
+    azurerm_storage_container_public    = "dummy-public"
+    azurerm_storage_container_private   = "dummy-private"
+    azurerm_velero_container_name       = "dummy-velero"
+  }
+  mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
+}
 
 inputs = {
   environment                        = local.environment
@@ -40,14 +47,14 @@ inputs = {
   location                           = local.location
   resource_group_name                = dependency.network.outputs.resource_group_name
   oidc_issuer_url                    = dependency.aks.outputs.oidc_issuer_url
-  storage_account_id                 = local.storage_account_resource_id
+  storage_account_id                 = dependency.storage.outputs.azurerm_storage_account_resource_id
   kubernetes_host                    = dependency.aks.outputs.kubernetes_host
   kubernetes_client_certificate      = dependency.aks.outputs.client_certificate
   kubernetes_client_key              = dependency.aks.outputs.client_key
   kubernetes_cluster_ca_certificate  = dependency.aks.outputs.cluster_ca_certificate
   container_names = [
-    local.storage_container_public,
-    local.storage_container_private,
-    local.storage_velero_container,
+    dependency.storage.outputs.azurerm_storage_container_public,
+    dependency.storage.outputs.azurerm_storage_container_private,
+    dependency.storage.outputs.azurerm_velero_container_name,
   ]
 }
