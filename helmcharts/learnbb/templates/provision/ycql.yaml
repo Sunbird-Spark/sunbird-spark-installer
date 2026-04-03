@@ -7,7 +7,7 @@ metadata:
     app: {{ .Chart.Name }}-yugabytecql-migration
     scope: provisioning
   annotations:
-    {{.Values.global.yugabyte.provisioning.annotations | toYaml }}
+    {{- .Values.global.yugabyte.provisioning.annotations | toYaml | nindent 4 }}
 spec:
   template:
     metadata:

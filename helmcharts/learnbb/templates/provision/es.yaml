@@ -8,7 +8,7 @@ metadata:
     app: {{ .Chart.Name }}-elasticsearch-migration
     scope: provisioning
   annotations:
-    {{.Values.global.elasticsearch.provisioning.annotations | toYaml }}
+    {{- .Values.global.elasticsearch.provisioning.annotations | toYaml | nindent 4 }}
 spec:
   template:
     metadata:
