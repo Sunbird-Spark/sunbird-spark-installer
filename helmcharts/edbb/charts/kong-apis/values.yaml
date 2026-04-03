@@ -134,7 +134,6 @@ observability_prefix: /observability
 knowledge_mw_service_url: "http://knowledge-mw-service:5000"
 userorg_service_url: "http://lern-service:9000"
 dial_service_url: "http://dial-service:9000"
-learning_service_url: "http://learning:8080/learning-service"
 telemetry_service_url: "http://telemetry-service:9001"
 player_service_url: "http://player:3000"
 echo_service_url: "http://echo:9595"

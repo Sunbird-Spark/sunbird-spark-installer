@@ -56,7 +56,6 @@ inputs = {
   storage_container_public           = dependency.storage.outputs.gcp_public_container_name
   storage_container_private          = dependency.storage.outputs.gcp_private_container_name
   private_ingressgateway_ip          = dependency.gke.outputs.private_ingressgateway_ip
-  encryption_string                  = dependency.keys.outputs.encryption_string
   random_string                      = dependency.keys.outputs.random_string
   cloud_storage_region               = local.region
   dial_state_container_public        = dependency.storage.outputs.gcp_dial_state_container_public

@@ -14,14 +14,6 @@ resource "random_password" "generated_string" {
   lower   = true         # Include lowercase letters
   numeric = true         # Include numbers
 }
-resource "random_password" "encryption_string" {
-  length  = 32          # Length of the string (can be between 32)
-  special = false        # Do not include special characters
-  upper   = true         # Include uppercase letters
-  lower   = true         # Include lowercase letters
-  numeric = true         # Include numbers
-}
-
 
 resource "null_resource" "generate_jwt_keys" {
   triggers = {
