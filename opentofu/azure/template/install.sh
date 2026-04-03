@@ -21,8 +21,8 @@ function deploy_tf_module() {
     local module=$1
     echo -e "\nDeploying module: $module"
     cd $module
-    terragrunt init --reconfigure --non-interactive
-    terragrunt apply --non-interactive
+    terragrunt init --reconfigure
+    terragrunt apply --auto-approve
     cd ..
 }
 
