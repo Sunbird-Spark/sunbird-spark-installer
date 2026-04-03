@@ -19,6 +19,8 @@ dependency "storage" {
       azurerm_storage_container_public = "dummy-container-public"
       azurerm_storage_container_private = "dummy-container-private"
     }
+    mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
+    mock_outputs_merge_strategy_with_state  = "shallow"
 }
 
 dependency "workload_identity" {
