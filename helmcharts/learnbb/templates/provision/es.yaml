@@ -74,6 +74,10 @@ spec:
                   curl  -X PUT http://{{.Values.global.elasticsearch.host}}:{{.Values.global.elasticsearch.port}}/${file}/_mapping -H 'Content-Type: application/json' -d @${file}-mapping.json
           done
 
+          #### Updating the userv3 index mapping with additional fields:
+          echo "#################################################"
+          curl -X PUT "http://{{.Values.global.elasticsearch.host}}:{{.Values.global.elasticsearch.port}}/userv3/_mapping" -H 'Content-Type: application/json' -d '{"properties":{"createdAt":{"type":"date","format":"yyyy-MM-dd"}}}'
+
           #### Adding ingest pipeline for newly created indices:
 
           echo "#################################################"
