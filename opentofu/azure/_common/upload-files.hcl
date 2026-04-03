@@ -4,9 +4,10 @@ terraform {
 
 locals {
   global_vars            = yamldecode(file(find_in_parent_folders("global-values.yaml")))
-  storage_account_name   = local.global_vars.global.azure_storage_account_name
-  storage_container_public = local.global_vars.global.azure_storage_container_public
-  storage_account_key    = local.global_vars.global.azure_storage_account_key
+  cloud_vars             = yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml"))
+  storage_account_name   = local.cloud_vars.global.cloud_storage_access_key
+  storage_container_public = local.cloud_vars.global.public_container_name
+  storage_account_key    = local.cloud_vars.global.cloud_storage_secret_key
 }
 
 dependency "workload_identity" {
