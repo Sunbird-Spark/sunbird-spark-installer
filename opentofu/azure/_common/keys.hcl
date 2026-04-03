@@ -4,6 +4,9 @@ locals {
   global_vars  = yamldecode(file(find_in_parent_folders("global-values.yaml")))
   environment  = local.global_vars.global.environment
   building_block = local.global_vars.global.building_block
+  storage_account_name      = local.global_vars.global.storage_account_name
+  storage_container_public  = local.global_vars.global.storage_container_public
+  storage_container_private = local.global_vars.global.storage_container_private
   # random_string  = local.environment_vars.locals.random_string 
 }
 
@@ -12,16 +15,6 @@ terraform {
   source = "../../modules//keys/"
 }
 
-dependency "storage" {
-    config_path = "../storage"
-    mock_outputs = {
-      azurerm_storage_account_name = "dummy-account"
-      azurerm_storage_container_public = "dummy-container-public"
-      azurerm_storage_container_private = "dummy-container-private"
-    }
-    mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
-    mock_outputs_merge_strategy_with_state  = "shallow"
-}
 
 dependency "workload_identity" {
   config_path = "../workload-identity"
@@ -33,8 +26,8 @@ dependency "workload_identity" {
 inputs = {
   environment                        = local.environment
   building_block                     = local.building_block
-  storage_account_name               = dependency.storage.outputs.azurerm_storage_account_name
-  storage_container_public           = dependency.storage.outputs.azurerm_storage_container_public
-  storage_container_private          = dependency.storage.outputs.azurerm_storage_container_private
+  storage_account_name               = local.storage_account_name
+  storage_container_public           = local.storage_container_public
+  storage_container_private          = local.storage_container_private
   # random_string                    = local.random_string
 }
