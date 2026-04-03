@@ -1,6 +1,6 @@
 locals {
   global_vars  = yamldecode(file(find_in_parent_folders("global-values.yaml")))
-  cloud_vars   = yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml"))
+  cloud_vars   = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {global: {cloud_storage_access_key: "", cloud_storage_secret_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: ""}})
   env                    = local.global_vars.global.env
   environment            = local.global_vars.global.environment
   building_block         = local.global_vars.global.building_block
@@ -22,22 +22,24 @@ dependency "aks" {
     config_path = "../aks"
 }
 
-dependency "keys" {
-    config_path = "../keys"
-    mock_outputs = {
-      random_string     = "dummy-string"
-      encryption_string = "dummy-encryption-string"
-    }
-    mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
-}
-
 dependency "workload_identity" {
     config_path = "../workload-identity"
     mock_outputs = {
       client_id = "00000000-0000-0000-0000-000000000000"
     }
     mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
+    mock_outputs_merge_strategy_with_state  = "shallow"
 }
+
+dependency "keys" {
+    config_path = "../keys"
+    mock_outputs = {
+      random_string     = "dummy-string"
+      encryption_string = "dummy-encryption-string-padded00"
+    }
+    mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
+}
+
 
 inputs = {
   env                                = local.env
