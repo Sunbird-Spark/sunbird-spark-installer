@@ -323,6 +323,7 @@ CREATE TABLE IF NOT EXISTS sunbird.user (
     countrycode text,
     createdby text,
     createddate text,
+    createdat text,
     dob text,
     email text,
     emailverified boolean,
