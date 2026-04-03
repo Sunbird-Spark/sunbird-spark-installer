@@ -54,7 +54,8 @@ fi
 
 # Create the storage account
 az storage account create --resource-group "$RESOURCE_GROUP_NAME" \
-  --name "$STORAGE_ACCOUNT_NAME" --sku Standard_LRS --encryption-services blob
+  --name "$STORAGE_ACCOUNT_NAME" --sku Standard_LRS --encryption-services blob \
+  --min-tls-version TLS1_2
 
 # Create the blob container
 az storage container create --name "$CONTAINER_NAME" --account-name "$STORAGE_ACCOUNT_NAME"
