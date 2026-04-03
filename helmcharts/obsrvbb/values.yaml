@@ -79,3 +79,6 @@ yugabyte: &yugabyte
 global:
   kafka: *kafka
   yugabyte: *yugabyte
+
+telemetry:
+  enabled: true

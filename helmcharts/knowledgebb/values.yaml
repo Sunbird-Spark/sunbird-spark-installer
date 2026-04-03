@@ -6,6 +6,7 @@ channel: &channel
   default: "in.ekstep"
 
 knowlg:
+  enabled: true
   opa_enabled: false
 
 provisioningAnnotations: &provisioningAnnotations
@@ -207,3 +208,8 @@ global:
   schema: *schema
   yugabyte: *yugabyte
   dialservice: *dialservice
+search:
+  enabled: true
+
+flink:
+  enabled: true

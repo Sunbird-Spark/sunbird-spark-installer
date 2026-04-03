@@ -1,3 +1,4 @@
+{{- if .Values.elasticsearch.enabled }}
 # Remove composte index from here.
 apiVersion: batch/v1
 kind: Job
@@ -91,4 +92,4 @@ spec:
           do
                   curl  -X PUT http://{{.Values.global.elasticsearch.host}}:{{.Values.global.elasticsearch.port}}/_ingest/pipeline/${file}-ingest-pipeline -H 'Content-Type: application/json' -d @${file}-ingest-pipeline.json
           done
-  backoffLimit: 4
+  backoffLimit: 4{{- end }}

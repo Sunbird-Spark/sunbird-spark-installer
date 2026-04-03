@@ -1,3 +1,4 @@
+{{- if .Values.yugabyte.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -125,4 +126,4 @@ spec:
               run_sql_file "$sql_file" "sunbird" || true
             done
             echo "Sunbird-lern SQL migrations completed."
-  backoffLimit: 30
+  backoffLimit: 30{{- end }}
