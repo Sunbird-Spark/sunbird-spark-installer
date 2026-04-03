@@ -33,8 +33,8 @@ function create_tf_resources() {
     deploy_tf_module network
     deploy_tf_module aks
     deploy_tf_module random_passwords
-    deploy_tf_module keys
     deploy_tf_module output-file
+    deploy_tf_module keys
     echo -e "\nUpdate global-cloud-values.yaml with real storage values, then run:"
     echo -e "  ./install.sh deploy_tf_module upload-files"
     echo -e "  ./install.sh deploy_tf_module workload-identity"
