@@ -13,6 +13,11 @@ subjects:
   - kind: ServiceAccount
     namespace: {{ (include "base.namespace" $) }}
     name: {{ include "velero.serverServiceAccount" . }}
+  {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+  - kind: ServiceAccount
+    namespace: {{ (include "base.namespace" $) }}
+    name: {{ .Values.global.workload_identity_service_account_name }}
+  {{- end }}
 roleRef:
   kind: ClusterRole
   name: {{ .Values.rbac.clusterAdministratorName }}

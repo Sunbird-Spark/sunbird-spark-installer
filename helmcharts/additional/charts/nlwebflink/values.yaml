@@ -296,8 +296,6 @@ flink_jobs:
       python.executable: python3
       python.client.executable: python3
       python.files: /opt/flink/job/
-      # Azure Storage Configuration
-      fs.azure.account.key.{{ .Values.global.object_storage_endpoint }}: {{ .Values.global.cloud_storage_secret_key }}
       # Plugin configuration for cloud storage filesystems
       fs.allowed-fallback-filesystems: wasb,wasbs
     # Python Flink Job - no job_classname needed

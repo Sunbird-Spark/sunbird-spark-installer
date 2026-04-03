@@ -1,7 +1,11 @@
 [ownaccount]
 type = azureblob
 account = ${storage_account_name}
-key = ${storage_account_key}
+env_auth = true
+# Uses DefaultAzureCredential chain for authentication
+# Picks up: Azure CLI (az login), environment variables, managed identity, etc.
+# AZURE_CLIENT_ID env var helps select the specific managed identity
+# Developer must run: az login before tofu apply
 
 [sunbird]
 type = azureblob

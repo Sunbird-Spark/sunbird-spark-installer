@@ -57,18 +57,16 @@ velero:
   enabled: true
   credentials:
     useSecret: true
-    secretContents:
-      cloud: |
-        AZURE_STORAGE_ACCOUNT_NAME: {{ .Values.global.cloud_storage_access_key }}
-        AZURE_STORAGE_ACCOUNT_KEY: {{ .Values.global.cloud_storage_secret_key }}
+    # For non-Azure: secretContents are conditionally set in templates/velero-secret.yaml
+    # For Azure (Workload Identity): no secret needed, uses workload-identity SA instead
   configuration:
     backupStorageLocation:
       - name: default
         provider: "azure"
         bucket: backups
         config:
-          storageAccount: 
-          storageAccountKeyEnvVar: AZURE_STORAGE_ACCOUNT_KEY
+          storageAccount:
+          useAAD: "true"
     volumeSnapshotLocation:
       - name: default
         provider: "azure"

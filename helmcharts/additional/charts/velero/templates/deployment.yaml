@@ -39,6 +39,9 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/version: {{ .Chart.AppVersion }}
         helm.sh/chart: {{ include "velero.chart" . }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
         {{- if .Values.podLabels }}
           {{- toYaml .Values.podLabels | nindent 8 }}
         {{- end }}
@@ -64,7 +67,11 @@ spec:
       {{- end }}
     {{- end }}
       restartPolicy: Always
+      {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- else }}
       serviceAccountName: {{ include "velero.serverServiceAccount" . }}
+      {{- end }}
       {{- if .Values.priorityClassName }}
       priorityClassName: {{ include "velero.priorityClassName" . }}
       {{- end }}
@@ -213,7 +220,7 @@ spec:
           volumeMounts:
             - name: plugins
               mountPath: /plugins
-            {{- if .Values.credentials.useSecret }}
+            {{- if and .Values.credentials.useSecret (ne .Values.global.cloud_storage_provider "azure") }}
             - name: cloud-credentials
               mountPath: /credentials
             {{- end }}
@@ -232,10 +239,10 @@ spec:
               name: {{ .Values.credentials.extraSecretRef }}
         {{- end }}
           env:
-          {{- if eq .Values.global.cloud_storage_provider "azure" }}
-            - name: AZURE_STORAGE_ACCOUNT_KEY
-              value: {{ .Values.global.cloud_storage_secret_key }}
-          {{- end }}    
+          {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+            - name: AZURE_CLIENT_ID
+              value: {{ .Values.global.azure_client_id }}
+          {{- end }}
             - name: VELERO_SCRATCH_DIR
               value: /scratch
             - name: VELERO_NAMESPACE
@@ -245,7 +252,7 @@ spec:
                   fieldPath: metadata.namespace
             - name: LD_LIBRARY_PATH
               value: /plugins
-          {{- if .Values.credentials.useSecret }}
+          {{- if and .Values.credentials.useSecret (ne .Values.global.cloud_storage_provider "azure") }}
             - name: AWS_SHARED_CREDENTIALS_FILE
               value: /credentials/cloud
             - name: GOOGLE_APPLICATION_CREDENTIALS
@@ -283,7 +290,7 @@ spec:
         {{- end }}
 {{- end }}
       volumes:
-        {{- if .Values.credentials.useSecret }}
+        {{- if and .Values.credentials.useSecret (ne .Values.global.cloud_storage_provider "azure") }}
         - name: cloud-credentials
           secret:
             secretName: {{ include "velero.secretName" . }}

@@ -176,6 +176,9 @@ rc_bad_char_list: "char_list"
 
 cert_cloud_storage_type: "azure"
 cert_cloud_storage_secret: "{{ .Values.global.cloud_storage_secret_key }}"
+# TODO: enable workload identity for flink when ready
+# cert_cloud_storage_secret: ""
+# cert_cloud_storage_auth_type: "{{ .Values.global.cloud_storage_auth_type }}"
 cert_cloud_storage_key: "{{ .Values.global.cloud_storage_access_key }}"
 cert_cloud_storage_endpoint: ""
 cloud_storage_base_url: "https://{{ .Values.global.object_storage_endpoint }}"
@@ -415,11 +418,6 @@ flink_jobs:
       cert_domain_url = "https://{{ .Values.global.domain }}"
       user_read_api = "/private/user/v1/read"
       content_read_api = "/content/v3/read"
-      cert_container_name = "{{ .Values.global.public_container_name }}"
-      cert_cloud_storage_type = "{{ include "common.tplvalues.render" (dict "value" .Values.cert_cloud_storage_type "context" $) }}"
-      cert_cloud_storage_secret = "{{ include "common.tplvalues.render" (dict "value" .Values.cert_cloud_storage_secret "context" $) }}"
-      cert_cloud_storage_endpoint = "{{ .Values.cert_cloud_storage_endpoint }}"
-      cert_cloud_storage_key = "{{ include "common.tplvalues.render" (dict "value" .Values.cert_cloud_storage_key "context" $) }}"
       cloud_storage_base_url = "{{ include "common.tplvalues.render" (dict "value" .Values.cloud_storage_base_url "context" $) }}"
       cloud_store_base_path_placeholder = "{{ include "common.tplvalues.render" (dict "value" .Values.cloud_store_base_path_placeholder "context" $) | default "CLOUD_BASE_PATH" }}"
       content_cloud_storage_container = "{{ .Values.global.public_container_name }}"
@@ -435,7 +433,6 @@ flink_jobs:
       }
       assessment.metrics.supported.contenttype = ["SelfAssess"]
       enable.suppress.exception = "{{ include "common.tplvalues.render" (dict "value" .Values.collection_certificate_generator_enable_suppress_exception "context" $) }}"
-      enable.rc.certificate = "{{ include "common.tplvalues.render" (dict "value" .Values.collection_certificate_generator_enable_rc_certificate "context" $) }}"
       task.rc.badcharlist = "{{ include "common.tplvalues.render" (dict "value" .Values.collection_certificate_generator_rc_badcharlist "context" $) }}"
     flink-conf: |+
       jobmanager.memory.flink.size: 1024m
