@@ -22,7 +22,7 @@ function deploy_tf_module() {
     echo -e "\nDeploying module: $module"
     cd $module
     terragrunt init --reconfigure
-    terragrunt apply --auto-approve
+    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
     cd ..
 }
 
@@ -32,6 +32,7 @@ function create_tf_resources() {
     # storage is skipped (skip = true in storage/terragrunt.hcl) — reusing existing
     deploy_tf_module network
     deploy_tf_module aks
+    deploy_tf_module workload-identity
     deploy_tf_module random_passwords
     deploy_tf_module output-file
     deploy_tf_module keys
