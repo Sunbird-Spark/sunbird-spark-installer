@@ -30,9 +30,9 @@ function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
     # storage is skipped (skip = true in storage/terragrunt.hcl) — reusing existing
+    # workload-identity runs independently: ./install.sh deploy_tf_module workload-identity
     deploy_tf_module network
     deploy_tf_module aks
-    deploy_tf_module workload-identity
     deploy_tf_module keys
     deploy_tf_module random_passwords
     deploy_tf_module output-file
