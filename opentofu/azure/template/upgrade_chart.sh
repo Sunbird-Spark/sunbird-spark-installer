@@ -70,7 +70,7 @@ if [ ! -d "$bundle" ]; then
     echo "Error: bundle '$bundle' not found in helmcharts/"
     exit 1
 fi
-if [ ! -d "$bundle/charts/$target_chart" ]; then
+if [ ! -d "$bundle/charts/$target_chart" ] && ! ls "$bundle/charts/$target_chart"-*.tgz &>/dev/null 2>&1; then
     echo "Error: chart '$target_chart' not found in helmcharts/$bundle/charts/"
     exit 1
 fi
