@@ -735,7 +735,7 @@ init:
                     --lastname {{ .Values.init.adminUser.lastname }} \
                     --email {{ .Values.init.adminUser.email }} \
                     --password {{ .Values.global.superset.init.adminUser.password | default .Values.init.adminUser.password }}
-    
+
     echo "Ensuring password matches configuration..."
     superset fab reset-password \
                   --username {{ .Values.init.adminUser.username }} \

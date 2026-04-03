@@ -33,10 +33,6 @@ images:
     repository: "elasticsearch"
     tag: "7.10.2"
 
-  neo4j: &neo4j
-    repository: "sunbirded.azurecr.io/neo4j"
-    tag: "3.3.0"
-
   grafana: &grafana
     registry: "docker.io"
     repository: "grafana/grafana"
@@ -183,11 +179,6 @@ internal: &internal
 
   elasticsearch:
     image: *elasticsearch
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  neo4j:
-    image: *neo4j
     imagePullSecrets:
       - name: "registry-secret-name"
 
