@@ -1,3 +1,4 @@
+{{- if .Values.keycloak.enabled }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -11,3 +12,4 @@ data:
     PUBLIC KEY-----'
   REFRESH_TOKEN_KID: 199dc9a1-a81b-44d9-ba32-401b3c867aa1
   REFRESH_TOKEN_SECRET: V4ZEsi3w-qiUvNSUwPZXg7nXr-hwwMQ3dzD7hO3z60JsHiaHBR8Vw2x4UOdMHdCGps5PGUXOjhQyiO0MR8gLmQ
+{{- end }}
