@@ -156,8 +156,8 @@ images:
     tag: develop_cb093d4
 
   secor: &secor
-    repository: "docker.io/divyagovindaiah123/secor"
-    tag: "azuresdk"
+    repository: "sunbirded.azurecr.io/secor"
+    tag: "spark"
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
