@@ -6,8 +6,8 @@ locals {
   building_block         = local.global_vars.global.building_block
   subscription_id        = local.global_vars.global.subscription_id
   cloud_storage_provider = local.global_vars.global.cloud_storage_provider
-  storage_account_name   = local.cloud_vars.global.cloud_storage_access_key
-  storage_account_key    = local.cloud_vars.global.cloud_storage_secret_key
+  storage_account_name      = local.cloud_vars.global.cloud_storage_access_key
+  storage_account_key       = local.cloud_vars.global.cloud_storage_secret_key
   storage_container_public  = local.cloud_vars.global.public_container_name
   storage_container_private = local.cloud_vars.global.private_container_name
   velero_container_name     = local.cloud_vars.global.velero_storage_container_private
