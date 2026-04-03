@@ -44,7 +44,7 @@ spec:
             requests:
               cpu: 10m
               memory: 32Mi
-        {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
