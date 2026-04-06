@@ -44,13 +44,6 @@
         </div>
 
         <script>
-            var i18n = {
-                enterNewPassword: '${msg("newPasswordPlaceholder")?js_string}',
-                confirmNewPassword: '${msg("confirmPasswordPlaceholder")?js_string}',
-                passwordRequirements: '${msg("passwordRequirements")?js_string}',
-                passwordsDoNotMatch: '${msg("passwordsDoNotMatch")?js_string}',
-                fixFields: '${msg("fixHighlightedFields")?js_string}'
-            };
             function handleUpdateSubmit(e) {
                 e.preventDefault();
                 var p1El = document.getElementById('password-new');
@@ -58,11 +51,11 @@
                 var p1 = p1El ? String(p1El.value || '').trim() : '';
                 var p2 = p2El ? String(p2El.value || '').trim() : '';
                 if (!p1) {
-                    if (window.showToast) window.showToast('error', i18n.enterNewPassword);
+                    if (window.showToast) window.showToast('error', '${msg("newPasswordPlaceholder")?js_string}');
                     return false;
                 }
                 if (!p2) {
-                    if (window.showToast) window.showToast('error', i18n.confirmNewPassword);
+                    if (window.showToast) window.showToast('error', '${msg("confirmPasswordPlaceholder")?js_string}');
                     return false;
                 }
                 var hasLength = p1.length >= 8;
@@ -73,11 +66,11 @@
                 var noSpaces = /^\S*$/.test(p1);
                 var isComplex = hasLength && hasLower && hasUpper && hasNumber && hasSpecial && noSpaces;
                 if (!isComplex) {
-                    if (window.showToast) window.showToast('error', i18n.passwordRequirements);
+                    if (window.showToast) window.showToast('error', '${msg("passwordRequirements")?js_string}');
                     return false;
                 }
                 if (p1 !== p2) {
-                    if (window.showToast) window.showToast('error', i18n.passwordsDoNotMatch);
+                    if (window.showToast) window.showToast('error', '${msg("passwordsDoNotMatch")?js_string}');
                     return false;
                 }
                 var form = document.getElementById('kc-passwd-update-form');
@@ -85,7 +78,7 @@
                     try { sessionStorage.setItem('sb_redirect_reset_success', '1'); } catch (e) {}
                     if (form.requestSubmit) form.requestSubmit(); else form.submit();
                 } else {
-                    if (window.showToast) window.showToast('error', i18n.fixFields);
+                    if (window.showToast) window.showToast('error', '${msg("fixHighlightedFields")?js_string}');
                 }
                 return false;
             }
