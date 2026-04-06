@@ -33,7 +33,6 @@ elasticsearch: &es
     registry: docker.io
     repository: bitnami/elasticsearch
     tag: 7.10.2
-  plugins: "repository-azure"
   master:
     masterOnly: false
     replicaCount: 1
@@ -47,6 +46,26 @@ elasticsearch: &es
     heapSize: 2G
     persistence:
       size: 25Gi
+    initContainers:
+      - name: install-azure-plugin
+        image: "sunbirded.azurecr.io/elasticsearch:7.10.2"
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 0
+        command:
+          - /bin/bash
+          - -c
+          - |
+            /opt/bitnami/elasticsearch/bin/elasticsearch-plugin install --batch repository-azure
+        volumeMounts:
+          - name: es-plugins
+            mountPath: /opt/bitnami/elasticsearch/plugins
+    extraVolumeMounts:
+      - name: es-plugins
+        mountPath: /opt/bitnami/elasticsearch/plugins
+  extraVolumes:
+    - name: es-plugins
+      emptyDir: {}
   data:
     replicaCount: 0
   coordinating:
