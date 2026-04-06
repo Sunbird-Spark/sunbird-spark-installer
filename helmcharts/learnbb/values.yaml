@@ -50,22 +50,19 @@ elasticsearch: &es
       - name: install-azure-plugin
         image: "sunbirded.azurecr.io/elasticsearch:7.10.2"
         imagePullPolicy: IfNotPresent
-        securityContext:
-          runAsUser: 1001
         command:
           - /bin/bash
           - -c
           - |
-            /opt/bitnami/elasticsearch/bin/elasticsearch-plugin install --batch repository-azure &&
-            cp -rp /opt/bitnami/elasticsearch/plugins/. /output/
+            /opt/bitnami/elasticsearch/bin/elasticsearch-plugin install --batch repository-azure
         volumeMounts:
-          - name: es-plugins
-            mountPath: /output
+          - name: plugins
+            mountPath: /opt/bitnami/elasticsearch/plugins
     extraVolumeMounts:
-      - name: es-plugins
+      - name: plugins
         mountPath: /opt/bitnami/elasticsearch/plugins
   extraVolumes:
-    - name: es-plugins
+    - name: plugins
       emptyDir: {}
   data:
     replicaCount: 0
