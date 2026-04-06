@@ -22,15 +22,21 @@
     (function() {
       try {
         var stored = localStorage.getItem('app-language');
-        if (!stored) return;
+        console.log('[KC-i18n] localStorage app-language:', stored);
+        console.log('[KC-i18n] all localStorage keys:', Object.keys(localStorage));
+        console.log('[KC-i18n] current origin:', window.location.origin);
+        if (!stored) { console.log('[KC-i18n] no language in localStorage, skipping redirect'); return; }
         var map = { en:'en', fr:'fr', ar:'ar', pt:'pt_BR' };
         var kcLocale = map[stored];
-        if (!kcLocale) return;
+        if (!kcLocale) { console.log('[KC-i18n] language "' + stored + '" not in locale map, skipping'); return; }
         var url = new URL(window.location.href);
-        if (url.searchParams.get('kc_locale') === kcLocale) return;
+        var currentKcLocale = url.searchParams.get('kc_locale');
+        console.log('[KC-i18n] kc_locale in URL:', currentKcLocale, '| target:', kcLocale);
+        if (currentKcLocale === kcLocale) { console.log('[KC-i18n] already correct locale, no redirect needed'); return; }
         url.searchParams.set('kc_locale', kcLocale);
+        console.log('[KC-i18n] redirecting to:', url.toString());
         window.location.replace(url.toString());
-      } catch(e) {}
+      } catch(e) { console.error('[KC-i18n] error:', e); }
     })();
     </script>
     <link rel="icon" type="image/png" sizes="32x32" href="${url.resourcesPath}/img/fav.png" />
