@@ -35,7 +35,6 @@ dependency "keys" {
     config_path = "../keys"
     mock_outputs = {
       random_string     = "dummy-string"
-      encryption_string = "dummy-encryption-string-padded00"
     }
     mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
 }
@@ -51,7 +50,6 @@ inputs = {
   storage_container_public           = local.storage_container_public
   storage_container_private          = local.storage_container_private
   storage_account_primary_access_key = local.storage_account_key
-  encryption_string                  = dependency.keys.outputs.encryption_string
   random_string                      = dependency.keys.outputs.random_string
   velero_container_name              = local.velero_container_name
   cloud_storage_provider             = local.cloud_storage_provider
