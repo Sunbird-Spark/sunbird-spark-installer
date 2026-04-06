@@ -51,15 +51,16 @@ elasticsearch: &es
         image: "sunbirded.azurecr.io/elasticsearch:7.10.2"
         imagePullPolicy: IfNotPresent
         securityContext:
-          runAsUser: 0
+          runAsUser: 1001
         command:
           - /bin/bash
           - -c
           - |
-            /opt/bitnami/elasticsearch/bin/elasticsearch-plugin install --batch repository-azure
+            /opt/bitnami/elasticsearch/bin/elasticsearch-plugin install --batch repository-azure &&
+            cp -rp /opt/bitnami/elasticsearch/plugins/. /output/
         volumeMounts:
           - name: es-plugins
-            mountPath: /opt/bitnami/elasticsearch/plugins
+            mountPath: /output
     extraVolumeMounts:
       - name: es-plugins
         mountPath: /opt/bitnami/elasticsearch/plugins
