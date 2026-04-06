@@ -1,6 +1,8 @@
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true>
 <!DOCTYPE html>
-<html class="${properties.kcHtmlClass!}" lang="${(locale.currentLanguageTag)!'en'}">
+<#assign currentLang = (locale.currentLanguageTag)!'en'>
+<#assign isRTL = (currentLang == 'ar')>
+<html class="${properties.kcHtmlClass!}" lang="${currentLang}" dir="${isRTL?then('rtl', 'ltr')}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -37,6 +39,9 @@
     })();
     </script>
     <link rel="icon" type="image/png" sizes="32x32" href="${url.resourcesPath}/img/fav.png" />
+    <#if isRTL>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    </#if>
     <#if properties.styles?has_content>
         <#list properties.styles?split(' ') as style>
             <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
