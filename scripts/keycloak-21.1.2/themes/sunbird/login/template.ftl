@@ -1,6 +1,6 @@
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true>
 <!DOCTYPE html>
-<html class="${properties.kcHtmlClass!}" lang="en">
+<html class="${properties.kcHtmlClass!}" lang="${locale.currentLanguageTag!'en'}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -17,7 +17,22 @@
             <meta name="${meta?split('==')[0]}" content="${meta?split('==')[1]}"/>
         </#list>
     </#if>
-    <title>Log in to Sunbird</title>
+    <title>${msg("loginPageTitle")}</title>
+    <script>
+    (function() {
+      try {
+        var stored = sessionStorage.getItem('app-language');
+        if (!stored) return;
+        var map = { en:'en', fr:'fr', ar:'ar', pt:'pt_BR' };
+        var kcLocale = map[stored];
+        if (!kcLocale) return;
+        var url = new URL(window.location.href);
+        if (url.searchParams.get('kc_locale') === kcLocale) return;
+        url.searchParams.set('kc_locale', kcLocale);
+        window.location.replace(url.toString());
+      } catch(e) {}
+    })();
+    </script>
     <link rel="icon" type="image/png" sizes="32x32" href="${url.resourcesPath}/img/fav.png" />
     <#if properties.styles?has_content>
         <#list properties.styles?split(' ') as style>
@@ -44,14 +59,14 @@
                     <div class="login-left-panel-container">
                     <div class="background-pattern" style="background-image: url('${url.resourcesPath}/img/auth-wave-bg.png');"></div>
                     <div class="left-panel-content">
-                        <h2 class="left-panel-title">Empower your future<br/>through learning.</h2>
+                        <h2 class="left-panel-title">${msg("brandTagline")}</h2>
                     </div>
                     </div>
                 </div>
                 <div class="login-right-panel">
                     <div class="login-card">
                     <!-- Close Button -->
-                    <button class="close-button" onclick="window.history.back();" aria-label="Close">
+                    <button class="close-button" onclick="window.history.back();" aria-label="${msg("doCancel")}">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
