@@ -67,7 +67,7 @@
                     <div class="login-left-panel-container">
                     <div class="background-pattern" style="background-image: url('${url.resourcesPath}/img/auth-wave-bg.png');"></div>
                     <div class="left-panel-content">
-                        <h2 class="left-panel-title">${msg("brandTagline")}</h2>
+                        <h2 class="left-panel-title">${msg("brandTagline")?no_esc}</h2>
                     </div>
                     </div>
                 </div>
