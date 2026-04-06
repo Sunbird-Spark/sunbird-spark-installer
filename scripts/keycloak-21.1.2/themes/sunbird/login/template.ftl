@@ -22,27 +22,19 @@
     (function() {
       try {
         var stored = localStorage.getItem('app-language');
-        console.log('[KC-i18n] localStorage app-language:', stored);
-        console.log('[KC-i18n] all localStorage keys:', Object.keys(localStorage));
-        console.log('[KC-i18n] current origin:', window.location.origin);
-        if (!stored) { console.log('[KC-i18n] no language in localStorage, skipping redirect'); return; }
+        if (!stored) return;
         var map = { en:'en', fr:'fr', ar:'ar', pt:'pt_BR' };
         var kcLocale = map[stored];
-        if (!kcLocale) { console.log('[KC-i18n] language "' + stored + '" not in locale map, skipping'); return; }
-        var url = new URL(window.location.href);
-        var currentKcLocale = url.searchParams.get('kc_locale');
-        console.log('[KC-i18n] kc_locale in URL:', currentKcLocale, '| target:', kcLocale);
-        if (currentKcLocale === kcLocale) { console.log('[KC-i18n] already correct locale, no redirect needed'); return; }
-        url.searchParams.set('kc_locale', kcLocale);
-        console.log('[KC-i18n] redirecting to:', url.toString());
-        window.location.replace(url.toString());
-      } catch(e) { console.error('[KC-i18n] error:', e); }
+        if (!kcLocale) return;
+        // Check if KEYCLOAK_LOCALE cookie already matches — avoid infinite reload
+        var cookieMatch = document.cookie.match(/(?:^|;\s*)KEYCLOAK_LOCALE=([^;]+)/);
+        var currentCookie = cookieMatch ? cookieMatch[1] : null;
+        if (currentCookie === kcLocale) return;
+        // Set the KEYCLOAK_LOCALE cookie — this is what Keycloak reads for locale
+        document.cookie = 'KEYCLOAK_LOCALE=' + kcLocale + '; path=/auth/realms/; SameSite=Lax';
+        window.location.reload();
+      } catch(e) {}
     })();
-    </script>
-    <script>
-    // Server-side locale debug (rendered by FreeMarker)
-    console.log('[KC-i18n] FreeMarker locale.current: ${(locale.current)!"NOT SET"}');
-    console.log('[KC-i18n] FreeMarker locale.currentLanguageTag: ${(locale.currentLanguageTag)!"NOT SET"}');
     </script>
     <link rel="icon" type="image/png" sizes="32x32" href="${url.resourcesPath}/img/fav.png" />
     <#if properties.styles?has_content>
