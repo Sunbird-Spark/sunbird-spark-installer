@@ -1,6 +1,6 @@
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true>
 <!DOCTYPE html>
-<html class="${properties.kcHtmlClass!}" lang="${locale.currentLanguageTag!'en'}">
+<html class="${properties.kcHtmlClass!}" lang="${(locale.currentLanguageTag)!'en'}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -21,7 +21,7 @@
     <script>
     (function() {
       try {
-        var stored = sessionStorage.getItem('app-language');
+        var stored = localStorage.getItem('app-language');
         if (!stored) return;
         var map = { en:'en', fr:'fr', ar:'ar', pt:'pt_BR' };
         var kcLocale = map[stored];
