@@ -39,6 +39,11 @@
       } catch(e) { console.error('[KC-i18n] error:', e); }
     })();
     </script>
+    <script>
+    // Server-side locale debug (rendered by FreeMarker)
+    console.log('[KC-i18n] FreeMarker locale.current: ${(locale.current)!"NOT SET"}');
+    console.log('[KC-i18n] FreeMarker locale.currentLanguageTag: ${(locale.currentLanguageTag)!"NOT SET"}');
+    </script>
     <link rel="icon" type="image/png" sizes="32x32" href="${url.resourcesPath}/img/fav.png" />
     <#if properties.styles?has_content>
         <#list properties.styles?split(' ') as style>
