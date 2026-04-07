@@ -1,6 +1,8 @@
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true>
 <!DOCTYPE html>
-<html class="${properties.kcHtmlClass!}" lang="en">
+<#assign currentLang = (locale.currentLanguageTag)!'en'>
+<#assign isRTL = (currentLang == 'ar')>
+<html class="${properties.kcHtmlClass!}" lang="${currentLang}" dir="${isRTL?then('rtl', 'ltr')}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -17,8 +19,29 @@
             <meta name="${meta?split('==')[0]}" content="${meta?split('==')[1]}"/>
         </#list>
     </#if>
-    <title>Log in to Sunbird</title>
+    <title>${msg("loginPageTitle")}</title>
+    <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('app-language');
+        if (!stored) return;
+        var map = { en:'en', fr:'fr', ar:'ar', pt:'pt_BR' };
+        var kcLocale = map[stored];
+        if (!kcLocale) return;
+        // Check if KEYCLOAK_LOCALE cookie already matches — avoid infinite reload
+        var cookieMatch = document.cookie.match(/(?:^|;\s*)KEYCLOAK_LOCALE=([^;]+)/);
+        var currentCookie = cookieMatch ? cookieMatch[1] : null;
+        if (currentCookie === kcLocale) return;
+        // Set the KEYCLOAK_LOCALE cookie — this is what Keycloak reads for locale
+        document.cookie = 'KEYCLOAK_LOCALE=' + kcLocale + '; path=/auth/realms/; SameSite=Lax';
+        window.location.reload();
+      } catch(e) {}
+    })();
+    </script>
     <link rel="icon" type="image/png" sizes="32x32" href="${url.resourcesPath}/img/fav.png" />
+    <#if isRTL>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    </#if>
     <#if properties.styles?has_content>
         <#list properties.styles?split(' ') as style>
             <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
@@ -44,14 +67,14 @@
                     <div class="login-left-panel-container">
                     <div class="background-pattern" style="background-image: url('${url.resourcesPath}/img/auth-wave-bg.png');"></div>
                     <div class="left-panel-content">
-                        <h2 class="left-panel-title">Empower your future<br/>through learning.</h2>
+                        <h2 class="left-panel-title">${msg("brandTagline")?no_esc}</h2>
                     </div>
                     </div>
                 </div>
                 <div class="login-right-panel">
                     <div class="login-card">
                     <!-- Close Button -->
-                    <button class="close-button" onclick="window.history.back();" aria-label="Close">
+                    <button class="close-button" onclick="window.history.back();" aria-label="${msg("doCancel")}">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -64,20 +87,7 @@
                 <div id="kc-header-wrapper" class="${properties.kcHeaderWrapperClass!}"><#nested "header"></div>
             </div>
 
-            <#if realm.internationalizationEnabled>
-                <div id="kc-locale" class="${properties.kcLocaleClass!}">
-                    <div id="kc-locale-wrapper" class="${properties.kcLocaleWrapperClass!}">
-                        <div class="kc-dropdown" id="kc-locale-dropdown">
-                            <a href="#" id="kc-current-locale-link">${locale.current}</a>
-                            <ul>
-                                <#list locale.supported as l>
-                                    <li class="kc-dropdown-item"><a href="${l.url}">${l.label}</a></li>
-                                </#list>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </#if>
+            <#-- Locale dropdown hidden — language is set via localStorage → kc_locale redirect -->
 
             <div id="kc-content" class="${properties.kcContentClass!}">
                 <div id="kc-content-wrapper" class="${properties.kcContentWrapperClass!}">
