@@ -125,7 +125,7 @@ base_config: |
     enable.distributed.checkpointing = true
     {{- if eq "azure" .Values.global.checkpoint_store_type }}
     statebackend {
-      base.url = "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+      base.url = "abfs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
     }
     {{- else if eq "gcs" .Values.global.checkpoint_store_type }}
     statebackend {
