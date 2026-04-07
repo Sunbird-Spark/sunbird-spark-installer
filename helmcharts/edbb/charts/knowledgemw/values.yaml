@@ -70,7 +70,7 @@ livenessProbe:
       port: 5000
   initialDelaySeconds: 15
   periodSeconds: 15
-  timeoutSeconds: 60
+  timeoutSeconds: 5
 
 readinessProbe:
   failureThreshold: 2
@@ -79,7 +79,7 @@ readinessProbe:
       port: 5000
   initialDelaySeconds: 15
   periodSeconds: 15
-  timeoutSeconds: 60
+  timeoutSeconds: 5
 
 nodeSelector: {}
 tolerations: []

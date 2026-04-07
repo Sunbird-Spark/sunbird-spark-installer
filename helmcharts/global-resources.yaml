@@ -4,7 +4,7 @@ adminutil:
       cpu: 100m
       memory: 100M
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 1G
 
 
@@ -14,7 +14,7 @@ echo:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 250m
+      cpu: 1
       memory: 1024Mi  
 
 flink: &flink
@@ -23,7 +23,7 @@ flink: &flink
       cpu: 100m
       memory: 1024Mi
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 2048Mi  
   flink_jobs:
     knowlg-publish:
@@ -44,7 +44,7 @@ knowledgemw:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 1G    
 
 kong:
@@ -93,7 +93,7 @@ janusgraph:
       cpu: 1
       memory: 3Gi
     limits:
-      cpu: 1.5
+      cpu: 3
       memory: 6Gi
 
 knowlg:
@@ -111,7 +111,7 @@ search:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 1024Mi 
 
 #learnbb     
@@ -121,7 +121,7 @@ cert:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 1024Mi
 
 certificateapi:
@@ -130,7 +130,7 @@ certificateapi:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 1024Mi
 
 certificatesign:
@@ -139,7 +139,7 @@ certificatesign:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 1024Mi
 
 certregistry:
@@ -148,7 +148,7 @@ certregistry:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 1024Mi 
 
 elasticsearch:
@@ -158,7 +158,7 @@ elasticsearch:
         cpu: "1"
         memory: "2Gi"
       limits:
-        cpu: "1"
+        cpu: "2"
         memory: "4Gi"
     persistence:
       size: 25Gi
@@ -167,10 +167,10 @@ kafka:
   broker:
     resources:
       limits:
-        cpu: 750m
+        cpu: 1
         memory: 2048Mi
       requests:
-        cpu: 500m
+        cpu: 750m
         memory: 1024Mi
     persistence:
       size: 8Gi
@@ -178,10 +178,10 @@ kafka:
     replicaCount: 3
     resources:
       limits:
-        cpu: 750m
+        cpu: 1
         memory: 2048Mi
       requests:
-        cpu: 500m
+        cpu: 750m
         memory: 1024Mi
     persistence:
       size: 8Gi
@@ -195,34 +195,6 @@ kafka:
 #         cpu: 750m
 #         memory: 750Mi
 
-knowledgemw:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1G    
-
-knowlg:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi 
-
-
-kong:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100M
-    limits:
-      cpu: 1
-      memory: 1024Mi
-
 registry:
   resources:
     requests:
@@ -235,19 +207,19 @@ registry:
 superset:
   resources:
     limits:
-      cpu: 250m
+      cpu: 512m
       memory: 1024Mi
     requests:
-      cpu: 100m
+      cpu: 250m
       memory: 512Mi  
 
 telemetry:
   resources:
     requests:
-      cpu: 100m
+      cpu: 2
       memory: 100Mi
     limits:
-      cpu: 1
+      cpu: 2
       memory: 1024Mi
 
 #monitoring
