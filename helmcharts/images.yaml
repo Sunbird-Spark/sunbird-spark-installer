@@ -83,7 +83,7 @@ images:
 
   adminutil: &adminutil
     repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
-    tag: "release-7.0.0_RC1_1_6c8f6f"
+    tag: "release-8.0.0_rc1_21f5d46_1"
 
   cert: &cert
     repository: "ghcr.io/sunbird-lern/cert-service"
@@ -153,7 +153,7 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_596f901"
+    tag: "develop_bd1dafe"
 
 # Internal block with pull secrets
 internal: &internal

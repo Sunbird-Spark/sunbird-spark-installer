@@ -188,7 +188,7 @@ base_config: |
 
     {{- else if eq "azure" .Values.global.checkpoint_store_type }}
     statebackend {
-      base.url = "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+      base.url = "abfs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
     }
 
     {{- else if eq "gcs" .Values.global.checkpoint_store_type }}
@@ -294,9 +294,9 @@ flink_jobs:
         objectTypes = ["EventSet", "Questionnaire", "Misconception", "FrameworkType", "EventSet", "Event"]
       }
       cloudstorage.metadata.replace_absolute_path=true
-      cloudstorage.relative_path_prefix= "CONTENT_STORAGE_BASE_PATH"
+      cloudstorage.relative_path_prefix="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_relative_path_prefix "context" $) }}"
       cloudstorage.read_base_path="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_read_base_path "context" $) }}"
-      cloudstorage.write_base_path=["https://{{ .Values.global.object_storage_endpoint }}"] 
+      cloudstorage.write_base_path={{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_write_base_path "context" $) }}
       cloudstorage.metadata.list={{ .Values.cloudstorage_metadatalist }}
       cloud_storage_container="{{ .Values.global.public_container_name }}"
 
@@ -367,12 +367,11 @@ flink_jobs:
 
       cloud_storage_type="{{ .Values.global.sunbird_cloud_storage_provider }}"
       cloud_storage_key="{{ .Values.global.cloud_storage_access_key }}"
-      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
-      {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
       {{- if eq .Values.global.cloud_storage_provider "azure" }}
       cloud_storage_secret=""
       cloud_storage_auth_type="{{ .Values.global.cloud_storage_auth_type }}"
-      {{- end }}
+      {{- else }}
+      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
       {{- end }}
       cloud_storage_container="{{ .Values.global.public_container_name }}"
       cloud_storage_endpoint=""
@@ -600,12 +599,11 @@ flink_jobs:
 
       cloud_storage_type="{{ .Values.global.sunbird_cloud_storage_provider }}"
       cloud_storage_key="{{ .Values.global.cloud_storage_access_key }}"
-      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
-      {{- if false }}{{/* TODO: enable workload identity for flink when ready */}}
       {{- if eq .Values.global.cloud_storage_provider "azure" }}
       cloud_storage_secret=""
       cloud_storage_auth_type="{{ .Values.global.cloud_storage_auth_type }}"
-      {{- end }}
+      {{- else }}
+      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
       {{- end }}
       cloud_storage_container="{{ .Values.global.public_container_name }}"
       cloud_storage_endpoint=""
