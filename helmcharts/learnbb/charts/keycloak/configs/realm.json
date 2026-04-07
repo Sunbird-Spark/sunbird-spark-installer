@@ -134,18 +134,18 @@
           "attributes": {}
         },
         {
-            "id": "98999987-faf5-4c4e-958a-e5463bc4edc6",
-            "name": "manage-events",
-            "description": "${role_manage-events}",
+          "id": "98999987-faf5-4c4e-958a-e5463bc4edc6",
+          "name": "manage-events",
+          "description": "${role_manage-events}",
           "composite": false,
           "clientRole": true,
           "containerId": "b2f45201-1362-4b10-83c3-207d470f44bf",
           "attributes": {}
         },
         {
-            "id": "f898fca8-5361-49d5-900a-ebf5b775a939",
-            "name": "impersonation",
-            "description": "${role_impersonation}",
+          "id": "f898fca8-5361-49d5-900a-ebf5b775a939",
+          "name": "impersonation",
+          "description": "${role_impersonation}",
           "composite": false,
           "clientRole": true,
           "containerId": "b2f45201-1362-4b10-83c3-207d470f44bf",
@@ -3956,8 +3956,8 @@
       }
     ]
   },
-  "internationalizationEnabled": false,
-  "supportedLocales": [],
+  "internationalizationEnabled": true,
+  "supportedLocales": ["en", "fr", "ar", "pt_BR"],
   "defaultLocale": "en",
   "authenticationFlows": [
     {
