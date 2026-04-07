@@ -232,11 +232,6 @@ body {
     margin-bottom: 20px;
 }
 
-.sunbird-logo img {
-    height: 3rem;
-    width: auto;
-}
-
 .welcome-title {
     font-size: 30px;
     font-weight: 600;
@@ -570,8 +565,8 @@ div[class*="kcFormGroupClass"] {
 }
 
 .sunbird-logo-img {
-    width: auto;
-    height: 3rem;
+    width: 10rem;
+    height: 6rem;
 }
 
 .page-title {
