@@ -53,7 +53,7 @@ kong:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 500m
+      cpu: 1
       memory: 1G  
 
 learnbb:
@@ -216,10 +216,10 @@ superset:
 telemetry:
   resources:
     requests:
-      cpu: 2
+      cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 2
+      cpu: 1
       memory: 1024Mi
 
 #monitoring
@@ -382,10 +382,10 @@ yugabyte:
   resource:
     master:
       requests:
-        cpu: "1"
+        cpu: "2"
         memory: 2Gi
       limits:
-        cpu: "1"
+        cpu: "2"
         memory: 2Gi
     tserver:
       requests:
