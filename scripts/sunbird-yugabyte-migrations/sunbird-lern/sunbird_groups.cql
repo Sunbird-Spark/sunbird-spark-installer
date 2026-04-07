@@ -74,7 +74,6 @@ CREATE TABLE IF NOT EXISTS sunbird_groups.group (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS idx_group_status ON sunbird_groups.group (status);
 
 CREATE TABLE IF NOT EXISTS sunbird_groups.group_member (
     groupid text,
@@ -105,7 +104,6 @@ CREATE TABLE IF NOT EXISTS sunbird_groups.group_member (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS idx_group_member_status ON sunbird_groups.group_member (status);
 
 CREATE TABLE IF NOT EXISTS sunbird_groups.user_group (
     userid text PRIMARY KEY,

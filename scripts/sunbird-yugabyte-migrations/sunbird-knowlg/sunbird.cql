@@ -61,10 +61,6 @@ CREATE TABLE IF NOT EXISTS sunbird.assessment_item (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ai_contentid ON sunbird.assessment_item (contentid);
-CREATE INDEX IF NOT EXISTS inx_ai_userid ON sunbird.assessment_item (userid);
-CREATE INDEX IF NOT EXISTS inx_ai_assessmentitemid ON sunbird.assessment_item (assessmentitemid);
-CREATE INDEX IF NOT EXISTS inx_ai_courseid ON sunbird.assessment_item (courseid);
 
 
 CREATE TABLE IF NOT EXISTS sunbird.bulk_upload_process (
@@ -101,4 +97,3 @@ CREATE TABLE IF NOT EXISTS sunbird.bulk_upload_process (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_status ON sunbird.bulk_upload_process (status);

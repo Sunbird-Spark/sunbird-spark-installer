@@ -26,9 +26,6 @@ CREATE TABLE IF NOT EXISTS sunbird.assessment_eval (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ae_courseid ON sunbird.assessment_eval (courseid);
-CREATE INDEX IF NOT EXISTS inx_ae_userid ON sunbird.assessment_eval (userid);
-CREATE INDEX IF NOT EXISTS inx_ae_contentid ON sunbird.assessment_eval (contentid);
 
 CREATE TABLE IF NOT EXISTS sunbird.bulk_upload_process_task (
     processid text,
@@ -131,12 +128,6 @@ CREATE TABLE IF NOT EXISTS sunbird.course_management (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_cm_course_name ON sunbird.course_management (coursename);
-CREATE INDEX IF NOT EXISTS inx_cm_courseid ON sunbird.course_management (courseid);
-CREATE INDEX IF NOT EXISTS inx_cm_status ON sunbird.course_management (status);
-CREATE INDEX IF NOT EXISTS inx_cm_contentid ON sunbird.course_management (contentid);
-CREATE INDEX IF NOT EXISTS inx_cm_organisationid ON sunbird.course_management (organisationid);
-CREATE INDEX IF NOT EXISTS inx_cm_facultyid ON sunbird.course_management (facultyid);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_group (
     userid text PRIMARY KEY,
@@ -177,7 +168,6 @@ CREATE TABLE IF NOT EXISTS sunbird.url_action (
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
 // CREATE INDEX IF NOT EXISTS inx_ua_url ON sunbird.url_action (values(url));
-CREATE INDEX IF NOT EXISTS inx_ua_name ON sunbird.url_action (name);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_auth (
     id text PRIMARY KEY,
@@ -200,8 +190,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_auth (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ua_userid ON sunbird.user_auth (userid);
-CREATE INDEX IF NOT EXISTS inx_ua_source ON sunbird.user_auth (source);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_organisation (
     userid text,
@@ -313,8 +301,6 @@ CREATE TABLE IF NOT EXISTS sunbird.client_info (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ci_clientname ON sunbird.client_info (clientname);
-CREATE INDEX IF NOT EXISTS inx_ci_clientchannel ON sunbird.client_info (channel);
 
 CREATE TABLE IF NOT EXISTS sunbird.user (
     id text PRIMARY KEY,
@@ -402,7 +388,6 @@ CREATE TABLE IF NOT EXISTS sunbird.group_member (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS idx_group_member_status ON sunbird.group_member (status);
 
 CREATE TABLE IF NOT EXISTS sunbird.subject (
     id text PRIMARY KEY,
@@ -422,7 +407,6 @@ CREATE TABLE IF NOT EXISTS sunbird.subject (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_sb_name ON sunbird.subject (name);
 
 CREATE TABLE IF NOT EXISTS sunbird.content_consumption (
     id text PRIMARY KEY,
@@ -457,10 +441,6 @@ CREATE TABLE IF NOT EXISTS sunbird.content_consumption (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_cc_contentid ON sunbird.content_consumption (contentid);
-CREATE INDEX IF NOT EXISTS inx_cc_courseid ON sunbird.content_consumption (courseid);
-CREATE INDEX IF NOT EXISTS inx_cc_status ON sunbird.content_consumption (status);
-CREATE INDEX IF NOT EXISTS inx_cc_userid ON sunbird.content_consumption (userid);
 
 CREATE TABLE IF NOT EXISTS sunbird.group (
     id text PRIMARY KEY,
@@ -488,7 +468,6 @@ CREATE TABLE IF NOT EXISTS sunbird.group (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS idx_group_status ON sunbird.group (status);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_lookup (
     type text,
@@ -606,10 +585,6 @@ CREATE TABLE IF NOT EXISTS sunbird.assessment_item (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ai_contentid ON sunbird.assessment_item (contentid);
-CREATE INDEX IF NOT EXISTS inx_ai_userid ON sunbird.assessment_item (userid);
-CREATE INDEX IF NOT EXISTS inx_ai_assessmentitemid ON sunbird.assessment_item (assessmentitemid);
-CREATE INDEX IF NOT EXISTS inx_ai_courseid ON sunbird.assessment_item (courseid);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_badge_assertion (
     id text PRIMARY KEY,
@@ -662,7 +637,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_skills (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_us_userid ON sunbird.user_skills (userid);
 
 CREATE TABLE IF NOT EXISTS sunbird.geo_location (
     id text PRIMARY KEY,
@@ -691,7 +665,6 @@ CREATE TABLE IF NOT EXISTS sunbird.geo_location (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_gl_rootorgid ON sunbird.geo_location (rootorgid);
 
 CREATE TABLE IF NOT EXISTS sunbird.role (
     id text PRIMARY KEY,
@@ -769,8 +742,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_org (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_uorg_userid ON sunbird.user_org (userid);
-CREATE INDEX IF NOT EXISTS inx_uorg_orgid ON sunbird.user_org (organisationid);
 
 CREATE TABLE IF NOT EXISTS sunbird.media_type (
     id text PRIMARY KEY,
@@ -830,7 +801,6 @@ CREATE TABLE IF NOT EXISTS sunbird.master_action (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ma_name ON sunbird.master_action (name);
 
 CREATE TABLE IF NOT EXISTS sunbird.badge_class_extension (
     id text PRIMARY KEY,
@@ -945,10 +915,6 @@ CREATE TABLE IF NOT EXISTS sunbird.course_enrollment (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ce_userid ON sunbird.course_enrollment (userid);
-CREATE INDEX IF NOT EXISTS inx_ce_course_name ON sunbird.course_enrollment (coursename);
-CREATE INDEX IF NOT EXISTS inx_ce_status ON sunbird.course_enrollment (status);
-CREATE INDEX IF NOT EXISTS inx_ce_courseid ON sunbird.course_enrollment (courseid);
 
 CREATE TABLE IF NOT EXISTS sunbird.org_external_identity (
     provider text,
@@ -1024,7 +990,6 @@ CREATE TABLE IF NOT EXISTS sunbird.usr_external_identity (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_usrextid_user_id ON sunbird.usr_external_identity (userid);
 
 CREATE TABLE IF NOT EXISTS sunbird.tenant_preference_v2 (
     orgid text,
@@ -1119,7 +1084,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_job_profile (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ujp_userid ON sunbird.user_job_profile (userid);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_declarations (
     userid text,
@@ -1184,7 +1148,6 @@ CREATE TABLE IF NOT EXISTS sunbird.bulk_upload_process (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_status ON sunbird.bulk_upload_process (status);
 
 CREATE TABLE IF NOT EXISTS sunbird.address (
     id text PRIMARY KEY,
@@ -1273,8 +1236,6 @@ CREATE TABLE IF NOT EXISTS sunbird.report_tracking (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_report_tracking_userid ON sunbird.report_tracking (userid);
-CREATE INDEX IF NOT EXISTS inx_report_tracking_status ON sunbird.report_tracking (status);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_external_identity (
     id text PRIMARY KEY,
@@ -1300,9 +1261,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_external_identity (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_uei_userid ON sunbird.user_external_identity (userid);
-CREATE INDEX IF NOT EXISTS inx_uei_externalid ON sunbird.user_external_identity (externalid);
-CREATE INDEX IF NOT EXISTS inx_uei_provider ON sunbird.user_external_identity (provider);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_courses (
     id text PRIMARY KEY,
@@ -1342,11 +1300,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_courses (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ucs_batchid ON sunbird.user_courses (batchid);
-CREATE INDEX IF NOT EXISTS inx_ucs_courseid ON sunbird.user_courses (courseid);
-CREATE INDEX IF NOT EXISTS inx_ucs_status ON sunbird.user_courses (status);
-CREATE INDEX IF NOT EXISTS inx_ucs_course_name ON sunbird.user_courses (coursename);
-CREATE INDEX IF NOT EXISTS inx_ucs_userid ON sunbird.user_courses (userid);
 
 CREATE TABLE IF NOT EXISTS sunbird.tenant_preference (
     id text PRIMARY KEY,
@@ -1370,8 +1323,6 @@ CREATE TABLE IF NOT EXISTS sunbird.tenant_preference (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_tp_key ON sunbird.tenant_preference (key);
-CREATE INDEX IF NOT EXISTS inx_tp_userid ON sunbird.tenant_preference (orgid);
 
 CREATE TABLE IF NOT EXISTS sunbird.shadow_user (
     channel text,
@@ -1407,13 +1358,7 @@ CREATE TABLE IF NOT EXISTS sunbird.shadow_user (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_shausr_userextid ON sunbird.shadow_user (userextid);
-CREATE INDEX IF NOT EXISTS inx_shausr_userstatus ON sunbird.shadow_user (userstatus);
 // CREATE INDEX IF NOT EXISTS shadow_user_userids_idx ON sunbird.shadow_user (values(userids));
-CREATE INDEX IF NOT EXISTS inx_shausr_claimstatus ON sunbird.shadow_user (claimstatus);
-CREATE INDEX IF NOT EXISTS inx_shausr_userid ON sunbird.shadow_user (userid);
-CREATE INDEX IF NOT EXISTS inx_shausr_processid ON sunbird.shadow_user (processid);
-CREATE INDEX IF NOT EXISTS inx_shausr_orgextid ON sunbird.shadow_user (orgextid);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_action_role (
     id text PRIMARY KEY,
@@ -1459,7 +1404,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_cert (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_usrcert_user_id ON sunbird.user_cert (userid);
 
 CREATE TABLE IF NOT EXISTS sunbird.cassandra_migration_version_counts (
     name text PRIMARY KEY,
@@ -1526,8 +1470,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_feed (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS user_feed_category_idx ON sunbird.user_feed (category);
-CREATE INDEX IF NOT EXISTS user_feed_userid_idx ON sunbird.user_feed (userid);
 
 CREATE TABLE IF NOT EXISTS sunbird.rate_limit (
     key text,
@@ -1571,7 +1513,6 @@ CREATE TABLE IF NOT EXISTS sunbird.course_publish_status (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_cps_status ON sunbird.course_publish_status (status);
 
 CREATE TABLE IF NOT EXISTS sunbird.action_group (
     id text PRIMARY KEY,
@@ -1630,11 +1571,6 @@ CREATE TABLE IF NOT EXISTS sunbird.course_batch (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_cou_bat_coursecreator ON sunbird.course_batch (coursecreator);
-CREATE INDEX IF NOT EXISTS inx_cou_bat_courseid ON sunbird.course_batch (courseid);
-CREATE INDEX IF NOT EXISTS inx_cou_bat_status ON sunbird.course_batch (status);
-CREATE INDEX IF NOT EXISTS inx_cou_bat_createdby ON sunbird.course_batch (createdby);
-CREATE INDEX IF NOT EXISTS inx_cou_bat_enrolmenttype ON sunbird.course_batch (enrollmenttype);
 
 CREATE TABLE IF NOT EXISTS sunbird.user_notes (
     id text PRIMARY KEY,
@@ -1697,7 +1633,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_education (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_ueu_userid ON sunbird.user_education (userid);
 
 CREATE TABLE IF NOT EXISTS sunbird.content_badge_association (
     id text PRIMARY KEY,
@@ -1767,8 +1702,6 @@ CREATE TABLE IF NOT EXISTS sunbird.user_badge (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_usr_badg_receiverid ON sunbird.user_badge (receiverid);
-CREATE INDEX IF NOT EXISTS inx_usr_badg ON sunbird.user_badge (badgetypeid);
 
 CREATE TABLE IF NOT EXISTS sunbird.config_path_audit (
     id text,
@@ -1795,7 +1728,6 @@ CREATE TABLE IF NOT EXISTS sunbird.config_path_audit (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS inx_created_date ON sunbird.config_path_audit (created_date);
 
 CREATE TABLE IF NOT EXISTS sunbird.page_section (
     id text PRIMARY KEY,
