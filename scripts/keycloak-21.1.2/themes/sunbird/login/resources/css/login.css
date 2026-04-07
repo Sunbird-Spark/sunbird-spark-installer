@@ -228,6 +228,10 @@ body {
     margin-bottom: 32px;
 }
 
+.sunbird-logo {
+    margin-bottom: 0 !important;
+}
+
 .welcome-title {
     font-size: 30px;
     font-weight: 600;
