@@ -233,7 +233,7 @@ body {
 }
 
 .sunbird-logo img {
-    height: 40px;
+    height: 3rem;
     width: auto;
 }
 
@@ -571,7 +571,7 @@ div[class*="kcFormGroupClass"] {
 
 .sunbird-logo-img {
     width: auto;
-    height: 40px;
+    height: 3rem;
 }
 
 .page-title {
