@@ -63,7 +63,10 @@ spec:
             "-DHADOOP_CONF_DIR=/opt/flink/conf",
   {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "azure" }}
-            "-Dfs.azure.account.auth.type.{{ .Values.global.object_storage_endpoint }}=ManagedIdentity",
+            "-Dfs.azure.account.auth.type.{{ .Values.global.object_storage_endpoint }}=OAuth",
+            "-Dfs.azure.account.oauth.provider.type.{{ .Values.global.object_storage_endpoint }}=org.apache.hadoop.fs.azurebfs.oauth2.WorkloadIdentityTokenProvider",
+            "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
+            "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "s3" }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
@@ -169,7 +172,10 @@ spec:
             "-DHADOOP_CONF_DIR=/opt/flink/conf",
   {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "azure" }}
-            "-Dfs.azure.account.auth.type.{{ .Values.global.object_storage_endpoint }}=ManagedIdentity",
+            "-Dfs.azure.account.auth.type.{{ .Values.global.object_storage_endpoint }}=OAuth",
+            "-Dfs.azure.account.oauth.provider.type.{{ .Values.global.object_storage_endpoint }}=org.apache.hadoop.fs.azurebfs.oauth2.WorkloadIdentityTokenProvider",
+            "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
+            "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "s3" }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
