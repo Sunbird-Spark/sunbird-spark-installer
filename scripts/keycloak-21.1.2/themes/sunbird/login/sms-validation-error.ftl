@@ -3,7 +3,7 @@
     <#if section = "form">
         <div class="spark-form-pane validation-pane">
             <div class="sunbird-logo-wrapper">
-                <img src="${url.resourcesPath}/img/sunbird-logo.png" alt="Sunbird" class="sunbird-logo-img" onerror="this.src='https://raw.githubusercontent.com/sunbird-ed/sunbird-ed-portal/master/src/assets/images/sunbird_logo.png'">
+                <img src="${url.resourcesPath}/img/sunbird-logo.svg" alt="Sunbird" class="sunbird-logo-img" onerror="this.src='https://raw.githubusercontent.com/sunbird-ed/sunbird-ed-portal/master/src/assets/images/sunbird_logo.png'">
             </div>
             <h1 class="page-title text-center">Verification Error</h1>
             <#if message?has_content>

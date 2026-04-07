@@ -3,10 +3,10 @@
     <#if section = "header">
         <div class="login-header">
             <div class="sunbird-logo">
-                <img src="${url.resourcesPath}/img/sunbird-logo.png" alt="Sunbird Logo" />
+                <img src="${url.resourcesPath}/img/sunbird-logo.svg" alt="Sunbird Logo" />
             </div>
-            <h1 class="welcome-title">Welcome to Sunbird!</h1>
-            <p class="welcome-subtitle">Your learning journey starts here—log in to continue.</p>
+            <h1 class="welcome-title">${msg("loginSunbird")}</h1>
+            <p class="welcome-subtitle">${msg("loginSubtitle")}</p>
         </div>
     <#elseif section = "form">
     <div id="kc-form">
@@ -20,26 +20,26 @@
             
         <#-- OR Divider -->
         <div class="or-divider">
-            <span>OR</span>
+            <span>${msg("orDivider")}</span>
         </div>
         
         <#if realm.password>
             <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                 <div class="${properties.kcFormGroupClass!}">
-                    <label for="emailormobile" class="${properties.kcLabelClass!}">Email ID / Mobile Number</label>
+                    <label for="emailormobile" class="${properties.kcLabelClass!}">${msg("emailormobile")}</label>
 
                     <#if usernameEditDisabled??>
-                        <input tabindex="1" id="emailormobile" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}" type="text" disabled placeholder="Enter Email ID / Mobile Number" />
+                        <input tabindex="1" id="emailormobile" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}" type="text" disabled placeholder="${msg("emailormobilePlaceholder")}" />
                     <#else>
-                        <input tabindex="1" id="emailormobile" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}" onfocusin="inputBoxFocusIn(this)" onfocusout="inputBoxFocusOut(this)" type="text" autofocus autocomplete="username" placeholder="Enter Email ID / Mobile Number" />
+                        <input tabindex="1" id="emailormobile" class="${properties.kcInputClass!}" name="username" value="${(login.username!'')}" onfocusin="inputBoxFocusIn(this)" onfocusout="inputBoxFocusOut(this)" type="text" autofocus autocomplete="username" placeholder="${msg("emailormobilePlaceholder")}" />
                     </#if>
                 </div>
 
                 <div class="${properties.kcFormGroupClass!}">
-                    <label for="password" class="${properties.kcLabelClass!}">Password</label>
+                    <label for="password" class="${properties.kcLabelClass!}">${msg("password")}</label>
                     <div class="password-wrapper">
-                        <input tabindex="2" id="password" class="${properties.kcInputClass!}" name="password" type="password" onfocusin="inputBoxFocusIn(this)" onfocusout="inputBoxFocusOut(this)" autocomplete="current-password" placeholder="Enter Password" />
-                        <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="Toggle password visibility">
+                        <input tabindex="2" id="password" class="${properties.kcInputClass!}" name="password" type="password" onfocusin="inputBoxFocusIn(this)" onfocusout="inputBoxFocusOut(this)" autocomplete="current-password" placeholder="${msg("passwordPlaceholder")}" />
+                        <button type="button" class="password-toggle" onclick="togglePassword()" aria-label="${msg("togglePasswordVisibility")}">
                             <svg id="eye-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10 4C4.5 4 1.5 10 1.5 10C1.5 10 4.5 16 10 16C15.5 16 18.5 10 18.5 10C18.5 10 15.5 4 10 4Z" stroke="#666" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                                 <circle cx="10" cy="10" r="3" stroke="#666" stroke-width="1.5"/>
@@ -56,7 +56,7 @@
                 </div>
 
                 <div id="kc-form-buttons" class="${properties.kcFormGroupClass!}">
-                    <button tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} login-button" name="login" id="kc-login" type="submit" onclick="doLogin(event)">Login</button>
+                    <button tabindex="4" class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!} login-button" name="login" id="kc-login" type="submit" onclick="doLogin(event)">${msg("doLogIn")}</button>
                 </div>
             </form>
         </#if>
@@ -65,7 +65,7 @@
     <#elseif section = "info" >
         <#if realm.password && realm.registrationAllowed && !usernameEditDisabled??>
             <div id="kc-registration" class="registration-link">
-                <span>New user? Please <a tabindex="5" onclick=navigate('self')>create an account</a> to continue.</span>
+                <span>${msg("registerNewUser")} <a tabindex="5" onclick=navigate('self')>${msg("doRegister")}</a> ${msg("registerToContinue")}</span>
             </div>
         </#if>
     </#if>
