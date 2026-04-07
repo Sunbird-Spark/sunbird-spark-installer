@@ -46,24 +46,6 @@ elasticsearch: &es
     heapSize: 2G
     persistence:
       size: 25Gi
-    initContainers:
-      - name: install-azure-plugin
-        image: "sunbirded.azurecr.io/elasticsearch:7.10.2"
-        imagePullPolicy: IfNotPresent
-        command:
-          - /bin/bash
-          - -c
-          - |
-            /opt/bitnami/elasticsearch/bin/elasticsearch-plugin install --batch repository-azure
-        volumeMounts:
-          - name: plugins
-            mountPath: /opt/bitnami/elasticsearch/plugins
-    extraVolumeMounts:
-      - name: plugins
-        mountPath: /opt/bitnami/elasticsearch/plugins
-  extraVolumes:
-    - name: plugins
-      emptyDir: {}
   data:
     replicaCount: 0
   coordinating:
