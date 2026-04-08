@@ -167,26 +167,8 @@ cd opentofu/<cloud-provider>/<env-name>
 # Update the player portal image
 ./install.sh install_helm_components edbb player
 
-# Update Kong configuration
-./install.sh install_helm_components edbb kong
-
 # Deploy Kafka and YugabyteDB together
 ./install.sh install_helm_components edbb kafka yugabyte
-
-# Update the Lern service
-./install.sh install_helm_components learnbb lern
-
-# Update Keycloak
-./install.sh install_helm_components learnbb keycloak
-
-# Deploy Lern, Keycloak and Flink together
-./install.sh install_helm_components learnbb lern keycloak flink
-
-# Update the Knowlg service
-./install.sh install_helm_components knowledgebb knowlg
-
-# Deploy Knowlg and Search together
-./install.sh install_helm_components knowledgebb knowlg search
 ```
 
 **How it works:** On the first call for a bundle, only the target service(s) are deployed (all others are disabled). On subsequent calls, Helm reuses the existing release state so all currently running services remain untouched — only the specified service(s) are updated.
