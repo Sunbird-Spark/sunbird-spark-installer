@@ -47,7 +47,7 @@ elasticsearch: &es
     persistence:
       size: 25Gi
   extraConfig:
-    reindex.remote.whitelist: "20.219.175.25:9200"
+    reindex.remote.whitelist: "" # Allow all remote hosts for reindexing, adjust as needed for security
   data:
     replicaCount: 0
   coordinating:
