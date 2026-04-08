@@ -46,6 +46,8 @@ elasticsearch: &es
     heapSize: 2G
     persistence:
       size: 25Gi
+  extraConfig:
+    reindex.remote.whitelist: "20.219.175.25:9200"
   data:
     replicaCount: 0
   coordinating:
