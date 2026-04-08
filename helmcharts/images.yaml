@@ -83,7 +83,7 @@ images:
 
   adminutil: &adminutil
     repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
-    tag: "release-7.0.0_RC1_1_6c8f6f"
+    tag: "release-8.0.0_rc1_21f5d46_1"
 
   cert: &cert
     repository: "ghcr.io/sunbird-lern/cert-service"
@@ -103,7 +103,7 @@ images:
 
   keycloak: &keycloak
     repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "develop_acec8d0"
+    tag: "develop_39c7621"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
@@ -334,7 +334,7 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v15_deb0367"
+    tag: "spark-f1.18-v1_1c442d5"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
