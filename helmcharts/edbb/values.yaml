@@ -138,6 +138,27 @@ yugabyte: &yugabyte
   username: "yugabyte"
   password: "yugabyte"  
 
+nginx-public-ingress:
+  enabled: true
+
+echo:
+  enabled: true
+
+player:
+  enabled: true
+
+kong:
+  enabled: true
+
+kong-apis:
+  enabled: true
+
+kong-consumers:
+  enabled: true
+
+knowledgemw:
+  enabled: true
+
 global:
   kafka: *kafka
   keycloak_key_configmap: keycloak-key

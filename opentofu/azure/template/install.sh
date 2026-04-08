@@ -113,11 +113,140 @@ function install_component() {
         -f "../opentofu/azure/$environment/global-cloud-values.yaml" --timeout 30m --debug
 }
 
+function install_service() {
+    if [ $# -ne 2 ]; then
+        echo "Usage: ./install.sh install_service <bundle> <chart>"
+        echo ""
+        echo "Bundles and their available charts:"
+        echo "  learnbb     — lern, keycloak, keycloak-kids-keys, flink, adminutil,"
+        echo "                cert, certificateapi, certificatesign, certregistry,"
+        echo "                registry, kafka, redis, elasticsearch, yugabyte"
+        echo "  edbb        — player, kong, kong-apis, kong-consumers, knowledgemw,"
+        echo "                echo, nginx-public-ingress, nginx-private-ingress,"
+        echo "                router, kafka, yugabyte"
+        echo "  knowledgebb — knowlg, search, flink, janusgraph, kafka, elasticsearch,"
+        echo "                yugabyte"
+        echo "  obsrvbb     — telemetry, superset, kafka, yugabyte"
+        echo "  additional  — nlweb, nlwebflink, velero, volume-autoscaler"
+        echo "  monitoring  — (deploy the full bundle via ./install.sh install_component)"
+        return 1
+    fi
+
+    local bundle="$1"
+    local target_chart="$2"
+
+    local current_directory="$(pwd)"
+    if [ "$(basename "$current_directory")" != "helmcharts" ]; then
+        cd ../../../helmcharts 2>/dev/null || true
+    fi
+
+    if [ ! -d "$bundle" ]; then
+        echo "Error: bundle '$bundle' not found in helmcharts/"
+        return 1
+    fi
+    if [ ! -d "$bundle/charts/$target_chart" ] && ! ls "$bundle/charts/$target_chart"-*.tgz &>/dev/null 2>&1; then
+        echo "Error: chart '$target_chart' not found in helmcharts/$bundle/charts/"
+        return 1
+    fi
+
+    local ed_values_flag=""
+    if [ -f "$bundle/ed-values.yaml" ]; then
+        ed_values_flag="-f $bundle/ed-values.yaml"
+    fi
+
+    local addon_values_flag=""
+    if [ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]; then
+        if [ -f "../addons/global-cloud-values.yaml" ]; then
+            addon_values_flag="-f ../addons/global-cloud-values.yaml"
+        fi
+    fi
+
+    if helm status "$bundle" --namespace sunbird &>/dev/null; then
+        # Phase B: Release exists — reuse previous values, enable only target chart
+        echo -e "\nRelease '$bundle' exists — upgrading '$target_chart' only (Phase B)"
+
+        local bitnami_password_flags=""
+        case "$target_chart" in
+            kafka)
+                if kubectl get secret kafka-user-passwords -n sunbird &>/dev/null; then
+                    INTER_BROKER_PASSWORD=$(kubectl get secret kafka-user-passwords -n sunbird \
+                        -o jsonpath="{.data.inter-broker-password}" | base64 -d)
+                    CONTROLLER_PASSWORD=$(kubectl get secret kafka-user-passwords -n sunbird \
+                        -o jsonpath="{.data.controller-password}" | base64 -d)
+                    bitnami_password_flags="--set kafka.sasl.interbroker.password=${INTER_BROKER_PASSWORD} --set kafka.sasl.controller.password=${CONTROLLER_PASSWORD}"
+                    echo "Fetched existing Kafka passwords from k8s secret"
+                fi
+                ;;
+            elasticsearch)
+                if kubectl get secret elasticsearch -n sunbird &>/dev/null; then
+                    ES_PASSWORD=$(kubectl get secret elasticsearch -n sunbird \
+                        -o jsonpath="{.data.elasticsearch-password}" | base64 -d)
+                    bitnami_password_flags="--set elasticsearch.security.elasticPassword=${ES_PASSWORD}"
+                    echo "Fetched existing Elasticsearch password from k8s secret"
+                fi
+                ;;
+            redis)
+                if kubectl get secret redis -n sunbird &>/dev/null; then
+                    REDIS_PASSWORD=$(kubectl get secret redis -n sunbird \
+                        -o jsonpath="{.data.redis-password}" | base64 -d)
+                    bitnami_password_flags="--set redis.auth.password=${REDIS_PASSWORD}"
+                    echo "Fetched existing Redis password from k8s secret"
+                fi
+                ;;
+        esac
+
+        helm upgrade "$bundle" "$bundle" \
+            --namespace sunbird \
+            --reuse-values \
+            --set "${target_chart}.enabled=true" \
+            $ed_values_flag \
+            $addon_values_flag \
+            -f images.yaml \
+            -f "global-resources.yaml" \
+            -f "../opentofu/azure/$environment/global-values.yaml" \
+            -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
+            $bitnami_password_flags \
+            --timeout 30m \
+            --debug
+    else
+        # Phase A: No release yet — deploy only target, disable all other conditional charts
+        echo -e "\nNo existing release for '$bundle' — deploying '$target_chart' only (Phase A)"
+
+        local set_flags="--set ${target_chart}.enabled=true"
+        while IFS= read -r chart_name; do
+            if [ "$chart_name" != "$target_chart" ]; then
+                set_flags="$set_flags --set ${chart_name}.enabled=false"
+            fi
+        done < <(yq '.dependencies[] | select(has("condition")) | .name' "$bundle/Chart.yaml")
+
+        helm upgrade --install "$bundle" "$bundle" \
+            --namespace sunbird \
+            $ed_values_flag \
+            $addon_values_flag \
+            -f images.yaml \
+            -f "global-resources.yaml" \
+            -f "../opentofu/azure/$environment/global-values.yaml" \
+            -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
+            $set_flags \
+            --timeout 30m \
+            --debug
+    fi
+}
+
 function install_helm_components() {
-    components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "inquirybb" "additional")
-    for component in "${components[@]}"; do
-        install_component "$component"
-    done
+    if [ $# -eq 2 ]; then
+        # Two args: deploy a single service within a bundle
+        install_service "$1" "$2"
+    elif [ $# -eq 1 ]; then
+        # One arg: deploy the entire bundle
+        install_component "$1"
+    else
+        # No args: deploy all bundles in order (original behavior)
+        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "inquirybb" "additional")
+        for component in "${components[@]}"; do
+            install_component "$component"
+        done
+    fi
 }
 
 function dns_mapping() {
@@ -292,7 +421,12 @@ else
         install_component "$1"
         ;;
     "install_helm_components")
-        install_helm_components
+        shift
+        install_helm_components "$@"
+        ;;
+    "install_service")
+        shift
+        install_service "$1" "$2"
         ;;
     "run_post_install")
         run_post_install

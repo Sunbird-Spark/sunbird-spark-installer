@@ -5,10 +5,13 @@ provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
 
 certregistry:
+  enabled: true
   opa_enabled: true
 lern:
+  enabled: true
   opa_enabled: true
 registry:
+  enabled: true
   opa_enabled: false
 
 migration:
@@ -137,6 +140,27 @@ yugabytecql:
   image:
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_499032f"
+
+keycloak:
+  enabled: true
+
+keycloak-kids-keys:
+  enabled: true
+
+flink:
+  enabled: true
+
+adminutil:
+  enabled: true
+
+cert:
+  enabled: true
+
+certificateapi:
+  enabled: true
+
+certificatesign:
+  enabled: true
 
 global:
   elasticsearch: *es

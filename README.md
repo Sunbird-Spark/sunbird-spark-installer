@@ -147,6 +147,38 @@ While the installer may work with other versions, these are the versions that ha
      time ./install.sh
      ```
 
+## Deploying or Upgrading a Single Service
+
+After initial installation, you can deploy or upgrade an individual service within a bundle without redeploying the entire bundle:
+
+```bash
+cd opentofu/<cloud-provider>/<env-name>
+
+./install.sh install_helm_components <bundle> <service>
+```
+
+**Examples:**
+
+```bash
+# Update the player portal image
+./install.sh install_helm_components edbb player
+
+# Update Kong configuration
+./install.sh install_helm_components edbb kong
+
+# Update the Lern service
+./install.sh install_helm_components learnbb lern
+
+# Update Keycloak
+./install.sh install_helm_components learnbb keycloak
+
+# Update the Knowlg service
+./install.sh install_helm_components knowledgebb knowlg
+```
+
+**How it works:** On the first call for a bundle, only the target service is deployed (all others are disabled). On subsequent calls, Helm reuses the existing release state so all currently running services remain untouched — only the target service is updated.
+
+
 ## Default Users in the Instance
 
 This installation setup creates the following default users with different roles. You can update the passwords using the "Forgot Password" option or create new users using APIs.
