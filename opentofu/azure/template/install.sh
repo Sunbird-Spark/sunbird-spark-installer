@@ -116,19 +116,6 @@ function install_component() {
 function install_service() {
     if [ $# -lt 2 ]; then
         echo "Usage: ./install.sh install_service <bundle> <chart> [chart2] [chart3] ..."
-        echo ""
-        echo "Bundles and their available charts:"
-        echo "  learnbb     — lern, keycloak, keycloak-kids-keys, flink, adminutil,"
-        echo "                cert, certificateapi, certificatesign, certregistry,"
-        echo "                registry, kafka, redis, elasticsearch, yugabyte"
-        echo "  edbb        — player, kong, kong-apis, kong-consumers, knowledgemw,"
-        echo "                echo, nginx-public-ingress, nginx-private-ingress,"
-        echo "                router, kafka, yugabyte"
-        echo "  knowledgebb — knowlg, search, flink, janusgraph, kafka, elasticsearch,"
-        echo "                yugabyte"
-        echo "  obsrvbb     — telemetry, superset, kafka, yugabyte"
-        echo "  additional  — nlweb, nlwebflink, velero, volume-autoscaler"
-        echo "  monitoring  — (deploy the full bundle via ./install.sh install_component)"
         return 1
     fi
 
