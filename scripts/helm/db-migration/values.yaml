@@ -1,0 +1,162 @@
+# Default values for Cassandra/PostgreSQL migration Helm chart
+
+# ============================
+# Jobs Configuration - Enable/Disable each migration type
+# ============================
+jobs:
+  # Cassandra to YugabyteDB migration
+  cassandra:
+    enabled: false
+    name: cassandra-migration-job
+
+
+  # PostgreSQL to YugabyteDB migration (SQL dump/restore)
+  postgres:
+    enabled: false
+    name: postgres-migration-job
+
+  # Neo4j to JanusGraph migration (Graph to Graph)
+  neo4j:
+    enabled: true
+    name: neo4j-janusgraph-migration-job
+
+
+# ============================
+# Cassandra Source Configuration (Reads FROM this host)
+# ============================
+cassandra:
+  host: "20.207.92.174"
+  port: 9042
+  serviceType: "LoadBalancer"  # External LoadBalancer IP
+
+  # Migration settings
+  keyspaces:
+    - sunbird
+    - sb_content_store
+    - sunbird_courses
+    - sb_hierarchy_store
+    - qmzbm_form_service
+    - sunbird_notifications
+    - sb_category_store
+    - dialcodes
+    - sb_dialcode_store
+    - sb_question_store
+    - apzvp_review_comment
+  tables: []
+  username: null
+  password: null
+
+# ============================
+# Neo4j Source Configuration
+# ============================
+neo4j:
+  host: "20.207.70.157"
+  port: 7687
+  database: "neo4j"
+  username: "neo4j"
+  password: ""
+  nodeLabels: []
+  relationships: []
+
+# ============================
+# JanusGraph Target Configuration
+# ============================
+janusgraph:
+  namespace: "sunbird"
+  service: "janusgraph"
+  port: 8182
+  # Label selector used to find the JanusGraph pod for kubectl exec
+  podLabel: "app.kubernetes.io/name=janusgraph"
+  # Container name inside the pod (pod has 2 containers — target the janusgraph one)
+  container: "janusgraph"
+
+# ============================
+# PostgreSQL Source Configuration
+# ============================
+postgres:
+  host: "20.204.200.23"
+  port: 5432
+  databases:
+    - keycloak
+    - registry
+  serviceType: "LoadBalancer"
+  schemas:
+    - public
+  tables: []
+  username: "postgres"
+  password: "5zHBScaezQdhqyEj"
+
+# ============================
+# YugabyteDB Target Configuration
+# ============================
+yugabyte:
+  host: "yb-tserver-service.sunbird.svc.cluster.local"
+  port: 9042
+  sqlPort: 5433
+  database: "yugabyte"
+  username: "yugabyte"
+  password: ""
+
+# ============================
+# Kubernetes Job Configuration
+# ============================
+job:
+  namespace: sunbird
+
+  # Number of retries if job fails
+  backoffLimit: 3
+
+  # Keep job logs for this many seconds (7 days)
+  ttlSecondsAfterFinished: 604800
+
+  # Image for running migration
+  image:
+    repository: eclipse-temurin
+    tag: "17-jdk"
+    pullPolicy: IfNotPresent
+
+# ============================
+# Resource configuration
+# ============================
+resources:
+  requests:
+    memory: "4Gi"
+    cpu: "2"
+  limits:
+    memory: "8Gi"
+    cpu: "4"
+
+# ============================
+# Service Account
+# ============================
+serviceAccount:
+  create: true
+  name: migration-sa
+
+# ============================
+# ConfigMap for scripts
+# ============================
+configMap:
+  name: migration-scripts
+  # Scripts will be mounted from files/
+  scriptFiles:
+    - cassandra_to_yugabyte.py
+    - postgres_dump_restore.sh
+    - neo4j_to_janusgraph.py
+
+# ============================
+# Volume configuration
+# ============================
+volumes:
+  logs:
+    sizeLimit: "1Gi"
+    medium: "Memory"
+
+# ============================
+# Logging
+# ============================
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(message)s"
+
+# ============================

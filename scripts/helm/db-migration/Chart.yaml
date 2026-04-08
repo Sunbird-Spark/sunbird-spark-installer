@@ -1,0 +1,16 @@
+apiVersion: v2
+name: cassandra-migration
+description: Cassandra to YugabyteDB migration using Spark
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Migration Team
+keywords:
+  - cassandra
+  - yugabyte
+  - migration
+  - spark
+home: https://github.com/your-org/cassandra-migration
+sources:
+  - https://github.com/your-org/cassandra-migration
