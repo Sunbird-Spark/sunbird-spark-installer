@@ -114,8 +114,8 @@ function install_component() {
 }
 
 function install_service() {
-    if [ $# -ne 2 ]; then
-        echo "Usage: ./install.sh install_service <bundle> <chart>"
+    if [ $# -lt 2 ]; then
+        echo "Usage: ./install.sh install_service <bundle> <chart> [chart2] [chart3] ..."
         echo ""
         echo "Bundles and their available charts:"
         echo "  learnbb     — lern, keycloak, keycloak-kids-keys, flink, adminutil,"
@@ -133,7 +133,8 @@ function install_service() {
     fi
 
     local bundle="$1"
-    local target_chart="$2"
+    shift
+    local target_charts=("$@")   # one or more chart names
 
     local current_directory="$(pwd)"
     if [ "$(basename "$current_directory")" != "helmcharts" ]; then
@@ -142,10 +143,6 @@ function install_service() {
 
     if [ ! -d "$bundle" ]; then
         echo "Error: bundle '$bundle' not found in helmcharts/"
-        return 1
-    fi
-    if [ ! -d "$bundle/charts/$target_chart" ] && ! ls "$bundle/charts/$target_chart"-*.tgz &>/dev/null 2>&1; then
-        echo "Error: chart '$target_chart' not found in helmcharts/$bundle/charts/"
         return 1
     fi
 
@@ -162,59 +159,40 @@ function install_service() {
     fi
 
     if helm status "$bundle" --namespace sunbird &>/dev/null; then
-        # Phase B: Release exists — reuse previous values, enable only target chart
-        echo -e "\nRelease '$bundle' exists — upgrading '$target_chart' only (Phase B)"
+        # Phase B: Release exists — reuse previous values, enable all target charts
+        echo -e "\nRelease '$bundle' exists — upgrading '${target_charts[*]}' (Phase B)"
 
-        local bitnami_password_flags=""
-        case "$target_chart" in
-            kafka)
-                if kubectl get secret kafka-user-passwords -n sunbird &>/dev/null; then
-                    INTER_BROKER_PASSWORD=$(kubectl get secret kafka-user-passwords -n sunbird \
-                        -o jsonpath="{.data.inter-broker-password}" | base64 -d)
-                    CONTROLLER_PASSWORD=$(kubectl get secret kafka-user-passwords -n sunbird \
-                        -o jsonpath="{.data.controller-password}" | base64 -d)
-                    bitnami_password_flags="--set kafka.sasl.interbroker.password=${INTER_BROKER_PASSWORD} --set kafka.sasl.controller.password=${CONTROLLER_PASSWORD}"
-                    echo "Fetched existing Kafka passwords from k8s secret"
-                fi
-                ;;
-            elasticsearch)
-                if kubectl get secret elasticsearch -n sunbird &>/dev/null; then
-                    ES_PASSWORD=$(kubectl get secret elasticsearch -n sunbird \
-                        -o jsonpath="{.data.elasticsearch-password}" | base64 -d)
-                    bitnami_password_flags="--set elasticsearch.security.elasticPassword=${ES_PASSWORD}"
-                    echo "Fetched existing Elasticsearch password from k8s secret"
-                fi
-                ;;
-            redis)
-                if kubectl get secret redis -n sunbird &>/dev/null; then
-                    REDIS_PASSWORD=$(kubectl get secret redis -n sunbird \
-                        -o jsonpath="{.data.redis-password}" | base64 -d)
-                    bitnami_password_flags="--set redis.auth.password=${REDIS_PASSWORD}"
-                    echo "Fetched existing Redis password from k8s secret"
-                fi
-                ;;
-        esac
+        # Build --set enabled flags for every target chart
+        local set_flags=""
+        for chart in "${target_charts[@]}"; do
+            set_flags="$set_flags --set ${chart}.enabled=true"
+        done
 
         helm upgrade "$bundle" "$bundle" \
             --namespace sunbird \
             --reuse-values \
-            --set "${target_chart}.enabled=true" \
+            $set_flags \
             $ed_values_flag \
             $addon_values_flag \
             -f images.yaml \
             -f "global-resources.yaml" \
             -f "../opentofu/azure/$environment/global-values.yaml" \
             -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
-            $bitnami_password_flags \
             --timeout 30m \
             --debug
     else
-        # Phase A: No release yet — deploy only target, disable all other conditional charts
-        echo -e "\nNo existing release for '$bundle' — deploying '$target_chart' only (Phase A)"
+        # Phase A: No release yet — enable all target charts, disable every other conditional chart
+        echo -e "\nNo existing release for '$bundle' — deploying '${target_charts[*]}' (Phase A)"
 
-        local set_flags="--set ${target_chart}.enabled=true"
+        local set_flags=""
         while IFS= read -r chart_name; do
-            if [ "$chart_name" != "$target_chart" ]; then
+            local is_target=false
+            for chart in "${target_charts[@]}"; do
+                [ "$chart_name" = "$chart" ] && is_target=true && break
+            done
+            if $is_target; then
+                set_flags="$set_flags --set ${chart_name}.enabled=true"
+            else
                 set_flags="$set_flags --set ${chart_name}.enabled=false"
             fi
         done < <(yq '.dependencies[] | select(has("condition")) | .name' "$bundle/Chart.yaml")
@@ -234,9 +212,9 @@ function install_service() {
 }
 
 function install_helm_components() {
-    if [ $# -eq 2 ]; then
-        # Two args: deploy a single service within a bundle
-        install_service "$1" "$2"
+    if [ $# -ge 2 ]; then
+        # Two or more args: deploy one or more services within a bundle
+        install_service "$@"
     elif [ $# -eq 1 ]; then
         # One arg: deploy the entire bundle
         install_component "$1"
@@ -426,7 +404,7 @@ else
         ;;
     "install_service")
         shift
-        install_service "$1" "$2"
+        install_service "$@"
         ;;
     "run_post_install")
         run_post_install
