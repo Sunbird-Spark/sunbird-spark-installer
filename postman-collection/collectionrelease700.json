@@ -9048,7 +9048,7 @@
 									}
 								},
 								"url": {
-									"raw": "{{host}}/api/data/v1/form/update",
+									"raw": "{{host}}/api/data/v1/form/create",
 									"host": [
 										"{{host}}"
 									],
