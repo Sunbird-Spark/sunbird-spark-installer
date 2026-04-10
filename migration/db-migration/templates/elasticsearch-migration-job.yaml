@@ -1,0 +1,88 @@
+{{- if .Values.jobs.elasticsearch.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.jobs.elasticsearch.name }}
+  namespace: {{ .Values.job.namespace }}
+  labels:
+    app: migration
+    type: elasticsearch
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  backoffLimit: {{ .Values.job.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: migration
+        type: elasticsearch
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- else }}
+      serviceAccountName: default
+      {{- end }}
+
+      containers:
+      - name: elasticsearch-migration
+        image: "python:3.11-slim"
+        imagePullPolicy: IfNotPresent
+
+        command:
+        - /bin/bash
+        - -c
+        - |
+          apt-get update -qq && apt-get install -y -qq curl &&
+          pip install -q requests &&
+          python3 /scripts/migrate_elasticsearch.py
+
+        env:
+        - name: OLD_ES_HOST
+          value: "{{ .Values.elasticsearchMigration.oldEsHost }}"
+        - name: NEW_ES_HOST
+          value: "{{ .Values.elasticsearchMigration.newEsHost }}"
+        - name: OLD_ES_USER
+          value: "{{ .Values.elasticsearchMigration.oldEsUser }}"
+        - name: OLD_ES_PASSWORD
+          value: "{{ .Values.elasticsearchMigration.oldEsPassword }}"
+        - name: INDICES
+          value: "{{ .Values.elasticsearchMigration.indices }}"
+        - name: BATCH_SIZE
+          value: "{{ .Values.elasticsearchMigration.batchSize }}"
+        - name: SKIP_INDICES
+          value: "{{ .Values.elasticsearchMigration.skipIndices }}"
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+
+        volumeMounts:
+        - name: script-volume
+          mountPath: /scripts
+          readOnly: true
+        - name: logs-volume
+          mountPath: /var/log/migration
+
+      terminationGracePeriodSeconds: 7200
+
+      volumes:
+      - name: script-volume
+        configMap:
+          name: {{ .Values.configMap.name }}
+          defaultMode: 0755
+          optional: false
+      - name: logs-volume
+        emptyDir:
+          medium: {{ .Values.volumes.logs.medium | quote }}
+          sizeLimit: {{ .Values.volumes.logs.sizeLimit }}
+{{- end }}

@@ -1,0 +1,89 @@
+{{- if .Values.jobs.createdat.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.jobs.createdat.name }}
+  namespace: {{ .Values.job.namespace }}
+  labels:
+    app: migration
+    type: createdat-backfill
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  backoffLimit: {{ .Values.job.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: migration
+        type: createdat-backfill
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- else }}
+      serviceAccountName: default
+      {{- end }}
+
+      containers:
+      - name: createdat-migration
+        image: "python:3.11-slim"
+        imagePullPolicy: IfNotPresent
+
+        command:
+        - /bin/bash
+        - -c
+        - |
+          apt-get update -qq && apt-get install -y -qq curl &&
+          curl -sSL "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl" -o /tmp/kubectl &&
+          chmod +x /tmp/kubectl && mv /tmp/kubectl /usr/local/bin/kubectl &&
+          python3 /scripts/migrate_createdat.py
+
+        env:
+        - name: ES_HOST
+          value: "http://{{ .Values.createdat.esHost }}:{{ .Values.createdat.esPort }}"
+        - name: YB_POD
+          value: "{{ .Values.createdat.ybPod }}"
+        - name: YB_NAMESPACE
+          value: "{{ .Values.createdat.ybNamespace }}"
+        - name: LERN_NAMESPACE
+          value: "{{ .Values.createdat.lernNamespace }}"
+        - name: LERN_PORT
+          value: "{{ .Values.createdat.lernPort }}"
+        - name: KEYSPACE
+          value: "{{ .Values.createdat.keyspace }}"
+        - name: SYNC_BATCH_SIZE
+          value: "{{ .Values.createdat.syncBatchSize }}"
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+
+        volumeMounts:
+        - name: script-volume
+          mountPath: /scripts
+          readOnly: true
+        - name: logs-volume
+          mountPath: /var/log/migration
+
+      terminationGracePeriodSeconds: 3600
+
+      volumes:
+      - name: script-volume
+        configMap:
+          name: {{ .Values.configMap.name }}
+          defaultMode: 0755
+          optional: false
+      - name: logs-volume
+        emptyDir:
+          medium: {{ .Values.volumes.logs.medium | quote }}
+          sizeLimit: {{ .Values.volumes.logs.sizeLimit }}
+{{- end }}
