@@ -76,11 +76,8 @@ def find_lern_pod():
 
 
 def confirm(message):
-    """Prompt user for confirmation."""
-    response = input(f"{message} (y/n): ").strip().lower()
-    if response != "y":
-        print("Aborted.")
-        sys.exit(0)
+    """No-op in automated mode."""
+    print(f"  [AUTO] {message} → proceeding automatically")
 
 
 def step_1_update_es_mapping():
@@ -102,12 +99,10 @@ def step_1_update_es_mapping():
 def step_2_alter_table():
     """Alter YugaByte table to add createdat column."""
     print("\n[Step 2/6] Altering YugaByte table...")
-    result = yb_exec(["ycqlsh", "-e", f"ALTER TABLE {KEYSPACE}.user ADD createdat text;"])
+    result = yb_exec(["ycqlsh", "-e", f"ALTER TABLE {KEYSPACE}.user ADD IF NOT EXISTS createdat text;"])
     if result.returncode != 0:
-        if "already exists" in result.stderr.lower() or "already exists" in result.stdout.lower():
-            print("  WARNING: Column already exists. Continuing...")
-        else:
-            print(f"  WARNING: {result.stderr.strip()}. Continuing...")
+        print(f"  FAILED: {result.stderr.strip()}")
+        sys.exit(1)
     print("  Done.")
 
 
@@ -168,7 +163,7 @@ def step_6_sync(lern_pod, user_ids):
             f"-H 'Content-Type: application/json' "
             f"-d '{payload}'"
         )
-        result = kubectl_exec(lern_pod, LERN_NAMESPACE, ["bash", "-c", curl_cmd])
+        result = kubectl_exec(lern_pod, LERN_NAMESPACE, ["sh", "-c", curl_cmd])
         status = result.stdout.strip()
         if status == "200":
             print("OK")
