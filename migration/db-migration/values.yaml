@@ -171,16 +171,30 @@ volumes:
     medium: "Memory"
 
 # ============================
-# Elasticsearch Migration Configuration
+# Elasticsearch Migration Configuration (Azure Blob Snapshot)
 # ============================
 elasticsearchMigration:
-  oldEsHost: "http://20.219.175.25:9200"
-  newEsHost: "http://elasticsearch.sunbird.svc.cluster.local:9200"
-  oldEsUser: ""
-  oldEsPassword: ""
-  indices: ""          # comma-separated, leave empty for all indices
-  batchSize: 1000
-  skipIndices: ""      # comma-separated indices to skip
+  # Azure Blob Storage credentials (for snapshot repository)
+  azureStorageAccountName: ""
+  azureStorageAccountKey: ""
+  azureContainerName: ""       # Azure blob container to store snapshot
+  azureBasePath: ""             # Path prefix inside the container
+
+  # Snapshot identity
+  snapshotName: "snapshot_1"             # Name of the ES snapshot to create/restore
+  repositoryName: "azure_backup"         # ES repository name registered on both clusters
+
+  # Cluster endpoints
+  oldEsUrl: ""                            # Old cluster LoadBalancer IP
+  newEsUrl: ""  # New cluster in-cluster DNS
+
+  # New ES pod (for keystore credential injection via kubectl exec)
+  newEsPodName: "elasticsearch-master-0"
+  newEsNamespace: ""
+  esKeystorePath: "/opt/bitnami/elasticsearch/bin/elasticsearch-keystore"
+
+  # NOTE: Old ES keystore must be pre-configured manually with Azure credentials
+  # before running this migration. The script does NOT manage the old ES keystore.
 
 # ============================
 # createdat Backfill Configuration

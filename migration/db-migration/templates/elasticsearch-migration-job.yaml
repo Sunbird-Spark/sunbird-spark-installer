@@ -38,33 +38,49 @@ spec:
         - /bin/bash
         - -c
         - |
-          apt-get update -qq && apt-get install -y -qq curl &&
-          pip install -q requests &&
+          set -e
+          apt-get update -qq && apt-get install -y -qq curl ca-certificates
+
+          # Install kubectl (direct binary — avoids Debian 13 GPG v3 signature rejection)
+          curl -sSL "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl" -o /tmp/kubectl
+          chmod +x /tmp/kubectl && mv /tmp/kubectl /usr/local/bin/kubectl
+
+          # Install Azure CLI
+          curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
           python3 /scripts/migrate_elasticsearch.py
 
         env:
-        - name: OLD_ES_HOST
-          value: "{{ .Values.elasticsearchMigration.oldEsHost }}"
-        - name: NEW_ES_HOST
-          value: "{{ .Values.elasticsearchMigration.newEsHost }}"
-        - name: OLD_ES_USER
-          value: "{{ .Values.elasticsearchMigration.oldEsUser }}"
-        - name: OLD_ES_PASSWORD
-          value: "{{ .Values.elasticsearchMigration.oldEsPassword }}"
-        - name: INDICES
-          value: "{{ .Values.elasticsearchMigration.indices }}"
-        - name: BATCH_SIZE
-          value: "{{ .Values.elasticsearchMigration.batchSize }}"
-        - name: SKIP_INDICES
-          value: "{{ .Values.elasticsearchMigration.skipIndices }}"
+        - name: AZURE_STORAGE_ACCOUNT_NAME
+          value: "{{ .Values.elasticsearchMigration.azureStorageAccountName }}"
+        - name: AZURE_STORAGE_ACCOUNT_KEY
+          value: "{{ .Values.elasticsearchMigration.azureStorageAccountKey }}"
+        - name: AZURE_CONTAINER_NAME
+          value: "{{ .Values.elasticsearchMigration.azureContainerName }}"
+        - name: AZURE_BASE_PATH
+          value: "{{ .Values.elasticsearchMigration.azureBasePath }}"
+        - name: SNAPSHOT_NAME
+          value: "{{ .Values.elasticsearchMigration.snapshotName }}"
+        - name: REPOSITORY_NAME
+          value: "{{ .Values.elasticsearchMigration.repositoryName }}"
+        - name: OLD_ES_URL
+          value: "{{ .Values.elasticsearchMigration.oldEsUrl }}"
+        - name: NEW_ES_URL
+          value: "{{ .Values.elasticsearchMigration.newEsUrl }}"
+        - name: NEW_ES_POD_NAME
+          value: "{{ .Values.elasticsearchMigration.newEsPodName }}"
+        - name: NEW_ES_NAMESPACE
+          value: "{{ .Values.elasticsearchMigration.newEsNamespace }}"
+        - name: ES_KEYSTORE_PATH
+          value: "{{ .Values.elasticsearchMigration.esKeystorePath }}"
 
         resources:
           requests:
-            memory: "512Mi"
-            cpu: "250m"
+            memory: "1Gi"
+            cpu: "500m"
           limits:
-            memory: "2Gi"
-            cpu: "1"
+            memory: "4Gi"
+            cpu: "2"
 
         volumeMounts:
         - name: script-volume
