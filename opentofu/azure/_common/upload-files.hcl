@@ -3,11 +3,17 @@ terraform {
 }
 
 locals {
-  global_vars            = yamldecode(file(find_in_parent_folders("global-values.yaml")))
-  cloud_vars             = yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml"))
-  storage_account_name   = local.cloud_vars.global.cloud_storage_access_key
-  storage_container_public = local.cloud_vars.global.public_container_name
-  storage_account_key    = local.cloud_vars.global.cloud_storage_secret_key
+  global_vars         = yamldecode(file(find_in_parent_folders("global-values.yaml")))
+  cloud_vars          = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {global: {cloud_storage_access_key: "", public_container_name: ""}})
+  skip_storage_module = local.global_vars.global.skip_storage_module
+}
+
+dependency "storage" {
+    config_path = "../storage"
+    mock_outputs = {
+      azurerm_storage_account_name     = "dummy-account"
+      azurerm_storage_container_public = "dummy-container-public"
+    }
 }
 
 dependency "workload_identity" {
@@ -18,7 +24,6 @@ dependency "workload_identity" {
 }
 
 inputs = {
-  storage_account_name               = local.storage_account_name
-  storage_container_public           = local.storage_container_public
-  storage_account_primary_access_key = local.storage_account_key
+  storage_account_name     = local.skip_storage_module ? local.cloud_vars.global.cloud_storage_access_key : dependency.storage.outputs.azurerm_storage_account_name
+  storage_container_public = local.skip_storage_module ? local.cloud_vars.global.public_container_name : dependency.storage.outputs.azurerm_storage_container_public
 }
