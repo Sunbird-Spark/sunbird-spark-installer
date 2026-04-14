@@ -8529,3 +8529,21 @@ kong_apis:
     config.limit_by: credential
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.medium_request_size_limit }}"
+
+- name: telemetryv3
+  uris: "{{ .Values.data_service_prefix }}/v3/telemetry"
+  url: "{{ .Values.telemetry_service_url }}/v1/telemetry"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - telemetryCreate
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.premium_consumer_large_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"    
