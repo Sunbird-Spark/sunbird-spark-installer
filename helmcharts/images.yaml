@@ -151,6 +151,10 @@ images:
     repository: sunbird-spark/janusgraph
     tag: develop_cb093d4
 
+  secor: &secor
+    repository: "sunbirded.azurecr.io/secor"
+    tag: "spark"
+
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_596f901"
@@ -323,6 +327,11 @@ internal: &internal
 
   janusgraph:
     image: *janusgraph
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  secor:
+    image: *secor
     imagePullSecrets:
       - name: "registry-secret-name"
 
