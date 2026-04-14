@@ -28,7 +28,7 @@ jobs:
 
   # createdat backfill migration
   createdat:
-    enabled: true
+    enabled: false
     name: createdat-migration-job
 
   # Elasticsearch old-to-new cluster migration
@@ -174,7 +174,7 @@ volumes:
 # Elasticsearch Migration Configuration
 # ============================
 elasticsearchMigration:
-  oldEsHost: "http://20.219.175.25:9200"
+  oldEsHost: "http://98.70.233.211:9200"
   newEsHost: "http://elasticsearch.sunbird.svc.cluster.local:9200"
   oldEsUser: ""
   oldEsPassword: ""

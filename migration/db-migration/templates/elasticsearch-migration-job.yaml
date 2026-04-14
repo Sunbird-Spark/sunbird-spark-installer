@@ -38,8 +38,8 @@ spec:
         - /bin/bash
         - -c
         - |
-          apt-get update -qq && apt-get install -y -qq curl &&
-          pip install -q requests &&
+          apt-get update -qq && apt-get install -y -qq curl nodejs npm &&
+          npm install -g elasticdump --quiet &&
           python3 /scripts/migrate_elasticsearch.py
 
         env:
@@ -47,16 +47,30 @@ spec:
           value: "{{ .Values.elasticsearchMigration.oldEsHost }}"
         - name: NEW_ES_HOST
           value: "{{ .Values.elasticsearchMigration.newEsHost }}"
-        - name: OLD_ES_USER
-          value: "{{ .Values.elasticsearchMigration.oldEsUser }}"
-        - name: OLD_ES_PASSWORD
-          value: "{{ .Values.elasticsearchMigration.oldEsPassword }}"
-        - name: INDICES
-          value: "{{ .Values.elasticsearchMigration.indices }}"
-        - name: BATCH_SIZE
-          value: "{{ .Values.elasticsearchMigration.batchSize }}"
-        - name: SKIP_INDICES
-          value: "{{ .Values.elasticsearchMigration.skipIndices }}"
+        - name: AZURE_ACCOUNT
+          value: "{{ .Values.elasticsearchMigration.azureAccount }}"
+        - name: AZURE_KEY
+          value: "{{ .Values.elasticsearchMigration.azureKey }}"
+        - name: AZURE_CONTAINER
+          value: "{{ .Values.elasticsearchMigration.azureContainer }}"
+        - name: AZURE_BASE_PATH
+          value: "{{ .Values.elasticsearchMigration.azureBasePath }}"
+        - name: REPO_NAME
+          value: "{{ .Values.elasticsearchMigration.repoName | default "azure_backup" }}"
+        - name: SNAPSHOT_NAME
+          value: "{{ .Values.elasticsearchMigration.snapshotName | default "snapshot_1" }}"
+        - name: OLD_ES_NAMESPACE
+          value: "{{ .Values.elasticsearchMigration.oldEsNamespace | default "sunbird" }}"
+        - name: OLD_ES_POD
+          value: "{{ .Values.elasticsearchMigration.oldEsPod | default "elasticsearch-master-0" }}"
+        - name: OLD_ES_CONTAINER
+          value: "{{ .Values.elasticsearchMigration.oldEsContainer | default "elasticsearch" }}"
+        - name: NEW_ES_NAMESPACE
+          value: "{{ .Values.job.namespace }}"
+        - name: NEW_ES_POD
+          value: "elasticsearch-master-0"
+        - name: NEW_ES_CONTAINER
+          value: "elasticsearch"
 
         resources:
           requests:
