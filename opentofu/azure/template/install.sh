@@ -29,8 +29,8 @@ function deploy_tf_module() {
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    # storage is skipped (skip = true in storage/terragrunt.hcl) — reusing existing
     deploy_tf_module network
+    deploy_tf_module storage
     deploy_tf_module aks
     deploy_tf_module workload-identity
     deploy_tf_module random_passwords
