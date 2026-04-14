@@ -5,40 +5,40 @@
     <#elseif section = "form">
         <div class="spark-form-pane">
             <div class="sunbird-logo-wrapper">
-                <img src="${url.resourcesPath}/img/sunbird-logo.png" alt="Sunbird" class="sunbird-logo-img" onerror="this.src='${url.resourcesPath}/img/sunbird-logo.png'">
+                <img src="${url.resourcesPath}/img/sunbird-logo.svg" alt="Sunbird" class="sunbird-logo-img" onerror="this.src='${url.resourcesPath}/img/sunbird-logo.svg'">
             </div>
             
-            <h1 class="page-title">Set New Password</h1>
-            <p class="page-subtitle">Create a strong password to secure your account.</p>
+            <h1 class="page-title">${msg("setNewPasswordTitle")}</h1>
+            <p class="page-subtitle">${msg("setNewPasswordSubtitle")}</p>
 
             <form id="kc-passwd-update-form" class="kc-form" action="${url.loginAction}" method="post">
                 <input type="text" id="username" name="username" value="${username}" style="display:none;"/>
                 <input type="password" id="password" name="password" autocomplete="current-password" style="display:none;"/>
 
                 <div class="kc-form-group">
-                    <label for="password-new" class="kc-label">New Password*</label>
+                    <label for="password-new" class="kc-label">${msg("newPasswordLabel")}</label>
                     <div class="input-wrapper">
-                        <input type="password" id="password-new" name="password-new" class="kc-input" autofocus autocomplete="new-password" placeholder="Enter New Password" required onkeyup="validatePassword()"/>
+                        <input type="password" id="password-new" name="password-new" class="kc-input" autofocus autocomplete="new-password" placeholder="${msg("newPasswordPlaceholder")}" required onkeyup="validatePassword()"/>
                         <span class="password-toggle" onclick="togglePassword('password-new', 'eye-icon-new')">
                             <svg id="eye-icon-new" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
                     </div>
-                    <div id="passwd-error-msg" class="ui text passwdchk">Your password must contain a minimum of 8 characters. It must include numerals, lower and upper case alphabets and special characters, without any spaces</div>
+                    <div id="passwd-error-msg" class="ui text passwdchk">${msg("passwordRequirements")}</div>
                 </div>
 
                 <div class="kc-form-group">
-                    <label for="password-confirm" class="kc-label">Confirm Password*</label>
+                    <label for="password-confirm" class="kc-label">${msg("confirmPasswordLabel")}</label>
                     <div class="input-wrapper">
-                        <input type="password" id="password-confirm" name="password-confirm" class="kc-input" autocomplete="new-password" placeholder="Confirm New Password" required onkeyup="matchPassword()"/>
+                        <input type="password" id="password-confirm" name="password-confirm" class="kc-input" autocomplete="new-password" placeholder="${msg("confirmPasswordPlaceholder")}" required onkeyup="matchPassword()"/>
                         <span class="password-toggle" onclick="togglePassword('password-confirm', 'eye-icon-confirm')">
                             <svg id="eye-icon-confirm" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         </span>
                     </div>
-                    <div id="passwd-match-error-msg" class="ui text confpasswderr hide">Passwords do not match</div>
+                    <div id="passwd-match-error-msg" class="ui text confpasswderr hide">${msg("passwordsDoNotMatch")}</div>
                 </div>
 
                 <div class="kc-form-buttons">
-                    <button id="login" class="kc-button" type="button" onclick="return handleUpdateSubmit(event)">Reset Password</button>
+                    <button id="login" class="kc-button" type="button" onclick="return handleUpdateSubmit(event)">${msg("doResetPassword")}</button>
                 </div>
             </form>
         </div>
@@ -51,11 +51,11 @@
                 var p1 = p1El ? String(p1El.value || '').trim() : '';
                 var p2 = p2El ? String(p2El.value || '').trim() : '';
                 if (!p1) {
-                    if (window.showToast) window.showToast('error', 'Enter New Password');
+                    if (window.showToast) window.showToast('error', '${msg("newPasswordPlaceholder")?js_string}');
                     return false;
                 }
                 if (!p2) {
-                    if (window.showToast) window.showToast('error', 'Confirm New Password');
+                    if (window.showToast) window.showToast('error', '${msg("confirmPasswordPlaceholder")?js_string}');
                     return false;
                 }
                 var hasLength = p1.length >= 8;
@@ -66,11 +66,11 @@
                 var noSpaces = /^\S*$/.test(p1);
                 var isComplex = hasLength && hasLower && hasUpper && hasNumber && hasSpecial && noSpaces;
                 if (!isComplex) {
-                    if (window.showToast) window.showToast('error', 'Your password must contain a minimum of 8 characters. It must include numerals, lower and upper case alphabets and special characters, without any spaces');
+                    if (window.showToast) window.showToast('error', '${msg("passwordRequirements")?js_string}');
                     return false;
                 }
                 if (p1 !== p2) {
-                    if (window.showToast) window.showToast('error', 'Passwords do not match');
+                    if (window.showToast) window.showToast('error', '${msg("passwordsDoNotMatch")?js_string}');
                     return false;
                 }
                 var form = document.getElementById('kc-passwd-update-form');
@@ -78,7 +78,7 @@
                     try { sessionStorage.setItem('sb_redirect_reset_success', '1'); } catch (e) {}
                     if (form.requestSubmit) form.requestSubmit(); else form.submit();
                 } else {
-                    if (window.showToast) window.showToast('error', 'Please fix the highlighted fields');
+                    if (window.showToast) window.showToast('error', '${msg("fixHighlightedFields")?js_string}');
                 }
                 return false;
             }

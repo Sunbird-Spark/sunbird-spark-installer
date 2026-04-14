@@ -41,6 +41,11 @@ body {
     overflow-x: hidden;
 }
 
+/* Arabic font */
+[dir="rtl"] body {
+    font-family: 'Noto Sans Arabic', 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 /* Utility: Hide class used by login scripts to toggle visibility */
 .hide {
     display: none !important;
@@ -228,7 +233,7 @@ body {
 }
 
 .sunbird-logo img {
-    height: 40px;
+    height: 3rem;
     width: auto;
 }
 
@@ -566,7 +571,7 @@ div[class*="kcFormGroupClass"] {
 
 .sunbird-logo-img {
     width: auto;
-    height: 40px;
+    height: 3rem;
 }
 
 .page-title {
@@ -912,3 +917,71 @@ div[class*="kcFormGroupClass"] {
 .show {
     display: block;
 }
+
+/* ── RTL (Arabic) Overrides ── */
+
+/* Left panel border-radius flipped */
+[dir="rtl"] .login-left-panel {
+    border-radius: 0 3rem 3rem 0;
+}
+
+[dir="rtl"] .login-left-panel-container {
+    border-width: 6px 6px 6px 0;
+}
+
+/* Left panel content position flipped */
+[dir="rtl"] .left-panel-content {
+    left: auto;
+    right: 24px;
+}
+
+/* Login card border-radius flipped */
+[dir="rtl"] .login-card {
+    border-radius: 3rem 0 0 3rem;
+}
+
+/* Close button flipped */
+[dir="rtl"] .close-button {
+    right: auto;
+    left: 20px;
+}
+
+/* Google icon margin flipped */
+[dir="rtl"] .google-icon {
+    margin-right: 0;
+    margin-left: 12px;
+}
+
+/* Forgot password link alignment */
+[dir="rtl"] .forgot-password {
+    text-align: left;
+}
+
+/* Password input padding flipped */
+[dir="rtl"] .password-wrapper input {
+    padding-right: 16px !important;
+    padding-left: 45px !important;
+}
+
+/* Password toggle position flipped */
+[dir="rtl"] .password-wrapper .password-toggle,
+[dir="rtl"] .input-wrapper .password-toggle {
+    right: auto;
+    left: 12px;
+}
+
+/* Toast container flipped */
+[dir="rtl"] .toast-container {
+    right: auto;
+    left: 16px;
+}
+
+[dir="rtl"] .toast {
+    padding: 12px 12px 12px 40px;
+}
+
+[dir="rtl"] .toast-close {
+    right: auto;
+    left: 8px;
+}
+
