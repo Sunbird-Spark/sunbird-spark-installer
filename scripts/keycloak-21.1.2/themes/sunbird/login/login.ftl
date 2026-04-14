@@ -3,7 +3,7 @@
     <#if section = "header">
         <div class="login-header">
             <div class="sunbird-logo">
-                <img src="${url.resourcesPath}/img/sunbird-logo.svg" alt="Sunbird Logo" />
+                <img src="${url.resourcesPath}/img/sunbird-logo.svg" alt="Sunbird Logo" class="sunbird-logo-img"/>
             </div>
             <h1 class="welcome-title">${msg("loginSunbird")}</h1>
             <p class="welcome-subtitle">${msg("loginSubtitle")}</p>
