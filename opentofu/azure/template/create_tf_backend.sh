@@ -17,6 +17,7 @@ fi
 building_block=$(yq '.global.building_block' global-values.yaml)
 environment_name=$(yq '.global.environment' global-values.yaml)
 location=$(yq '.global.cloud_storage_region' global-values.yaml)
+resource_group_name=$(yq '.global.resource_group_name' global-values.yaml)
 
 # Validate that the values are extracted correctly
 if [[ -z "$building_block" || -z "$environment_name" ]]; then
@@ -35,7 +36,11 @@ ID=$(az account show | jq -r .tenantId | cut -d '-' -f1)
 SUBSCRIPTION_ID=$(az account show | jq -r .id)
 
 # Construct resource names
-RESOURCE_GROUP_NAME="ed-sandbox"
+if [[ -z "$resource_group_name" || "$resource_group_name" == "null" ]]; then
+  RESOURCE_GROUP_NAME="${building_block}-${environment_name}"
+else
+  RESOURCE_GROUP_NAME="$resource_group_name"
+fi
 STORAGE_ACCOUNT_NAME="${environment_name}tfstate$ID"
 CONTAINER_NAME="${environment_name}tfstate"
 
