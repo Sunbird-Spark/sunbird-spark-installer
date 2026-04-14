@@ -103,7 +103,7 @@ images:
 
   keycloak: &keycloak
     repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "develop_39c7621"
+    tag: "develop_dbc2db2"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
@@ -111,7 +111,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v0.17_3f179f9_21"
+    tag: "spark-v0.19_1084816_23"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
