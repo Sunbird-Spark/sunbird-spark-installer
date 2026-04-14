@@ -175,10 +175,8 @@ enable_rc_certificate: true
 rc_bad_char_list: "char_list"
 
 cert_cloud_storage_type: "azure"
-cert_cloud_storage_secret: "{{ .Values.global.cloud_storage_secret_key }}"
-# TODO: enable workload identity for flink when ready
-# cert_cloud_storage_secret: ""
-# cert_cloud_storage_auth_type: "{{ .Values.global.cloud_storage_auth_type }}"
+cert_cloud_storage_secret: ""
+cert_cloud_storage_auth_type: "{{ .Values.global.cloud_storage_auth_type }}"
 cert_cloud_storage_key: "{{ .Values.global.cloud_storage_access_key }}"
 cert_cloud_storage_endpoint: ""
 cloud_storage_base_url: "https://{{ .Values.global.object_storage_endpoint }}"
@@ -331,7 +329,11 @@ base_config: |
 
       {{- else if eq "azure" .Values.global.checkpoint_store_type }}
       statebackend {
+        {{- if eq .Values.global.cloud_storage_provider "azure" }}
+        base.url = "abfs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+        {{- else }}
         base.url = "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+        {{- end }}
       }
 
       {{- else if eq "gcs" .Values.global.checkpoint_store_type }}
