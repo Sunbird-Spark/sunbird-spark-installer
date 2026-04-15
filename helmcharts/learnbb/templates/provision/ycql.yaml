@@ -51,7 +51,7 @@ spec:
           # Custom reCAPTCHA site key insertion
           echo "==== Inserting reCAPTCHA site key ===="
           ycqlsh $YCQLSH_HOST $YCQLSH_PORT -u $YCQLSH_USERNAME -p $YCQLSH_PASSWORD -e "INSERT INTO sunbird.system_settings (field, id, value) VALUES ('portal_google_recaptcha_site_key','portal_google_recaptcha_site_key','{{ .Values.global.sunbird_google_captcha_site_key }}');"
-          # Print log file to stdout so errors are visible in kubectl logs
+                    # Print log file to stdout so errors are visible in kubectl logs
           LOG_FILE=$(ls -t /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern/migration_*.log 2>/dev/null | head -1)
           if [ -n "$LOG_FILE" ]; then
             echo "======== MIGRATION LOG ========"
