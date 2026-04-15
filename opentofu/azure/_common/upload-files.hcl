@@ -9,13 +9,13 @@ locals {
 }
 
 dependency "storage" {
-    config_path = "../storage"
+    config_path  = "../storage"
+    skip_outputs = local.skip_storage_module
     mock_outputs = {
       azurerm_storage_account_name     = "dummy-account"
       azurerm_storage_container_public = "dummy-container-public"
     }
-    mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
-    mock_outputs_merge_strategy_with_state  = "shallow"
+    mock_outputs_merge_strategy_with_state = "shallow"
 }
 
 dependency "workload_identity" {
