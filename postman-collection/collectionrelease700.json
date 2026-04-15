@@ -1920,6 +1920,50 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "35 - System Settings - certContextOrigins",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer"
+							},
+							{
+								"key": "x-authenticated-user-token",
+								"value": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"request\": {\n        \"id\": \"certContextOrigins\",\n        \"field\": \"certContextOrigins\",\n        \"value\": \"https://downloadableartifacts.blob.core.windows.net/\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -9057,7 +9101,7 @@
 										"data",
 										"v1",
 										"form",
-										"update"
+										"create"
 									]
 								}
 							},
