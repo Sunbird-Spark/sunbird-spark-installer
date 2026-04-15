@@ -396,7 +396,7 @@ Update the external IPs in `migration/db-migration/values.yaml` and run each job
 | 5 | elasticsearch |
 | 6 | createdat |
 
-Refer to [migration/MIGRATION_GUIDE.md](migration/MIGRATION_GUIDE.md) for the full migration steps.
+Refer to [migration/DB-migration.md](migration/DB-migration.md) for the full migration steps.
 
 ### Step 5 — Update Encryption Key
 
