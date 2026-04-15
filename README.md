@@ -353,13 +353,13 @@ if saved_credential.get('key') == credential_iss:
 
 ---
 
-## Data Migration Guide
+## Migrating from Release 8.1.0 to Sunbird Spark
 
-Steps to migrate data from an existing Sunbird cluster to a new cluster.
+Steps to migrate data from the **Release 8.1.0** cluster to the new **Sunbird Spark** cluster.
 
-### Step 1 — Prepare Old Cluster
+### Step 1 — Prepare Release 8.1.0 Cluster
 
-Expose these services as **LoadBalancer** in the **old cluster**:
+Expose these services as **LoadBalancer** in the **Release 8.1.0 cluster**:
 
 | Service | Port |
 |---------|------|
@@ -372,20 +372,20 @@ Expose these services as **LoadBalancer** in the **old cluster**:
 kubectl patch svc <service-name> -n sunbird -p '{"spec": {"type": "LoadBalancer"}}'
 ```
 
-### Step 2 — Prepare New Cluster Branch
+### Step 2 — Prepare Sunbird Spark Branch
 
 ```bash
 git checkout develop
-git checkout -b release-8.1.0-migration
+git checkout -b release-8.1.0-to-spark-migration
 ```
 
 ### Step 3 — Deploy Only Databases
 
-On the new cluster, deploy **only** YugabyteDB, JanusGraph, and Elasticsearch first. Wait for all three to be healthy before proceeding.
+On the Sunbird Spark cluster, deploy **only** YugabyteDB, JanusGraph, and Elasticsearch first. Wait for all three to be healthy before proceeding.
 
 ### Step 4 — Run Data Migration
 
-Update the external IPs in `migration/db-migration/values.yaml` and run each job one at a time in this order:
+Update the external IPs from Step 1 in `migration/db-migration/values.yaml` and run each job one at a time in this order:
 
 | Order | Job |
 |-------|-----|
@@ -400,10 +400,10 @@ Refer to [migration/DB-migration.md](migration/DB-migration.md) for the full mig
 
 ### Step 5 — Update Encryption Key
 
-In `helmcharts/learnbb/charts/lern/configs/env.yaml`, update `sunbird_encryption_key` with the value from the **old cluster's** userorg env:
+In `helmcharts/learnbb/charts/lern/configs/env.yaml`, update `sunbird_encryption_key` with the value from the **Release 8.1.0 cluster's** userorg env:
 
 ```yaml
-sunbird_encryption_key: "<value from old cluster userorg env>"
+sunbird_encryption_key: "<value from Release 8.1.0 cluster userorg env>"
 ```
 
 ### Step 6 — Deploy All Bundles

@@ -1,12 +1,12 @@
-# Migration Guide
+# DB Migration Guide
 
-Guide for migrating data from the old cluster to the new Sunbird cluster.
+Guide for migrating data from the **Release 8.1.0** cluster to the new **Sunbird Spark** cluster.
 
 ---
 
 ## Prerequisites
 
-Before running any migration, expose the following services as **LoadBalancer** in the **old cluster**:
+Before running any migration, expose the following services as **LoadBalancer** in the **Release 8.1.0 cluster**:
 
 | Service | Port |
 |---------|------|
@@ -27,11 +27,11 @@ Fill in the external IPs and passwords in `db-migration/values.yaml` before runn
 
 | Step | Job | What it does |
 |------|-----|--------------|
-| 1 | **postgres** | Dumps PostgreSQL DBs (keycloak, registry) from old cluster and restores into YugabyteDB |
+| 1 | **postgres** | Dumps PostgreSQL DBs (keycloak, registry) from Release 8.1.0 cluster and restores into YugabyteDB |
 | 2 | **keycloak** | Updates Keycloak admin password hash and client secrets in YugabyteDB |
-| 3 | **cassandra** | Migrates Cassandra keyspaces to YugabyteDB (YCQL) |
-| 4 | **neo4j** | Migrates Neo4j graph data to JanusGraph |
-| 5 | **elasticsearch** | Migrates Elasticsearch indices from old to new cluster |
+| 3 | **cassandra** | Migrates Cassandra keyspaces from Release 8.1.0 cluster to YugabyteDB (YCQL) |
+| 4 | **neo4j** | Migrates Neo4j graph data from Release 8.1.0 cluster to JanusGraph |
+| 5 | **elasticsearch** | Migrates Elasticsearch indices from Release 8.1.0 cluster to Sunbird Spark cluster |
 | 6 | **createdat** | Backfills missing `createdat` field in YugabyteDB and syncs users to Elasticsearch |
 
 ---
@@ -42,14 +42,14 @@ Fill in the external IPs and passwords in `db-migration/values.yaml` before runn
 
 ```yaml
 cassandra:
-  host: ""        # External IP of old Cassandra
+  host: ""        # External IP of Release 8.1.0 Cassandra
 
 neo4j:
-  host: ""        # External IP of old Neo4j
+  host: ""        # External IP of Release 8.1.0 Neo4j
   password: ""
 
 postgres:
-  host: ""        # External IP of old PostgreSQL
+  host: ""        # External IP of Release 8.1.0 PostgreSQL
   password: ""
 
 keycloak:
@@ -57,15 +57,13 @@ keycloak:
   newSecret: ""   # New client secret suffix
 
 elasticsearchMigration:
-  oldEsHost: ""   # URL of old Elasticsearch (e.g. http://1.2.3.4:9200)
+  oldEsHost: ""   # URL of Release 8.1.0 Elasticsearch (e.g. http://1.2.3.4:9200)
 ```
 
 **Step 2** — Enable one job at a time, then deploy:
 
 ```bash
-# Example: run postgres migration
-# Set jobs.postgres.enabled: true in values.yaml
-
+# Set the job enabled: true in values.yaml, e.g. jobs.postgres.enabled: true
 helm upgrade --install db-migration ./migration/db-migration -n sunbird
 ```
 
@@ -86,7 +84,3 @@ kubectl logs -n sunbird -l type=<job-type> --follow
 - Enable only **one job at a time**
 - ES migration uses **elasticdump** (direct HTTP)
 - Neo4j migration exports CSV → runs Groovy import script inside JanusGraph pod via `kubectl exec`
-
----
-
-
