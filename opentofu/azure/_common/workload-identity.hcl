@@ -31,15 +31,15 @@ dependency "aks" {
 }
 
 dependency "storage" {
-  config_path = "../storage"
+  config_path  = "../storage"
+  skip_outputs = local.skip_storage_module
   mock_outputs = {
     azurerm_storage_account_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dummy-rg/providers/Microsoft.Storage/storageAccounts/dummy"
     azurerm_storage_container_public    = "dummy-public"
     azurerm_storage_container_private   = "dummy-private"
     azurerm_velero_container_name       = "dummy-velero"
   }
-  mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
-  mock_outputs_merge_strategy_with_state  = "shallow"
+  mock_outputs_merge_strategy_with_state = "shallow"
 }
 
 inputs = {
