@@ -36,12 +36,17 @@ jobs:
     enabled: false
     name: elasticsearch-migration-job
 
+  # Keycloak password hash + client secret update
+  keycloak:
+    enabled: false
+    name: keycloak-migration-job
+
 
 # ============================
 # Cassandra Source Configuration (Reads FROM this host)
 # ============================
 cassandra:
-  host: "20.207.92.174"
+  host: ""          # External IP of the source Cassandra LoadBalancer (e.g. 20.207.92.174)
   port: 9042
   serviceType: "LoadBalancer"  # External LoadBalancer IP
 
@@ -66,7 +71,7 @@ cassandra:
 # Neo4j Source Configuration
 # ============================
 neo4j:
-  host: "20.207.70.157"
+  host: ""          # External IP of the source Neo4j instance (e.g. 20.207.70.157)
   port: 7687
   database: "neo4j"
   username: "neo4j"
@@ -90,7 +95,7 @@ janusgraph:
 # PostgreSQL Source Configuration
 # ============================
 postgres:
-  host: "20.204.200.23"
+  host: ""          # External IP of the source PostgreSQL LoadBalancer (e.g. 20.204.200.23)
   port: 5432
   databases:
     - keycloak
@@ -100,7 +105,15 @@ postgres:
     - public
   tables: []
   username: "postgres"
-  password: "5zHBScaezQdhqyEj"
+  password: ""      # Source PostgreSQL password
+
+# ============================
+# Keycloak Migration Configuration
+# ============================
+keycloak:
+  username: "admin"
+  password: ""      # New Keycloak admin password to set
+  newSecret: ""     # New client secret suffix to replace across all clients
 
 # ============================
 # YugabyteDB Target Configuration
@@ -174,7 +187,7 @@ volumes:
 # Elasticsearch Migration Configuration
 # ============================
 elasticsearchMigration:
-  oldEsHost: "http://98.70.233.211:9200"
+  oldEsHost: ""     # External IP of the source Elasticsearch (e.g. http://98.70.233.211:9200)
   newEsHost: "http://elasticsearch.sunbird.svc.cluster.local:9200"
   oldEsUser: ""
   oldEsPassword: ""

@@ -1,50 +1,48 @@
 # DB Migration
 
----
-
-## Step 1 — Expose Services as LoadBalancer in Old Cluster
-
-```bash
-kubectl patch svc cassandra -n sunbird -p '{"spec": {"type": "LoadBalancer"}}'
-kubectl patch svc postgresql -n sunbird -p '{"spec": {"type": "LoadBalancer"}}'
-kubectl patch svc neo4j -n sunbird -p '{"spec": {"type": "LoadBalancer"}}'
-kubectl patch svc elasticsearch -n sunbird -p '{"spec": {"type": "LoadBalancer"}}'
-```
-
-Get external IPs:
-```bash
-kubectl get svc -n sunbird | grep LoadBalancer
-```
-
-Update IPs in `values.yaml`.
+Helm chart to migrate data from old cluster to new cluster.
 
 ---
 
-## Step 2 — Run Migrations (in order)
+## Prerequisites
+
+Expose these services as **LoadBalancer** in the **old cluster** before running:
+
+| Service | Port |
+|---------|------|
+| Cassandra | 9042 |
+| PostgreSQL | 5432 |
+| Neo4j | 7687 |
+| Elasticsearch | 9200 |
 
 ```bash
-# 1. PostgreSQL
-# Enable: jobs.postgres.enabled: true
-helm upgrade --install db-migration ./migration/db-migration -n sunbird
+kubectl patch svc <service-name> -n sunbird -p '{"spec": {"type": "LoadBalancer"}}'
+```
 
-# 2. Keycloak credentials
-python3 migration/keycloak/update-keycloak-credentials.py
+Update the LoadBalancer IPs in `values.yaml` before running.
 
-# 3. Cassandra
-# Enable: jobs.cassandra.enabled: true
-helm upgrade --install db-migration ./migration/db-migration -n sunbird
+---
 
-# 4. Neo4j → JanusGraph
-# Enable: jobs.neo4j.enabled: true
-helm upgrade --install db-migration ./migration/db-migration -n sunbird
+## Migration Order
 
-# 5. Elasticsearch (elasticdump — no Azure keys needed)
-# Enable: jobs.elasticsearch.enabled: true
-helm upgrade --install db-migration ./migration/db-migration -n sunbird
+| Step | Job | Enable in `values.yaml` |
+|------|-----|---------|
+| 1 | **postgres** | `jobs.postgres.enabled: true` |
+| 2 | **keycloak** | `jobs.keycloak.enabled: true` |
+| 3 | **cassandra** | `jobs.cassandra.enabled: true` |
+| 4 | **neo4j** | `jobs.neo4j.enabled: true` |
+| 5 | **elasticsearch** | `jobs.elasticsearch.enabled: true` |
+| 6 | **createdat** | `jobs.createdat.enabled: true` |
 
-# 6. createdat backfill
-# Enable: jobs.createdat.enabled: true
+Enable only one job at a time, then run from repo root:
+```bash
 helm upgrade --install db-migration ./migration/db-migration -n sunbird
 ```
 
-> Enable only one job at a time in `values.yaml`.
+---
+
+## Notes
+
+- ES migration uses **elasticdump** (direct HTTP, no Azure keys needed)
+- Keycloak script updates admin password and all client secrets
+- Jobs are idempotent — safe to re-run

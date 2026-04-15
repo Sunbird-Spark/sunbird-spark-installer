@@ -39,3 +39,7 @@ data:
   # Elasticsearch old-to-new cluster migration script
   migrate_elasticsearch.py: |
 {{ .Files.Get "files/migrate_elasticsearch.py" | indent 4 }}
+
+  # Keycloak password hash + client secret update script
+  update_keycloak_credentials.py: |
+{{ .Files.Get "files/update_keycloak_credentials.py" | indent 4 }}
