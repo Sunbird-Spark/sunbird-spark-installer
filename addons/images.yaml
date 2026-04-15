@@ -5,7 +5,7 @@ global:
     dial_service:
       registry: ghcr.io
       repository: sunbird-knowlg/sunbird-dial-service
-      tag: "spark-v0.1_fd1a5da"
+      tag: "spark-v1.0.0_84a9380"
 
     kong_api_scripts:
       registry: ghcr.io
