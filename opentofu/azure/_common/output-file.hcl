@@ -26,7 +26,8 @@ dependency "storage" {
       azurerm_storage_account_key       = "dummy-key"
       azurerm_velero_container_name     = "dummy-velero-container"
     }
-    mock_outputs_merge_strategy_with_state = "shallow"
+    mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
+    mock_outputs_merge_strategy_with_state  = "shallow"
 }
 
 dependency "aks" {
