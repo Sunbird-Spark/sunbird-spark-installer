@@ -1,0 +1,95 @@
+{{- if .Values.jobs.fixHierarchyIdentifiers.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.jobs.fixHierarchyIdentifiers.name }}
+  namespace: {{ .Values.job.namespace }}
+  labels:
+    app: migration
+    type: fix-hierarchy-identifiers
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    release: {{ .Release.Name }}
+spec:
+  backoffLimit: {{ .Values.job.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.job.ttlSecondsAfterFinished }}
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: migration
+        type: fix-hierarchy-identifiers
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Never
+
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      {{- else }}
+      serviceAccountName: default
+      {{- end }}
+
+      containers:
+      - name: fix-hierarchy-identifiers
+        image: "python:3.11-slim"
+        imagePullPolicy: IfNotPresent
+
+        command:
+        - /bin/bash
+        - -c
+        - |
+          apt-get update -qq && apt-get install -y -qq curl &&
+          curl -sSL "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl" -o /tmp/kubectl &&
+          chmod +x /tmp/kubectl && mv /tmp/kubectl /usr/local/bin/kubectl &&
+          python3 /scripts/fix_hierarchy_identifiers.py
+
+        env:
+        - name: YB_POD
+          value: "{{ .Values.fixHierarchyIdentifiers.ybPod }}"
+        - name: YB_NAMESPACE
+          value: "{{ .Values.fixHierarchyIdentifiers.ybNamespace }}"
+        - name: KEYSPACE
+          value: "{{ .Values.global.env }}_hierarchy_store"
+        - name: TABLE
+          value: "{{ .Values.fixHierarchyIdentifiers.table }}"
+        - name: KNOWLG_SERVICE_HOST
+          value: "{{ .Values.fixHierarchyIdentifiers.knowlgServiceHost }}"
+        - name: KNOWLG_SERVICE_PORT
+          value: "{{ .Values.fixHierarchyIdentifiers.knowlgServicePort }}"
+        - name: API_DELAY_SECONDS
+          value: "{{ .Values.fixHierarchyIdentifiers.apiDelaySeconds }}"
+        - name: API_TIMEOUT_SECONDS
+          value: "{{ .Values.fixHierarchyIdentifiers.apiTimeoutSeconds }}"
+        - name: PROGRESS_EVERY
+          value: "{{ .Values.fixHierarchyIdentifiers.progressEvery }}"
+        - name: DRY_RUN
+          value: "{{ .Values.fixHierarchyIdentifiers.dryRun }}"
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+
+        volumeMounts:
+        - name: script-volume
+          mountPath: /scripts
+          readOnly: true
+        - name: logs-volume
+          mountPath: /var/log/migration
+
+      terminationGracePeriodSeconds: 3600
+
+      volumes:
+      - name: script-volume
+        configMap:
+          name: {{ .Values.configMap.name }}
+          defaultMode: 0755
+          optional: false
+      - name: logs-volume
+        emptyDir:
+          medium: {{ .Values.volumes.logs.medium | quote }}
+          sizeLimit: {{ .Values.volumes.logs.sizeLimit }}
+{{- end }}

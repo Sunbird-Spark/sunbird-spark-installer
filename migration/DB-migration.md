@@ -33,6 +33,7 @@ Fill in the external IPs and passwords in `db-migration/values.yaml` before runn
 | 4 | **neo4j** | Migrates Neo4j graph data from Release 8.1.0 cluster to JanusGraph |
 | 5 | **elasticsearch** | Migrates Elasticsearch indices from Release 8.1.0 cluster to Sunbird Spark cluster |
 | 6 | **createdat** | Backfills missing `createdat` field in YugabyteDB and syncs users to Elasticsearch |
+| 7 | **fixHierarchyIdentifiers** | Strips `.img` suffix from `content_hierarchy` identifiers and retriggers the knowlg-service hierarchy update-relation API for each unique identifier |
 
 ---
 
@@ -71,7 +72,7 @@ helm upgrade --install db-migration ./migration/db-migration -n sunbird
 
 ```bash
 kubectl logs -n sunbird -l type=<job-type> --follow
-# e.g. type=postgres, keycloak, cassandra, neo4j, elasticsearch, createdat
+# e.g. type=postgres, keycloak, cassandra, neo4j, elasticsearch, createdat, fix-hierarchy-identifiers
 ```
 
 **Step 4** — Disable the job, enable the next one, repeat.

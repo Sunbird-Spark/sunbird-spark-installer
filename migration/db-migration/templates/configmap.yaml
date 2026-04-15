@@ -43,3 +43,7 @@ data:
   # Keycloak password hash + client secret update script
   update_keycloak_credentials.py: |
 {{ .Files.Get "files/update_keycloak_credentials.py" | indent 4 }}
+
+  # content_hierarchy identifier fix (strip .img + trigger update-relation API)
+  fix_hierarchy_identifiers.py: |
+{{ .Files.Get "files/fix_hierarchy_identifiers.py" | indent 4 }}

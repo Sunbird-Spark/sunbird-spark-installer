@@ -41,6 +41,11 @@ jobs:
     enabled: false
     name: keycloak-migration-job
 
+  # content_hierarchy identifier fix (strip .img + retrigger hierarchy update)
+  fixHierarchyIdentifiers:
+    enabled: false
+    name: fix-hierarchy-identifiers-job
+
 
 # ============================
 # Cassandra Source Configuration (Reads FROM this host)
@@ -174,6 +179,7 @@ configMap:
     - neo4j_to_janusgraph.py
     - migrate_createdat.py
     - migrate_elasticsearch.py
+    - fix_hierarchy_identifiers.py
 
 # ============================
 # Volume configuration
@@ -207,6 +213,24 @@ createdat:
   lernPort: "9000"
   keyspace: "sunbird"
   syncBatchSize: 500
+
+# ============================
+# content_hierarchy identifier fix
+# ============================
+fixHierarchyIdentifiers:
+  ybPod: "yb-tserver-0"
+  ybNamespace: "sunbird"
+  # keyspace is derived from global.env in the job template:
+  #   "{{ .Values.global.env }}_hierarchy_store"  →  e.g. "sb_hierarchy_store"
+  table: "content_hierarchy"
+  # knowlg-service is reachable via cluster DNS from inside the job pod;
+  # no port-forward needed when the job runs in-cluster.
+  knowlgServiceHost: "knowlg-service.sunbird.svc.cluster.local"
+  knowlgServicePort: "9000"
+  apiDelaySeconds: "0.1"
+  apiTimeoutSeconds: "30"
+  progressEvery: "100"
+  dryRun: "false"
 
 # ============================
 # Logging
