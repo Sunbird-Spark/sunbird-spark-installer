@@ -1964,6 +1964,42 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "36 - System Settings - googleClientId",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"request\": {\n    \"id\": \"googleClientId\",\n    \"field\": \"googleClientId\",\n    \"value\": \"{{google_oauth_client_id}}\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}/api/data/v1/system/settings/set",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"api",
+								"data",
+								"v1",
+								"system",
+								"settings",
+								"set"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
