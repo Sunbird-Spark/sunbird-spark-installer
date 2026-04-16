@@ -1,12 +1,12 @@
-{{- if .Values.jobs.createdat.enabled }}
+{{- if .Values.jobs.generateHierarchyRelations.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Values.jobs.createdat.name }}
+  name: {{ .Values.jobs.generateHierarchyRelations.name }}
   namespace: {{ .Values.job.namespace }}
   labels:
     app: migration
-    type: createdat-backfill
+    type: generate-hierarchy-relations
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     release: {{ .Release.Name }}
 spec:
@@ -18,7 +18,7 @@ spec:
     metadata:
       labels:
         app: migration
-        type: createdat-backfill
+        type: generate-hierarchy-relations
         release: {{ .Release.Name }}
     spec:
       restartPolicy: Never
@@ -30,7 +30,7 @@ spec:
       {{- end }}
 
       containers:
-      - name: createdat-migration
+      - name: generate-hierarchy-relations
         image: "python:3.11-slim"
         imagePullPolicy: IfNotPresent
 
@@ -41,23 +41,29 @@ spec:
           apt-get update -qq && apt-get install -y -qq curl &&
           curl -sSL "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl" -o /tmp/kubectl &&
           chmod +x /tmp/kubectl && mv /tmp/kubectl /usr/local/bin/kubectl &&
-          python3 /scripts/add_user_createdat_field.py
+          python3 /scripts/generate_hierarchy_relations.py
 
         env:
-        - name: ES_HOST
-          value: "http://{{ .Values.createdat.esHost }}:{{ .Values.createdat.esPort }}"
         - name: YB_POD
-          value: "{{ .Values.createdat.ybPod }}"
+          value: "{{ .Values.generateHierarchyRelations.ybPod }}"
         - name: YB_NAMESPACE
-          value: "{{ .Values.createdat.ybNamespace }}"
-        - name: LERN_NAMESPACE
-          value: "{{ .Values.createdat.lernNamespace }}"
-        - name: LERN_PORT
-          value: "{{ .Values.createdat.lernPort }}"
+          value: "{{ .Values.generateHierarchyRelations.ybNamespace }}"
         - name: KEYSPACE
-          value: "{{ .Values.createdat.keyspace }}"
-        - name: SYNC_BATCH_SIZE
-          value: "{{ .Values.createdat.syncBatchSize }}"
+          value: "{{ .Values.global.env }}_hierarchy_store"
+        - name: TABLE
+          value: "{{ .Values.generateHierarchyRelations.table }}"
+        - name: KNOWLG_SERVICE_HOST
+          value: "{{ .Values.generateHierarchyRelations.knowlgServiceHost }}"
+        - name: KNOWLG_SERVICE_PORT
+          value: "{{ .Values.generateHierarchyRelations.knowlgServicePort }}"
+        - name: API_DELAY_SECONDS
+          value: "{{ .Values.generateHierarchyRelations.apiDelaySeconds }}"
+        - name: API_TIMEOUT_SECONDS
+          value: "{{ .Values.generateHierarchyRelations.apiTimeoutSeconds }}"
+        - name: PROGRESS_EVERY
+          value: "{{ .Values.generateHierarchyRelations.progressEvery }}"
+        - name: DRY_RUN
+          value: "{{ .Values.generateHierarchyRelations.dryRun }}"
 
         resources:
           requests:

@@ -249,7 +249,7 @@ This job adds and backfills the `createdat` field in both Elasticsearch and Yuga
 
 ```yaml
 jobs:
-  createdat:
+  addUserCreatedatField:
     enabled: true
 ```
 
@@ -261,7 +261,7 @@ Run this after the createdat backfill is complete. This job strips the `.img` su
 
 ```yaml
 jobs:
-  fixHierarchyIdentifiers:
+  generateHierarchyRelations:
     enabled: true
 ```
 

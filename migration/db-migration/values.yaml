@@ -26,10 +26,10 @@ jobs:
     enabled: false
     name: neo4j-janusgraph-migration-job
 
-  # createdat backfill migration
-  createdat:
+  # Add user createdat field (backfill)
+  addUserCreatedatField:
     enabled: false
-    name: createdat-migration-job
+    name: add-user-createdat-field-job
 
   # Elasticsearch old-to-new cluster migration
   elasticsearch:
@@ -41,10 +41,10 @@ jobs:
     enabled: false
     name: keycloak-migration-job
 
-  # content_hierarchy identifier fix (strip .img + retrigger hierarchy update)
-  fixHierarchyIdentifiers:
+  # Generate hierarchy relations (strip .img + trigger hierarchy update)
+  generateHierarchyRelations:
     enabled: false
-    name: fix-hierarchy-identifiers-job
+    name: generate-hierarchy-relations-job
 
 
 # ============================
@@ -202,9 +202,9 @@ elasticsearchMigration:
   skipIndices: ""      # comma-separated indices to skip
 
 # ============================
-# createdat Backfill Configuration
+# Add User createdat Field Configuration
 # ============================
-createdat:
+addUserCreatedatField:
   esHost: "elasticsearch"
   esPort: 9200
   ybPod: "yb-tserver-0"
@@ -215,9 +215,9 @@ createdat:
   syncBatchSize: 500
 
 # ============================
-# content_hierarchy identifier fix
+# Generate Hierarchy Relations Configuration
 # ============================
-fixHierarchyIdentifiers:
+generateHierarchyRelations:
   ybPod: "yb-tserver-0"
   ybNamespace: "sunbird"
   # keyspace is derived from global.env in the job template:
