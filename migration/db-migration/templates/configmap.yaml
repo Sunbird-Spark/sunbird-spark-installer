@@ -33,8 +33,8 @@ data:
 {{ .Files.Get "files/set_graphid.groovy" | indent 4 }}
 
   # createdat backfill migration script
-  migrate_createdat.py: |
-{{ .Files.Get "files/migrate_createdat.py" | indent 4 }}
+  add_user_createdat_field.py: |
+{{ .Files.Get "files/add_user_createdat_field.py" | indent 4 }}
 
   # Elasticsearch old-to-new cluster migration script
   migrate_elasticsearch.py: |
@@ -45,5 +45,5 @@ data:
 {{ .Files.Get "files/update_keycloak_credentials.py" | indent 4 }}
 
   # content_hierarchy identifier fix (strip .img + trigger update-relation API)
-  fix_hierarchy_identifiers.py: |
-{{ .Files.Get "files/fix_hierarchy_identifiers.py" | indent 4 }}
+  generate_hierarchy_relations.py: |
+{{ .Files.Get "files/generate_hierarchy_relations.py" | indent 4 }}

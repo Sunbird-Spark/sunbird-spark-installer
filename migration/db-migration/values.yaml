@@ -177,9 +177,9 @@ configMap:
     - cassandra_to_yugabyte.py
     - postgres_dump_restore.sh
     - neo4j_to_janusgraph.py
-    - migrate_createdat.py
+    - add_user_createdat_field.py
     - migrate_elasticsearch.py
-    - fix_hierarchy_identifiers.py
+    - generate_hierarchy_relations.py
 
 # ============================
 # Volume configuration

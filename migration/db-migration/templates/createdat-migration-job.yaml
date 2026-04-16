@@ -41,7 +41,7 @@ spec:
           apt-get update -qq && apt-get install -y -qq curl &&
           curl -sSL "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl" -o /tmp/kubectl &&
           chmod +x /tmp/kubectl && mv /tmp/kubectl /usr/local/bin/kubectl &&
-          python3 /scripts/migrate_createdat.py
+          python3 /scripts/add_user_createdat_field.py
 
         env:
         - name: ES_HOST

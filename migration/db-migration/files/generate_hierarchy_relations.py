@@ -12,7 +12,7 @@ Steps:
      update-relation endpoint
 
 Usage:
-  python3 fix_hierarchy_identifiers.py
+  python3 generate_hierarchy_relations.py
 
 Optional env vars:
   YB_POD                (default: yb-tserver-0)

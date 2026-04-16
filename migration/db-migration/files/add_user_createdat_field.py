@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Migration script: Backfill createdat field for user creation count report.
 
@@ -10,7 +11,7 @@ Steps:
   6. Backfill createdat from createddate in YugaByte
 
 Usage:
-  python3 migrate_createdat.py
+  python3 add_user_createdat_field.py
 
 Optional env vars:
   ES_SERVICE  (default: elasticsearch:9200)
