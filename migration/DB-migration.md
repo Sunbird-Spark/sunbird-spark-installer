@@ -241,11 +241,11 @@ Confirm all indices and document counts match between Release 8.1.0 and the new 
 
 ---
 
-## Step 5 — createdat Backfill
+## Step 5 — Add User createdat Field
 
 This is a separate operation, not part of the main migration sequence. Run it after all Step 4 migrations are complete and verified.
 
-This job backfills the `createdat` field in Elasticsearch using user timestamp data from YugabyteDB.
+This job adds and backfills the `createdat` field in both Elasticsearch and YugabyteDB from existing user timestamp data.
 
 ```yaml
 jobs:
@@ -255,9 +255,9 @@ jobs:
 
 ---
 
-## Step 6 — Fix Hierarchy Identifiers
+## Step 6 — Generate Hierarchy Relations
 
-Run this after the createdat backfill is complete. This job strips the `.img` suffix from `content_hierarchy` identifiers in YugabyteDB and retriggers the knowlg-service hierarchy update-relation API for each unique identifier.
+Run this after the createdat backfill is complete. This job strips the `.img` suffix from `content_hierarchy` identifiers in YugabyteDB and triggers the knowlg-service hierarchy update-relation API for each unique identifier.
 
 ```yaml
 jobs:
