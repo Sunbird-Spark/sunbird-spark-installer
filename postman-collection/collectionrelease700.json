@@ -8046,7 +8046,7 @@
 									"name": "Add-Ons",
 									"item": [
 										{
-											"name": "1 - Groups Form",
+											"name": "1 - Groups Create",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8114,7 +8114,7 @@
 											"response": []
 										},
 										{
-											"name": "3 - Batch Form",
+											"name": "3 - Batch Create",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8310,7 +8310,7 @@
 											"response": []
 										},
 										{
-											"name": "2 - Terms of Usage Form",
+											"name": "2 - Terms of Usage",
 											"request": {
 												"method": "POST",
 												"header": [
