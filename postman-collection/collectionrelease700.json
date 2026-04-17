@@ -7446,7 +7446,7 @@
 									"name": "Consumption",
 									"item": [
 										{
-											"name": "1 - Landing Page Sections - Portal",
+											"name": "1 - Landing Page Sections",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -7488,7 +7488,7 @@
 											"response": []
 										},
 										{
-											"name": "2 - Onboarding Flow - Portal",
+											"name": "2 - Onboarding Flow",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -7527,7 +7527,7 @@
 											"response": []
 										},
 										{
-											"name": "3 - Home page - Portal",
+											"name": "3 - Home Page",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -7566,7 +7566,7 @@
 											"response": []
 										},
 										{
-											"name": "4 - Explore Page Filters - Portal",
+											"name": "4 - Explore Page Filters",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -7605,7 +7605,7 @@
 											"response": []
 										},
 										{
-											"name": "5 - Support page - portal",
+											"name": "5 - Support Page",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8271,7 +8271,7 @@
 									"name": "Consumption",
 									"item": [
 										{
-											"name": "1 - Mobile App Auth Config",
+											"name": "1 - Auth Config",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8310,7 +8310,7 @@
 											"response": []
 										},
 										{
-											"name": "2 - Terms Of Usage Form - Mobile app",
+											"name": "2 - Terms of Usage Form",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8349,7 +8349,7 @@
 											"response": []
 										},
 										{
-											"name": "3 - Onboarding page - Mobile App",
+											"name": "3 - Onboarding Page",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8388,7 +8388,7 @@
 											"response": []
 										},
 										{
-											"name": "4 - Home page - Mobile App",
+											"name": "4 - Home Page",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8427,7 +8427,7 @@
 											"response": []
 										},
 										{
-											"name": "5 - Landing page - Mobile App",
+											"name": "5 - Landing Page",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8466,7 +8466,7 @@
 											"response": []
 										},
 										{
-											"name": "6 - Filter Explore page - Mobile App",
+											"name": "6 - Filter Explore Page",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8505,7 +8505,7 @@
 											"response": []
 										},
 										{
-											"name": "7 - Support Page - Mobile App",
+											"name": "7 - Support Page",
 											"request": {
 												"method": "POST",
 												"header": [
@@ -8544,7 +8544,7 @@
 											"response": []
 										},
 										{
-											"name": "8 - Mobile app Explore Page Filters",
+											"name": "8 - Explore Page Filters",
 											"request": {
 												"method": "POST",
 												"header": [
