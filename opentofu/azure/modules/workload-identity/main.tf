@@ -50,9 +50,8 @@ resource "azurerm_user_assigned_identity" "workload_identity" {
 resource "azurerm_federated_identity_credential" "workload_identity" {
   for_each = var.k8s_service_accounts
 
-  name                = "${local.environment_name}-${each.key}-federated-cred"
-  resource_group_name = var.resource_group_name
-  parent_id           = azurerm_user_assigned_identity.workload_identity.id
+  name      = "${local.environment_name}-${each.key}-federated-cred"
+  parent_id = azurerm_user_assigned_identity.workload_identity.id
   audience            = ["api://AzureADTokenExchange"]
   issuer              = var.oidc_issuer_url
   subject             = "system:serviceaccount:${each.value.namespace}:${each.value.name}"
