@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "8a8fe682-92f6-4f00-bce5-f465a9430e0b",
-		"name": "Oneclick Installer Release 7.0.0 - Daylight Release",
+		"_postman_id": "f1ee4b6f-1b23-47bd-903a-632109d869cb",
+		"name": "Oneclick Installer - Sunbird Spark - Daylight Release",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "50198284"
+		"_exporter_id": "26192103"
 	},
 	"item": [
 		{
@@ -7456,7 +7456,7 @@
 													},
 													{
 														"key": "Authorization",
-														"value": "Bearer"
+														"value": "Bearer {{apikey}}"
 													}
 												],
 												"body": {
@@ -7469,12 +7469,9 @@
 													}
 												},
 												"url": {
-													"raw": "https://sandbox.sunbirded.org/api/data/v1/form/create",
-													"protocol": "https",
+													"raw": "{{host}}/api/data/v1/form/create",
 													"host": [
-														"sandbox",
-														"sunbirded",
-														"org"
+														"{{host}}"
 													],
 													"path": [
 														"api",
@@ -8320,7 +8317,7 @@
 													},
 													{
 														"key": "Authorization",
-														"value": "Bearer"
+														"value": "Bearer {{apikey}}"
 													}
 												],
 												"body": {
