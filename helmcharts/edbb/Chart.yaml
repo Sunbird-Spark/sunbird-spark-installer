@@ -65,3 +65,6 @@ dependencies:
   - name: knowledgemw
     version: 0.1.0
     condition: knowledgemw.enabled
+  - name: secor
+    version: 0.1.0
+    condition: secor.enabled
