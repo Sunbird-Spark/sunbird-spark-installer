@@ -1,3 +1,4 @@
+{{- if not .Values.global.migration_enabled }}
 # This chart is required because helm does not support deleting jobs if not having hooks.
 # We can add pre-install, hook as some services may require schemas in db, and it'll cause catch22.
 apiVersion: v1
@@ -68,3 +69,4 @@ spec:
               echo "deleted $job"
             done
       restartPolicy: Never
+{{- end }}
