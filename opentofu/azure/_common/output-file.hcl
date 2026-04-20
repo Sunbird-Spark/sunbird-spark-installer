@@ -2,7 +2,7 @@ locals {
   # This section will be enabled after final code is pushed and tagged
   # source_base_url = "github.com/<org>/modules.git//app"
   global_vars            = yamldecode(file(find_in_parent_folders("global-values.yaml")))
-  cloud_vars             = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {global: {cloud_storage_access_key: "", cloud_storage_secret_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: ""}})
+  cloud_vars             = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {global: {cloud_storage_access_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: ""}})
   skip_storage_module    = local.global_vars.global.skip_storage_module
   env                    = local.global_vars.global.env
   environment            = local.global_vars.global.environment
@@ -24,7 +24,6 @@ dependency "storage" {
       azurerm_storage_account_name      = "dummy-account"
       azurerm_storage_container_public  = "dummy-container-public"
       azurerm_storage_container_private = "dummy-container-private"
-      azurerm_storage_account_key       = "dummy-key"
       azurerm_velero_container_name     = "dummy-velero-container"
     }
     mock_outputs_merge_strategy_with_state = "shallow"
@@ -57,7 +56,6 @@ inputs = {
   storage_account_name               = local.skip_storage_module ? local.cloud_vars.global.cloud_storage_access_key : dependency.storage.outputs.azurerm_storage_account_name
   storage_container_public           = local.skip_storage_module ? local.cloud_vars.global.public_container_name : dependency.storage.outputs.azurerm_storage_container_public
   storage_container_private          = local.skip_storage_module ? local.cloud_vars.global.private_container_name : dependency.storage.outputs.azurerm_storage_container_private
-  storage_account_primary_access_key = local.skip_storage_module ? local.cloud_vars.global.cloud_storage_secret_key : dependency.storage.outputs.azurerm_storage_account_key
   random_string                      = dependency.keys.outputs.random_string
   velero_container_name              = local.skip_storage_module ? local.cloud_vars.global.velero_storage_container_private : dependency.storage.outputs.azurerm_velero_container_name
   cloud_storage_provider             = local.cloud_storage_provider
