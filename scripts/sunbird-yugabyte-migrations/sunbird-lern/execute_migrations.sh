@@ -125,6 +125,7 @@ CQL_FILES=(
     "sunbird_groups.cql"
     "sunbird_notifications.cql"
     "sunbird_programs.cql"
+    "sunbird_seed_data.cql"
 )
 
 print_header "Starting CQL File Execution"
