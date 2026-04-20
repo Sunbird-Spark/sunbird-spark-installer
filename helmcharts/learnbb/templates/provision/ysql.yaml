@@ -1,3 +1,4 @@
+{{- if not .Values.global.migration_enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -126,3 +127,4 @@ spec:
             done
             echo "Sunbird-lern SQL migrations completed."
   backoffLimit: 30
+{{- end }}
