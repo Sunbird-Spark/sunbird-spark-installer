@@ -191,8 +191,8 @@ function run_post_install() {
     fi
     check_pod_status
     echo "Starting post install..."
-    cp ../../../postman-collection/collection${RELEASE}.json .
-    postman collection run collection${RELEASE}.json --environment env.json --delay-request 500 --bail --insecure
+    cp ../../../postman-collection/sunbird-spark-collection-v1.json .
+    postman collection run sunbird-spark-collection-v1.json --environment env.json --delay-request 500 --bail --insecure
 }
 
 function create_client_forms() {
