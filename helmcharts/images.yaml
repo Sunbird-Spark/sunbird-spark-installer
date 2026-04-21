@@ -103,7 +103,7 @@ images:
 
   keycloak: &keycloak
     repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "develop_dbc2db2"
+    tag: "develop_eb2384f"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
