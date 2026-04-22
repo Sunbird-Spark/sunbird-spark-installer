@@ -50,7 +50,7 @@ images:
 
   player: &player
     repository: "sunbirded.azurecr.io/sunbird-portal"
-    tag: "spark-v103_6becc5b"
+    tag: "spark-v1.0.2_1b538d6"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -71,7 +71,7 @@ images:
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "spark-v0.1_bf6ceb4_12"
+    tag: "spark-v1.0.0_b75e555_13"
     
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -83,7 +83,7 @@ images:
 
   adminutil: &adminutil
     repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
-    tag: "release-8.0.0_rc1_21f5d46_1"
+    tag: "spark-v1.0.0_b8f4778_3"
 
   cert: &cert
     repository: "ghcr.io/sunbird-lern/cert-service"
@@ -103,7 +103,7 @@ images:
 
   keycloak: &keycloak
     repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "develop_dbc2db2"
+    tag: "develop_eb2384f"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
@@ -111,7 +111,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v0.19_1084816_23"
+    tag: "spark-v1.0.0_a66d3e7_25"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -119,11 +119,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v17_7d8451a"
+    tag: "spark-v1.0.1_d80ed5e"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v16_ad7adbb"
+    tag: "spark-v1.0.1_d80ed5e"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
@@ -343,9 +343,9 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-f1.18-v1_1c442d5"
+    tag: "spark-v1.0.1_4c96414"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v0.6_3734950"
+    tag: "spark-v1.0.0_c3b332f"
