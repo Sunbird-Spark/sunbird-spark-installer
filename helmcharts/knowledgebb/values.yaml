@@ -117,6 +117,18 @@ kafka: &kafka
     - name: "{{ .Values.global.env }}.knowlg.transaction.meta"
       partitions: 1
       replicationFactor: 1
+    - name: "{{ .Values.global.env }}.knowlg.qrimage.request"
+      partitions: 1
+      replicationFactor: 1
+    - name: "{{ .Values.global.env }}.knowlg.system.events"
+      partitions: 1
+      replicationFactor: 1
+    - name: "{{ .Values.global.env }}.knowlg.dialcode.context.job.request"
+      partitions: 1
+      replicationFactor: 1
+    - name: "{{ .Values.global.env }}.knowlg.dialcode.context.job.request.failed"
+      partitions: 1
+      replicationFactor: 1
     parallel: 1
   listeners:
     client:
