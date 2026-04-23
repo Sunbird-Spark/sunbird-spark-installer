@@ -1,0 +1,35 @@
+Database Import - {{ .Chart.Name }} v{{ .Chart.Version }}
+=============================================
+
+Enabled jobs (execution order):
+{{- if .Values.databases.yugabytedb.enabled }}
+  1. PostgreSQL (YugabyteDB YSQL) - databases: {{ range .Values.databases.yugabytedb.databases }}{{ .name }} {{ end }}
+{{- end }}
+{{- if .Values.postMigration.keycloakCredentials.enabled }}
+  2. Keycloak credentials update
+{{- end }}
+{{- if .Values.databases.ycql.enabled }}
+  3. Cassandra (YugabyteDB YCQL)  - keyspaces: {{ range .Values.databases.ycql.keyspaces }}{{ . }} {{ end }}
+{{- end }}
+{{- if .Values.databases.janusgraph.enabled }}
+  4. JanusGraph - host: {{ .Values.databases.janusgraph.host }}
+{{- end }}
+{{- if .Values.databases.elasticsearch.enabled }}
+  5. Elasticsearch - host: {{ .Values.databases.elasticsearch.host }}
+{{- end }}
+{{- if .Values.postMigration.createdatBackfill.enabled }}
+  6. createdat backfill (ES + YCQL)
+{{- end }}
+{{- if .Values.postMigration.hierarchyFix.enabled }}
+  7. Hierarchy identifier fix (knowlg-service API)
+{{- end }}
+
+Storage: {{ .Values.target.cloud }} / {{ .Values.target.container }}
+
+Jobs run sequentially via Helm hooks:
+  postgres(1) -> keycloak(2) -> cassandra(3) -> janusgraph(4) -> elasticsearch(5) -> createdat(6) -> hierarchy(7)
+Only enabled jobs will run. Disabled steps are skipped.
+
+Monitor progress:
+  kubectl get jobs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+  kubectl logs -n {{ .Release.Namespace }} job/{{ include "database-import.fullname" . }}-<component> -f

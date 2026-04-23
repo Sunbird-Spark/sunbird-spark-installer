@@ -1,0 +1,17 @@
+apiVersion: v2
+name: database-import
+description: Pull artifacts from object storage and restore to Sunbird Spark databases
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - migration
+  - database
+  - restore
+  - sunbird
+home: https://github.com/Sunbird-Spark/sunbird-spark-installer
+sources:
+  - https://github.com/Sunbird-Spark/sunbird-spark-installer
+maintainers:
+  - name: Sunbird Team
+    email: support@sunbird.org

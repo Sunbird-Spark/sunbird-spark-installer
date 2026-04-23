@@ -1,15 +1,16 @@
 locals {
-  # This section will be enabled after final code is pushed and tagged
-  # source_base_url = "github.com/<org>/modules.git//app"
-  global_vars            = yamldecode(file(find_in_parent_folders("global-values.yaml")))
-  cloud_vars             = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {global: {cloud_storage_access_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: ""}})
-  skip_storage_module    = local.global_vars.global.skip_storage_module
+  global_vars  = yamldecode(file(find_in_parent_folders("global-values.yaml")))
+  cloud_vars   = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {global: {cloud_storage_access_key: "", cloud_storage_secret_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: ""}})
   env                    = local.global_vars.global.env
   environment            = local.global_vars.global.environment
   building_block         = local.global_vars.global.building_block
   subscription_id        = local.global_vars.global.subscription_id
   cloud_storage_provider = local.global_vars.global.cloud_storage_provider
-  # random_string        = local.environment_vars.locals.random_string
+  storage_account_name      = local.cloud_vars.global.cloud_storage_access_key
+  storage_account_key       = local.cloud_vars.global.cloud_storage_secret_key
+  storage_container_public  = local.cloud_vars.global.public_container_name
+  storage_container_private = local.cloud_vars.global.private_container_name
+  velero_container_name     = local.cloud_vars.global.velero_storage_container_private
 }
 
 # For local development
@@ -17,27 +18,8 @@ terraform {
   source = "../../modules//output-file/"
 }
 
-dependency "storage" {
-    config_path  = "../storage"
-    skip_outputs = local.skip_storage_module
-    mock_outputs = {
-      azurerm_storage_account_name      = "dummy-account"
-      azurerm_storage_container_public  = "dummy-container-public"
-      azurerm_storage_container_private = "dummy-container-private"
-      azurerm_velero_container_name     = "dummy-velero-container"
-    }
-    mock_outputs_merge_strategy_with_state = "shallow"
-}
-
 dependency "aks" {
     config_path = "../aks"
-}
-
-dependency "keys" {
-    config_path = "../keys"
-    mock_outputs = {
-      random_string = "dummy-string"
-    }
 }
 
 dependency "workload_identity" {
@@ -45,7 +27,18 @@ dependency "workload_identity" {
     mock_outputs = {
       client_id = "00000000-0000-0000-0000-000000000000"
     }
+    mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
+    mock_outputs_merge_strategy_with_state  = "shallow"
 }
+
+dependency "keys" {
+    config_path = "../keys"
+    mock_outputs = {
+      random_string     = "dummy-string"
+    }
+    mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
+}
+
 
 inputs = {
   env                                = local.env
@@ -53,11 +46,12 @@ inputs = {
   building_block                     = local.building_block
   subscription_id                    = local.subscription_id
   private_ingressgateway_ip          = dependency.aks.outputs.private_ingressgateway_ip
-  storage_account_name               = local.skip_storage_module ? local.cloud_vars.global.cloud_storage_access_key : dependency.storage.outputs.azurerm_storage_account_name
-  storage_container_public           = local.skip_storage_module ? local.cloud_vars.global.public_container_name : dependency.storage.outputs.azurerm_storage_container_public
-  storage_container_private          = local.skip_storage_module ? local.cloud_vars.global.private_container_name : dependency.storage.outputs.azurerm_storage_container_private
+  storage_account_name               = local.storage_account_name
+  storage_container_public           = local.storage_container_public
+  storage_container_private          = local.storage_container_private
+  storage_account_primary_access_key = local.storage_account_key
   random_string                      = dependency.keys.outputs.random_string
-  velero_container_name              = local.skip_storage_module ? local.cloud_vars.global.velero_storage_container_private : dependency.storage.outputs.azurerm_velero_container_name
+  velero_container_name              = local.velero_container_name
   cloud_storage_provider             = local.cloud_storage_provider
   azure_client_id                    = dependency.workload_identity.outputs.client_id
   k8s_service_account_name           = "azure-managed-identity-sa"
