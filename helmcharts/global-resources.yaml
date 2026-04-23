@@ -164,8 +164,6 @@ elasticsearch:
       size: 25Gi
 
 opensearch:
-  image:
-    tag: "2.19.5"
   extraEnvs:
     - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
       value: "Lern@Migr8#2026!"
