@@ -209,6 +209,18 @@ function run_post_install() {
     postman collection run sunbird-spark-collection-v1.json --environment env.json --delay-request 500 --bail --insecure
 }
 
+function run_form_read() {
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "$environment" ]; then
+        cd ../opentofu/azure/$environment 2>/dev/null || true
+    fi
+    echo "Setting up missing forms..."
+    cp ../../../postman-collection/sunbird-spark-collection-v1.json .
+    python3 ../../../migration/setup_forms.py \
+        --collection sunbird-spark-collection-v1.json \
+        --env env.json
+}
+
 function create_client_forms() {
     local current_directory="$(pwd)"
     if [ "$(basename $current_directory)" != "$environment" ]; then
@@ -312,6 +324,9 @@ else
         ;;
     "run_post_install")
         run_post_install
+        ;;
+    "run_form_read")
+        run_form_read
         ;;
     "destroy_tf_resources")
         destroy_tf_resources
