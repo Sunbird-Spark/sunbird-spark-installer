@@ -33,6 +33,11 @@ images:
     repository: "elasticsearch"
     tag: "7.10.2"
 
+  opensearch: &opensearch
+    registry: "docker.io"
+    repository: "opensearchproject/opensearch"
+    tag: "2.19.5"
+
   grafana: &grafana
     registry: "docker.io"
     repository: "grafana/grafana"
@@ -183,6 +188,11 @@ internal: &internal
 
   elasticsearch:
     image: *elasticsearch
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  opensearch:
+    image: *opensearch
     imagePullSecrets:
       - name: "registry-secret-name"
 
