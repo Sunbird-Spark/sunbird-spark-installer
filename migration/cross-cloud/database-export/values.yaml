@@ -1,0 +1,96 @@
+# Source database connection settings
+source:
+  cloud: "azure"  # azure, gcp, aws, onprem
+  useExistingSecrets: true  # Use existing cluster secrets instead of creating new ones
+  # Azure specific
+  storageAccount: "edsandboxda72f12a"
+  container: "databasebackup"
+  accessKey: ""
+  # Storage path prefixes
+  postgresql_path: "postgresql"
+  cassandra_path: "cassandra"
+  elasticsearch_path: "elasticsearch"
+  neo4j_path: "neo4j"
+  # GCP specific  
+  bucket: ""
+  projectId: ""
+  serviceAccountKey: ""
+  # AWS specific
+  s3Bucket: ""
+  accessKeyId: ""
+  secretAccessKey: ""
+  region: ""
+  
+# Database connections
+databases:
+  postgresql:
+    enabled: false
+    secretName: ""  # Use fallback credentials
+    host: "postgresql.sunbird.svc.cluster.local"
+    port: 5432
+    username: "postgres"  # Fallback username if no secret
+    password: ""  # Fallback password if no secret
+    databases:
+      - name: "keycloak"
+      - name: "registry"
+        
+  cassandra:
+    enabled: true
+    secretName: ""  # Empty if no authentication
+    host: "cassandra.sunbird.svc.cluster.local"
+    port: 9042
+    username: "cassandra"  # Fallback username if no secret
+    password: ""  # Empty if no authentication
+    podName: "cassandra-0"         # Source pod (used for kubectl-exec DESCRIBE)
+    podNamespace: "sunbird"        # Source pod namespace
+    keyspaces:
+        - sunbird
+        - sb_content_store
+        - sunbird_courses
+        - sb_hierarchy_store
+        - qmzbm_form_service
+        - sunbird_notifications
+        - sb_category_store
+        - dialcodes
+        - sb_dialcode_store
+        - sb_question_store
+        - apzvp_review_comment
+        
+  neo4j:
+    enabled: false
+    secretName: ""  # Empty if no authentication
+    image: "ubuntu:22.04"
+    podName: "neo4j-0"         # Pod name of source Neo4j (for kubectl exec)
+    podNamespace: "sunbird"    # Kubernetes namespace of source Neo4j
+    host: "neo4j.sunbird.svc.cluster.local"
+    port: 7687
+    username: "neo4j"  # Fallback username if no secret
+    password: ""  # Empty if no authentication
+    
+  elasticsearch:
+    enabled: true
+    secretName: ""  # Empty if no authentication
+    image: "ubuntu:22.04"
+    host: "elasticsearch.sunbird.svc.cluster.local"
+    port: 9200
+    username: "elastic"  # Fallback username if no secret
+    password: ""  # Empty if no authentication
+
+# Job settings
+jobs:
+  image: "ubuntu:22.04"
+  pullPolicy: "IfNotPresent"
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 10
+
+# Validation
+validation:
+  enabled: true
+  strictMode: false  # fail on count mismatch vs warn only

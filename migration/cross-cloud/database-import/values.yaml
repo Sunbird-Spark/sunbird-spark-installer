@@ -1,0 +1,109 @@
+# Target database connection settings
+target:
+  cloud: "azure"  # azure, gcp, aws, onprem
+  # Azure specific
+  storageAccount: "edsandboxda72f12a"
+  container: "databasebackup"
+  accessKey: ""
+  # Storage path prefixes
+  postgresql_path: "postgresql"
+  cassandra_path: "cassandra"
+  elasticsearch_path: "cluster-1"
+  neo4j_path: "neo4j"
+  # GCP specific  
+  bucket: ""
+  projectId: ""
+  serviceAccountKey: ""
+  # AWS specific
+  s3Bucket: ""
+  accessKeyId: ""
+  secretAccessKey: ""
+  region: ""
+  
+# Target database connections (Sunbird Spark)
+databases:
+  yugabytedb:
+    enabled: false
+    host: "yb-tserver-service.sunbird.svc.cluster.local"
+    port: 5433
+    username: "yugabyte"
+    password: ""
+    databases:
+      - name: "keycloak"
+        username: "yugabyte"
+        password: ""
+      - name: "registry" 
+        username: "yugabyte"
+        password: ""
+        
+  ycql:
+    enabled: false
+    host: "yb-tserver-service.sunbird.svc.cluster.local"
+    port: 9042
+    username: "cassandra"
+    password: ""
+    # Rename keyspace prefixes at restore time. If a source keyspace starts
+    # with `sourcePrefix`, it is created on target with `targetPrefix` instead.
+    # Example: "sb_content_store" → "dv_content_store" when sourcePrefix="sb_"
+    # and targetPrefix="dv_". Set both to "" to disable renaming.
+    sourcePrefix: "sb_"
+    targetPrefix: "dv_"
+    keyspaces:
+      - "sunbird"
+      - "sb_content_store"
+      - "sunbird_courses"
+      - "sb_hierarchy_store"
+      - "qmzbm_form_service"
+      - "sunbird_notifications"
+      - "sb_category_store"
+      - "dialcodes"
+      - "sb_dialcode_store"
+      - "sb_question_store"
+      - "apzvp_review_comment"
+      
+  janusgraph:
+    enabled: true
+    host: "janusgraph.sunbird.svc.cluster.local"
+    port: 8182
+    username: "janusgraph"
+    password: ""
+    namespace: "sunbird"
+    podLabel: "app.kubernetes.io/name=janusgraph"
+    container: "janusgraph"
+    
+  elasticsearch:
+    enabled: false
+    host: "elasticsearch.sunbird.svc.cluster.local"
+    port: 9200
+    username: "elastic"
+    password: ""
+
+# Job settings
+jobs:
+  image: "ubuntu:22.04"
+  pullPolicy: "IfNotPresent"
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "4Gi"
+      cpu: "2000m"
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 10
+
+# Validation
+validation:
+  enabled: true
+  strictMode: false  # fail on count mismatch vs warn only
+
+# Post-migration tasks
+postMigration:
+  keycloakCredentials:
+    enabled: false
+    adminPassword: "mukD5bLJg9yTtVoh"
+    secretSuffix: "Aq39rvb0BSjV7IVF"  # Suffix to append to client secrets (e.g., "4567")
+  createdatBackfill:
+    enabled: false
+  hierarchyFix:
+    enabled: true

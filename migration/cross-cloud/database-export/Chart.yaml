@@ -1,0 +1,17 @@
+apiVersion: v2
+name: database-export
+description: Export databases from Sunbird ED 8.1.0 and upload to object storage
+type: application
+version: 0.1.0
+appVersion: "8.1.0"
+keywords:
+  - migration
+  - database
+  - backup
+  - sunbird
+home: https://github.com/Sunbird-Spark/sunbird-spark-installer
+sources:
+  - https://github.com/Sunbird-Spark/sunbird-spark-installer
+maintainers:
+  - name: Sunbird Team
+    email: support@sunbird.org

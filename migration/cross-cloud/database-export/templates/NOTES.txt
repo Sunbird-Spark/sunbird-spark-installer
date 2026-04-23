@@ -1,0 +1,25 @@
+Database Export - {{ .Chart.Name }} v{{ .Chart.Version }}
+=============================================
+
+Enabled exports (execution order):
+{{- if .Values.databases.postgresql.enabled }}
+  1. PostgreSQL  - databases: {{ range .Values.databases.postgresql.databases }}{{ .name }} {{ end }}
+{{- end }}
+{{- if .Values.databases.cassandra.enabled }}
+  2. Cassandra   - keyspaces: {{ range .Values.databases.cassandra.keyspaces }}{{ . }} {{ end }}
+{{- end }}
+{{- if .Values.databases.neo4j.enabled }}
+  3. Neo4j       - host: {{ .Values.databases.neo4j.host }}
+{{- end }}
+{{- if .Values.databases.elasticsearch.enabled }}
+  4. Elasticsearch - host: {{ .Values.databases.elasticsearch.host }}
+{{- end }}
+
+Storage: {{ .Values.source.cloud }} / {{ .Values.source.container }}
+
+Jobs run sequentially via Helm hooks (postgres -> cassandra -> neo4j -> elasticsearch).
+Only enabled databases will run. Re-runs overwrite existing data in blob storage.
+
+Monitor progress:
+  kubectl get jobs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+  kubectl logs -n {{ .Release.Namespace }} job/{{ include "database-export.fullname" . }}-<database> -f
