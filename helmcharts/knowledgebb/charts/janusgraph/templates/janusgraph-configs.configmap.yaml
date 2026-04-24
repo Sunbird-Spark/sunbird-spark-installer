@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: janusgraph-configs
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- .Values.provisioningAnnotations | toYaml | nindent 4 }}
+data:
+  log4j2-server.xml: |
+{{ .Files.Get "config/log4j2-server.xml" | indent 4 }}
+  register-cdc.groovy: |
+{{ .Files.Get "config/register-cdc.groovy" | indent 4 }}
+  gremlin-server.yaml: |
+{{ .Files.Get "config/gremlin-server.yaml" | indent 4 }}
+  logstash.conf: |
+{{ tpl (.Files.Get "config/logstash.conf") . | indent 4 }}
+  empty-sample.groovy: |
+{{ .Files.Get "config/empty-sample.groovy" | indent 4 }}
+  schema-init.groovy: |
+{{ .Files.Get "config/schema_init.groovy" | indent 4 }}
+  janusgraph-cql.properties: |
+{{ .Files.Get "config/janusgraph-cql.properties" | indent 4 }}
+  cdc-log4j.properties: |
+{{ .Files.Get "config/cdc-log4j.properties" | indent 4 }}
+  janusgraph-cql-server.properties: |
+    # CDC Transaction Log Configuration
+    log.learning_graph_events.backend=default
+    log.learning_graph_events.key-consistent=true
+    log.learning_graph_events.read-interval=500
+    {{- include "common.tplvalues.render" ( dict "value" .Values.janusgraphCqlExtraProperties "context" $ ) | nindent 4 }}
+    

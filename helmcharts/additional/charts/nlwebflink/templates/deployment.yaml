@@ -1,0 +1,267 @@
+{{- $currentScope := .}}
+{{- range $jobName, $jobData := .Values.flink_jobs }}
+{{- if $jobData.enabled }}
+{{- with $currentScope }}
+{{- $component := "taskmanager" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-%s" $jobName $component }}
+  namespace: {{ .Values.namespace }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  annotations:
+    checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
+    checksum/job-config: {{ $jobData | toYaml | sha256sum }}
+  {{- if .Values.commonAnnotations }}
+    {{ include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.taskmanager.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+      app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "common.names.name" . }}
+        app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
+      annotations:
+        checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
+        checksum/job-config: {{ $jobData | toYaml | sha256sum }}
+    spec:
+      {{- if .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: {{ .Values.taskmanager.flink_work_dir }}
+          command: ["/opt/flink/bin/taskmanager.sh"]
+          args: ["start-foreground"]
+          env:
+          {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+          - name: AZURE_CLIENT_ID
+            value: "{{ .Values.global.azure_client_id }}"
+          - name: CHECKPOINT_DIR
+            value: "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+          {{- end }}
+          - name: FLINK_PROPERTIES
+            value: |
+              jobmanager.rpc.address: {{ $jobName }}-jobmanager
+              jobmanager.rpc.port: {{ .Values.jobmanager.rpc_port }}
+              taskmanager.rpc.port: {{ .Values.taskmanager.rpc_port }}
+              taskmanager.numberOfTaskSlots: 1
+              rest.address: {{ $jobName }}-jobmanager
+              rest.port: 8081
+              parallelism.default: 1
+              taskmanager.memory.process.size: 1600m
+              taskmanager.memory.flink.size: 1024m
+              taskmanager.memory.heap.size: 768m
+              taskmanager.memory.managed.size: 256m
+              taskmanager.memory.network.fraction: 0.1
+              metrics.reporter.prom.class: org.apache.flink.metrics.prometheus.PrometheusReporter
+              metrics.reporter.prom.host: {{ $jobName }}-taskmanager
+              metrics.reporter.prom.port: 9251-9260
+              web.submit.enable: false
+              {{- if eq .Values.global.checkpoint_store_type "azure" }}
+              fs.allowed-fallback-filesystems: wasb,wasbs
+              state.backend: filesystem
+              state.checkpoints.dir: wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint
+              {{- end }}
+          ports:
+            {{- range .Values.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort }}
+            {{- end }}
+            - name: prom
+              containerPort: {{ .Values.taskmanager.prom_port }}
+          resources:
+            requests:
+              memory: {{ .Values.taskmanager.heap_memory }}Mi
+              cpu: {{ .Values.taskmanager.cpu_requests }}
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              cpu: {{ .Values.resources.limits.cpu }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+          - name: flink-config-volume
+            mountPath: /opt/flink/conf/flink-conf.yaml
+            subPath: flink-conf.yaml
+          - name: flink-config-volume
+            mountPath: /opt/flink/conf/log4j-console.properties
+            subPath: log4j-console.properties
+      volumes:
+      - name: flink-config-volume
+        configMap:
+          name: {{ $jobName }}-config
+          items:
+          - key: flink-conf
+            path: flink-conf.yaml
+          - key: log4j_console_properties
+            path: log4j-console.properties
+{{- $component := "jobmanager" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-%s" $jobName $component }}
+  namespace: {{ .Values.namespace }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  annotations:
+    checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
+    checksum/job-config: {{ $jobData | toYaml | sha256sum }}
+  {{- if .Values.commonAnnotations }}
+  {{ include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+      app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "common.names.name" . }}
+        app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
+      annotations:
+        checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
+        checksum/job-config: {{ $jobData | toYaml | sha256sum }}
+    spec:
+      {{- if .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: {{ .Values.jobmanager.flink_work_dir }}
+          command: ["/bin/bash"]
+          args: 
+            - -c
+            - |
+              # Start JobManager in background
+              /opt/flink/bin/jobmanager.sh start-foreground &
+              
+              # Wait for JobManager to be ready
+              echo "Waiting for JobManager to start..."
+              while ! curl -f http://localhost:8081/overview >/dev/null 2>&1; do
+                sleep 5
+                echo "Still waiting for JobManager..."
+              done
+              
+              echo "JobManager is ready! Submitting Python job..."
+              sleep 10
+              
+              # Submit the Python job
+              /opt/flink/bin/flink run -py {{ $jobData.python_file }} \
+                --python-requirements /opt/flink/job/requirements.txt \
+                --pyFiles /opt/flink/job/ \
+                -j localhost:8081
+              
+              echo "Python job submitted successfully!"
+              
+              # Keep container running
+              wait
+          env:
+          {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+          - name: AZURE_CLIENT_ID
+            value: "{{ .Values.global.azure_client_id }}"
+          - name: CHECKPOINT_DIR
+            value: "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+          {{- end }}
+          - name: FLINK_PROPERTIES
+            value: |
+              jobmanager.rpc.address: {{ $jobName }}-jobmanager
+              jobmanager.rpc.bind-address: 0.0.0.0
+              jobmanager.rpc.port: {{ .Values.jobmanager.rpc_port }}
+              rest.address: {{ $jobName }}-jobmanager
+              rest.port: 8081
+              rest.bind-address: 0.0.0.0
+              taskmanager.numberOfTaskSlots: 1
+              parallelism.default: 1
+              jobmanager.execution.failover-strategy: region
+              jobmanager.memory.process.size: 1600m
+              jobmanager.memory.flink.size: 1024m
+              jobmanager.memory.heap.size: 768m
+              jobmanager.memory.jvm-metaspace.size: 256m
+              taskmanager.memory.process.size: 1600m
+              taskmanager.memory.flink.size: 1024m
+              taskmanager.memory.heap.size: 768m
+              taskmanager.memory.managed.size: 256m
+              taskmanager.memory.network.fraction: 0.1
+              metrics.reporter.prom.class: org.apache.flink.metrics.prometheus.PrometheusReporter
+              metrics.reporter.prom.host: {{ $jobName }}-jobmanager
+              metrics.reporter.prom.port: 9250-9260
+              web.submit.enable: false
+              {{- if and .Values.checkpoint_enabled (eq .Values.global.checkpoint_store_type "azure") }}
+              fs.allowed-fallback-filesystems: wasb,wasbs
+              state.backend: filesystem
+              state.checkpoints.dir: wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint
+              {{- end }}
+          ports:
+            {{- range .Values.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort }}
+            {{- end }}
+            - name: prom
+              containerPort: {{ .Values.jobmanager.prom_port }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+          - name: flink-config-volume
+            mountPath: /opt/flink/conf/flink-conf.yaml
+            subPath: flink-conf.yaml
+          - name: flink-config-volume
+            mountPath: /data/flink/conf/base-config.conf
+            subPath: base-config.conf
+          - name: flink-config-volume
+            mountPath: /opt/flink/conf/log4j-console.properties
+            subPath: log4j-console.properties
+      volumes:
+      - name: flink-config-volume
+        configMap:
+          name: {{ $jobName }}-config
+          items:
+          - key: flink-conf
+            path: flink-conf.yaml
+          - key: base-config
+            path: base-config.conf
+          - key: log4j_console_properties
+            path: log4j-console.properties
+{{- end }}
+{{- end}}
+{{- end}}

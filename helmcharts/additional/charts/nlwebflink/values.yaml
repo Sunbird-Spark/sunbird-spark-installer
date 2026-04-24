@@ -1,0 +1,311 @@
+replicaCount: 1
+
+image:
+  repository: sunbirded.azurecr.io/flink-nlweb
+  tag: 0.0.3
+  pullPolicy: Always
+  pullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # runAsNonRoot: true
+  # runAsUser: 0
+  # fsGroup: 0
+
+securityContext: {}
+  # readOnlyRootFilesystem: false
+  # capabilities:
+  #   drop:
+  #   - ALL
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8081
+
+commonLabels:
+  release: monitoring
+
+ingress: {}
+  # enabled: false
+  # annotations: {}
+  # hosts:
+  #   - host: chart-example.local
+  #     paths:
+  #     - /
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 1Gi
+  limits:
+    cpu: 2
+    memory: 3Gi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+nodeSelector: {}
+tolerances: []
+affinity: {}
+
+configmap:
+  enabled: false
+  mountPath: /config
+
+serviceAccount:
+  create: false
+
+serviceMonitor: &serviceMonitor
+  jobmanager:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: monitoring
+    honorLabels: true
+    jobLabel: "app.kubernetes.io/name"
+    port: prom
+  taskmanager:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: monitoring
+    honorLabels: true
+    jobLabel: "app.kubernetes.io/name"
+    port: prom
+
+initContainers: {}
+  # - name: init-myservice
+  #   image: busybox:1.28
+  #   command: ['sh', '-c', "until nslookup kubernetes.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+
+sidecars: {}
+  # - name: log-reader
+  #   image: busybox
+  #   command: ["/bin/sh"]
+  #   args: ["-c", "tail -f /var/log/app.log"]
+
+jobmanager:
+  rpc_port: 6123
+  blob_port: 6124
+  query_port: 6125
+  ui_port: 8081
+  prom_port: 9250
+  heap_memory: 1024
+  flink_work_dir: "/opt/flink"
+
+rest_port: 80
+resttcp_port: 8081
+
+taskmanager:
+  prom_port: 9251
+  rpc_port: 6122
+  heap_memory: 1536
+  replicas: 1
+  cpu_requests: 0.5
+  flink_work_dir: "/opt/flink"
+
+# Cloud Storage Configuration
+checkpoint_enabled: false
+checkpoint_store_type: "azure"
+cloud_storage_flink_bucketname: ""
+
+# Cloud credentials
+s3_access_key: ""
+s3_secret_key: ""
+s3_endpoint: ""
+s3_path_style_access: ""
+
+# Environment settings
+env_name: &env_name "dev"
+domain_name: &domain_name "localhost"
+proto: &proto "https"
+instance: &instance "dev"
+
+
+# NL Web Specific Configuration
+nlweb_topic: "{{ .Values.global.env }}.nlweb.ingest"
+nlweb_group_id: "nlweb-flink-group"
+qdrant_endpoint: "http://qdrant:6333"
+api_endpoint: "http://nlweb:8000/load-data"
+site_name: "default_site"
+batch_size: 100
+
+# Flink Job Configuration
+checkpoint_interval: 0
+checkpoint_pause_between_seconds: 5000
+checkpoint_compression_enabled: false
+restart_attempts: 3
+restart_delay: 30000
+producer_max_request_size: 1572864
+producer_batch_size: 98304
+producer_linger_ms: 10
+
+# Job specific parallelism settings
+nlweb_consumer_parallelism: 1
+nlweb_parallelism: 1
+
+# Log4j Configuration
+log4j_console_properties: |
+  # This affects logging for both user code and Flink
+  rootLogger.level = INFO
+  rootLogger.appenderRef.console.ref = ConsoleAppender
+
+  # Uncomment this if you want to _only_ change Flink's logging
+  #logger.flink.name = org.apache.flink
+  #logger.flink.level = INFO
+
+  # The following lines keep the log level of common libraries/connectors on
+  # log level INFO. The root logger does not override this. You have to manually
+  # change the log levels here.
+  logger.akka.name = akka
+  logger.akka.level = ERROR
+  logger.kafka.name= org.apache.kafka
+  logger.kafka.level = ERROR
+  logger.hadoop.name = org.apache.hadoop
+  logger.hadoop.level = ERROR
+  logger.zookeeper.name = org.apache.zookeeper
+  logger.zookeeper.level = ERROR
+
+  # Log all infos to the console
+  appender.console.name = ConsoleAppender
+  appender.console.type = CONSOLE
+  appender.console.layout.type = PatternLayout
+  appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+
+  # Suppress the irrelevant (wrong) warnings from the Netty channel handler
+  logger.netty.name = org.apache.flink.shaded.akka.org.jboss.netty.channel.DefaultChannelPipeline
+  logger.netty.level = OFF
+
+# Base Configuration
+base_config: |
+  kafka {
+      broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+      producer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+      consumer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+      zookeeper = ""
+      producer {
+        max-request-size = {{ .Values.producer_max_request_size }}
+        batch.size = {{ .Values.producer_batch_size }}
+        linger.ms = {{ .Values.producer_linger_ms }}
+      }
+    }
+    job {
+      env = "{{ .Values.global.env }}"
+      enable.distributed.checkpointing = {{ .Values.checkpoint_enabled }}
+      {{ if eq "oci" .Values.global.checkpoint_store_type }}
+      statebackend {
+        base.url = "s3://{{ .Values.global.private_container_name }}/checkpoint"
+      }
+      {{ else if eq "azure" .Values.global.checkpoint_store_type }}
+      statebackend {
+        base.url = "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+      }
+      {{ else if eq "gcs" .Values.global.checkpoint_store_type }}
+      statebackend {
+        base.url = "gs://{{ .Values.global.private_container_name }}/checkpoint"
+      }
+      {{ else }}
+      # No valid checkpoint_store_type configured, skipping statebackend.
+      {{ end }}
+    }
+    
+    task {
+      parallelism = 1
+      consumer.parallelism = 1
+      checkpointing.compressed = {{ .Values.checkpoint_compression_enabled }}
+      checkpointing.interval = {{ .Values.checkpoint_interval }}
+      checkpointing.pause.between.seconds = {{ .Values.checkpoint_pause_between_seconds }}
+      restart-strategy.attempts = {{ .Values.restart_attempts }}
+      restart-strategy.delay = {{ .Values.restart_delay }}
+    }
+
+# Flink Jobs Configuration
+flink_jobs:
+  flink-kafka-to-qdrant:
+    enabled: true
+    serviceMonitor: *serviceMonitor
+    config: |+
+      include file("/data/flink/conf/base-config.conf")
+      kafka {
+        input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.nlweb_topic "context" $) }}"
+        groupId = "{{ .Values.nlweb_group_id }}"
+      }
+      task {
+        consumer.parallelism = {{ .Values.nlweb_consumer_parallelism }}
+        parallelism = {{ .Values.nlweb_parallelism }}
+      }
+      nlweb {
+        qdrant.endpoint = "{{ .Values.qdrant_endpoint }}"
+        api.endpoint = "{{ .Values.api_endpoint }}"
+        site.name = "{{ .Values.site_name }}"
+        batch.size = {{ .Values.batch_size }}
+      }
+    flink-conf: |
+      # JobManager Memory Configuration - Required
+      jobmanager.memory.process.size: 1600m
+      jobmanager.memory.flink.size: 1024m
+      jobmanager.memory.heap.size: 768m
+      jobmanager.memory.jvm-metaspace.size: 256m
+      # TaskManager Memory Configuration
+      taskmanager.memory.process.size: 2048m
+      taskmanager.memory.flink.size: 1536m
+      taskmanager.memory.heap.size: 1024m
+      taskmanager.memory.managed.size: 512m
+      taskmanager.numberOfTaskSlots: 2
+      # Execution Configuration
+      parallelism.default: 1
+      jobmanager.execution.failover-strategy: region
+      taskmanager.memory.network.fraction: 0.1
+      # Akka timeout configurations to handle communication issues
+      akka.ask.timeout: 60s
+      akka.tcp.timeout: 60s
+      akka.startup-timeout: 60s
+      heartbeat.timeout: 60000
+      # Additional stability configurations
+      slot.request.timeout: 60000
+      slot.idle.timeout: 300000
+      # RPC and REST Configuration
+      jobmanager.rpc.address: flink-kafka-to-qdrant-jobmanager
+      jobmanager.rpc.bind-address: 0.0.0.0
+      jobmanager.rpc.port: 6123
+      rest.address: flink-kafka-to-qdrant-jobmanager
+      rest.port: 8081
+      rest.bind-address: 0.0.0.0
+      # Python Configuration
+      python.executable: python3
+      python.client.executable: python3
+      python.files: /opt/flink/job/
+      # Plugin configuration for cloud storage filesystems
+      fs.allowed-fallback-filesystems: wasb,wasbs
+    # Python Flink Job - no job_classname needed
+    python_file: "/opt/flink/job/flink_kafka_to_qdrant.py"
+
+# Common annotations
+commonAnnotations:
+  reloader.stakater.com/auto: "true"
+
+imagePullSecrets: []
+
+# Global configuration needed by templates
+

@@ -1,0 +1,531 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/sunbird-lern/data-pipeline
+  tag: release-8.0.0_rc7_a377ffa
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # runAsNonRoot: true
+  # runAsUser: 0
+  # fsGroup: 0
+
+securityContext: {}
+  # readOnlyRootFilesystem: false
+  # capabilities:
+  #   drop:
+  #   - ALL
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8081
+commonLabels:
+  release: monitoring
+
+ingress: {}
+  # enabled: false
+  # annotations: {}
+  # hosts:
+  #   - host: chart-example.local
+  #     paths:
+  #     - /
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 500Mi
+  limits:
+    cpu: 1
+    memory: 2048Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+configmap:
+  enabled: false
+  mountPath: /config
+
+serviceAccount:
+  create: false
+
+serviceMonitor: &serviceMonitor
+  jobmanager:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: monitoring # additional labels e.g. release: prometheus
+    honorLabels: true
+    jobLabel: "app.kubernetes.io/name"
+    port: prom
+  taskmanager:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: monitoring # additional labels e.g. release: prometheus
+    honorLabels: true
+    jobLabel: "app.kubernetes.io/name"
+    port: prom
+
+# Example values.yaml structure
+initContainers: {}
+  # - name: init-myservice
+  #   image: busybox:1.28
+  #   command: ['sh', '-c', "until nslookup kubernetes.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+
+sidecars: {}
+  # - name: log-reader # Sidecar container
+  #   image: busybox # Use another busybox image
+  #   command: ["/bin/sh"] # Override the default command
+  #   args: ["-c", "tail -f /var/log/app.log"] # Run a shell script that tails the log file
+
+jobmanager:
+  rpc_port: 6123
+  blob_port: 6124
+  query_port: 6125
+  ui_port: 8081
+  prom_port: 9250
+  heap_memory: 1024
+
+rest_port: 80
+resttcp_port: 8081
+
+taskmanager:
+  prom_port: 9251
+  rpc_port: 6122
+  heap_memory: 1024
+  replicas: 1
+  cpu_requests: 0.3
+
+# Azure Container Details
+checkpoint_store_type: "azure"
+cloud_storage_flink_bucketname: "{{ .Values.global.public_container_name }}"
+
+# AWS S3 Details
+s3_access_key: ""
+s3_secret_key: ""
+s3_endpoint: ""
+s3_path_style_access: ""
+
+# Azure Container Details
+azure_account: ""
+azure_secret: ""
+env_name: &env_name "local"
+domain_name: &domain_name "localhost"
+proto: &proto "https"
+instance: &instance "dev"
+
+cloud_storage: &cloud_storage
+  type: "azure"
+  key: "dummyAccessKey"
+  secret: "dummySecretKey"
+  container: "dummyContainer"
+  endpoint: "https://dummy.endpoint.com"
+  cloud_service_provider: "azure"
+  cloud_storage_content_bucketname: "content-bucket"
+  cloud_private_storage_accountname: "storage-account"
+  cloud_private_storage_secret: "s3cr3t-key"
+
+core_vault_sunbird_fcm_account_key: "your-fcm-account-key"
+sunbird_msg_91_auth: "your-msg-91-auth-key"
+
+cassandra_isMultiDCEnabled: false
+kp_schema_base_path: "https://{{ .Values.global.object_storage_endpoint }}./{{ .Values.global.public_container_name }}/schemas/local"
+lms_service_base_url: "http://lern-service:9000"
+kp_search_service_base_url: "http://search-service:9000"
+content_read_api_host: "http://knowlg-service:9000"
+content_read_api_endpoint: "content/v3/read/"
+content_service_base_url: "http://knowlg-service:9000"
+userorg_service_base_url: "http://lern-service:9000"
+cert_reg_service_base_url: "http://certreg:9000/certreg"
+enc_service_base_url: "http://enc:9000/enc"
+cert_rc_base_url: "http://registry-service:8081/api/v1"
+cert_rc_entity: "TrainingCertificate"
+certificate_migrator_enable_suppress_exception: false
+sunbird_api_auth_token: "token"
+cloud_store_base_path_placeholder: "CLOUD_BASE_PATH"
+enable_suppress_exception: false
+enable_rc_certificate: true
+rc_bad_char_list: "char_list"
+
+cert_cloud_storage_type: "azure"
+cert_cloud_storage_secret: ""
+cert_cloud_storage_auth_type: "{{ .Values.global.cloud_storage_auth_type }}"
+cert_cloud_storage_key: "{{ .Values.global.cloud_storage_access_key }}"
+cert_cloud_storage_endpoint: ""
+cloud_storage_base_url: "https://{{ .Values.global.object_storage_endpoint }}"
+cloud_storage_cname_url: "https://{{ .Values.global.object_storage_endpoint }}"
+kafka_topic_course_batch_job_request: "{{ .Values.global.env }}.coursebatch.job.request"
+kafka_topic_telemetry_raw: "{{ .Values.global.env }}.telemetry.raw"
+kafka_topic_activity_agg_failed: "{{ .Values.global.env }}.activity.agg.failed"
+kafka_topic_certificate_request: "{{ .Values.global.env }}.issue.certificate.request"
+kafka_group_activity_agg: "{{ .Values.global.env }}-activity-aggregate-group"
+kafka_group_relation_cache_updater: "{{ .Values.global.env }}-relation-cache-updater-group"
+kafka_topic_content_publish_request: "{{ .Values.global.env }}.knowlg.content.postpublish.request"
+kafka_topic_generate_certificate_request: "{{ .Values.global.env }}.generate.certificate.request"
+kafka_topic_certificate_failed: "{{ .Values.global.env }}.issue.certificate.failed"
+kafka_topic_lms_user_account: "{{ .Values.global.env }}.lms.user.account.merge"
+kafka_topic_learning_failed: "{{ .Values.global.env }}.learning.events.failed"
+kafka_topic_assessment_failed: "{{ .Values.global.env }}.telemetry.assess.failed"
+kafka_topic_lms_notification: "{{ .Values.global.env }}.lms.notification"
+kafka_topic_enrolment_reconciliation_failed: "{{ .Values.global.env }}.enrolment.reconciliation.failed"
+kafka_topic_generate_certificate_failed: "{{ .Values.global.env }}.generate.certificate.failed"
+kafka_topic_migrate_certificate_request: "{{ .Values.global.env }}.legacy.certificate.migrate"
+kafka_topic_contentstate_invalid: "{{ .Values.global.env }}.contentstate.invalid"
+kafka_topic_enrolment_sync_request: "{{ .Values.global.env }}.batch.enrolment.sync.request"
+kafka_topic_assessment: "{{ .Values.global.env }}.telemetry.assess"
+kafka_group_collection_pre_processor: "{{ .Values.global.env }}-collection-cert-pre-processor-group"
+kafka_group_certificate_generator: "{{ .Values.global.env }}-certificate-generator-group"
+kafka_group_certificate_migrator: "{{ .Values.global.env }}-certificate-migrator-group"
+kafka_group_merge_courses: "{{ .Values.global.env }}-merge-courses-group"
+kafka_group_assessment_aggregator: "{{ .Values.global.env }}-assessment-aggregator-group"
+kafka_group_lms_notification: "{{ .Values.global.env }}-lms-notification"
+
+### base-config related vars
+postgres_max_connections: 2
+checkpoint_interval: 60000
+checkpoint_pause_between_seconds: 5000
+checkpoint_compression_enabled: true
+restart_attempts: 3
+restart_delay: 30000 # in milli-seconds
+producer_max_request_size: 1572864
+producer_batch_size: 98304
+producer_linger_ms: 10
+
+###  Certificate Job related Vars
+certificate_generator_consumer_parallelism: 1
+certificate_generator_parallelism: 1
+
+### Enrolment Reconciliation
+enrolment_reconciliation_consumer_parallelism: 1
+enrolment_reconciliation_parallelism: 1
+enrolment_reconciliation_batch_write_size: 10
+enrolment_reconciliation_filter_processe_enabled: true
+enrolment_reconciliation_collection_status_cache_expiry_time: 3600
+
+
+###  Collection Generator Job related Vars
+collection_certificate_generator_consumer_parallelism: 1
+collection_certificate_generator_parallelism: 1
+collection_certificate_generator_enable_suppress_exception: "{{ .Values.enable_suppress_exception }}"
+collection_certificate_generator_enable_rc_certificate: "{{ .Values.enable_rc_certificate }}"
+collection_certificate_generator_rc_badcharlist: "{{ .Values.rc_bad_char_list }}"
+registry_sunbird_keyspace: "sunbird"
+cert_registry_table: "cert_registry"
+legacy_certificate_migrator_consumer_parallelism: 1
+legacy_certificate_migrator_parallelism: 1
+middleware_course_keyspace: "sunbird_courses"
+middleware_cassandra_assessment_aggregator_table: "assessment_aggregator"
+middleware_cassandra_user_activity_agg_table: "user_activity_agg"
+
+###  Merge User Courses Job related Vars
+merge_user_courses_consumer_parallelism: 1
+merge_user_courses_parallelism: 1
+merge_user_courses_course_batch_parallelism: 1
+merge_user_courses_course_date_format: "yyyy-MM-dd HH:mm:ss:SSSZ"
+
+###  Notification Job related Vars
+notification_job_consumer_parallelism: 1
+notification_job_parallelism: 1
+
+###  User-cache-update Job related Vars
+user_cache_updater_job_consumer_parallelism: 1
+user_cache_updater_job_parallelism: 1
+
+### Program-User-Info Job vars
+programuserinfo_consumer_parallelism: 1
+programuserinfo_downstream_parallelism: 1
+programuserinfo_programuser_parallelism: 1
+middleware_cassandra_programuserinfo_keyspace: sunbird_programs
+middleware_cassandra_programuserinfo_table: program_enrollment
+
+sunbird_mail_server_from_email: "support@myorg.com"
+notification_msg_default_sender: "msg-sender"
+mail_server_username: "apikey"
+mail_server_password: "password"
+mail_server_host: "smtp.sendgrid.net"
+mail_server_port: "587"
+
+### User-deletion-cleanup Job vars
+user_deletion_cleanup_job_parallelism: 1
+sunbird_keycloak_user_federation_provider_id: "cassandrafederationid"
+sunbird_sso_client_id: "lms"
+
+log4j_console_properties: |
+  # This affects logging for both user code and Flink
+  rootLogger.level = INFO
+  rootLogger.appenderRef.console.ref = ConsoleAppender
+
+  # Uncomment this if you want to _only_ change Flink's logging
+  #logger.flink.name = org.apache.flink
+  #logger.flink.level = INFO
+
+  # The following lines keep the log level of common libraries/connectors on
+  # log level INFO. The root logger does not override this. You have to manually
+  # change the log levels here.
+  logger.akka.name = akka
+  logger.akka.level = ERROR
+  logger.kafka.name= org.apache.kafka
+  logger.kafka.level = ERROR
+  logger.hadoop.name = org.apache.hadoop
+  logger.hadoop.level = ERROR
+
+  # Log all infos to the console
+  appender.console.name = ConsoleAppender
+  appender.console.type = CONSOLE
+  appender.console.layout.type = PatternLayout
+  appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+
+  # Suppress the irrelevant (wrong) warnings from the Netty channel handler
+  logger.netty.name = org.apache.flink.shaded.akka.org.jboss.netty.channel.DefaultChannelPipeline
+  logger.netty.level = OFF
+
+base_config: |
+  kafka {
+      broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+      producer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+      consumer.broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+      producer {
+        max-request-size = 1572864
+        batch.size = 98304
+        linger.ms = 10
+        zookeeper = ""
+      }
+    }
+    job {
+      env = "{{ .Values.global.env }}"
+      enable.distributed.checkpointing = true
+
+      {{- if eq "oci" .Values.global.checkpoint_store_type }}
+      statebackend {
+        base.url = "s3://{{ .Values.global.private_container_name }}/checkpoint"
+      }
+
+      {{- else if eq "azure" .Values.global.checkpoint_store_type }}
+      statebackend {
+        {{- if eq .Values.global.cloud_storage_provider "azure" }}
+        base.url = "abfs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+        {{- else }}
+        base.url = "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
+        {{- end }}
+      }
+
+      {{- else if eq "gcs" .Values.global.checkpoint_store_type }}
+      statebackend {
+        base.url = "gs://{{ .Values.global.private_container_name }}/checkpoint"
+      }
+      {{- else }}
+      # No valid checkpoint_store_type configured, skipping statebackend.
+      {{- end }}
+    }
+    
+    
+    
+    task {
+      parallelism = 1
+      consumer.parallelism = 1
+      checkpointing.compressed = true
+      checkpointing.interval = 60000
+      checkpointing.pause.between.seconds = 5000
+      restart-strategy.attempts = 3
+      restart-strategy.delay = 30000 # in milli-seconds
+    }
+    redis {
+      enabled = false
+    }
+    lms-cassandra {
+        host = "{{ .Values.global.yugabyte.host }}"
+        port = "{{ .Values.global.yugabyte.port }}"
+        isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
+    }
+    es {
+        basePath = "{{.Values.global.elasticsearch.host}}:{{.Values.global.elasticsearch.port}}"
+    }
+    schema {
+      basePath = "{{ include "common.tplvalues.render" (dict "value" .Values.kp_schema_base_path "context" $) }}"
+      supportedVersion = {
+        itemset = "2.0"
+      }
+    }
+    ml-cassandra {
+      host = "{{ .Values.global.yugabyte.host }}"
+      port = "{{ .Values.global.yugabyte.port }}"
+      isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
+    }
+    ml-mongo {
+        host = ""
+        port = "27017"
+        database = ""
+    }
+    sunbird_instance_name = "Sunbird"
+flink_jobs:
+  collection-certificate-generator:
+    enabled: true
+    serviceMonitor: *serviceMonitor
+    config: |+
+      include file("/data/flink/conf/base-config.conf")
+      kafka {
+        input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_request "context" $) }}"
+        output.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_generate_certificate_request "context" $) }}"
+        output.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_certificate_failed "context" $) }}"
+        output.cert.failed.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_generate_certificate_failed "context" $) }}"
+        output.audit.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_telemetry_raw "context" $) }}"
+        groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_certificate_generator "context" $) }}"
+        zookeeper = ""
+
+      }
+      task {
+        restart-strategy.attempts = "{{ .Values.restart_attempts }}" # max 3 restart attempts
+        restart-strategy.delay = 240000 # in milli-seconds # on max restarts (3) within 4 min the job will fail.
+        consumer.parallelism = "{{ .Values.collection_certificate_generator_consumer_parallelism }}"
+        parallelism = "{{ .Values.collection_certificate_generator_parallelism }}"
+        generate_certificate.parallelism = 1
+      }
+
+      lms-cassandra {
+        keyspace = "{{ .Values.middleware_course_keyspace }}"
+        user_enrolments.table = "user_enrolments"
+        course_batch.table = "course_batch"
+        sbkeyspace = "{{ .Values.registry_sunbird_keyspace }}"
+        assessment_aggregator.table = "{{ .Values.middleware_cassandra_assessment_aggregator_table }}"
+        user_activity_agg.table = "{{ .Values.middleware_cassandra_user_activity_agg_table }}"
+        certreg.table ="{{ .Values.cert_registry_table }}"
+      }
+      cert_domain_url = "https://{{ .Values.global.domain }}"
+      user_read_api = "/private/user/v1/read"
+      content_read_api = "/content/v3/read"
+      cloud_storage_base_url = "{{ include "common.tplvalues.render" (dict "value" .Values.cloud_storage_base_url "context" $) }}"
+      cloud_store_base_path_placeholder = "{{ include "common.tplvalues.render" (dict "value" .Values.cloud_store_base_path_placeholder "context" $) | default "CLOUD_BASE_PATH" }}"
+      content_cloud_storage_container = "{{ .Values.global.public_container_name }}"
+      cloud_storage_cname_url = "{{ include "common.tplvalues.render" (dict "value" .Values.cloud_storage_cname_url "context" $) }}"
+      service {
+        certreg.basePath = "{{ .Values.cert_reg_service_base_url }}"
+        learner.basePath = "{{ .Values.userorg_service_base_url }}"
+        enc.basePath = "{{ .Values.enc_service_base_url }}"
+        rc.basePath = "{{ .Values.cert_rc_base_url }}"
+        rc.entity = "{{ .Values.cert_rc_entity }}"
+        rc.rcApiKey = "{{ .Values.sunbird_api_auth_token }}"
+        content.basePath = "{{ .Values.content_service_base_url }}"
+      }
+      assessment.metrics.supported.contenttype = ["SelfAssess"]
+      enable.suppress.exception = "{{ include "common.tplvalues.render" (dict "value" .Values.collection_certificate_generator_enable_suppress_exception "context" $) }}"
+      task.rc.badcharlist = "{{ include "common.tplvalues.render" (dict "value" .Values.collection_certificate_generator_rc_badcharlist "context" $) }}"
+    flink-conf: |+
+      jobmanager.memory.flink.size: 1024m
+      taskmanager.memory.flink.size: 1024m
+      taskmanager.numberOfTaskSlots: 1
+      parallelism.default: 1
+      jobmanager.execution.failover-strategy: region
+      taskmanager.memory.network.fraction: 0.1
+    job_classname: org.sunbird.job.certgen.task.CertificateGeneratorStreamTask
+
+  notification-job:
+    enabled: true
+    serviceMonitor: *serviceMonitor
+    config: |+
+      include file("/data/flink/conf/base-config.conf")
+      kafka {
+        input.topic = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_topic_lms_notification "context" $) }}"
+        groupId = "{{ include "common.tplvalues.render" (dict "value" .Values.kafka_group_lms_notification "context" $) }}"
+        zookeeper = ""
+        }
+      task {
+        restart-strategy.attempts = "{{ .Values.restart_attempts }}" # max 3 restart attempts
+        restart-strategy.delay = 240000 # in milli-seconds # on max restarts (3) within 4 min the job will fail.
+        consumer.parallelism = "{{ .Values.notification_job_consumer_parallelism }}"
+        parallelism = "{{ .Values.notification_job_parallelism }}"
+      }
+      fcm_account_key= "{{ .Values.core_vault_sunbird_fcm_account_key }}"
+      sms_auth_key= "{{ .Values.global.sunbird_msg_91_auth }}"
+      mail_server_from_email= "{{ .Values.global.mail_server_from_email }}"
+      sms_default_sender= "{{ .Values.notification_msg_default_sender }}"
+      mail_server_username= "{{ .Values.global.mail_server_username }}"
+      mail_server_password= "{{ .Values.global.mail_server_password }}"
+      mail_server_host= "{{ .Values.mail_server_host }}"
+      mail_server_port= "{{ .Values.mail_server_port }}"
+    flink-conf: |+
+      jobmanager.memory.flink.size: 1024m
+      taskmanager.memory.flink.size: 1024m
+      taskmanager.numberOfTaskSlots: 1
+      parallelism.default: 1
+      jobmanager.execution.failover-strategy: region
+      taskmanager.memory.network.fraction: 0.1
+    job_classname: org.sunbird.job.notification.task.NotificationStreamTask
+  
+  user-deletion-cleanup:
+    enabled: true
+    serviceMonitor: *serviceMonitor
+    config: |+
+      include file("/data/flink/conf/base-config.conf")
+      kafka {
+        input.topic = "{{ .Values.global.env }}.delete.user"
+        groupId = "{{ .Values.global.env }}-delete-user-group"
+        zookeeper = ""
+
+      }
+      task {
+        user.deletion.cleanup.parallelism = "{{ .Values.user_deletion_cleanup_job_parallelism }}"
+      }
+  
+      service {
+          lms {
+              basePath = "{{ .Values.lms_service_base_url }}"
+          }
+          userorg {
+              basePath = "{{ .Values.userorg_service_base_url }}"
+          }
+      }
+  
+      sunbird_keycloak_user_federation_provider_id="{{ .Values.sunbird_keycloak_user_federation_provider_id }}"
+      user_read_api = "/private/user/v1/read"
+      batch_search_api = "/course/v1/batch/list"
+      sunbird_sso_realm = "sunbird"
+      sunbird_sso_client_secret = "{{ .Values.sunbird_sso_client_id }}{{ .Values.global.random_string }}"
+      sunbird_sso_client_id = "{{ .Values.sunbird_sso_client_id }}"
+      sunbird_sso_password = "{{.Values.global.keycloak.keycloak_password}}"
+      sunbird_sso_username = "{{.Values.global.keycloak.keycloak_user}}"
+      sunbird_sso_url = "https://{{ .Values.global.domain }}/auth/"
+  
+      user {
+          keyspace = "sunbird"
+          lookup.table = "user_lookup"
+          table = "user"
+          externalIdentity.table = "usr_external_identity"
+          org.table = "user_organisation"
+      }
+    flink-conf: |+
+      jobmanager.memory.flink.size: 1024m
+      taskmanager.memory.flink.size: 1024m
+      taskmanager.numberOfTaskSlots: 1
+      parallelism.default: 1
+      jobmanager.execution.failover-strategy: region
+      taskmanager.memory.network.fraction: 0.1
+    job_classname: org.sunbird.job.deletioncleanup.task.UserDeletionCleanupStreamTask
+commonAnnotations:
+  reloader.stakater.com/auto: "true"

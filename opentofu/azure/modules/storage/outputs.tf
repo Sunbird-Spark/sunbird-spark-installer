@@ -1,0 +1,19 @@
+output "azurerm_storage_account_name" {
+  value = azurerm_storage_account.storage_account.name
+}
+
+output "azurerm_storage_container_private" {
+  value = azurerm_storage_container.storage_container_private.name
+}
+
+output "azurerm_storage_container_public" {
+  value = azurerm_storage_container.storage_container_public.name
+}
+
+output "azurerm_velero_container_name" {
+  value = azurerm_storage_container.velero_storage_container_private.name
+}
+
+output "azurerm_storage_account_resource_id" {
+  value = azurerm_storage_account.storage_account.id
+}

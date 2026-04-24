@@ -1,0 +1,351 @@
+image:
+  dockerRegistrySecretName: "registry-secret-name"
+  dockerConfigJson: |-
+    {"auths":{"http://registry.your-domain.io":{"auth":"eW91cl9yZWdpc3RyeV91c2VybmFtZTp5b3VyX3JlZ2lzdHJ5X3Rva2Vu"}}}
+
+imagePullSecrets:
+  - name: "registry-secret-name"
+
+# All images defined with anchors
+images:
+  velero: &velero
+    registry: "docker.io"
+    repository: "velero/velero"
+    tag: "v1.15.0"
+
+  volume_autoscaler: &volume_autoscaler
+    registry: "docker.io"
+    repository: "devopsnirvana/kubernetes-volume-autoscaler"
+    tag: "1.0.6"
+
+  kafka: &kafka
+    registry: "docker.io"
+    repository: sanketikahub/kafka
+    tag: "4.0.0"
+
+  redis: &redis
+    registry: "sunbirded.azurecr.io"
+    repository: "redis"
+    tag: "7.0.9-debian-11-r1"
+
+  elasticsearch: &elasticsearch
+    registry: "sunbirded.azurecr.io"
+    repository: "elasticsearch"
+    tag: "7.10.2"
+
+  grafana: &grafana
+    registry: "docker.io"
+    repository: "grafana/grafana"
+    tag: "11.4.0"
+    digest: ""
+
+  alloy: &alloy
+    registry: "docker.io"
+    repository: grafana/alloy
+    tag: v1.12.1
+
+  echo: &echo
+    repository: "ghcr.io/project-sunbird/sunbird-echo-service"
+    tag: "release-7.7.0_rc1_50b5b2d_2"
+
+  player: &player
+    repository: "sunbirded.azurecr.io/sunbird-portal"
+    tag: "spark-v1.0.2_1b538d6"
+
+  router: &router
+    repository: "sunbirded.azurecr.io/router"
+    tag: "release-3.9.0_RC1_01339f9_07941f0_1_router"
+
+  kong: &kong
+    registry: "docker.io"
+    repository: "kong"
+    tag: "3.9.1"
+
+  kong_apis: &kong_apis
+    repository: "ghcr.io/sunbird-spark/kong-api-scripts"
+    tag: "develop_5c87617"
+
+  kong_consumers: &kong_consumers
+    repository: "ghcr.io/sunbird-spark/kong-api-scripts"
+    tag: "develop_5c87617"
+
+  knowledge_mw: &knowledge_mw
+    repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
+    tag: "spark-v1.0.0_b75e555_13"
+    
+  nginx_private_ingress: &nginx_private_ingress
+    repository: "sunbirded.azurecr.io/proxy"
+    tag: "release-7.0.0_8e6b2db_23"
+
+  nginx_public_ingress: &nginx_public_ingress
+    repository: "sunbirded.azurecr.io/proxy"
+    tag: "release-7.0.0_8e6b2db_23"
+
+  adminutil: &adminutil
+    repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
+    tag: "spark-v1.0.0_b8f4778_3"
+
+  cert: &cert
+    repository: "ghcr.io/sunbird-lern/cert-service"
+    tag: "release-8.0.0_rc1_ba5cc75_1"
+
+  certregistry: &certregistry
+    repository: "ghcr.io/sunbird-lern/certificate-registry"
+    tag: "release-8.1.0_rc2_546e8d5_3"
+
+  certificateapi: &certificateapi
+    repository: "sunbirded.azurecr.io/sunbird-rc-certificate-api"
+    tag: "release-5.1.0_2bc7760_10"
+
+  certificatesign: &certificatesign
+    repository: "sunbirded.azurecr.io/sunbird-rc-certificate-signer"
+    tag: "release-5.1.0_2bc7760_9"
+
+  keycloak: &keycloak
+    repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
+    tag: "develop_eb2384f"
+
+  keycloak-kids-keys: &keycloak-kids-keys
+    repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
+    tag: "develop_499032f"
+
+  lern: &lern
+    repository: "ghcr.io/sunbird-lern/lern-service"
+    tag: "spark-v1.0.0_a66d3e7_25"
+    
+  registry: &registry
+    repository: "sunbirded.azurecr.io/sunbird-rc-core"
+    tag: "sparkv0.0.13.1"
+
+  knowlg: &knowlg
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
+    tag: "spark-v1.0.1_d80ed5e"
+
+  search: &search
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
+    tag: "spark-v1.0.1_d80ed5e"
+
+  telemetry: &telemetry
+    repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
+    tag: "spark-v0.1_8b8e877_5"
+
+  superset: &superset
+    repository: sanketikahub/superset
+    tag: 4.1.1
+
+  nlweb: &nlweb
+    repository: "sanketikahub/nlweb"
+    tag: "0.0.1"
+
+  nlwebflink: &nlwebflink
+    repository: "sunbirded.azurecr.io/flink-nlweb-job"
+    tag: "0.0.3"
+
+  yugabyte: &yugabyte  
+    registry: yugabytedb
+    repository: yugabyte
+    tag: 2025.2.0.0-b131 
+
+  janusgraph: &janusgraph
+    registry: ghcr.io
+    repository: sunbird-spark/janusgraph
+    tag: develop_cb093d4
+
+  secor: &secor
+    repository: "sunbirded.azurecr.io/secor"
+    tag: "spark"
+
+  yugabytecql: &yugabytecql
+    repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
+    tag: "develop_eb2384f"
+
+# Internal block with pull secrets
+internal: &internal
+  velero:
+    image: *velero
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  volume_autoscaler:
+    image: *volume_autoscaler
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  kafka:
+    image: *kafka
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  redis:
+    image: *redis
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  elasticsearch:
+    image: *elasticsearch
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  grafana:
+    image: *grafana
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  alloy:
+    image: *alloy
+    imagePullSecrets:
+      - name: "registry-secret-name"   
+
+  knowlg:
+    image: *knowlg
+    imagePullSecrets:
+      - name: "registry-secret-name"      
+
+  echo:
+    image: *echo
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  player:
+    image: *player
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  router:
+    image: *router
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+
+  kong:
+    image: *kong
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  kong-apis:
+    image: *kong_apis
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  kong-consumers:
+    image: *kong_consumers
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  knowledgemw:
+    image: *knowledge_mw
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  nginx-private-ingress:
+    image: *nginx_private_ingress
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  nginx-public-ingress:
+    image: *nginx_public_ingress
+    imagePullSecrets:
+      - name: "registry-secret-name"    
+
+  adminutil:
+    image: *adminutil
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  cert:
+    image: *cert
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  certregistry:
+    image: *certregistry
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  certificateapi:
+    image: *certificateapi
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  certificatesign:
+    image: *certificatesign
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  keycloak:
+    image: *keycloak
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  keycloak-kids-keys:
+    image: *keycloak-kids-keys
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  lern:
+    image: *lern
+    imagePullSecrets:
+      - name: "registry-secret-name"
+  
+  registry:
+    image: *registry
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  search:
+    image: *search
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  telemetry:
+    image: *telemetry
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  superset:
+    image: *superset
+    imagePullSecrets:
+      - name: "registry-secret-name"    
+
+  nlweb:
+    image: *nlweb
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  nlwebflink:
+    image: *nlwebflink
+    imagePullSecrets:
+      - name: "registry-secret-name"
+  yugabyte:
+    image: *yugabyte
+    imagePullSecrets:
+      - name: "registry-secret-name"
+  yugabytecql:
+    image: *yugabytecql
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  janusgraph:
+    image: *janusgraph
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  secor:
+    image: *secor
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+# Merge internal into root for direct access
+<<: *internal
+
+# Flink images
+global:
+  knowledgeflink:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/knowledge-platform-jobs"
+    tag: "spark-v1.0.1_4c96414"
+
+  learnflink:
+    registry: "ghcr.io/sunbird-lern"
+    repository: "data-pipeline"
+    tag: "spark-v1.0.0_c3b332f"

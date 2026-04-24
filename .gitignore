@@ -1,0 +1,23 @@
+.*.sw?
+.idea
+terragrunt.iml
+vendor
+.opentofu
+.vscode
+*.tfstate
+*.tfstate.backup
+*.out
+.terragrunt-cache
+.bundle
+.ruby-version
+terragrunt
+.DS_Store
+*.terrahelpbkp
+
+# Ignoring common charts
+**/charts/common
+# Ignoring test directories
+**/kitchen
+
+# Ignore built JARs for JanusGraph
+scripts/janusgraph/*.jar

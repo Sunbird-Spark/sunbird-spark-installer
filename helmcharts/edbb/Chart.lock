@@ -1,0 +1,21 @@
+dependencies:
+- name: common
+  repository: https://nimbushubin.github.io/helmcharts
+  version: 0.1.0
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 17.8.3
+- name: kafka
+  repository: ""
+  version: 32.2.15
+- name: yugabyte
+  repository: https://charts.yugabyte.com
+  version: 2025.2.0
+- name: router
+  repository: ""
+  version: 0.1.0
+- name: nginx-private-ingress
+  repository: ""
+  version: 0.1.0
+digest: sha256:e49e6c76fdff3f325c639aa856b00847635e6335d0e544e13534b697b19548b6
+generated: "2026-02-12T19:30:21.267242606+05:30"

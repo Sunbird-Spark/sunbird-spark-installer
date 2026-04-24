@@ -1,0 +1,143 @@
+nameOverride: "player"
+fullnameOverride: "player"
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/sunbird-ed/sunbirded-portal/player
+  tag: "release-8.0.1-rc1-t15_17d6abc"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # runAsNonRoot: true
+  # runAsUser: 1001
+  # fsGroup: 1001
+
+securityContext: {}
+  # readOnlyRootFilesystem: false
+  # capabilities:
+  #   drop:
+  #   - ALL
+
+service:
+  type: ClusterIP
+  ports:
+    - name: http-player
+      port: 3000
+      targetPort: 3000
+
+ingress: {}
+
+commonAnnotations:
+  reloader.stakater.com/auto: "true"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 100Mi
+  limits:
+    cpu: 1
+    memory: 1G
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+livenessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /service/health
+      port: 3000
+  initialDelaySeconds: 15
+  periodSeconds: 15
+  timeoutSeconds: 300
+
+readinessProbe:
+  failureThreshold: 2
+  httpGet:
+      path: /service/health
+      port: 3000
+  initialDelaySeconds: 15
+  periodSeconds: 15
+  timeoutSeconds: 300
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+configmap:
+  enabled: false
+  mountPath: /config
+
+serviceAccount:
+  create: false
+
+serviceMonitor:
+  enabled: false
+  interval: 30s
+  scrapeTimeout: 10s
+  labels: {} # additional labels e.g. release: prometheus
+  honorLabels: true
+  jobLabel: "app.kubernetes.io/name"
+
+sunbird_default_device_token: ""
+sunbird_external_content_whitelisted_domains: ""
+
+# Example values.yaml structure
+initContainers: {}
+  # - name: init-myservice
+  #   image: busybox:1.28
+  #   command: ['sh', '-c', "until nslookup kubernetes.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+
+sidecars: {}
+  # - name: log-reader # Sidecar container
+  #   image: busybox # Use another busybox image
+  #   command: ["/bin/sh"] # Override the default command
+  #   args: ["-c", "tail -f /var/log/app.log"] # Run a shell script that tails the log file
+
+opa_enabled: false
+learning_service_base_url: "http://lern-service:9000"
+sunbird_session_store_type: "yugabyte"
+sunbird_anonymous_session_ttl: "86400000"
+sunbird_portal_log_level: "debug"
+kong_url: http://kong:8000  
+sunbird_google_keycloak_client_id: "google-auth"
+google_auth_client_secret: "google-auth"
+sunbird_android_keycloak_client_id: ""
+sunbird_google_android_keycloak_client_id: "google-auth-android"
+sunbird_google_android_keycloak_secret: "google-auth-android"
+android_client_secret: "android"
+global:
+  azure_private_container_name: ""
+  azure_storage_account_name: sunbird
+  sunbird_admin_api_token: ""
+  sunbird_anonymous_register_token: ""
+  sunbird_loggedin_register_token: ""
+  sunbird_anonymous_default_token: ""
+  sunbird_logged_default_token: ""
+  adminutil_learner_api_auth_key: ""
+  kafka:
+    host: kafka
+    port: 9092
+  yugabyte:
+    host: yb-tserver-service
+    port: 9042
+  redis:
+    host: redis-master

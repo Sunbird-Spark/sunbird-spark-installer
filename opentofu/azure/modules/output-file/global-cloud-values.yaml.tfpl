@@ -1,0 +1,55 @@
+global:
+  env: ${env}
+  environment: ${environment}
+  building_block: ${building_block}
+  cloud_storage_access_key: ${azure_storage_account_name}
+  public_container_name: ${azure_public_container_name}
+  private_container_name: ${azure_private_container_name}
+  velero_storage_container_private: ${azure_velero_container_name}
+  private_ingressgateway_ip: ${private_ingressgateway_ip}
+  random_string: ${random_string}
+  object_storage_endpoint: ${azure_storage_account_name}.blob.core.windows.net
+  storage_class: managed-premium
+  cloud_storage_provider:  ${cloud_storage_provider}
+  %{ if cloud_storage_provider == "azure" }cloud_storage_auth_type: "OIDC"%{ endif }
+  azure_client_id: ${azure_client_id}
+  workload_identity_service_account_name: ${k8s_service_account_name}
+  serviceAccount: 
+    create: false
+
+velero:
+  enabled: true
+  credentials:
+    useSecret: true
+  configuration:
+      backupStorageLocation:
+        - name: default
+          provider: "${cloud_storage_provider}"
+          bucket: "${azure_velero_container_name}"
+          prefix:
+          config:
+            storageAccount: ${azure_storage_account_name}
+            useAAD: "true"
+      dbbackupStorageLocation:
+        - name: dbbackup
+          provider: "${cloud_storage_provider}"
+          bucket: "${azure_velero_container_name}"
+          prefix:
+          config:
+            storageAccount: ${azure_storage_account_name}
+            useAAD: "true"
+      volumeSnapshotLocation:
+        - name: default
+          provider: "${cloud_storage_provider}"
+  initContainers:
+  - name: velero-plugin-for-azure
+    image: velero/velero-plugin-for-microsoft-azure:v1.14.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+nginx-public-ingress:
+  commonAnnotations:
+    reloader.stakater.com/auto: "true"
+    service.beta.kubernetes.io/azure-load-balancer-external: "true" 

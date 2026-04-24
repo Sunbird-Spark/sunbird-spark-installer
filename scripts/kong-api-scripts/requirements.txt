@@ -1,0 +1,18 @@
+# Kong 3.9.1 API Scripts - Python 3.11+ Requirements
+# Last updated: February 1, 2026
+
+# HTTP requests
+requests>=2.31.0
+urllib3>=2.0.0
+
+# JWT handling for Kong credentials
+PyJWT>=2.8.0
+
+# Cryptography for RSA keys and TLS
+cryptography>=41.0.0
+
+# YAML parsing (for convert_kong_apis_yaml.py)
+PyYAML>=6.0
+
+# Note: argparse and logging are built-in Python 3 modules
+# retry functionality implemented directly in common.py

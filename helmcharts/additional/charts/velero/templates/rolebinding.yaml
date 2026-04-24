@@ -1,0 +1,26 @@
+{{- if .Values.rbac.create }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "velero.fullname" . }}-server
+  namespace: {{ (include "base.namespace" $) }}
+  labels:
+    app.kubernetes.io/component: server
+    app.kubernetes.io/name: {{ include "velero.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "velero.chart" . }}
+subjects:
+  - kind: ServiceAccount
+    namespace: {{ (include "base.namespace" $) }}
+    name: {{ include "velero.serverServiceAccount" . }}
+  {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+  - kind: ServiceAccount
+    namespace: {{ (include "base.namespace" $) }}
+    name: {{ .Values.global.workload_identity_service_account_name }}
+  {{- end }}
+roleRef:
+  kind: Role
+  name: {{ include "velero.fullname" . }}-server
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
