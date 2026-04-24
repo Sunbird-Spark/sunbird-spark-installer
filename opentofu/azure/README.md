@@ -1,52 +1,44 @@
 # Azure
 
-Follow this document if you are setting up Sunbird-Ed on Azure
+Sunbird Spark deploys on Azure AKS. Infrastructure provisioning and application deployment are both handled by the installer — you do not need to create any Azure resources manually.
 
-#### Required tools and permisions
-1. Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
-2. Ensure that the user or service principal running the Terraform script has the necessary prvileges as [listed here](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/resources/application#api-permissions)
+## Deployment Approaches
 
-**Note:**
-We will overwrite the following files. Please take a backup of your existing files in the following locations
-- `~/.config/rclone/rclone.conf`
-- 
+Two approaches are available, both covering infrastructure provisioning and deployment end-to-end:
 
-### Authentication
+**[private-repo-setup/README.md](../../private-repo-setup/README.md)**
 
-Post installation of the CLI tool and providing necessary permissions, use the following command to login to Azure via CLI. 
+| Approach | Description |
+|----------|-------------|
+| **GitHub Actions** | Automated CI/CD using OIDC federated credentials. Infra and deployments run from a private GitHub repository — no credentials stored in GitHub. |
+| **Manual via Azure VM** | An Azure VM with a system-assigned managed identity runs `install.sh` directly over SSH. No CI/CD setup needed. |
 
-```
-az login --tenant <AZURE_TENANT_ID>
-```
+## What Gets Provisioned
 
-Note: Make sure you replace the AZURE_TENANT_ID with the tenant id from Azure Console. 
+OpenTofu modules in `opentofu/azure/modules/` create:
 
-#### Azure Infra Setup
+| Resource | Purpose |
+|----------|---------|
+| AKS cluster | 2 × Standard_B16as_v2 nodes (16 vCPU / 64 GB RAM each) |
+| Virtual Network | Dedicated VNet and subnet for AKS |
+| Storage Account | Cloud storage for Sunbird content and backups |
+| Key Vault | Secrets management |
+| Managed Identity | Workload identity for AKS pods |
+| OpenTofu state backend | Azure Storage container for Terraform state |
 
-Post login, update the `opentofu/azure/<env>/global-values.yaml` with the variables as per your environment
+## global-values.yaml Reference
 
-```
-  building_block: "" # building block name
-  env: "" 
-  environment: "" # use lowercase alphanumeric string between 1-9 characters
-  domain: ""
-  subscription_id: ""
-  sunbird_cloud_storage_provider: azure 
-  sunbird_google_captcha_site_key: 
-  google_captcha_private_key: 
-  sunbird_google_oauth_clientId: 
-  sunbird_google_oauth_clientSecret: 
-  mail_server_from_email: ""
-  mail_server_password: ""
-  mail_server_host: smtp.sendgrid.net
-  mail_server_port: "587"
-  mail_server_username: apikey
-  sunbird_msg_91_auth: ""
-  sunbird_msg_sender: ""
-  youtube_apikey: ""
-  proxy_private_key: |
-   <private_key_generated_when_setting_up_ssl>
-  proxy_certificate: |
-   <certificate_generated_when_setting_up_ssl>
-```
+The main configuration file at `opentofu/azure/<env>/global-values.yaml` is filled in before running the installer. Key fields:
 
+| Field | Description |
+|-------|-------------|
+| `global.building_block` | Short prefix for all Azure resources (e.g. `"myorg"`). Lowercase letters only. |
+| `global.env` | Short environment tag used inside the cluster (e.g. `"demo"`). |
+| `global.environment` | 1–9 lowercase alphanumeric. Must match the `configs/` folder name. |
+| `global.domain` | Your domain (e.g. `"sunbird.myorg.com"`). |
+| `global.subscription_id` | Your Azure Subscription ID. |
+| `global.cloud_storage_region` | Azure region (e.g. `"eastus"`, `"centralindia"`). |
+| `global.proxy_private_key` | SSL/TLS private key in PEM format. |
+| `global.proxy_certificate` | SSL/TLS certificate chain in PEM format (cert + CA bundle). |
+
+> Using Let's Encrypt? Set `global.lets_encrypt_ssl: true` and `global.cert_notifications.email`. Leave `proxy_private_key` and `proxy_certificate` blank.
