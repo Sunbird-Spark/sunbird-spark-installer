@@ -67,9 +67,11 @@ Two approaches are available for provisioning infrastructure and deploying Sunbi
 2. **SSL Certificate**: The FullChain, consisting of the private key and Certificate+CA_Bundle, is mandatory for installation.
 3. **Google OAuth Credentials**: [Create credentials](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id)
 4. **Google V3 ReCaptcha Credentials**: [Create credentials](https://www.google.com/recaptcha/admin)
-5. **Email Service Provider**
-6. **MSG91 SMS Service Provider API Token** (Optional): Required for sending OTPs to registered email addresses during user registration or password reset.
+5. **Email Service Provider**: Only **SendGrid** is supported in this installer. Use your SendGrid API key as the SMTP password.
+6. **MSG91 SMS Service Provider API Token** (Optional): Required for sending OTPs during user registration or password reset. Only **MSG91** is supported in this installer.
 7. **YouTube API Token** (Optional): Necessary for uploading video content directly via YouTube URL.
+
+> **Note:** This one-click installer supports **SendGrid** for email and **MSG91** for SMS out of the box. Other providers are not supported without customisation.
 
 ---
 
