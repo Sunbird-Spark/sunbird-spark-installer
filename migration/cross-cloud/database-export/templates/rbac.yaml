@@ -2,7 +2,7 @@
   Shared RBAC for jobs that need to kubectl-exec into the source DB namespace
   (elasticsearch-snapshot, neo4j-export).
 */}}
-{{- $ns := "sunbird" -}}
+{{- $ns := .Values.source.namespace | default "sunbird" -}}
 {{- $needsExec := or .Values.databases.elasticsearch.enabled .Values.databases.neo4j.enabled .Values.databases.cassandra.enabled -}}
 {{- if $needsExec }}
 apiVersion: v1

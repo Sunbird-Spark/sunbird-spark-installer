@@ -1,85 +1,112 @@
-# Source database connection settings
+# =============================================================================
+# database-export: Phase 1 of cross-cloud migration
+# Exports source databases (Sunbird ED 8.1.0) to object storage
+# =============================================================================
+
+# Name overrides (optional)
+nameOverride: ""
+fullnameOverride: ""
+
+# -----------------------------------------------------------------------------
+# Object storage destination for exported artifacts
+# -----------------------------------------------------------------------------
 source:
-  cloud: "azure"  # azure, gcp, aws, onprem
-  useExistingSecrets: true  # Use existing cluster secrets instead of creating new ones
-  # Azure specific
+  cloud: "azure"                     # azure | gcp | aws | onprem
+  namespace: "sunbird"               # Namespace of source DB pods (kubectl-exec target)
+  useExistingSecrets: true           # true = read DB creds from cluster secrets; false = use values below
+  container: "databasebackup"        # Bucket / container name
+
+  # Azure Blob
   storageAccount: "edsandboxda72f12a"
-  container: "databasebackup"
-  accessKey: ""
-  # Storage path prefixes
-  postgresql_path: "postgresql"
-  cassandra_path: "cassandra"
-  elasticsearch_path: "elasticsearch"
-  neo4j_path: "neo4j"
-  # GCP specific  
+  accessKey: ""                      # Prefer MSI; leave empty if using IRSA / workload identity
+
+  # GCP (only fill when cloud=gcp)
   bucket: ""
   projectId: ""
-  serviceAccountKey: ""
-  # AWS specific
+  serviceAccountKey: ""              # JSON key, base64 NOT required — chart handles encoding
+
+  # AWS (only fill when cloud=aws)
   s3Bucket: ""
   accessKeyId: ""
   secretAccessKey: ""
   region: ""
-  
-# Database connections
+
+  # Storage path prefixes (relative to container)
+  postgresql_path: "postgresql"
+  cassandra_path: "cassandra"
+  elasticsearch_path: "elasticsearch"
+  neo4j_path: "neo4j"
+
+# -----------------------------------------------------------------------------
+# Source databases to export
+# -----------------------------------------------------------------------------
 databases:
   postgresql:
     enabled: false
-    secretName: ""  # Use fallback credentials
+    secretName: ""                   # K8s secret with keys: username, password
     host: "postgresql.sunbird.svc.cluster.local"
     port: 5432
-    username: "postgres"  # Fallback username if no secret
-    password: ""  # Fallback password if no secret
+    username: "postgres"             # Fallback when secretName is empty
+    password: ""
     databases:
       - name: "keycloak"
       - name: "registry"
-        
+
   cassandra:
     enabled: true
-    secretName: ""  # Empty if no authentication
+    secretName: ""
     host: "cassandra.sunbird.svc.cluster.local"
     port: 9042
-    username: "cassandra"  # Fallback username if no secret
-    password: ""  # Empty if no authentication
-    podName: "cassandra-0"         # Source pod (used for kubectl-exec DESCRIBE)
-    podNamespace: "sunbird"        # Source pod namespace
+    username: "cassandra"
+    password: ""
+    podName: "cassandra-0"           # Source pod for kubectl-exec DESCRIBE
+    podNamespace: "sunbird"
     keyspaces:
-        - sunbird
-        - sb_content_store
-        - sunbird_courses
-        - sb_hierarchy_store
-        - qmzbm_form_service
-        - sunbird_notifications
-        - sb_category_store
-        - dialcodes
-        - sb_dialcode_store
-        - sb_question_store
-        - apzvp_review_comment
-        
+      - sunbird
+      - sb_content_store
+      - sunbird_courses
+      - sb_hierarchy_store
+      - qmzbm_form_service
+      - sunbird_notifications
+      - sb_category_store
+      - dialcodes
+      - sb_dialcode_store
+      - sb_question_store
+      - apzvp_review_comment
+
   neo4j:
     enabled: false
-    secretName: ""  # Empty if no authentication
+    secretName: ""
     image: "ubuntu:22.04"
-    podName: "neo4j-0"         # Pod name of source Neo4j (for kubectl exec)
-    podNamespace: "sunbird"    # Kubernetes namespace of source Neo4j
     host: "neo4j.sunbird.svc.cluster.local"
     port: 7687
-    username: "neo4j"  # Fallback username if no secret
-    password: ""  # Empty if no authentication
-    
+    username: "neo4j"
+    password: ""
+    podName: "neo4j-0"
+    podNamespace: "sunbird"
+
   elasticsearch:
     enabled: true
-    secretName: ""  # Empty if no authentication
+    secretName: ""
     image: "ubuntu:22.04"
     host: "elasticsearch.sunbird.svc.cluster.local"
     port: 9200
-    username: "elastic"  # Fallback username if no secret
-    password: ""  # Empty if no authentication
+    username: "elastic"
+    password: ""
+    podName: "elasticsearch-master-0"
+    podNamespace: "sunbird"
+    snapshotName: "migration_snapshot"
+    repositoryName: "migration_repo"
+    keystorePath: "/opt/bitnami/elasticsearch/bin/elasticsearch-keystore"
 
-# Job settings
+# -----------------------------------------------------------------------------
+# Job runtime settings
+# -----------------------------------------------------------------------------
 jobs:
   image: "ubuntu:22.04"
   pullPolicy: "IfNotPresent"
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 10
   resources:
     requests:
       memory: "1Gi"
@@ -87,10 +114,10 @@ jobs:
     limits:
       memory: "4Gi"
       cpu: "2000m"
-  ttlSecondsAfterFinished: 3600
-  backoffLimit: 10
 
+# -----------------------------------------------------------------------------
 # Validation
+# -----------------------------------------------------------------------------
 validation:
   enabled: true
-  strictMode: false  # fail on count mismatch vs warn only
+  strictMode: false                  # true = fail on row/doc count mismatch

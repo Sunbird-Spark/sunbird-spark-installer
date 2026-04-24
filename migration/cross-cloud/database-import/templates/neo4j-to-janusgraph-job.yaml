@@ -20,7 +20,7 @@ spec:
         {{- include "database-import.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: janusgraph-restore
     spec:
-      serviceAccountName: {{ include "database-import.fullname" . }}-migration-sa
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
       restartPolicy: OnFailure
       containers:
       - name: janusgraph-restore

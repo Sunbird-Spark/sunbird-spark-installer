@@ -4,15 +4,27 @@ kind: Job
 metadata:
   name: {{ include "database-import.fullname" . }}-cassandra
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "database-import.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cassandra-restore
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   ttlSecondsAfterFinished: {{ .Values.jobs.ttlSecondsAfterFinished }}
   backoffLimit: {{ .Values.jobs.backoffLimit }}
   template:
+    metadata:
+      labels:
+        {{- include "database-import.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: cassandra-restore
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
       initContainers:
       - name: install-deps
-        image: python:3.11
+        image: {{ .Values.databases.ycql.image | default "python:3.11" }}
         command:
           - pip
           - install
@@ -24,9 +36,9 @@ spec:
           mountPath: /deps
       containers:
       - name: cassandra-restore
-        image: python:3.11
+        image: {{ .Values.databases.ycql.image | default "python:3.11" }}
+        imagePullPolicy: {{ .Values.jobs.pullPolicy }}
         command: ["python3", "/scripts/cassandra-to-yugabyte.py"]
-
         env:
         - name: PYTHONPATH
           value: "/deps"
@@ -38,28 +50,24 @@ spec:
           value: {{ .Values.target.container | quote }}
         - name: STORAGE_PREFIX
           value: {{ .Values.target.cassandra_path | quote }}
-
         - name: YCQL_HOST
           value: {{ .Values.databases.ycql.host | quote }}
         - name: YCQL_PORT
           value: {{ .Values.databases.ycql.port | quote }}
-
         - name: SOURCE_PREFIX
           value: {{ .Values.databases.ycql.sourcePrefix | quote }}
         - name: TARGET_PREFIX
           value: {{ .Values.databases.ycql.targetPrefix | quote }}
         - name: TRUNCATE_BEFORE_LOAD
           value: {{ .Values.databases.ycql.truncateBeforeLoad | default "true" | quote }}
-
         volumeMounts:
         - name: scripts
           mountPath: /scripts
+          readOnly: true
         - name: deps
           mountPath: /deps
-
         resources:
           {{- toYaml .Values.jobs.resources | nindent 12 }}
-
       volumes:
       - name: scripts
         configMap:

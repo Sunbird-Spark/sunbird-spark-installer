@@ -1,17 +1,22 @@
 apiVersion: v2
 name: database-import
-description: Pull artifacts from object storage and restore to Sunbird Spark databases
+description: Phase 2 of cross-cloud migration. Pull artifacts from object storage and restore to Sunbird Spark target databases.
 type: application
-version: 0.1.0
+version: 1.0.0
 appVersion: "1.0.0"
+kubeVersion: ">=1.24.0-0"
 keywords:
   - migration
   - database
   - restore
   - sunbird
+  - cross-cloud
 home: https://github.com/Sunbird-Spark/sunbird-spark-installer
 sources:
   - https://github.com/Sunbird-Spark/sunbird-spark-installer
 maintainers:
   - name: Sunbird Team
     email: support@sunbird.org
+annotations:
+  category: Migration
+  phase: "2-import"

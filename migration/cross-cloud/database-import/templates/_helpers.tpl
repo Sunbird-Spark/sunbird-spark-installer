@@ -59,3 +59,10 @@ Secret name
 {{- define "database-import.secretName" -}}
 {{- printf "%s-secrets" (include "database-import.fullname" .) }}
 {{- end }}
+
+{{/*
+ServiceAccount name (single canonical name)
+*/}}
+{{- define "database-import.serviceAccountName" -}}
+{{- printf "%s-sa" (include "database-import.fullname" .) }}
+{{- end }}

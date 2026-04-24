@@ -21,6 +21,7 @@ spec:
         app.kubernetes.io/component: keycloak-credentials
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
       containers:
       - name: keycloak-credentials
         image: {{ .Values.jobs.image }}

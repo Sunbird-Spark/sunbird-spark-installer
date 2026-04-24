@@ -1,17 +1,22 @@
 apiVersion: v2
 name: database-export
-description: Export databases from Sunbird ED 8.1.0 and upload to object storage
+description: Phase 1 of cross-cloud migration. Export databases from Sunbird ED 8.1.0 and upload artifacts to object storage.
 type: application
-version: 0.1.0
-appVersion: "8.1.0"
+version: 1.0.0
+appVersion: "1.0.0"
+kubeVersion: ">=1.24.0-0"
 keywords:
   - migration
   - database
   - backup
   - sunbird
+  - cross-cloud
 home: https://github.com/Sunbird-Spark/sunbird-spark-installer
 sources:
   - https://github.com/Sunbird-Spark/sunbird-spark-installer
 maintainers:
   - name: Sunbird Team
     email: support@sunbird.org
+annotations:
+  category: Migration
+  phase: "1-export"

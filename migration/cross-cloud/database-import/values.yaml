@@ -1,26 +1,45 @@
-# Target database connection settings
+# =============================================================================
+# database-import: Phase 2 of cross-cloud migration
+# Restores artifacts from object storage into Sunbird Spark target cluster
+# =============================================================================
+
+# Name overrides (optional)
+nameOverride: ""
+fullnameOverride: ""
+
+# -----------------------------------------------------------------------------
+# Object storage source (artifacts produced by database-export)
+# -----------------------------------------------------------------------------
 target:
-  cloud: "azure"  # azure, gcp, aws, onprem
-  # Azure specific
-  storageAccount: "edsandboxda72f12a"
+  cloud: "azure"                     # azure | gcp | aws | onprem
+  namespace: "sunbird"               # Namespace of target DB pods (kubectl-exec target)
+  useExistingSecrets: true           # true = use existing cluster secrets; false = create secret from values
   container: "databasebackup"
+
+  # Azure Blob
+  storageAccount: "edsandboxda72f12a"
   accessKey: ""
-  # Storage path prefixes
-  postgresql_path: "postgresql"
-  cassandra_path: "cassandra"
-  elasticsearch_path: "cluster-1"
-  neo4j_path: "neo4j"
-  # GCP specific  
+
+  # GCP
   bucket: ""
   projectId: ""
   serviceAccountKey: ""
-  # AWS specific
+
+  # AWS
   s3Bucket: ""
   accessKeyId: ""
   secretAccessKey: ""
   region: ""
-  
-# Target database connections (Sunbird Spark)
+
+  # Storage path prefixes (must match source paths when same-cloud; can differ when rclone'd)
+  postgresql_path: "postgresql"
+  cassandra_path: "cassandra"
+  elasticsearch_path: "cluster-1"
+  neo4j_path: "neo4j"
+
+# -----------------------------------------------------------------------------
+# Target databases (Sunbird Spark)
+# -----------------------------------------------------------------------------
 databases:
   yugabytedb:
     enabled: false
@@ -32,22 +51,22 @@ databases:
       - name: "keycloak"
         username: "yugabyte"
         password: ""
-      - name: "registry" 
+      - name: "registry"
         username: "yugabyte"
         password: ""
-        
+
   ycql:
     enabled: false
+    image: "python:3.11"
     host: "yb-tserver-service.sunbird.svc.cluster.local"
     port: 9042
     username: "cassandra"
     password: ""
-    # Rename keyspace prefixes at restore time. If a source keyspace starts
-    # with `sourcePrefix`, it is created on target with `targetPrefix` instead.
-    # Example: "sb_content_store" → "dv_content_store" when sourcePrefix="sb_"
-    # and targetPrefix="dv_". Set both to "" to disable renaming.
+    # Keyspace prefix rename at restore. Set both to "" to disable.
+    # Example: "sb_content_store" → "dv_content_store" when sourcePrefix="sb_", targetPrefix="dv_"
     sourcePrefix: "sb_"
     targetPrefix: "dv_"
+    truncateBeforeLoad: "true"
     keyspaces:
       - "sunbird"
       - "sb_content_store"
@@ -60,28 +79,35 @@ databases:
       - "sb_dialcode_store"
       - "sb_question_store"
       - "apzvp_review_comment"
-      
+
   janusgraph:
     enabled: true
     host: "janusgraph.sunbird.svc.cluster.local"
     port: 8182
     username: "janusgraph"
     password: ""
-    namespace: "sunbird"
     podLabel: "app.kubernetes.io/name=janusgraph"
     container: "janusgraph"
-    
+
   elasticsearch:
     enabled: false
     host: "elasticsearch.sunbird.svc.cluster.local"
     port: 9200
     username: "elastic"
     password: ""
+    podName: "elasticsearch-master-0"
+    snapshotName: "migration_snapshot"
+    repositoryName: "migration_repo"
+    keystorePath: "/opt/bitnami/elasticsearch/bin/elasticsearch-keystore"
 
-# Job settings
+# -----------------------------------------------------------------------------
+# Job runtime settings
+# -----------------------------------------------------------------------------
 jobs:
   image: "ubuntu:22.04"
   pullPolicy: "IfNotPresent"
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 10
   resources:
     requests:
       memory: "1Gi"
@@ -89,21 +115,31 @@ jobs:
     limits:
       memory: "4Gi"
       cpu: "2000m"
-  ttlSecondsAfterFinished: 3600
-  backoffLimit: 10
 
+# -----------------------------------------------------------------------------
 # Validation
+# -----------------------------------------------------------------------------
 validation:
   enabled: true
-  strictMode: false  # fail on count mismatch vs warn only
+  strictMode: false
 
-# Post-migration tasks
+# -----------------------------------------------------------------------------
+# Post-migration fix-ups (run after DB restores)
+# -----------------------------------------------------------------------------
 postMigration:
   keycloakCredentials:
     enabled: false
-    adminPassword: "mukD5bLJg9yTtVoh"
-    secretSuffix: "Aq39rvb0BSjV7IVF"  # Suffix to append to client secrets (e.g., "4567")
+    adminPassword: ""                # Admin password for Keycloak master realm
+    secretSuffix: ""                 # Suffix appended to rotated client secrets
+
   createdatBackfill:
     enabled: false
+    ybPod: "yb-tserver-0"
+    keyspace: "sunbird"
+
   hierarchyFix:
     enabled: true
+    ybPod: "yb-tserver-0"
+    knowlgServiceHost: "knowlg-service.sunbird.svc.cluster.local"
+    knowlgServicePort: 9000
+    dryRun: false

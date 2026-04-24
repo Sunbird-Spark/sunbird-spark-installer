@@ -21,6 +21,7 @@ spec:
         app.kubernetes.io/component: postgres-restore
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
       containers:
       - name: postgres-restore
         image: {{ .Values.jobs.image }}

@@ -21,7 +21,7 @@ spec:
         app.kubernetes.io/component: createdat-backfill
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: {{ include "database-import.fullname" . }}-sa
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
       containers:
       - name: createdat-backfill
         image: {{ .Values.jobs.image }}
@@ -32,11 +32,11 @@ spec:
         - name: ES_SERVICE
           value: "{{ .Values.databases.elasticsearch.host }}:{{ .Values.databases.elasticsearch.port }}"
         - name: YB_POD
-          value: "yb-tserver-0"
+          value: {{ .Values.postMigration.createdatBackfill.ybPod | quote }}
         - name: NAMESPACE
-          value: "sunbird"
+          value: {{ .Values.target.namespace | default "sunbird" | quote }}
         - name: KEYSPACE
-          value: "sunbird"
+          value: {{ .Values.postMigration.createdatBackfill.keyspace | quote }}
         volumeMounts:
         - name: scripts
           mountPath: /scripts

@@ -21,7 +21,7 @@ spec:
         app.kubernetes.io/component: elasticsearch-restore
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: {{ include "database-import.fullname" . }}-sa
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
       containers:
       - name: elasticsearch-restore
         image: {{ .Values.jobs.image }}
@@ -54,15 +54,15 @@ spec:
         - name: AZURE_BASE_PATH
           value: {{ .Values.target.elasticsearch_path | quote }}
         - name: SNAPSHOT_NAME
-          value: "migration_snapshot"
+          value: {{ .Values.databases.elasticsearch.snapshotName | quote }}
         - name: REPOSITORY_NAME
-          value: "migration_repo"
+          value: {{ .Values.databases.elasticsearch.repositoryName | quote }}
         - name: NEW_ES_POD_NAME
-          value: "elasticsearch-master-0"
+          value: {{ .Values.databases.elasticsearch.podName | quote }}
         - name: NEW_ES_NAMESPACE
-          value: "sunbird"
+          value: {{ .Values.target.namespace | default "sunbird" | quote }}
         - name: ES_KEYSTORE_PATH
-          value: "/opt/bitnami/elasticsearch/bin/elasticsearch-keystore"
+          value: {{ .Values.databases.elasticsearch.keystorePath | quote }}
         volumeMounts:
         - name: scripts
           mountPath: /scripts

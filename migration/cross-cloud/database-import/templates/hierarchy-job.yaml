@@ -21,7 +21,7 @@ spec:
         app.kubernetes.io/component: hierarchy-fix
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: {{ include "database-import.fullname" . }}-sa
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
       containers:
       - name: hierarchy-fix
         image: {{ .Values.jobs.image }}
@@ -30,17 +30,17 @@ spec:
         args: ["/scripts/hierarchy-fix.sh"]
         env:
         - name: YB_POD
-          value: "yb-tserver-0"
+          value: {{ .Values.postMigration.hierarchyFix.ybPod | quote }}
         - name: YB_NAMESPACE
-          value: "sunbird"
+          value: {{ .Values.target.namespace | default "sunbird" | quote }}
         - name: KEYSPACE
           value: "{{ .Values.databases.ycql.targetPrefix | default "sb_" }}hierarchy_store"
         - name: KNOWLG_SERVICE_HOST
-          value: "knowlg-service.sunbird.svc.cluster.local"
+          value: {{ .Values.postMigration.hierarchyFix.knowlgServiceHost | quote }}
         - name: KNOWLG_SERVICE_PORT
-          value: "9000"
+          value: {{ .Values.postMigration.hierarchyFix.knowlgServicePort | quote }}
         - name: DRY_RUN
-          value: "false"
+          value: {{ .Values.postMigration.hierarchyFix.dryRun | quote }}
         volumeMounts:
         - name: scripts
           mountPath: /scripts

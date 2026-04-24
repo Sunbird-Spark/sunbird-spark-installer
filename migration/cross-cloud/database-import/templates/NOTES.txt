@@ -1,35 +1,43 @@
-Database Import - {{ .Chart.Name }} v{{ .Chart.Version }}
+Database Import — {{ .Chart.Name }} v{{ .Chart.Version }} (phase 2 of 2)
 =============================================
 
-Enabled jobs (execution order):
+Enabled jobs (execution order via helm post-install hooks):
 {{- if .Values.databases.yugabytedb.enabled }}
-  1. PostgreSQL (YugabyteDB YSQL) - databases: {{ range .Values.databases.yugabytedb.databases }}{{ .name }} {{ end }}
+  1. postgres-restore (YSQL)     → {{ range .Values.databases.yugabytedb.databases }}{{ .name }} {{ end }}
 {{- end }}
 {{- if .Values.postMigration.keycloakCredentials.enabled }}
-  2. Keycloak credentials update
+  2. keycloak-credentials update
 {{- end }}
 {{- if .Values.databases.ycql.enabled }}
-  3. Cassandra (YugabyteDB YCQL)  - keyspaces: {{ range .Values.databases.ycql.keyspaces }}{{ . }} {{ end }}
+  3. cassandra-restore (YCQL)    → {{ len .Values.databases.ycql.keyspaces }} keyspaces
 {{- end }}
 {{- if .Values.databases.janusgraph.enabled }}
-  4. JanusGraph - host: {{ .Values.databases.janusgraph.host }}
+  4. janusgraph-restore          → {{ .Values.databases.janusgraph.host }}
 {{- end }}
 {{- if .Values.databases.elasticsearch.enabled }}
-  5. Elasticsearch - host: {{ .Values.databases.elasticsearch.host }}
+  5. elasticsearch-restore       → {{ .Values.databases.elasticsearch.host }}
 {{- end }}
 {{- if .Values.postMigration.createdatBackfill.enabled }}
-  6. createdat backfill (ES + YCQL)
+  6. createdat-backfill (ES + YCQL)
 {{- end }}
 {{- if .Values.postMigration.hierarchyFix.enabled }}
-  7. Hierarchy identifier fix (knowlg-service API)
+  7. hierarchy-fix (knowlg-service API)
 {{- end }}
 
-Storage: {{ .Values.target.cloud }} / {{ .Values.target.container }}
+Source:              {{ .Values.target.cloud }} / {{ .Values.target.container }}
+Release namespace:   {{ .Release.Namespace }}   (jobs + SA + ConfigMap live here)
+Target DB namespace: {{ .Values.target.namespace }}   (kubectl-exec target; must already exist)
+{{- if ne .Release.Namespace .Values.target.namespace }}
 
-Jobs run sequentially via Helm hooks:
-  postgres(1) -> keycloak(2) -> cassandra(3) -> janusgraph(4) -> elasticsearch(5) -> createdat(6) -> hierarchy(7)
-Only enabled jobs will run. Disabled steps are skipped.
+NOTE: Release namespace ({{ .Release.Namespace }}) differs from target DB namespace ({{ .Values.target.namespace }}).
+      RoleBinding in {{ .Values.target.namespace }} allows the migration SA to exec into DB pods. OK.
+{{- end }}
 
-Monitor progress:
+Jobs run sequentially via helm hook weights. Disabled steps skipped.
+
+Monitor:
   kubectl get jobs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
-  kubectl logs -n {{ .Release.Namespace }} job/{{ include "database-import.fullname" . }}-<component> -f
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} -f --tail=200
+
+Validation:
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} | grep -E 'MISMATCH|VALIDATION'

@@ -1,23 +1,43 @@
+{{/*
+  RBAC for jobs that need to kubectl-exec into target DB pods
+  (janusgraph restore, createdat backfill, hierarchy fix, ES restore).
+*/}}
+{{- $ns := .Values.target.namespace | default "sunbird" -}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ include "database-import.fullname" . }}-pod-manager
-  namespace: {{ .Values.databases.janusgraph.namespace | default "sunbird" }}
+  name: {{ include "database-import.fullname" . }}-pod-exec
+  namespace: {{ $ns }}
+  labels:
+    {{- include "database-import.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
 rules:
 - apiGroups: [""]
-  resources: ["pods", "pods/exec", "pods/log"]
-  verbs: ["get", "list", "create"]
+  resources: ["pods", "pods/log"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create", "get"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ include "database-import.fullname" . }}-pod-manager-binding
-  namespace: {{ .Values.databases.janusgraph.namespace | default "sunbird" }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: {{ include "database-import.fullname" . }}-pod-manager
+  name: {{ include "database-import.fullname" . }}-pod-exec
+  namespace: {{ $ns }}
+  labels:
+    {{- include "database-import.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation
 subjects:
 - kind: ServiceAccount
-  name: {{ include "database-import.fullname" . }}-migration-sa
+  name: {{ include "database-import.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "database-import.fullname" . }}-pod-exec
+  apiGroup: rbac.authorization.k8s.io
