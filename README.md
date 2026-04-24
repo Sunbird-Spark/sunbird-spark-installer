@@ -147,34 +147,18 @@ While the installer may work with other versions, these are the versions that ha
      time ./install.sh
      ```
 
-## Deploying or Upgrading Services
+## Deploying Sunbird Spark
 
-After initial installation, you can deploy or upgrade one or more services within a bundle without redeploying the entire bundle:
+Two deployment approaches are available — both are covered in the setup guide:
 
-```bash
-cd opentofu/<cloud-provider>/<env-name>
+**[private-repo-setup/README.md](private-repo-setup/README.md)**
 
-# Single service
-./install.sh install_helm_components <bundle> <chart>
+| Approach | When to use |
+|----------|-------------|
+| **GitHub Actions** | Automated, audit-trailed deployments. Requires a private GitHub repository with Ansible Vault encrypted config and Azure OIDC authentication. Recommended for teams. |
+| **Manual via Azure VM** | Simpler setup with no CI/CD configuration. Create a VM using `setup-installer-vm.sh`, SSH in, and run `install.sh` directly. Good for single-operator or trial deployments. |
 
-# Multiple services in one Helm call
-./install.sh install_helm_components <bundle> <chart1> <chart2> [chart3] ...
-```
-
-**Examples:**
-
-```bash
-# Update the player portal image
-./install.sh install_helm_components edbb player
-
-# Deploy Kafka and YugabyteDB together
-./install.sh install_helm_components edbb kafka yugabyte
-```
-
-**How it works:** On the first call for a bundle, only the target service(s) are deployed (all others are disabled). On subsequent calls, Helm reuses the existing release state so all currently running services remain untouched — only the specified service(s) are updated.
-
-For a detailed explanation, see [INSTALL-SERVICE.md](INSTALL-SERVICE.md).
-
+---
 
 ## Default Users in the Instance
 
