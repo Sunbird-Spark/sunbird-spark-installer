@@ -484,6 +484,9 @@ extraVolumeMounts:
   - name: janusgraph-configs
     mountPath: /opt/bitnami/janusgraph/conf/janusgraph-cql.properties
     subPath: janusgraph-cql.properties  
+  - name: janusgraph-configs
+    mountPath: /opt/bitnami/janusgraph/scripts/schema_init.groovy
+    subPath: schema-init.groovy
 
 ## @param sidecars Add additional sidecar containers to the JanusGraph pod(s)
 ## e.g:
@@ -497,13 +500,23 @@ extraVolumeMounts:
 ##
 sidecars:
   - name: logstash
-    image: logstash:6.8.21
+    image: docker.elastic.co/logstash/logstash-oss:7.10.2
     imagePullPolicy: Always
     env:
       - name: PIPELINE_WORKERS
         value: "1"
       - name: PIPELINE_BATCH_SIZE
         value: "1"
+      - name: LS_JAVA_OPTS
+        value: "-Dnetworkaddress.cache.ttl=30 -Dnetworkaddress.cache.negative.ttl=10"
+    livenessProbe:
+      httpGet:
+        path: /
+        port: 9600
+      initialDelaySeconds: 60
+      periodSeconds: 30
+      timeoutSeconds: 5
+      failureThreshold: 3
     volumeMounts:
       - name: janusgraph-configs
         mountPath: /usr/share/logstash/pipeline/logstash.conf

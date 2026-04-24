@@ -7,5 +7,5 @@ dependencies:
 description: A production-ready Helm chart base template
 maintainers:
 - name: NimbusHub.in
-name: adminutils
+name: adminutil
 version: 0.1.0

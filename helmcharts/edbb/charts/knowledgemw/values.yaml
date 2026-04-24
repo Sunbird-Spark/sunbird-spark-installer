@@ -64,7 +64,7 @@ autoscaling:
           averageUtilization: 80
 
 livenessProbe:
-  failureThreshold: 2
+  failureThreshold: 6
   httpGet:
       path: /service/health
       port: 5000
@@ -73,7 +73,7 @@ livenessProbe:
   timeoutSeconds: 5
 
 readinessProbe:
-  failureThreshold: 2
+  failureThreshold: 6
   httpGet:
       path: /service/health
       port: 5000

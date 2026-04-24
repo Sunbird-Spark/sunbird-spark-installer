@@ -51,7 +51,8 @@ Each addon follows a consistent structure:
 
 ```
 addons/
-├── global-values.yaml           # Shared global values for all addons
+├── global-values.yaml           # Shared static global values for all addons
+├── global-cloud-values.yaml     # Cloud-generated addon values (created at runtime by addon opentofu)
 ├── images.yaml                  # Centralized image registry/repo/tag configuration
 └── <addon-name>/
     ├── README.md                # Addon-specific documentation
@@ -86,6 +87,11 @@ Addons use a layered configuration approach:
    - Shared configuration for all addons (service endpoints, shared settings)
    - Contains connections to Elasticsearch, Redis, Kafka, Yugabyte, etc.
    - Values here are merged with cloud-generated values and passed to Helm.
+
+5. **Addon Cloud-Generated Values** (`addons/global-cloud-values.yaml`)
+   - Generated at runtime by addon-specific OpenTofu modules (e.g., DIAL storage container name)
+   - Created automatically when addon cloud resources are provisioned
+   - Included in Helm deployments only if the file exists
 
 ## Prerequisites
 

@@ -16,11 +16,14 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
     spec:
-       {{- if .Values.serviceAccount.create }}
-      serviceAccountName: {{ include "common.names.fullname" . }}
+      {{- if .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -31,9 +34,9 @@ spec:
       {{- with .Values.initContainers }}
       initContainers:
         {{- toYaml . | nindent 8 }}
-        - name: wait-for-neo4j
+        - name: wait-for-janusgraph
           image: busybox:1.35
-          command: ['sh', '-c', 'until nc -z neo4j 7687; do echo "Waiting for Neo4j..."; sleep 5; done']
+          command: ['sh', '-c', 'until nc -z janusgraph 8182; do echo "Waiting for JanusGraph..."; sleep 5; done']
           resources:
             limits:
               cpu: 50m

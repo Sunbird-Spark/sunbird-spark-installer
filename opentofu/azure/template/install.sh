@@ -20,9 +20,11 @@ function backup_configs() {
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    tofu init -upgrade
-    terragrunt init -upgrade
-    terragrunt run-all apply --terragrunt-non-interactive
+    export TG_TF_PATH=tofu
+    tofu init -reconfigure
+    terragrunt init --all --reconfigure --non-interactive
+    # terragrunt plan --all --non-interactive
+    terragrunt run --all apply --non-interactive
     chmod 600 ~/.kube/config
 }
 function certificate_keys() {
@@ -73,8 +75,7 @@ function install_component() {
         cd ../../../helmcharts 2>/dev/null || true
     fi
     local component="$1"
-    kubectl create namespace sunbird 2>/dev/null || true
-    kubectl create namespace velero 2>/dev/null || true
+    # namespaces sunbird and velero are created by workload-identity Terraform module
     kubectl create namespace volume-autoscaler 2>/dev/null || true
     kubectl create namespace nlweb 2>/dev/null || true
 
@@ -98,8 +99,8 @@ function install_component() {
       fi
     local addon_values_flag=""
     if [ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]; then
-        if [ -f "../addons/global-values.yaml" ]; then
-            addon_values_flag="-f ../addons/global-values.yaml"
+        if [ -f "../addons/global-cloud-values.yaml" ]; then
+            addon_values_flag="-f ../addons/global-cloud-values.yaml"
         fi
     fi
 
@@ -157,6 +158,7 @@ function generate_postman_env() {
     keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
     keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
     keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
+    google_oauth_client_id=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.GOOGLE_OAUTH_CLIENT_ID}')
     generated_uuid=$(uuidgen)
     temp_file=$(mktemp)
     cp postman.env.json "${temp_file}"
@@ -168,6 +170,7 @@ function generate_postman_env() {
         -e "s|GENERATE_UUID|${generated_uuid}|g" \
         -e "s|BLOB_STORE_PATH|${blob_store_path}|g" \
         -e "s|PUBLIC_CONTAINER_NAME|${public_container_name}|g" \
+        -e "s|REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID|${google_oauth_client_id}|g" \
         "${temp_file}" >"env.json"
 
     echo -e "A env.json file is created in this directory: opentofu/azure/$environment"
@@ -188,8 +191,8 @@ function run_post_install() {
     fi
     check_pod_status
     echo "Starting post install..."
-    cp ../../../postman-collection/collection${RELEASE}.json .
-    postman collection run collection${RELEASE}.json --environment env.json --delay-request 500 --bail --insecure
+    cp ../../../postman-collection/sunbird-spark-collection-v1.json .
+    postman collection run sunbird-spark-collection-v1.json --environment env.json --delay-request 500 --bail --insecure
 }
 
 function create_client_forms() {

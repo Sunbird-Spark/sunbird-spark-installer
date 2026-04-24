@@ -163,6 +163,7 @@ sunbird_user_qrcode_courses_limit: "5000"
 learning_content_props_to_add: "mimeType,contentType,name,code,description,keywords,framework,copyright,topic"
 group_activity_agg_cache_ttl: "3600"
 group_activity_agg_cache_enable: "false"
+redis_enabled: false
 redis_connection_max: "64"
 redis_connection_idle_max: "32"
 redis_connection_idle_min: "1"
@@ -181,6 +182,7 @@ hierarchy_relations_table: "hierarchy_relations"
 cloud_storage_path_prefix_dial: "dial"
 cloud_store_base_path_placeholder: ""
 sunbird_dial_service_search_url: "/dialcode/v3/search"
+learner_in_memory_cache_ttl: "300"
 
 enable_activity_aggregator_actor: "true"
 enable_module_aggregation: "true"
@@ -194,6 +196,9 @@ assessment_direct_aggregation_enabled: "true"
 
 # Notification Specific
 sunbird_cassandra_notification_keyspace: sunbird_notifications
+
+# Yugabytesql Values
+sunbird_postgres_db: "sunbird"
 
 # OPA / Envoy
 opa_enabled: false

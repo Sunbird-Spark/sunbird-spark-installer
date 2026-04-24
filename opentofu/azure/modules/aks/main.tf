@@ -28,6 +28,8 @@ provider "azurerm" {
 
     #Uncomment the below line to create a private cluster
     # private_cluster_enabled = true
+    oidc_issuer_enabled       = true
+    workload_identity_enabled = true
     default_node_pool {
       name           = var.big_nodepool_name
       node_count     = var.big_node_count
@@ -37,9 +39,10 @@ provider "azurerm" {
     }
 
     network_profile {
-      network_plugin = var.network_plugin
-      service_cidr   = var.service_cidr
-      dns_service_ip = var.dns_service_ip
+      network_plugin      = var.network_plugin
+      network_plugin_mode = "overlay"
+      service_cidr        = var.service_cidr
+      dns_service_ip      = var.dns_service_ip
     }
 
     # Use System-Assigned Managed Identity

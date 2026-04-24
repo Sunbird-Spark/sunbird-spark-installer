@@ -7,6 +7,7 @@ This module creates the DIAL storage container separately from the main infrastr
 1. Main infrastructure must be deployed first (storage account must exist)
 2. Backend environment variables must be set (same as main opentofu)
 3. `global-values.yaml` and `global-cloud-values.yaml` must exist in main opentofu directory
+4. After `terragrunt apply`, the container name is automatically written to `addons/global-cloud-values.yaml`
 
 ## Usage
 

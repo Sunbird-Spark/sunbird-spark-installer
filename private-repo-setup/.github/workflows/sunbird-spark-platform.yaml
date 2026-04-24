@@ -1,0 +1,620 @@
+name: Spark Platform Infra And Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (must match folder name in configs/)'
+        required: true
+        type: choice
+        options:
+          - your-env   # Replace this with your environment name (e.g. dev, prod, staging)
+        default: your-env
+      config_branch:
+        description: 'Config repository branch (your private repo)'
+        required: true
+        type: string
+        default: main
+      source_branch:
+        description: 'Source repository branch (sunbird-spark-installer - public)'
+        required: true
+        type: string
+        default: main
+
+      # ── JOB 1: INFRA — Core Terraform ───────────────────────────────────
+      create_tf_backend:
+        description: '1️⃣ Create Terraform backend'
+        type: boolean
+        default: false
+      backup_configs:
+        description: '2️⃣ Backup configurations'
+        type: boolean
+        default: false
+      create_tf_resources:
+        description: '3️⃣ Create infrastructure resources'
+        type: boolean
+        default: false
+
+      # ── JOB 2: DEPLOY — Helm Bundles ────────────────────────────────────
+      install_helm:
+        description: '5️⃣ Install Helm components'
+        type: boolean
+        default: false
+      helm_mode:
+        description: '   ↳ "all": install all bundles | "selective": choose bundles or specific charts below'
+        type: choice
+        options:
+          - selective
+          - all
+        default: selective
+      monitoring:
+        description: '   ↳ monitoring'
+        type: boolean
+        default: false
+      edbb:
+        description: '   ↳ edbb'
+        type: boolean
+        default: false
+      player_image_tag:
+        description: '      ↳ Player image tag (optional - leave empty for default from images.yaml)'
+        type: string
+        default: ''
+      learnbb:
+        description: '   ↳ learnbb'
+        type: boolean
+        default: false
+      knowledgebb:
+        description: '   ↳ knowledgebb'
+        type: boolean
+        default: false
+      obsrvbb:
+        description: '   ↳ obsrvbb'
+        type: boolean
+        default: false
+      additional:
+        description: '   ↳ additional'
+        type: boolean
+        default: false
+      specific_charts:
+        description: '   ↳ specific charts (space-separated, e.g. "kafka yugabyte") — also check one bundle above'
+        type: string
+        default: ''
+      restart_workloads:
+        description: '7️⃣ Restart workloads using keycloak keys'
+        type: boolean
+        default: false
+      certificate_config:
+        description: '8️⃣ Configure certificate keys'
+        type: boolean
+        default: false
+      dns_mapping:
+        description: '9️⃣ DNS mapping (waits up to 20 mins for propagation)'
+        type: boolean
+        default: false
+      generate_postman_env:
+        description: '🔟 Generate Postman environment file'
+        type: boolean
+        default: false
+      run_post_install:
+        description: '1️⃣1️⃣ Run post-install (Postman collection)'
+        type: boolean
+        default: false
+      create_client_forms:
+        description: '1️⃣2️⃣ Create client forms'
+        type: boolean
+        default: false
+      setup_forms:
+        description: '1️⃣3️⃣ Setup missing forms (read-check then create)'
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: write
+
+env:
+  CONFIG_PATH: "configs/${{ inputs.environment }}"
+  ENV_FOLDER: "sunbird-spark-installer/opentofu/azure/${{ inputs.environment }}"
+  HELMCHARTS_DIR: "sunbird-spark-installer/helmcharts"
+
+# ════════════════════════════════════════════════════════════════════════════
+# JOB 1 — INFRA (Core Terraform)
+# Secrets: AZURE_INFRA_CLIENT_ID
+# ════════════════════════════════════════════════════════════════════════════
+jobs:
+  infra:
+    name: "1 — Infrastructure (Core Terraform)"
+    if: ${{ inputs.create_tf_backend || inputs.backup_configs || inputs.create_tf_resources }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout Configuration Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.config_branch }}
+
+      - name: Clone Source Repository
+        run: |
+          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+            https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
+          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+
+      - name: Azure Login (Infra)
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_INFRA_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Decrypt Config Files
+        run: |
+          pip install ansible
+
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+
+          ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
+            --vault-password-file=/tmp/vault_pass.txt
+          echo "✅ global-values.yaml decrypted"
+
+          if [ -f "$CONFIG_PATH/global-cloud-values.yaml" ]; then
+            ansible-vault decrypt $CONFIG_PATH/global-cloud-values.yaml \
+              --vault-password-file=/tmp/vault_pass.txt
+            echo "✅ global-cloud-values.yaml decrypted"
+          else
+            echo "⚠️  global-cloud-values.yaml not found"
+          fi
+
+          rm /tmp/vault_pass.txt
+
+      - name: Install Terraform Tools
+        if: ${{ inputs.create_tf_backend || inputs.create_tf_resources }}
+        run: |
+          curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
+          sudo wget -qO /usr/local/bin/terragrunt \
+            https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.21/terragrunt_linux_amd64
+          sudo chmod +x /usr/local/bin/terragrunt
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          tofu --version && terragrunt --version && yq --version
+
+      - name: Setup Environment Folder
+        run: |
+          cp -r sunbird-spark-installer/opentofu/azure/template $ENV_FOLDER
+          cp $CONFIG_PATH/global-values.yaml $ENV_FOLDER/global-values.yaml
+          if [ -f "$CONFIG_PATH/global-cloud-values.yaml" ]; then
+            cp $CONFIG_PATH/global-cloud-values.yaml $ENV_FOLDER/global-cloud-values.yaml
+          else
+            echo "{}" > $ENV_FOLDER/global-cloud-values.yaml
+          fi
+          if [ -f "$CONFIG_PATH/tf.sh" ]; then
+            cp $CONFIG_PATH/tf.sh $ENV_FOLDER/tf.sh
+            echo "✅ tf.sh restored from configs"
+          fi
+          echo "✅ Environment folder ready: $ENV_FOLDER"
+
+      - name: 1️⃣ create_tf_backend
+        if: ${{ inputs.create_tf_backend }}
+        run: |
+          cd $ENV_FOLDER
+          export TERRAGRUNT_TFPATH=$(which tofu)
+          bash install.sh create_tf_backend
+          echo "✅ create_tf_backend done"
+
+      - name: 2️⃣ backup_configs
+        if: ${{ inputs.backup_configs }}
+        run: |
+          cd $ENV_FOLDER
+          bash install.sh backup_configs
+          echo "✅ backup_configs done"
+
+      - name: 3️⃣ create_tf_resources
+        if: ${{ inputs.create_tf_resources }}
+        run: |
+          cd $ENV_FOLDER
+          export TERRAGRUNT_TFPATH=$(which tofu)
+          bash install.sh create_tf_resources
+          echo "✅ create_tf_resources done"
+
+      - name: Encrypt and Commit Updated Configs
+        if: ${{ inputs.create_tf_backend || inputs.create_tf_resources }}
+        run: |
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+
+          rsync -av --exclude='.terragrunt-cache' --exclude='.terraform' \
+            $ENV_FOLDER/ $CONFIG_PATH/
+
+          for f in $CONFIG_PATH/global-values.yaml $CONFIG_PATH/global-cloud-values.yaml; do
+            [ -f "$f" ] && ansible-vault encrypt "$f" --vault-password-file=/tmp/vault_pass.txt \
+              && echo "✓ Encrypted: $(basename $f)"
+          done
+
+          for file in $CONFIG_PATH/*.key $CONFIG_PATH/*.pem $CONFIG_PATH/*-secrets.yaml $CONFIG_PATH/*-passwords.yaml; do
+            if [ -f "$file" ] && ! grep -q "ANSIBLE_VAULT" "$file" 2>/dev/null; then
+              ansible-vault encrypt "$file" --vault-password-file=/tmp/vault_pass.txt
+              echo "✓ Encrypted: $(basename $file)"
+            fi
+          done
+
+          rm /tmp/vault_pass.txt
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add $CONFIG_PATH/
+          git commit -m "chore: encrypted configs after infra deployment [${{ inputs.environment }}] [skip ci]" \
+            || echo "No changes to commit"
+          git push || echo "Push failed or no changes"
+          echo "✅ configs/${{ inputs.environment }}/ committed"
+
+      - name: Infra Summary
+        if: always()
+        run: |
+          echo "================================================"
+          echo "     INFRA JOB SUMMARY"
+          echo "================================================"
+          echo "Environment : ${{ inputs.environment }}"
+          [ "${{ inputs.create_tf_backend }}" == "true" ]   && echo "  ✅ 1️⃣  create_tf_backend"   || echo "  ⏭️  1️⃣  create_tf_backend (skipped)"
+          [ "${{ inputs.backup_configs }}" == "true" ]      && echo "  ✅ 2️⃣  backup_configs"      || echo "  ⏭️  2️⃣  backup_configs (skipped)"
+          [ "${{ inputs.create_tf_resources }}" == "true" ] && echo "  ✅ 3️⃣  create_tf_resources" || echo "  ⏭️  3️⃣  create_tf_resources (skipped)"
+          echo "================================================"
+
+# ════════════════════════════════════════════════════════════════════════════
+# JOB 2 — DEPLOY (Helm Bundles)
+# Secrets: AZURE_DEPLOY_CLIENT_ID
+# ════════════════════════════════════════════════════════════════════════════
+  deploy:
+    name: "2 — Deploy (Helm Bundles)"
+    if: ${{ always() && (inputs.install_helm || inputs.specific_charts != '') }}
+    needs: [infra]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout Configuration Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.config_branch }}
+
+      - name: Clone Source Repository
+        run: |
+          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+            https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
+          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+
+      - name: Azure Login (Deploy)
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Decrypt Config Files
+        run: |
+          pip install ansible
+
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+
+          ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
+            --vault-password-file=/tmp/vault_pass.txt
+          echo "✅ global-values.yaml decrypted"
+
+          if [ -f "$CONFIG_PATH/global-cloud-values.yaml" ]; then
+            ansible-vault decrypt $CONFIG_PATH/global-cloud-values.yaml \
+              --vault-password-file=/tmp/vault_pass.txt
+            echo "✅ global-cloud-values.yaml decrypted"
+          else
+            echo "⚠️  global-cloud-values.yaml not found"
+          fi
+
+          if [ -f "$CONFIG_PATH/postman.env.json" ]; then
+            cp $CONFIG_PATH/postman.env.json sunbird-spark-installer/opentofu/azure/template/
+          fi
+
+          if [ -f "$CONFIG_PATH/addons/global-cloud-values.yaml" ]; then
+            ansible-vault decrypt $CONFIG_PATH/addons/global-cloud-values.yaml \
+              --vault-password-file=/tmp/vault_pass.txt
+            if [ -f "sunbird-spark-installer/addons/global-cloud-values.yaml" ]; then
+              yq eval-all 'select(fileIndex==0) * select(fileIndex==1)' \
+                sunbird-spark-installer/addons/global-cloud-values.yaml \
+                $CONFIG_PATH/addons/global-cloud-values.yaml \
+                > /tmp/merged-addon-cloud.yaml
+              cp /tmp/merged-addon-cloud.yaml sunbird-spark-installer/addons/global-cloud-values.yaml
+              echo "✅ Addon cloud values merged"
+            else
+              cp $CONFIG_PATH/addons/global-cloud-values.yaml \
+                sunbird-spark-installer/addons/global-cloud-values.yaml
+              echo "✅ Addon cloud values copied"
+            fi
+          fi
+
+          rm /tmp/vault_pass.txt
+
+      - name: Setup Environment Folder
+        run: |
+          cp -r sunbird-spark-installer/opentofu/azure/template $ENV_FOLDER
+          cp $CONFIG_PATH/global-values.yaml $ENV_FOLDER/global-values.yaml
+          if [ -f "$CONFIG_PATH/global-cloud-values.yaml" ]; then
+            cp $CONFIG_PATH/global-cloud-values.yaml $ENV_FOLDER/global-cloud-values.yaml
+          else
+            echo "{}" > $ENV_FOLDER/global-cloud-values.yaml
+          fi
+          echo "✅ Environment folder ready: $ENV_FOLDER"
+
+      - name: Install Deploy Tools
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          kubectl version --client && helm version && yq --version
+
+      - name: Get AKS Credentials
+        run: |
+          BUILDING_BLOCK=$(yq '.global.building_block' $CONFIG_PATH/global-values.yaml)
+          CLUSTER_NAME="${BUILDING_BLOCK}-${{ inputs.environment }}"
+          az aks get-credentials \
+            --name "$CLUSTER_NAME" \
+            --resource-group "$CLUSTER_NAME" \
+            --overwrite-existing
+          kubectl get nodes
+          echo "✅ AKS credentials configured (cluster: $CLUSTER_NAME)"
+
+      - name: 5️⃣ install_helm — all bundles
+        if: ${{ inputs.install_helm && inputs.helm_mode == 'all' }}
+        run: |
+          cd $ENV_FOLDER
+          bash install.sh install_helm_components
+          echo "✅ All Helm components installed"
+
+      - name: 5️⃣ install_helm — monitoring
+        if: ${{ inputs.install_helm && inputs.helm_mode == 'selective' && inputs.monitoring && inputs.specific_charts == '' }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh install_component monitoring
+          echo "✅ monitoring installed"
+
+      - name: 5️⃣ install_helm — edbb
+        if: ${{ inputs.install_helm && inputs.helm_mode == 'selective' && inputs.edbb && inputs.specific_charts == '' }}
+        run: |
+          if [ -n "${{ inputs.player_image_tag }}" ]; then
+            yq e '.player.tag = "${{ inputs.player_image_tag }}"' -i $HELMCHARTS_DIR/images.yaml
+          fi
+          cd $ENV_FOLDER && bash install.sh install_component edbb
+          echo "✅ edbb installed"
+
+      - name: 5️⃣ install_helm — learnbb
+        if: ${{ inputs.install_helm && inputs.helm_mode == 'selective' && inputs.learnbb && inputs.specific_charts == '' }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh install_component learnbb
+          echo "✅ learnbb installed"
+
+      - name: 5️⃣ install_helm — knowledgebb
+        if: ${{ inputs.install_helm && inputs.helm_mode == 'selective' && inputs.knowledgebb && inputs.specific_charts == '' }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh install_component knowledgebb
+          echo "✅ knowledgebb installed"
+
+      - name: 5️⃣ install_helm — obsrvbb
+        if: ${{ inputs.install_helm && inputs.helm_mode == 'selective' && inputs.obsrvbb && inputs.specific_charts == '' }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh install_component obsrvbb
+          echo "✅ obsrvbb installed"
+
+      - name: 5️⃣ install_helm — additional
+        if: ${{ inputs.install_helm && inputs.helm_mode == 'selective' && inputs.additional && inputs.specific_charts == '' }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh install_component additional
+          echo "✅ additional installed"
+
+      - name: 5️⃣ install_helm — specific charts
+        if: ${{ inputs.specific_charts != '' }}
+        run: |
+          cd $ENV_FOLDER
+          bundle=""
+          [ "${{ inputs.monitoring }}"  == "true" ] && bundle="monitoring"
+          [ "${{ inputs.edbb }}"        == "true" ] && bundle="edbb"
+          [ "${{ inputs.learnbb }}"     == "true" ] && bundle="learnbb"
+          [ "${{ inputs.knowledgebb }}" == "true" ] && bundle="knowledgebb"
+          [ "${{ inputs.obsrvbb }}"     == "true" ] && bundle="obsrvbb"
+          [ "${{ inputs.additional }}"  == "true" ] && bundle="additional"
+          if [ -z "$bundle" ]; then
+            echo "❌ No bundle selected — check one bundle checkbox alongside specific_charts"
+            exit 1
+          fi
+          bash install.sh install_service "$bundle" ${{ inputs.specific_charts }}
+          echo "✅ specific charts (${{ inputs.specific_charts }}) installed in bundle: $bundle"
+
+      - name: Deploy Summary
+        if: always()
+        run: |
+          echo "================================================"
+          echo "     DEPLOY JOB SUMMARY"
+          echo "================================================"
+          echo "Environment : ${{ inputs.environment }}"
+          if [ "${{ inputs.install_helm }}" == "true" ]; then
+            echo "  ✅ 5️⃣  install_helm (mode: ${{ inputs.helm_mode }})"
+            [ "${{ inputs.helm_mode }}" == "selective" ] && {
+              [ "${{ inputs.monitoring }}"  == "true" ] && echo "       ✅ monitoring"  || echo "       ⏭️  monitoring"
+              [ "${{ inputs.edbb }}"        == "true" ] && echo "       ✅ edbb"        || echo "       ⏭️  edbb"
+              [ "${{ inputs.learnbb }}"     == "true" ] && echo "       ✅ learnbb"     || echo "       ⏭️  learnbb"
+              [ "${{ inputs.knowledgebb }}" == "true" ] && echo "       ✅ knowledgebb" || echo "       ⏭️  knowledgebb"
+              [ "${{ inputs.obsrvbb }}"     == "true" ] && echo "       ✅ obsrvbb"     || echo "       ⏭️  obsrvbb"
+              [ "${{ inputs.additional }}"  == "true" ] && echo "       ✅ additional"  || echo "       ⏭️  additional"
+            }
+          else
+            echo "  ⏭️  5️⃣  install_helm (skipped)"
+          fi
+          if [ -n "${{ inputs.specific_charts }}" ]; then
+            bundle=""
+            [ "${{ inputs.monitoring }}"  == "true" ] && bundle="monitoring"
+            [ "${{ inputs.edbb }}"        == "true" ] && bundle="edbb"
+            [ "${{ inputs.learnbb }}"     == "true" ] && bundle="learnbb"
+            [ "${{ inputs.knowledgebb }}" == "true" ] && bundle="knowledgebb"
+            [ "${{ inputs.obsrvbb }}"     == "true" ] && bundle="obsrvbb"
+            [ "${{ inputs.additional }}"  == "true" ] && bundle="additional"
+            echo "  ✅ 5️⃣  specific charts in ${bundle:-<no bundle>}: ${{ inputs.specific_charts }}"
+          fi
+          echo "================================================"
+
+# ════════════════════════════════════════════════════════════════════════════
+# JOB 3 — PLATFORM (Post-Install Config)
+# Secrets: AZURE_DEPLOY_CLIENT_ID
+# ════════════════════════════════════════════════════════════════════════════
+  platform:
+    name: "3 — Platform (Post-Install Config)"
+    if: ${{ always() && (inputs.restart_workloads || inputs.certificate_config || inputs.dns_mapping || inputs.generate_postman_env || inputs.run_post_install || inputs.create_client_forms || inputs.setup_forms) }}
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout Configuration Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.config_branch }}
+
+      - name: Clone Source Repository
+        run: |
+          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+            https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
+          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+
+      - name: Azure Login (Deploy)
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Decrypt Config Files
+        run: |
+          pip install ansible
+
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+
+          ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
+            --vault-password-file=/tmp/vault_pass.txt
+          echo "✅ global-values.yaml decrypted"
+
+          if [ -f "$CONFIG_PATH/global-cloud-values.yaml" ]; then
+            ansible-vault decrypt $CONFIG_PATH/global-cloud-values.yaml \
+              --vault-password-file=/tmp/vault_pass.txt
+            echo "✅ global-cloud-values.yaml decrypted"
+          else
+            echo "⚠️  global-cloud-values.yaml not found"
+          fi
+
+          if [ -f "$CONFIG_PATH/postman.env.json" ]; then
+            cp $CONFIG_PATH/postman.env.json sunbird-spark-installer/opentofu/azure/template/
+          fi
+
+          rm /tmp/vault_pass.txt
+
+      - name: Setup Environment Folder
+        run: |
+          cp -r sunbird-spark-installer/opentofu/azure/template $ENV_FOLDER
+          cp $CONFIG_PATH/global-values.yaml $ENV_FOLDER/global-values.yaml
+          if [ -f "$CONFIG_PATH/global-cloud-values.yaml" ]; then
+            cp $CONFIG_PATH/global-cloud-values.yaml $ENV_FOLDER/global-cloud-values.yaml
+          else
+            echo "{}" > $ENV_FOLDER/global-cloud-values.yaml
+          fi
+          echo "✅ Environment folder ready: $ENV_FOLDER"
+
+      - name: Install Platform Tools
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          openssl version
+          echo "✅ Tools installed"
+
+      - name: Get AKS Credentials
+        run: |
+          BUILDING_BLOCK=$(yq '.global.building_block' $CONFIG_PATH/global-values.yaml)
+          CLUSTER_NAME="${BUILDING_BLOCK}-${{ inputs.environment }}"
+          az aks get-credentials \
+            --name "$CLUSTER_NAME" \
+            --resource-group "$CLUSTER_NAME" \
+            --overwrite-existing
+          kubectl get nodes
+          echo "✅ AKS credentials configured (cluster: $CLUSTER_NAME)"
+
+      - name: 7️⃣ restart_workloads
+        if: ${{ inputs.restart_workloads }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh restart_workloads_using_keys
+          echo "✅ restart_workloads done"
+
+      - name: 8️⃣ certificate_config
+        if: ${{ inputs.certificate_config }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh certificate_config
+          echo "✅ certificate_config done"
+
+      - name: 9️⃣ dns_mapping
+        if: ${{ inputs.dns_mapping }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh dns_mapping
+          echo "✅ dns_mapping done"
+
+      - name: 🔟 generate_postman_env
+        if: ${{ inputs.generate_postman_env }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh generate_postman_env
+          echo "✅ generate_postman_env done"
+
+      - name: Encrypt and Commit env.json
+        if: ${{ inputs.generate_postman_env }}
+        run: |
+          cp $ENV_FOLDER/env.json $CONFIG_PATH/env.json
+
+          ansible-vault encrypt $CONFIG_PATH/env.json \
+            --vault-password-file=<(echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}")
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add $CONFIG_PATH/env.json
+          git commit -m "Add encrypted env.json [${{ inputs.environment }}] [skip ci]" || echo "No changes to commit"
+          git push || echo "Push failed or no changes"
+          echo "✅ env.json committed"
+
+      - name: 1️⃣1️⃣ run_post_install
+        if: ${{ inputs.run_post_install }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh run_post_install
+          echo "✅ run_post_install done"
+
+      - name: 1️⃣2️⃣ create_client_forms
+        if: ${{ inputs.create_client_forms }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh create_client_forms
+          echo "✅ create_client_forms done"
+
+      - name: 1️⃣3️⃣ setup_forms
+        if: ${{ inputs.setup_forms }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh setup_forms
+          echo "✅ setup_forms done"
+
+      - name: Platform Summary
+        if: always()
+        run: |
+          echo "================================================"
+          echo "     PLATFORM JOB SUMMARY"
+          echo "================================================"
+          echo "Environment : ${{ inputs.environment }}"
+          [ "${{ inputs.restart_workloads }}"     == "true" ] && echo "  ✅ 7️⃣   restart_workloads"    || echo "  ⏭️  7️⃣   restart_workloads (skipped)"
+          [ "${{ inputs.certificate_config }}"   == "true" ] && echo "  ✅ 8️⃣   certificate_config"   || echo "  ⏭️  8️⃣   certificate_config (skipped)"
+          [ "${{ inputs.dns_mapping }}"          == "true" ] && echo "  ✅ 9️⃣   dns_mapping"          || echo "  ⏭️  9️⃣   dns_mapping (skipped)"
+          [ "${{ inputs.generate_postman_env }}" == "true" ] && echo "  ✅ 🔟   generate_postman_env" || echo "  ⏭️  🔟   generate_postman_env (skipped)"
+          [ "${{ inputs.run_post_install }}"     == "true" ] && echo "  ✅ 1️⃣1️⃣  run_post_install"     || echo "  ⏭️  1️⃣1️⃣  run_post_install (skipped)"
+          [ "${{ inputs.create_client_forms }}"  == "true" ] && echo "  ✅ 1️⃣2️⃣  create_client_forms"  || echo "  ⏭️  1️⃣2️⃣  create_client_forms (skipped)"
+          [ "${{ inputs.setup_forms }}"          == "true" ] && echo "  ✅ 1️⃣3️⃣  setup_forms"          || echo "  ⏭️  1️⃣3️⃣  setup_forms (skipped)"
+          echo "================================================"

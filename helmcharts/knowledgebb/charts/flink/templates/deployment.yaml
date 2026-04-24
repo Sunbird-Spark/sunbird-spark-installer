@@ -29,12 +29,15 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
         app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
         checksum/job-config: {{ $jobData | toYaml | sha256sum }}
     spec:
-      {{- if .Values.global.serviceAccount.create }}
-      serviceAccountName: {{ .Values.global.serviceAccount.name }}
+      {{- if .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -53,14 +56,17 @@ spec:
           workingDir: {{ .Values.taskmanager.flink_work_dir }}
           command: ["/opt/flink/bin/taskmanager.sh"]
           args: ["start-foreground",
-  {{- if eq .Values.global.checkpoint_store_type "azure" }}
-            "-Dfs.azure.account.key.{{ .Values.global.object_storage_endpoint }}={{ .Values.global.cloud_storage_secret_key }}",
-  {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "gcs" }}
             "-Dgoogle.cloud.auth.service.account.enable=true",
             "-Dfs.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem",
             "-Dfs.AbstractFileSystem.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
             "-DHADOOP_CONF_DIR=/opt/flink/conf",
+  {{- end }}
+  {{- if eq .Values.global.checkpoint_store_type "azure" }}
+            "-Dfs.azure.account.auth.type.{{ .Values.global.object_storage_endpoint }}=OAuth",
+            "-Dfs.azure.account.oauth.provider.type.{{ .Values.global.object_storage_endpoint }}=org.apache.hadoop.fs.azurebfs.oauth2.WorkloadIdentityTokenProvider",
+            "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
+            "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "s3" }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
@@ -78,8 +84,17 @@ spec:
           ports:
           - containerPort: {{ .Values.taskmanager.rpc_port }}
             name: rpc
+          env:
+          {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+          - name: AZURE_CLIENT_ID
+            value: "{{ .Values.global.azure_client_id }}"
+          {{- end }}
           resources:
+            {{- if $jobData.resources }}
+            {{- toYaml $jobData.resources | nindent 12 }}
+            {{- else }}
             {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:
@@ -123,12 +138,15 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
         app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
         checksum/job-config: {{ $jobData | toYaml | sha256sum }}
     spec:
-      {{- if .Values.global.serviceAccount.create }}
-      serviceAccountName: {{ .Values.global.serviceAccount.name }}
+      {{- if .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
       {{- end }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -147,14 +165,17 @@ spec:
           workingDir: {{ .Values.jobmanager.flink_work_dir }}
           command: ["/opt/flink/bin/standalone-job.sh"]
           args: ["start-foreground",
-  {{- if eq .Values.global.checkpoint_store_type "azure" }}
-            "-Dfs.azure.account.key.{{ .Values.global.object_storage_endpoint }}={{ .Values.global.cloud_storage_secret_key }}",
-  {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "gcs" }}
             "-Dgoogle.cloud.auth.service.account.enable=true",
             "-Dfs.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem",
             "-Dfs.AbstractFileSystem.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
             "-DHADOOP_CONF_DIR=/opt/flink/conf",
+  {{- end }}
+  {{- if eq .Values.global.checkpoint_store_type "azure" }}
+            "-Dfs.azure.account.auth.type.{{ .Values.global.object_storage_endpoint }}=OAuth",
+            "-Dfs.azure.account.oauth.provider.type.{{ .Values.global.object_storage_endpoint }}=org.apache.hadoop.fs.azurebfs.oauth2.WorkloadIdentityTokenProvider",
+            "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
+            "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
   {{- if eq .Values.global.checkpoint_store_type "s3" }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
@@ -179,8 +200,17 @@ spec:
             - name: {{ .name }}
               containerPort: {{ .targetPort }}
             {{- end }}
+          env:
+          {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+          - name: AZURE_CLIENT_ID
+            value: "{{ .Values.global.azure_client_id }}"
+          {{- end }}
           resources:
+            {{- if $jobData.resources }}
+            {{- toYaml $jobData.resources | nindent 12 }}
+            {{- else }}
             {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           volumeMounts:

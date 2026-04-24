@@ -28,11 +28,6 @@ variable "storage_container_private" {
   description = "Private storage container name."
 }
 
-variable "storage_account_primary_access_key" {
-  type        = string
-  description = "Storage account primary access key."
-}
-
 variable "base_location" {
   type        = string
   description = "Location of terrafrom execution folder."
@@ -50,15 +45,6 @@ variable "private_ingressgateway_ip" {
   type        = string
   description = "Private LB IP."
 }
-variable "encryption_string" {
-  type        = string
-  description = "This string will be used to encrypt / mask various values. Use a strong random string in order to secure the applications. The string should be exactly 32 characters in length. If you forget the string, the application will stop working and the string cannot be retrieved."
-
-  validation {
-    condition     = length(var.encryption_string) == 32
-    error_message = "The string must have a length of exactly 32 characters."
-  }
-}
 variable "cloud_storage_provider" {
   description = "The cloud storage provider to use."
   type        = string
@@ -71,3 +57,16 @@ variable "velero_container_name" {
   type        = string
   default     = ""
 }
+
+variable "azure_client_id" {
+  type        = string
+  description = "Client ID of the user-assigned managed identity for Workload Identity (for Azure blob storage access). Required when cloud_storage_provider is 'azure'."
+  default     = ""
+}
+
+variable "k8s_service_account_name" {
+  type        = string
+  description = "Name of the Kubernetes service account for Workload Identity (created by workload-identity module)."
+  default     = "azure-managed-identity-sa"
+}
+
