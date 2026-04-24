@@ -1,17 +1,21 @@
-# Setting Up a Private Deployment Repository for Sunbird Spark
+# Sunbird Spark — Private Deployment Repository Setup
 
-This guide walks through creating a **private GitHub repository** that holds your environment configuration (encrypted) and the GitHub Actions workflows that deploy Sunbird Spark using `sunbird-spark-installer` as the source.
+This guide walks through creating a **private GitHub repository** that holds your environment configuration (encrypted) and GitHub Actions workflows to deploy Sunbird Spark using `sunbird-spark-installer` as the source.
 
-## How to Set Up Your Private Repository
+> Throughout this guide, `demo` is used as the environment name. Replace it with your own (e.g. `production`, `staging`, `uat`).
 
-Two deployment approaches are available:
+---
 
-- **GitHub Actions** — workflows in your private repo run deployments automatically. Requires encrypted config and Azure OIDC authentication.
-- **Manual via Azure VM** — create a VM with the setup script, SSH in, and run `install.sh` directly. No CI/CD setup needed. Skip to [Alternative: Manual Deployment via Azure VM](#alternative-manual-deployment-via-azure-vm).
+## Choose Your Deployment Path
 
-For GitHub Actions deployments, the workflow clones `sunbird-spark-installer` into the runner at runtime — your private repo only holds the encrypted config and workflow files.
+| Path | When to use |
+|------|-------------|
+| **GitHub Actions** | Automated CI/CD — requires encrypted config and Azure OIDC auth |
+| **Manual via Azure VM** | Quick start — SSH into a VM and run `install.sh` directly, no CI/CD setup needed |
 
-> Throughout this guide `demo` is used as the environment name. Replace it with your own (e.g. `production`, `staging`, `uat`).
+For GitHub Actions, the workflow clones `sunbird-spark-installer` at runtime — your private repo only holds the encrypted config and workflow files.
+
+Skip to [Manual Deployment via Azure VM](#alternative-manual-deployment-via-azure-vm) if you prefer that path.
 
 ---
 
@@ -24,33 +28,32 @@ spark-devops/
 │       ├── sunbird-spark-platform.yaml     ← main deployment workflow
 │       └── sunbird-spark-addons.yaml       ← addons workflow (optional)
 └── configs/
-    └── demo/                               ← your environment name (you decide)
+    └── demo/                               ← your environment name
         ├── global-values.yaml              ← YOU create this (encrypted)
         ├── global-cloud-values.yaml        ← auto-generated after infra run
         ├── tf.sh                           ← auto-generated after backend creation
         └── env.json                        ← auto-generated after post-install
 ```
 
+> **Do not manually create** `global-cloud-values.yaml`, `tf.sh`, or `env.json` — the workflows generate and commit them automatically.
+
 ---
 
-## Step 1: Create the Private GitHub Repository
+## Step 1 — Create the Private Repository
 
 1. Create a new **private** repository in your GitHub account or organization.
 
-2. Clone it locally:
-   ```bash
-   git clone https://github.com/org-name/spark-devops.git
-   cd spark-devops
-   ```
+2. Clone it locally and create the folder structure:
 
-3. Create the directory structure:
-   ```bash
-   mkdir -p .github/workflows configs/demo
-   ```
+```bash
+git clone https://github.com/org-name/spark-devops.git
+cd spark-devops
+mkdir -p .github/workflows configs/demo
+```
 
 ---
 
-## Step 2: Copy the Template Files
+## Step 2 — Copy Workflow Templates
 
 ```bash
 INSTALLER_PATH=/path/to/sunbird-spark-installer
@@ -61,40 +64,40 @@ cp $INSTALLER_PATH/private-repo-setup/.github/workflows/sunbird-spark-addons.yam
 
 ---
 
-## Step 3: Prepare `global-values.yaml`
+## Step 3 — Prepare `global-values.yaml`
 
 ```bash
 cp $INSTALLER_PATH/opentofu/azure/template/global-values.yaml configs/demo/global-values.yaml
 ```
 
-Open `configs/demo/global-values.yaml` and fill in all required fields — refer to the root [README.md](../README.md) for the full field reference.
+Open the file and fill in all required fields — see the root [README.md](../README.md) for the full field reference.
 
-> `global.environment` **must exactly match** the `configs/` folder name and the GitHub Actions environment name in Step 6.
+> **Important:** `global.environment` must exactly match the `configs/` folder name and the GitHub Actions environment name set in Step 6.
 
 ---
 
-## Step 4: Encrypt and Commit the Config
+## Step 4 — Encrypt and Commit the Config
 
 ```bash
 pip install ansible
 
 ansible-vault encrypt configs/demo/global-values.yaml
-# Enter a strong password — save it securely. This becomes ANSIBLE_VAULT_PASSWORD in Step 6.
+# Enter a strong password and save it securely — this becomes ANSIBLE_VAULT_PASSWORD in Step 6.
 
 git add configs/demo/global-values.yaml
 git commit -m "Add encrypted environment config"
 git push
 ```
 
-> The `$ANSIBLE_VAULT;1.1;AES256` header at the top of the file confirms it is encrypted. Never commit the file unencrypted.
+> Confirm encryption: the file should start with `$ANSIBLE_VAULT;1.1;AES256`. Never commit it unencrypted.
 
 ---
 
-## Step 5: Set Up Azure Authentication (OIDC)
+## Step 5 — Set Up Azure OIDC Authentication
 
 The workflows authenticate to Azure using OIDC federated credentials — no client secrets stored in GitHub.
 
-Edit the variables at the top of `$INSTALLER_PATH/private-repo-setup/scripts/setup-azure-oidc.sh`:
+Edit the variables at the top of `setup-azure-oidc.sh`:
 
 ```bash
 TENANT_ID=""           # Azure Portal → Azure Active Directory → Overview → Tenant ID
@@ -112,31 +115,30 @@ Run it (requires `az` CLI and Azure Owner access):
 bash $INSTALLER_PATH/private-repo-setup/scripts/setup-azure-oidc.sh
 ```
 
-The script creates two service principals with OIDC trust:
+This creates two service principals with OIDC trust and prints their client IDs:
+
 - `<building_block>-<env>-github-infra` — provisions AKS, storage, networking
 - `<building_block>-<env>-github-deploy` — runs kubectl and helm
 
-It prints the client IDs to add to GitHub Secrets at the end.
-
 ---
 
-## Step 6: Configure GitHub Secrets
+## Step 6 — Configure GitHub Secrets
 
-Go to **Settings → Secrets and variables → Actions → New repository secret** in your private repo and add:
+Go to **Settings → Secrets and variables → Actions → New repository secret** and add:
 
-| Secret Name | Where to Get It |
-|-------------|----------------|
-| `ANSIBLE_VAULT_PASSWORD` | The password from Step 4 |
+| Secret | Source |
+|--------|--------|
+| `ANSIBLE_VAULT_PASSWORD` | Password from Step 4 |
 | `AZURE_INFRA_CLIENT_ID` | Printed by `setup-azure-oidc.sh` |
 | `AZURE_DEPLOY_CLIENT_ID` | Printed by `setup-azure-oidc.sh` |
-| `AZURE_TENANT_ID` | Your Azure AD Tenant ID |
-| `AZURE_SUBSCRIPTION_ID` | Your Azure Subscription ID |
+| `AZURE_TENANT_ID` | Azure AD → Overview → Tenant ID |
+| `AZURE_SUBSCRIPTION_ID` | Azure Portal → Subscriptions |
 
 ---
 
-## Step 7: Update Environment Name in Workflows
+## Step 7 — Set Environment Name in Workflows
 
-In both `.github/workflows/sunbird-spark-platform.yaml` and `sunbird-spark-addons.yaml`, replace `your-env` with your environment name:
+In both workflow files, replace `your-env` with your environment name:
 
 ```yaml
 options:
@@ -152,11 +154,9 @@ git push
 
 ---
 
-## Step 8: Run the Deployment
+## Step 8 — Run the Deployment
 
-Go to **Actions → Spark Platform Infra And Deploy → Run workflow** in your private repo.
-
-Run in three phases:
+Go to **Actions → Spark Platform Infra And Deploy → Run workflow** and run in three phases:
 
 ### Phase 1 — Infrastructure
 
@@ -164,21 +164,22 @@ Enable and run:
 - `1️⃣ Create Terraform backend`
 - `3️⃣ Create infrastructure resources`
 
-Provisions AKS, VNet, storage, Key Vault, and managed identities. The workflow commits auto-generated `global-cloud-values.yaml` and `tf.sh` back to `configs/demo/`.
+Provisions AKS, VNet, storage, Key Vault, and managed identities. The workflow auto-commits `global-cloud-values.yaml` and `tf.sh` back to `configs/demo/`.
 
-**After this phase:** Add an A record for your domain pointing to the load balancer public IP shown in the workflow output.
+After this phase, **add a DNS A record** for your domain pointing to the load balancer public IP shown in the workflow output.
 
 ### Phase 2 — Deploy Helm Bundles
 
 Enable `5️⃣ Install Helm components`, mode: `all`.
 
-Deploys all 7 building blocks: monitoring → edbb → learnbb → knowledgebb → obsrvbb → inquirybb → additional.
+Deploys all 7 building blocks in order: monitoring → edbb → learnbb → knowledgebb → obsrvbb → inquirybb → additional.
 
 > First run takes 25–40 minutes as container images are pulled.
 
-### Phase 3 — Platform Finalisation
+### Phase 3 — Finalise the Platform
 
-Enable in order:
+Run in order:
+
 - `7️⃣ Restart workloads using keycloak keys`
 - `8️⃣ Configure certificate keys`
 - `9️⃣ DNS mapping`
@@ -188,23 +189,21 @@ Enable in order:
 
 ---
 
-## Step 9 (Optional): Deploy Addons
+## Step 9 (Optional) — Deploy Addons
 
 Go to **Actions → Spark Platform Addons → Run workflow**.
 
 | Addon | Steps |
 |-------|-------|
 | DIAL | Run `1️⃣ Run DIAL addon OpenTofu` first, then `2️⃣ → DIAL`. Set `deployed_dial_addon: "true"` in `global-values.yaml` before Phase 2. |
-| Discussion Forum | Enable `2️⃣ → Discussion Forum`. |
-| Video Stream Generator | Enable `2️⃣ → Video Stream Generator`. |
+| Discussion Forum | Enable `2️⃣ → Discussion Forum` |
+| Video Stream Generator | Enable `2️⃣ → Video Stream Generator` |
 
 ---
 
 ## Auto-Generated Files Reference
 
-Do **not** create these manually — the workflows generate and commit them automatically:
-
-| File | Created By |
+| File | Created by |
 |------|-----------|
 | `configs/demo/global-cloud-values.yaml` | `create_tf_resources` |
 | `configs/demo/tf.sh` | `create_tf_backend` |
@@ -216,11 +215,11 @@ Do **not** create these manually — the workflows generate and commit them auto
 
 ## Alternative: Manual Deployment via Azure VM
 
-SSH into a dedicated Azure VM and run `install.sh` directly. No private GitHub repository or encrypted config files needed.
+SSH into a dedicated Azure VM and run `install.sh` directly. No private GitHub repo or encrypted config needed.
 
-### Step 1: Create the Installer VM
+### Step 1 — Create the Installer VM
 
-Edit the variables at the top of `$INSTALLER_PATH/private-repo-setup/scripts/setup-installer-vm.sh`:
+Edit variables at the top of `setup-installer-vm.sh`:
 
 ```bash
 TENANT_ID=""        # Azure Portal → Azure Active Directory → Overview → Tenant ID
@@ -237,15 +236,15 @@ Run it (requires `az` CLI and Azure Owner access):
 bash $INSTALLER_PATH/private-repo-setup/scripts/setup-installer-vm.sh
 ```
 
-Creates an Ubuntu 22.04 VM (`Standard_B2s`) with a system-assigned managed identity and the least-privilege RBAC role for OpenTofu. Prints the SSH command when done.
+Creates an Ubuntu 22.04 VM (`Standard_B2s`) with a system-assigned managed identity and least-privilege RBAC for OpenTofu. Prints the SSH command when done.
 
-### Step 2: SSH into the VM
+### Step 2 — SSH into the VM
 
 ```bash
 ssh -i ~/.ssh/<building_block>-<env>-installer-vm azureuser@<vm-public-ip>
 ```
 
-### Step 3: Install Required CLI Tools on the VM
+### Step 3 — Install Required CLI Tools
 
 ```bash
 # Azure CLI
@@ -275,7 +274,7 @@ sudo apt-get install -y jq rclone
 curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
 ```
 
-### Step 4: Clone and Prepare the Installer
+### Step 4 — Clone and Configure the Installer
 
 ```bash
 git clone https://github.com/Sunbird-Spark/sunbird-spark-installer.git
@@ -283,17 +282,10 @@ cd sunbird-spark-installer/opentofu/azure
 
 cp -r template demo
 cd demo
+# Open global-values.yaml and fill in all required fields
 ```
 
-Open `global-values.yaml` and fill in all required fields — refer to the root [README.md](../README.md) for the full field reference.
-
-### Step 5: Authenticate Using the VM Managed Identity
-
-```bash
-az login --identity
-```
-
-### Step 6: Run the Installer
+### Step 5 — Run the Installer
 
 Full installation:
 
@@ -322,13 +314,11 @@ Or phase by phase:
 **`ansible-vault: command not found`**
 Run `pip install ansible` or `pip3 install ansible`.
 
-**Azure login fails in the workflow (OIDC token exchange failed)**
-- Check that the GitHub repo name in `setup-azure-oidc.sh` exactly matches your private repo (case-sensitive)
-- Check that the GitHub environment name matches the environment created in Step 6
-- Re-run `setup-azure-oidc.sh` — it is idempotent
+**Azure login fails — OIDC token exchange failed**
+Check that the GitHub repo name in `setup-azure-oidc.sh` exactly matches your private repo (case-sensitive) and the GitHub environment name matches. Re-run `setup-azure-oidc.sh` — it is idempotent.
 
 **`global-cloud-values.yaml not found` warning during deploy**
-Expected on the first run before `create_tf_resources`. Complete Phase 1 first.
+Expected on the first run before Phase 1 completes. Finish `create_tf_resources` first.
 
 **AKS credentials step fails — cluster not found**
 Ensure `global.building_block` matches what was used during infra creation. Cluster name is `{building_block}-{environment}`.
