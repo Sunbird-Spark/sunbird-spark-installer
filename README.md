@@ -147,6 +147,19 @@ While the installer may work with other versions, these are the versions that ha
      time ./install.sh
      ```
 
+## Deploying Sunbird Spark
+
+Two deployment approaches are available — both are covered in the setup guide:
+
+**[private-repo-setup/README.md](private-repo-setup/README.md)**
+
+| Approach | When to use |
+|----------|-------------|
+| **GitHub Actions** | Automated, audit-trailed deployments. Requires a private GitHub repository with Ansible Vault encrypted config and Azure OIDC authentication. Recommended for teams. |
+| **Manual via Azure VM** | Simpler setup with no CI/CD configuration. Create a VM using `setup-installer-vm.sh`, SSH in, and run `install.sh` directly. Good for single-operator or trial deployments. |
+
+---
+
 ## Default Users in the Instance
 
 This installation setup creates the following default users with different roles. You can update the passwords using the "Forgot Password" option or create new users using APIs.
