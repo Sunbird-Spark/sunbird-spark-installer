@@ -156,7 +156,22 @@ git push
 
 ## Step 8 — Run the Deployment
 
-Go to **Actions → Spark Platform Infra And Deploy → Run workflow** and run in three phases:
+Go to **Actions → Spark Platform Infra And Deploy → Run workflow**.
+
+Fill in the inputs before enabling any steps:
+
+![Workflow dispatch — branch and environment inputs](assets/workflow-dispatch.png)
+
+| Input | Description |
+|-------|-------------|
+| **Use workflow from** | Branch of your private repo the workflow itself runs from (usually `main`) |
+| **environment** | Your environment name (e.g. `demo`) — must match your `configs/` folder name |
+| **config_branch** | Branch of **your private repo** to read config and encrypted secrets from (default: `main`) |
+| **source_branch** | Branch of **sunbird-spark-installer** (public repo) to clone at runtime (default: `main`) |
+
+> `config_branch` and `source_branch` let you test config changes or a new installer release independently — change one without touching the other.
+
+Run in three phases:
 
 ### Phase 1 — Infrastructure
 
@@ -192,6 +207,8 @@ Run in order:
 ## Step 9 (Optional) — Deploy Addons
 
 Go to **Actions → Spark Platform Addons → Run workflow**.
+
+The dispatch panel has the same three branch/environment inputs as Step 8.
 
 | Addon | Steps |
 |-------|-------|
