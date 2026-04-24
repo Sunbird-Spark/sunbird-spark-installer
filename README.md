@@ -98,7 +98,7 @@ The installer has been verified with:
 
 ---
 
-## Installing Sunbird on GCP
+## Installing Sunbird on AWS or GCP
 
 ### Notes
 - Existing files in the following locations will be backed up with a `.bak` extension and overwritten:
@@ -114,7 +114,7 @@ The installer has been verified with:
      ```
 2. Copy the template directory:
      ```bash
-     cd opentofu/gcp
+     cd opentofu/<cloud-provider>   # aws or gcp
      cp -r template demo
      cd demo
      ```
@@ -124,8 +124,12 @@ The installer has been verified with:
 
 5. To enable asset enrichment, set `enable_asset_enrichment: true` in `global-values.yaml`.
 
-6. Log in to GCP:
+6. Log in to your cloud provider:
     ```bash
+    # AWS
+    aws configure
+
+    # GCP
     gcloud auth login
     ```
 7. Run the installation script:
