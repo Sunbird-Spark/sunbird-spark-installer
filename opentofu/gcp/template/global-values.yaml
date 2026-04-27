@@ -18,6 +18,7 @@ global:
   environment: "" # environment name
   release_version: "release-7.0.0"
   # Cluster-level variables for GKE setup and networking
+  kubernetes_version: "1.33"  # Pin the exact GKE Kubernetes version (e.g. "1.31.7-gke.1054003"). Run: gcloud container get-server-config --region <region>
   gke_node_pool_instance_type: "n2d-standard-16"
   create_network: "true"
   gke_node_default_disk_size_gb: 100
