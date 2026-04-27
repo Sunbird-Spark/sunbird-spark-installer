@@ -22,9 +22,9 @@ function create_tf_resources() {
     echo -e "\nCreating resources on azure cloud"
     export TG_TF_PATH=tofu
     terragrunt run-all init --reconfigure
-    terragrunt run-all plan
-    # terragrunt run-all apply -auto-approve
-    chmod 600 ~/.kube/config
+    # terragrunt run-all plan
+    terragrunt run-all apply -auto-approve
+    [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
 }
 function certificate_keys() {
     #  # If keys already present in global-values.yaml → skip writing
