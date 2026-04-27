@@ -20,6 +20,6 @@ output "managed_identity_principal_id" {
 
 output "deployer_role_ready" {
   value       = time_sleep.wait_for_deployer_role_propagation.id
-  description = "Signals that deployer blob role assignments have propagated. Depend on this before running blob uploads."
+  description = "Signals that workload identity container role assignments have propagated. Depend on this before running blob uploads."
 }
 
