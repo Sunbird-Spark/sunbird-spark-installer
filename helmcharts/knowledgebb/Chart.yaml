@@ -46,6 +46,10 @@ dependencies:
   - name: janusgraph
     version: 1.4.10
     condition: janusgraph.enabled
+  - name: opensearch
+    repository: https://opensearch-project.github.io/helm-charts
+    version: 2.37.0
+    condition: opensearch.enabled
   - name: knowlg
     version: 0.1.0
     condition: knowlg.enabled

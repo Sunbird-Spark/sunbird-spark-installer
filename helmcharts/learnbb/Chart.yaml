@@ -43,6 +43,10 @@ dependencies:
     repository: https://charts.yugabyte.com
     version: 2025.2.0   # Chart version
     condition: yugabyte.enabled
+  - name: opensearch
+    repository: https://opensearch-project.github.io/helm-charts
+    version: 2.37.0
+    condition: opensearch.enabled
   - name: lern
     version: 0.1.0
     condition: lern.enabled

@@ -170,6 +170,18 @@ yugabytecql:
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_499032f"
 
+opensearch: &opensearch
+  enabled: true
+  fullnameOverride: "opensearch"
+  host: "opensearch"
+  port: 9200
+  singleNode: true
+  extraEnvs:
+    - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+      value: "Lern@Migr8#2026!"
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+
 keycloak:
   enabled: true
 
@@ -193,6 +205,7 @@ certificatesign:
 
 global:
   elasticsearch: *es
+  opensearch: *opensearch
   kafka: *kafka
   keycloak_key_configmap: keycloak-key
   keycloak_kid_keys_configmap: keycloak-kids-keys

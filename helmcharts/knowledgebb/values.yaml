@@ -53,6 +53,18 @@ elasticsearch: &es
     repository: bitnami-shell-archived
     tag: 11-debian-11-r54
 
+opensearch: &opensearch
+  enabled: true
+  fullnameOverride: "opensearch"
+  host: "opensearch"
+  port: 9200
+  singleNode: true
+  extraEnvs:
+    - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+      value: "Lern@Migr8#2026!"
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+
 graph_passport: &graph_passport
   key_base: "secretKey"
 
@@ -213,6 +225,7 @@ flink:
 global:
   channel: *channel
   elasticsearch: *es
+  opensearch: *opensearch
   graph_passport: *graph_passport
   installation: *installation
   janusgraph: *janusgraph

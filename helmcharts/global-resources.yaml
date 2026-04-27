@@ -164,9 +164,6 @@ elasticsearch:
       size: 25Gi
 
 opensearch:
-  extraEnvs:
-    - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-      value: "Lern@Migr8#2026!"
   resources:
     requests:
       cpu: "1"
@@ -176,8 +173,6 @@ opensearch:
       memory: "4Gi"
   persistence:
     size: 25Gi
-  replicas: 1
-  singleNode: true
 
 kafka:
   broker:
