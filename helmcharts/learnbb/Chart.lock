@@ -6,13 +6,16 @@ dependencies:
   repository: https://charts.bitnami.com/bitnami
   version: 18.1.1
 - name: kafka
-  repository: https://charts.bitnami.com/bitnami
-  version: 20.0.2
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 32.2.15
 - name: elasticsearch
   repository: https://charts.bitnami.com/bitnami
   version: 19.5.4
 - name: yugabyte
   repository: https://charts.yugabyte.com
-  version: 2025.2.0   
-digest: sha256:7482f8b9b83a81ac821c878713a95bcd05a42f92401787b27af45f3b203138c7
-generated: "2024-01-12T11:40:04.779084178+01:00"
+  version: 2025.2.0
+- name: opensearch
+  repository: https://opensearch-project.github.io/helm-charts
+  version: 2.37.0
+digest: sha256:a216ce21760f217c544dd5a23de91c533a13e610bced5ea9976ef7e62658f33c
+generated: "2026-04-27T12:38:53.885171+05:30"
