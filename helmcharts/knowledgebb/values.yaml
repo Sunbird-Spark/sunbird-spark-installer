@@ -62,6 +62,9 @@ opensearch: &opensearch
   extraEnvs:
     - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
       value: "Lern@Migr8#2026!"
+  config:
+    opensearch.yml: |
+      plugins.security.disabled: true
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
 
