@@ -24,6 +24,7 @@ global:
     email: "" # provide the email address for certificate renewal notifications/alerts
   play_http:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
+  aks_version: "1.33"  # Pin the exact AKS Kubernetes version (e.g. "1.31.7", "1.32.5", "1.33.1"). Run: az aks get-versions --location <region> --output table
   subscription_id: ""
   cloud_storage_region: ""
   sunbird_cloud_storage_provider: "azure" # Provide the cloud storage provider

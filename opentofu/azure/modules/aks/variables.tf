@@ -4,10 +4,8 @@ variable "environment" {
 }
 
 variable "aks_version" {
-  type = string
-  description = "AKS cluster version"
-  default = "1.33.6"
-  
+  type        = string
+  description = "AKS Kubernetes version to pin. Find available versions with: az aks get-versions --location <region> --output table"
 }
 
 variable "building_block" {
