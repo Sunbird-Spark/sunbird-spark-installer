@@ -113,23 +113,12 @@ resource "azurerm_role_assignment" "workload_identity_containers" {
   role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
 }
 
-# Blob data plane access for the deployer identity running tofu apply.
-# Owner/Contributor roles only cover control plane — az storage --auth-mode login
-# requires an explicit Storage Blob Data role on the data plane.
-resource "azurerm_role_assignment" "deployer_blob_containers" {
-  for_each = toset(var.container_names)
-
-  principal_id         = data.azurerm_client_config.current.object_id
-  scope                = "${var.storage_account_id}/blobServices/default/containers/${each.value}"
-  role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
-}
-
 # Azure role assignments take time to propagate across the control plane.
 # Downstream modules (keys, upload-files) depend on this sleep via workload-identity
-# dependency so they never run before the roles are active.
+# dependency so they never run before the workload identity container roles are active.
 resource "time_sleep" "wait_for_deployer_role_propagation" {
   create_duration = "60s"
-  depends_on      = [azurerm_role_assignment.deployer_blob_containers]
+  depends_on      = [azurerm_role_assignment.workload_identity_containers]
 }
 
 # Check if the DIAL container exists in Azure by querying the storage account directly.
