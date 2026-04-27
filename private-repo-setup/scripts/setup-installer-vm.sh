@@ -132,7 +132,9 @@ cat > "$ROLE_JSON_FILE" <<EOF
   "DataActions": [
     "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
     "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
-    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete"
+    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
+    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action",
+    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action"
   ],
   "NotActions": [],
   "NotDataActions": [],
