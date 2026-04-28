@@ -97,7 +97,11 @@ git push
 
 The workflows authenticate to Azure using OIDC federated credentials — no client secrets stored in GitHub.
 
-Edit the variables at the top of `setup-azure-oidc.sh`:
+Two service principals are needed. They are set up with separate scripts so each can be run independently.
+
+### 5a — Infra SP
+
+Edit the variables at the top of `setup-infra-sp.sh` and run it (requires `az` CLI and Azure Owner access):
 
 ```bash
 TENANT_ID=""           # Azure Portal → Azure Active Directory → Overview → Tenant ID
@@ -109,16 +113,27 @@ GITHUB_REPO=""         # "org-name/spark-devops"
 GITHUB_ENVIRONMENT=""  # Same as ENVIRONMENT
 ```
 
-Run it (requires `az` CLI and Azure Owner access):
-
 ```bash
-bash $INSTALLER_PATH/private-repo-setup/scripts/setup-azure-oidc.sh
+bash $INSTALLER_PATH/private-repo-setup/scripts/setup-infra-sp.sh
 ```
 
-This creates two service principals with OIDC trust and prints their client IDs:
+Creates `<building_block>-<env>-github-infra` — provisions AKS, storage, networking. Prints `AZURE_INFRA_CLIENT_ID`.
 
-- `<building_block>-<env>-github-infra` — provisions AKS, storage, networking
-- `<building_block>-<env>-github-deploy` — runs kubectl and helm
+### 5b — Deploy SP
+
+> **Prerequisite:** the AKS cluster must already exist before running this script. The deploy SP is assigned the `Azure Kubernetes Service Cluster Admin Role` at cluster scope — this will fail if the cluster does not exist yet.
+>
+> Run Phase 1 (infrastructure) first, then come back to run this script.
+
+Edit the same variables at the top of `setup-deploy-sp.sh` and run it:
+
+```bash
+bash $INSTALLER_PATH/private-repo-setup/scripts/setup-deploy-sp.sh
+```
+
+Creates `<building_block>-<env>-github-deploy` — runs kubectl and helm. Assigned both `Azure Kubernetes Service Cluster Admin Role` and `Azure Kubernetes Service Cluster User Role` at cluster scope. Prints `AZURE_DEPLOY_CLIENT_ID`.
+
+Both scripts are idempotent — safe to re-run if anything needs to be recreated.
 
 ---
 
@@ -129,8 +144,8 @@ Go to **Settings → Secrets and variables → Actions → New repository secret
 | Secret | Source |
 |--------|--------|
 | `ANSIBLE_VAULT_PASSWORD` | Password from Step 4 |
-| `AZURE_INFRA_CLIENT_ID` | Printed by `setup-azure-oidc.sh` |
-| `AZURE_DEPLOY_CLIENT_ID` | Printed by `setup-azure-oidc.sh` |
+| `AZURE_INFRA_CLIENT_ID` | Printed by `setup-infra-sp.sh` (Step 5a) |
+| `AZURE_DEPLOY_CLIENT_ID` | Printed by `setup-deploy-sp.sh` (Step 5b) |
 | `AZURE_TENANT_ID` | Azure AD → Overview → Tenant ID |
 | `AZURE_SUBSCRIPTION_ID` | Azure Portal → Subscriptions |
 
@@ -180,6 +195,8 @@ Enable and run:
 - `3️⃣ Create infrastructure resources`
 
 Provisions AKS, VNet, storage, Key Vault, and managed identities. The workflow auto-commits `global-cloud-values.yaml` and `tf.sh` back to `configs/demo/`.
+
+> **After Phase 1 completes**, go back and run `setup-deploy-sp.sh` (Step 5b) if you haven't done so yet — the AKS cluster now exists and the role assignment will succeed.
 
 After this phase, **add a DNS A record** for your domain pointing to the load balancer public IP shown in the workflow output.
 
@@ -332,7 +349,7 @@ Or phase by phase:
 Run `pip install ansible` or `pip3 install ansible`.
 
 **Azure login fails — OIDC token exchange failed**
-Check that the GitHub repo name in `setup-azure-oidc.sh` exactly matches your private repo (case-sensitive) and the GitHub environment name matches. Re-run `setup-azure-oidc.sh` — it is idempotent.
+Check that the GitHub repo name in `setup-infra-sp.sh` / `setup-deploy-sp.sh` exactly matches your private repo (case-sensitive) and the GitHub environment name matches. Both scripts are idempotent — safe to re-run.
 
 **`global-cloud-values.yaml not found` warning during deploy**
 Expected on the first run before Phase 1 completes. Finish `create_tf_resources` first.
