@@ -21,8 +21,9 @@ function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
     export TG_TF_PATH=tofu
-    terragrunt run --all init --reconfigure
-    terragrunt run --all plan --non-interactive
+    tofu init -reconfigure
+    terragrunt init --all --reconfigure --non-interactive
+    terragrunt plan --all --non-interactive
     # terragrunt run --all apply --non-interactive
     chmod 600 ~/.kube/config
 }
