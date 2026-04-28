@@ -82,9 +82,9 @@ variable "description" {
 }
 
 variable "kubernetes_version" {
-  description = "The Kubernetes version of the masters."
+  description = "The Kubernetes version of the masters. If set to 'latest' it will pull latest available version in the selected region."
   type        = string
-  default     = "1.33"
+  default     = "latest"
 }
 
 variable "gke_node_pool_instance_type" {
