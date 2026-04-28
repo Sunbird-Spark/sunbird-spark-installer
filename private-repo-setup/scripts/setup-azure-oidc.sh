@@ -23,7 +23,6 @@ SUBSCRIPTION_ID=""     # Your Azure Subscription ID (Azure Portal → Subscripti
 BUILDING_BLOCK=""      # Short resource prefix — must match global.building_block in global-values.yaml (e.g. "myorg")
 ENVIRONMENT=""         # Environment name — must match configs/ folder name and GitHub Actions environment name (e.g. "dev")
 RESOURCE_GROUP=""      # Azure resource group where all infra will be created (e.g. "myorg-dev")
-LOCATION=""          # Azure region for the resource group (e.g. "eastus", "centralindia")
 GITHUB_REPO=""         # Your private devops repo as "org/repo" (e.g. "my-org/my-spark-devops")
 GITHUB_ENVIRONMENT=""  # GitHub Actions environment name — must match ENVIRONMENT above
 # ─────────────────────────────────────────────────────────────────────────────
@@ -177,7 +176,7 @@ EOF
 }
 
 # ── Validate inputs ────────────────────────────────────────
-for var in TENANT_ID SUBSCRIPTION_ID BUILDING_BLOCK ENVIRONMENT RESOURCE_GROUP LOCATION GITHUB_REPO GITHUB_ENVIRONMENT; do
+for var in TENANT_ID SUBSCRIPTION_ID BUILDING_BLOCK ENVIRONMENT RESOURCE_GROUP GITHUB_REPO GITHUB_ENVIRONMENT; do
   if [ -z "${!var}" ]; then
     echo "❌ ERROR: $var is not set. Please edit the variables at the top of this script before running."
     exit 1
@@ -189,10 +188,6 @@ echo "Logging in to Azure..."
 az login --tenant $TENANT_ID
 az account set --subscription $SUBSCRIPTION_ID
 echo "✓ Subscription: $SUBSCRIPTION_ID"
-
-# ── Step 2: Ensure resource group exists ───────────────────
-az group create --name "$RESOURCE_GROUP" --location "$LOCATION" --output none
-echo "✓ Resource group ready: $RESOURCE_GROUP"
 
 # ══════════════════════════════════════════════════════════
 # SP 1 — INFRA
@@ -209,7 +204,7 @@ INFRA_OBJECT_ID=$(az ad sp show --id "$INFRA_CLIENT_ID" --query id -o tsv)
 
 add_federated_credential "$INFRA_CLIENT_ID" "${GITHUB_ENVIRONMENT}-infra"
 
-assign_role "$INFRA_OBJECT_ID" "$CUSTOM_ROLE_NAME" "$RG_SCOPE"
+assign_role "$INFRA_OBJECT_ID" "$CUSTOM_ROLE_NAME" "$SUBSCRIPTION_SCOPE"
 
 echo "✓ Infra SP ready: $INFRA_APP_NAME"
 
