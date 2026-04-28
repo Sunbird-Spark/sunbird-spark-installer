@@ -101,8 +101,6 @@ cat > "$ROLE_JSON_FILE" <<EOF
   "Actions": [
     "Microsoft.Resources/subscriptions/read",
     "Microsoft.Resources/subscriptions/resourceGroups/read",
-    "Microsoft.Resources/subscriptions/resourceGroups/write",
-    "Microsoft.Resources/subscriptions/resourceGroups/delete",
     "Microsoft.Resources/deployments/*",
 
     "Microsoft.ContainerService/managedClusters/*",
