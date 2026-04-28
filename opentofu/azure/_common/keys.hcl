@@ -21,10 +21,6 @@ dependency "storage" {
     }
 }
 
-dependency "workload_identity" {
-  config_path = "../workload-identity"
-}
-
 inputs = {
   environment                        = local.environment
   building_block                     = local.building_block
