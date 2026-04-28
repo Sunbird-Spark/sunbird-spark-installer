@@ -22,8 +22,8 @@ function create_tf_resources() {
     echo -e "\nCreating resources on azure cloud"
     export TG_TF_PATH=tofu
     terragrunt run-all init --reconfigure
-    # terragrunt run-all plan
-    terragrunt run-all apply -auto-approve --terragrunt-non-interactive
+    terragrunt run-all plan
+    # terragrunt run-all apply -auto-approve --terragrunt-non-interactive
     [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
 }
 function certificate_keys() {
