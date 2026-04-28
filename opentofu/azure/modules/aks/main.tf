@@ -24,7 +24,6 @@ provider "azurerm" {
     location            = var.location
     resource_group_name = var.resource_group_name
     dns_prefix          = "${local.environment_name}"
-    kubernetes_version = var.aks_version
 
     #Uncomment the below line to create a private cluster
     # private_cluster_enabled = true
