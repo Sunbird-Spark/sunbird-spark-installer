@@ -13,7 +13,7 @@ dependency "storage" {
 dependency "workload_identity" {
   config_path = "../workload-identity"
   mock_outputs = {
-    deployer_role_ready = "mock"
+    client_id = "mock"
   }
 }
 
