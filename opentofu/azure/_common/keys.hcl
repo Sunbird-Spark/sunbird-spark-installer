@@ -27,9 +27,6 @@ dependency "storage" {
 
 dependency "workload_identity" {
   config_path = "../workload-identity"
-  mock_outputs = {
-    client_id = "mock"
-  }
 }
 
 inputs = {
