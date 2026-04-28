@@ -45,7 +45,7 @@ variable "resource_group_name" {
 variable "network_plugin" {
   type        = string
   description = "AKS cluster network plugin."
-  default     = "azure"
+  default     = "kubenet"
 }
 
 variable "vnet_subnet_id" {
