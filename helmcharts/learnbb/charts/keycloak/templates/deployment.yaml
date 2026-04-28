@@ -27,10 +27,31 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.initContainers }}
       initContainers:
+        # realm-import: force-override realm.json onto existing DB data (e.g. after cross-cloud migration).
+        # Default `kc.sh start --import-realm` SKIPS import if realm already exists. We use the dedicated
+        # `kc.sh import` subcommand with `--override true` to actively replace migrated realm content.
+        - name: realm-import
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              echo "==> Forcing realm import with --override true..."
+              /opt/keycloak/bin/kc.sh import --file /opt/keycloak/data/import/realm.json --override true
+              echo "==> Realm import done."
+          envFrom:
+          - configMapRef:
+              name: {{ include "common.names.fullname" . }}-env
+          volumeMounts:
+          {{- if .Values.configmap.enabled }}
+          - name: config
+            mountPath: {{ .Values.configmap.mountPath }}
+          {{- end }}
+        {{- with .Values.initContainers }}
         {{- toYaml . | nindent 8 }}
-      {{- end }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
