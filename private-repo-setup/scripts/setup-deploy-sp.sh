@@ -117,6 +117,7 @@ DEPLOY_OBJECT_ID=$(az ad sp show --id "$DEPLOY_CLIENT_ID" --query id -o tsv)
 
 add_federated_credential "$DEPLOY_CLIENT_ID" "${GITHUB_ENVIRONMENT}-deploy"
 assign_role "$DEPLOY_OBJECT_ID" "Azure Kubernetes Service Cluster Admin Role" "$CLUSTER_SCOPE"
+assign_role "$DEPLOY_OBJECT_ID" "Azure Kubernetes Service Cluster User Role"  "$CLUSTER_SCOPE"
 
 echo "✓ Deploy SP ready: $DEPLOY_APP_NAME"
 
