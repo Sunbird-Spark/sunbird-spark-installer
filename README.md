@@ -48,98 +48,88 @@ Minimum resources required to install and run Sunbird-ED on any cloud provider
 
 ---
 
-## Installing Sunbird on Any Cloud Provider
+## Deploying Sunbird Spark
 
-### Pre-requisites
+Two approaches are available for provisioning infrastructure and deploying Sunbird Spark on Azure — both covered in the setup guide:
+
+**[private-repo-setup/README.md](private-repo-setup/README.md)**
+
+| Approach | When to use |
+|----------|-------------|
+| **GitHub Actions** | Automated, audit-trailed deployments. Requires a private GitHub repository with Ansible Vault encrypted config and Azure OIDC authentication. |
+| **Manual via Azure VM** | Simpler setup with no CI/CD configuration. Create a VM using `setup-installer-vm.sh`, SSH in, and run `install.sh` directly. |
+
+---
+
+## Pre-requisites
 
 1. **Domain Name**
 2. **SSL Certificate**: The FullChain, consisting of the private key and Certificate+CA_Bundle, is mandatory for installation.
 3. **Google OAuth Credentials**: [Create credentials](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id)
 4. **Google V3 ReCaptcha Credentials**: [Create credentials](https://www.google.com/recaptcha/admin)
-5. **Email Service Provider**
-6. **MSG91 SMS Service Provider API Token** (Optional): Required for sending OTPs to registered email addresses during user registration or password reset.
+5. **Email Service Provider**: Only **SendGrid** is supported in this installer. Use your SendGrid API key as the SMTP password.
+6. **MSG91 SMS Service Provider API Token** (Optional): Required for sending OTPs during user registration or password reset. Only **MSG91** is supported in this installer.
 7. **YouTube API Token** (Optional): Necessary for uploading video content directly via YouTube URL.
 
-### Required CLI Tools
+> **Note:** This one-click installer supports **SendGrid** for email and **MSG91** for SMS out of the box. Other providers are not supported without customisation.
+
+---
+
+## Required CLI Tools
+
 1. [jq](https://jqlang.github.io/jq/download/)
 2. [yq](https://github.com/mikefarah/yq#install) (for YAML processing)
 3. [rclone](https://rclone.org/)
 4. [OpenTofu](https://opentofu.org/docs/intro/install/)
 5. [Terragrunt](https://terragrunt.gruntwork.io/docs/getting-started/install/)
 6. Linux / MacOS / GitBash (Windows)
-7. Python 3 
+7. Python 3
 8. PyJWT Python Package (install via pip)
 9. [kubectl](https://kubernetes.io/docs/tasks/tools/)
 10. [helm](https://helm.sh/docs/intro/quickstart/#install-helm)
 11. [Postman CLI](https://learning.postman.com/docs/getting-started/installation/installation-and-updates/)
-12. For cloud-specific tools, follow the instructions in the respective README file based on your provider.  
-    Example for Azure: [opentofu/azure/README.md](opentofu/azure/README.md)
 
 ### CLI Versions
 
-The installer has been used and verified with the following CLI versions:
+The installer has been verified with:
 
 - **OpenTofu**: v1.11.4
 - **Terragrunt**: v0.77.5
 
-While the installer may work with other versions, these are the versions that have been tested and confirmed to work. If you encounter issues with different versions, please try using these specific versions.
+---
+
+## Installing Sunbird on AWS or GCP
+
 ### Notes
-- Existing files in the following locations will be backed up with a `.bak` extension, and the files will be overwritten:
+- Existing files in the following locations will be backed up with a `.bak` extension and overwritten:
     - `~/.config/rclone/rclone.conf`
     - `~/.kube/config`
-- In the instructions below, `demo` is used as the environment name. You can replace it with your desired environment name, such as `dev`, `stage`, etc.
+- `demo` is used as the environment name below. Replace it with your own (`dev`, `stage`, etc.).
 
-### Steps to Clone and Prepare
+### Steps
 
-1. Clone the repository:a
+1. Clone the repository:
      ```bash
-     git clone https://github.com/project-sunbird/sunbird-ed-installer.git
+     git clone https://github.com/Sunbird-Spark/sunbird-spark-installer.git
      ```
 2. Copy the template directory:
      ```bash
-     cd opentofu/<cloud-provider>   # Replace <cloud-provider> with your cloud provider (e.g., azure, aws, gcp)
+     cd opentofu/<cloud-provider>   # aws or gcp
      cp -r template demo
      cd demo
      ```
-3. Fill in the variables in `demo/global-values.yaml`.
-   take reference from  [opentofu/azure/README.md]
+3. Fill in the variables in `global-values.yaml`.
 
-4. Enabling DIAL Addon Integration
+4. To enable DIAL addon integration, set `deployed_dial_addon: true` in `global-values.yaml`.
 
-     The DIAL addon is deployed independently via the scripts in `addons/dial`. However, the core Sunbird services (LMS, Player, etc.) need to be aware of the DIAL addon to enable proper integration and routing.
-
-     - **To Enable Integration**: Set `deployed_dial_addon: true` in your `global-values.yaml` file. This tells the core installation script to include addon-specific configurations.
-     
-     - **When to set this**: Enable this flag and deploy core services, if you have deployed or intend to deploy the DIAL addon.
-
-     Example in `global-values.yaml`:
-
-     ```yaml
-     deployed_dial_addon: true
-     ```
-
-5. Enabling Asset Enrichment
-
-     If you want to enable asset enrichment, you can control it using the
-     `enable_asset_enrichment` flag.
-
-     - Default: `false` (Asset enrichment is disabled)
-
-     - To enable: set it to `true` in your `global-values.yaml` file. For example:
-
-         ```yaml
-         enable_asset_enrichment: true
-         ```
+5. To enable asset enrichment, set `enable_asset_enrichment: true` in `global-values.yaml`.
 
 6. Log in to your cloud provider:
     ```bash
-    # If  cloud provider is Azure
-    az login --tenant AZURE_TENANT_ID
-
-    # If cloud provider is AWS
+    # AWS
     aws configure
 
-    # If cloud provider is GCP
+    # GCP
     gcloud auth login
     ```
 7. Run the installation script:
