@@ -44,5 +44,4 @@ inputs = {
   gke_node_pool_instance_type        = local.gke_node_pool_instance_type
   gke_node_default_disk_size_gb      = local.gke_node_default_disk_size_gb
   env                              = local.env
-  kubernetes_version                 = local.global_vars.global.kubernetes_version
 }
