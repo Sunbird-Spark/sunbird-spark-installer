@@ -41,7 +41,7 @@ create_or_reuse_sp() {
   local name=$1
 
   local existing_id
-  existing_id=$(az ad app list --show-mine --filter "displayName eq '$name'" --query "[0].appId" -o tsv 2>/dev/null || echo "")
+  existing_id=$(az ad app list --filter "displayName eq '$name'" --query "[0].appId" -o tsv 2>/dev/null || echo "")
 
   if [ -n "$existing_id" ]; then
     echo "✓ App already exists, reusing: $name ($existing_id)" >&2
@@ -94,12 +94,23 @@ assign_role() {
   local role=$2
   local scope=$3
 
-  az role assignment create \
+  local existing
+  existing=$(az role assignment list \
     --assignee "$assignee" \
     --role "$role" \
     --scope "$scope" \
-    2>/dev/null && echo "✓ Role assigned: $role" \
-    || echo "✓ Role already assigned (skipped): $role"
+    --query "[0].id" -o tsv 2>/dev/null || echo "")
+
+  if [ -n "$existing" ]; then
+    echo "✓ Role already assigned (skipped): $role"
+    return
+  fi
+
+  az role assignment create \
+    --assignee "$assignee" \
+    --role "$role" \
+    --scope "$scope" >/dev/null
+  echo "✓ Role assigned: $role"
 }
 
 # ── Login ──────────────────────────────────────────────────

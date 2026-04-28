@@ -131,7 +131,7 @@ Edit the same variables at the top of `setup-deploy-sp.sh` and run it:
 bash $INSTALLER_PATH/private-repo-setup/scripts/setup-deploy-sp.sh
 ```
 
-Creates `<building_block>-<env>-github-deploy` — runs kubectl and helm. Prints `AZURE_DEPLOY_CLIENT_ID`.
+Creates `<building_block>-<env>-github-deploy` — runs kubectl and helm. Assigned both `Azure Kubernetes Service Cluster Admin Role` and `Azure Kubernetes Service Cluster User Role` at cluster scope. Prints `AZURE_DEPLOY_CLIENT_ID`.
 
 Both scripts are idempotent — safe to re-run if anything needs to be recreated.
 
