@@ -16,6 +16,7 @@ import json
 import tarfile
 import tempfile
 import logging
+from collections import namedtuple
 from datetime import datetime
 from decimal import Decimal
 
@@ -104,6 +105,11 @@ logging.basicConfig(
     format="%(asctime)s | %(levelname)s | %(message)s",
 )
 log = logging.getLogger(__name__)
+# Silence cassandra-driver per-connection chatter (load_balancing_policy warnings,
+# host discovery, datacenter detection). Only show ERROR.
+for noisy in ("cassandra", "cassandra.cluster", "cassandra.policies",
+              "cassandra.pool", "cassandra.connection"):
+    logging.getLogger(noisy).setLevel(logging.ERROR)
 
 
 # ============================
@@ -411,13 +417,24 @@ def _unescape_cqlsh_text(s):
     return ''.join(result)
 
 
-def parse_value(raw, cql_type):
+def _udt_literal_to_dict(raw):
+    """Convert cqlsh UDT literal `{f1: 'v1', f2: 2}` → Python dict via JSON.
+    Uses regex to quote bare keys, then json.loads. Supports nested dicts/lists."""
+    if not isinstance(raw, str) or not raw.startswith("{"):
+        return None
+    cleaned = re.sub(r"([{,]\s*)([a-zA-Z0-9_]+)\s*:", r'\1"\2":', raw)
+    cleaned = cleaned.replace("'", '"')
+    return json.loads(cleaned)
+
+
+def parse_value(raw, cql_type, udt_map=None):
     # cqlsh COPY TO emits:
     #   blob -> 0x48656c6c6f
     #   uuid -> xxxxxxxx-xxxx-...
     #   timestamp -> 2023-01-01 00:00:00.000+0000
     #   list/set -> [a, b], {a, b}
     #   map -> {'k': 'v'}
+    #   udt -> {field1: 'v1', field2: 2}
     #   null -> empty
     if raw is None or raw == "":
         return None
@@ -461,28 +478,59 @@ def parse_value(raw, cql_type):
                 return raw
     if t in ("text", "varchar", "ascii", "inet"):
         return _unescape_cqlsh_text(raw)
-    if t.startswith(("list<", "set<", "map<", "frozen<", "tuple<")):
+    # Strip frozen<...> wrapper, recurse on inner type
+    if t.startswith("frozen<"):
+        inner = t[len("frozen<"):-1].strip()
+        return parse_value(raw, inner, udt_map)
+    # UDT — driver-registered namedtuple class. Convert literal -> dict -> namedtuple.
+    if udt_map and t in udt_map:
+        try:
+            d = _udt_literal_to_dict(raw)
+            if d is None:
+                return raw
+            cls = udt_map[t]
+            # Build kwargs mapping field name -> value (None for missing)
+            kwargs = {f: d.get(f) for f in cls._fields}
+            return cls(**kwargs)
+        except Exception:
+            return raw
+    if t.startswith(("list<", "set<", "map<", "tuple<")):
         try:
             v = ast.literal_eval(raw)
             # Handle inner types (e.g. map<text, date> -> convert values to date objects)
             inner = _get_inner_types(t)
             if t.startswith("map<") and len(inner) == 2:
                 kt, vt = inner
-                return {parse_value(str(k), kt): parse_value(str(v), vt) for k, v in v.items()}
-            elif t.startswith(("list<", "set<", "frozen<list<", "frozen<set<")):
+                return {parse_value(str(k), kt, udt_map): parse_value(str(v), vt, udt_map) for k, v in v.items()}
+            elif t.startswith(("list<", "set<")):
                 it = inner[0] if inner else "text"
-                parsed = [parse_value(str(x), it) for x in v]
+                # Inner element: if dict-shaped (UDT), pass raw repr; else stringify
+                parsed = []
+                for x in v:
+                    if isinstance(x, dict):
+                        # Reconstitute UDT literal so recursion can register-bind
+                        lit = "{" + ", ".join(f"{k}: {repr(val)}" for k, val in x.items()) + "}"
+                        parsed.append(parse_value(lit, it, udt_map))
+                    else:
+                        parsed.append(parse_value(str(x), it, udt_map))
                 return set(parsed) if t.startswith("set<") else parsed
             return v
         except Exception:
+            # Fallback: try regex-based UDT literal parse for list<frozen<UDT>>-shaped raw
+            try:
+                v = _udt_literal_to_dict("[" + raw.strip().lstrip("[").rstrip("]") + "]") if raw.strip().startswith("[") else None
+                if v is not None:
+                    inner = _get_inner_types(t)
+                    it = inner[0] if inner else "text"
+                    return [parse_value(json.dumps(x) if isinstance(x, dict) else str(x), it, udt_map) for x in v]
+            except Exception:
+                pass
             return raw
-    # Unknown / UDT — try parsing as Cassandra map/UDT string then JSON.
+    # Unknown — try parsing as Cassandra UDT/map literal then JSON.
     try:
-        # Cassandra UDTs look like {f1: 'v1', f2: 2}. Convert to JSON-ish.
-        if isinstance(raw, str) and raw.startswith("{") and ":" in raw:
-            # Basic transform: {field: -> {"field":
-            cleaned = re.sub(r"([{,]\s*)([a-zA-Z0-9_]+)\s*:", r'\1"\2":', raw)
-            return json.loads(cleaned)
+        d = _udt_literal_to_dict(raw)
+        if d is not None:
+            return d
         return json.loads(raw)
     except Exception:
         return raw
@@ -541,6 +589,30 @@ def _flush_batch(session, stmts):
     session.execute(bs)
 
 
+def _register_udts(cluster, session, keyspace):
+    """Fetch UDTs in keyspace and register them as namedtuples on cluster.
+    Returns dict {udt_name (lowercased): namedtuple_class}."""
+    udt_map = {}
+    try:
+        rows = session.execute(
+            f"SELECT type_name, field_names FROM system_schema.types "
+            f"WHERE keyspace_name = '{keyspace}'"
+        )
+        for r in rows:
+            fields = list(r.field_names) if r.field_names else []
+            if not fields:
+                continue
+            cls = namedtuple(r.type_name, fields, rename=True)
+            try:
+                cluster.register_user_type(keyspace, r.type_name, cls)
+                udt_map[r.type_name.lower()] = cls
+            except Exception as e:
+                log.warning(f"    register_user_type {keyspace}.{r.type_name} failed: {str(e)[:80]}")
+    except Exception as e:
+        log.warning(f"    UDT discovery failed for {keyspace}: {str(e)[:80]}")
+    return udt_map
+
+
 def load_table(keyspace, table, csv_path):
     cols = get_table_columns(keyspace, table)
     if not cols:
@@ -549,28 +621,22 @@ def load_table(keyspace, table, csv_path):
     has_counter, pk_names, counter_names, type_by_col = classify_table(cols)
 
     cluster, session = ycql_connect(keyspace)
+    udt_map = _register_udts(cluster, session, keyspace)
     try:
         if CONFIG["truncateBeforeLoad"]:
             try:
                 session.execute(f"TRUNCATE {keyspace}.{table}")
-                log.info(f"    truncated {keyspace}.{table}")
             except Exception as e:
-                log.warning(f"    truncate {keyspace}.{table} failed (table may not exist yet): {str(e)[:80]}")
+                log.warning(f"  truncate {keyspace}.{table} failed (table may not exist yet): {str(e)[:80]}")
 
         with open(csv_path, newline="") as f:
             # cqlsh COPY TO defaults: DELIMITER=',', QUOTE='"', ESCAPE='\'
-            # Setting escapechar='\\' is critical for correctly parsing escaped quotes in JSON.
+            # escapechar='\\' is critical for correctly parsing escaped quotes in JSON.
             reader = csv.DictReader(f, quotechar='"', doublequote=True, escapechar='\\')
             fieldnames = [c.strip() for c in (reader.fieldnames or [])]
             rows = list(reader)
         if not rows:
             return 0
-
-        log.info(f"    CSV Header: {fieldnames}")
-        if rows:
-            # Log first row sample (keys and values) to check for shifts
-            sample = {str(k).strip(): str(v)[:50] for k, v in list(rows[0].items())[:5] if k is not None}
-            log.info(f"    Data Sample (Row 0): {sample}")
 
         converted = []
         for row_idx, r in enumerate(rows):
@@ -578,7 +644,7 @@ def load_table(keyspace, table, csv_path):
                 # Use stripped and lowercased keys for robust matching
                 row_data = {str(k).strip().lower(): v for k, v in r.items() if k is not None}
                 converted.append([
-                    parse_value(row_data.get(c.lower()), type_by_col.get(c.lower(), "text"))
+                    parse_value(row_data.get(c.lower()), type_by_col.get(c.lower(), "text"), udt_map)
                     for c in fieldnames
                 ])
             except Exception as e:
@@ -605,20 +671,30 @@ def load_table(keyspace, table, csv_path):
         prepared = session.prepare(query)
 
         n = 0
+        skipped = 0
         batch = []
         batch_bytes = 0
-        for row in converted:
+        for row_idx, row in enumerate(converted):
+            try:
+                bound = prepared.bind(row)
+            except Exception as e:
+                skipped += 1
+                if skipped <= 5:
+                    log.warning(f"    bind failed row {row_idx} in {keyspace}.{table}: {str(e)[:120]}")
+                continue
             row_bytes = _estimate_row_bytes(row)
             if batch and (batch_bytes + row_bytes > _BATCH_BYTES_LIMIT or len(batch) >= _BATCH_ROW_LIMIT):
                 _flush_batch(session, batch)
                 n += len(batch)
                 batch = []
                 batch_bytes = 0
-            batch.append(prepared.bind(row))
+            batch.append(bound)
             batch_bytes += row_bytes
         if batch:
             _flush_batch(session, batch)
             n += len(batch)
+        if skipped:
+            log.warning(f"    {keyspace}.{table}: skipped {skipped} unbindable rows")
         return n
     finally:
         session.shutdown()
@@ -642,10 +718,9 @@ def get_count(keyspace, table):
 # PROCESS ONE BLOB
 # ============================
 def process_blob(blob_name):
-    log.info(f"Processing {blob_name}")
     source_ks = os.path.basename(blob_name).replace(".tar.gz", "")
     target_ks = rename_keyspace(source_ks)
-    log.info(f"  keyspace: {source_ks} -> {target_ks}")
+    log.info(f"==> keyspace {source_ks} -> {target_ks}")
 
     tar_path    = download_blob(blob_name)
     extract_dir = extract_tar(tar_path)
@@ -663,27 +738,31 @@ def process_blob(blob_name):
     if schema_path:
         with open(schema_path) as f:
             schema_cql = f.read()
-        log.info(f"  applying schema.cql ({len(schema_cql)} bytes)")
         apply_schema(schema_cql, source_ks, target_ks)
     else:
         log.warning(f"  schema.cql missing in {blob_name} — assuming target schema pre-exists")
 
     total = 0
+    failed = 0
+    mismatched = 0
     for path in csv_files:
         table = os.path.splitext(os.path.basename(path))[0]
         try:
             loaded = load_table(target_ks, table, path)
             after  = get_count(target_ks, table)
-            if after is not None:
-                tag = "ok" if after == loaded else f"mismatch (loaded={loaded})"
-                log.info(f"  {target_ks}.{table}: loaded {loaded} rows, after={after} [{tag}]")
-            else:
-                log.info(f"  {target_ks}.{table}: loaded {loaded} rows")
+            if after is not None and after != loaded:
+                mismatched += 1
+                log.warning(f"  {table}: loaded {loaded} after {after} [MISMATCH]")
             total += loaded
         except Exception as e:
-            import traceback
-            log.error(f"  failed {target_ks}.{table}: {str(e)[:120]}")
-            log.error(traceback.format_exc())
+            failed += 1
+            log.error(f"  {table}: failed {str(e)[:120]}")
+    suffix = ""
+    if failed:
+        suffix += f" failed={failed}"
+    if mismatched:
+        suffix += f" mismatched={mismatched}"
+    log.info(f"<== {target_ks} done: tables={len(csv_files)} rows={total}{suffix}")
     return total
 
 

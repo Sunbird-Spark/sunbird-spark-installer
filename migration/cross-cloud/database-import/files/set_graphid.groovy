@@ -3,16 +3,11 @@ graph = JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph-cql.prop
 g = graph.traversal()
 
 println("Setting graphId for vertices without graphId...")
-
-// Start transaction with logIdentifier (Critical for Sunbird CDC)
-tx = graph.buildTransaction().logIdentifier("learning_graph_events").start()
-txG = tx.traversal()
-
-count = txG.V().has('IL_UNIQUE_ID').hasNot('graphId').count().next()
+count = g.V().has('IL_UNIQUE_ID').hasNot('graphId').count().next()
 println("Vertices needing graphId: " + count)
 
-txG.V().has('IL_UNIQUE_ID').hasNot('graphId').property('graphId', 'domain').iterate()
-tx.commit()
+g.V().has('IL_UNIQUE_ID').hasNot('graphId').property('graphId', 'domain').iterate()
+graph.tx().commit()
 
 updated = g.V().has('graphId', 'domain').count().next()
 println("Vertices with graphId=domain: " + updated)

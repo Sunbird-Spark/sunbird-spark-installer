@@ -155,19 +155,60 @@ def step_5_export_users():
 
 
 def step_6_yb_backfill():
-    """Generate and execute backfill statements on the YugaByte pod."""
+    """Generate backfill.cql on pod, then run ycqlsh -f detached + poll for completion.
+    Long ycqlsh -f reset kubectl exec stream → use nohup + log polling instead."""
+    import time
     print("\n[Step 6/6] Backfilling createdat in YugaByte from createddate...")
-    script = (
+
+    # 1) Generate CQL file on pod (fast — single short exec)
+    print("  Generating backfill.cql on pod...")
+    gen_script = (
         f"awk -F',' '{{print \"UPDATE {KEYSPACE}.user SET createdat=\\x27\" "
         f"substr($2,1,10) \"\\x27 WHERE id=\\x27\" $1 \"\\x27;\"}}' "
-        f"/tmp/users.csv > /tmp/backfill.cql && ycqlsh -f /tmp/backfill.cql"
+        f"/tmp/users.csv > /tmp/backfill.cql && wc -l /tmp/backfill.cql"
     )
-    result = yb_exec(["bash", "-c", script])
+    result = yb_exec(["bash", "-c", gen_script])
     if result.returncode != 0:
-        print(f"  FAILED: {result.stderr.strip()}")
+        print(f"  FAILED to generate CQL: {result.stderr.strip()}")
+        sys.exit(1)
+    print(f"  {result.stdout.strip()}")
+
+    # 2) Launch ycqlsh -f detached on pod with log + done sentinel
+    print("  Launching ycqlsh -f in background on pod...")
+    launch_script = (
+        "rm -f /tmp/backfill.log /tmp/backfill.done && "
+        "nohup bash -c 'ycqlsh -f /tmp/backfill.cql > /tmp/backfill.log 2>&1; "
+        "echo $? > /tmp/backfill.done' >/dev/null 2>&1 & disown; echo started"
+    )
+    result = yb_exec(["bash", "-c", launch_script])
+    if result.returncode != 0:
+        print(f"  FAILED to launch: {result.stderr.strip()}")
         sys.exit(1)
 
-    # Verify
+    # 3) Poll for /tmp/backfill.done
+    print("  Polling for completion (max 30 min)...")
+    for i in range(180):  # 180 * 10s = 30 min
+        time.sleep(10)
+        check = yb_exec(["bash", "-c", "test -f /tmp/backfill.done && cat /tmp/backfill.done || echo running"])
+        out = check.stdout.strip()
+        if out == "running":
+            if i % 6 == 0:
+                # Every minute, print row count for progress
+                tail = yb_exec(["bash", "-c", "wc -l /tmp/backfill.log 2>/dev/null || echo 0"])
+                print(f"    [{(i+1)*10}s] still running, log lines: {tail.stdout.strip()}")
+            continue
+        rc = out
+        print(f"  ycqlsh exit code: {rc}")
+        if rc != "0":
+            tail = yb_exec(["bash", "-c", "tail -20 /tmp/backfill.log"])
+            print(f"  log tail:\n{tail.stdout}")
+            sys.exit(1)
+        break
+    else:
+        print("  TIMEOUT: backfill still running after 30min. Check pod /tmp/backfill.log manually.")
+        sys.exit(1)
+
+    # 4) Verify
     print("  Verifying...")
     result = yb_exec([
         "ycqlsh", "-e",

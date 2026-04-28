@@ -116,6 +116,8 @@ if [ -n "$POD_NAME" ]; then
     kubectl cp /scripts/set_graphid.groovy "$NS/$POD_NAME:/tmp/set_graphid.groovy" -c "$CONTAINER"
 
     GREMLIN_BIN="/opt/bitnami/janusgraph/bin/gremlin.sh"
+    # Match db-migration: default replaceExisting=false. Existing vertices skipped (no dupes),
+    # new vertices get graphId via set_graphid. Source data static for migration → no refresh needed.
     kubectl exec -n "$NS" "$POD_NAME" -c "$CONTAINER" -- $GREMLIN_BIN -e /tmp/import_data.groovy
     kubectl exec -n "$NS" "$POD_NAME" -c "$CONTAINER" -- $GREMLIN_BIN -e /tmp/set_graphid.groovy
     echo "Groovy bulk import completed."

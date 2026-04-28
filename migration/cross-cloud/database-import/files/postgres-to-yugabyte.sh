@@ -70,21 +70,20 @@ echo "==> Restoring database: {{ .name }}"
 download_from_storage "{{ $.Values.target.postgresql_path }}/{{ .name }}.sql.gz" "/tmp/{{ .name }}.sql.gz"
 gunzip -f /tmp/{{ .name }}.sql.gz
 
-# 🔥 FIX: create DB if not exists
-DB_EXISTS=$(PGPASSWORD="$POSTGRES_PASSWORD" psql \
+# Idempotent: drop + recreate DB so reruns produce a clean restore (no PK violations, no dupes)
+echo "Dropping database {{ .name }} if it exists..."
+PGPASSWORD="$POSTGRES_PASSWORD" psql \
     -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" \
     -U "$POSTGRES_USER" \
     -d postgres \
-    -tAc "SELECT 1 FROM pg_database WHERE datname='{{ .name }}'")
+    -c "DROP DATABASE IF EXISTS {{ .name }};"
 
-if [ "$DB_EXISTS" != "1" ]; then
-    echo "Creating database {{ .name }}..."
-    PGPASSWORD="$POSTGRES_PASSWORD" psql \
-        -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" \
-        -U "$POSTGRES_USER" \
-        -d postgres \
-        -c "CREATE DATABASE {{ .name }};"
-fi
+echo "Creating database {{ .name }}..."
+PGPASSWORD="$POSTGRES_PASSWORD" psql \
+    -h "$POSTGRES_HOST" -p "$POSTGRES_PORT" \
+    -U "$POSTGRES_USER" \
+    -d postgres \
+    -c "CREATE DATABASE {{ .name }};"
 
 # Apply dump
 PGPASSWORD="$POSTGRES_PASSWORD" psql \

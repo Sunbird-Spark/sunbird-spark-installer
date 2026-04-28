@@ -65,10 +65,9 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
         def label = labelRaw.trim()
         def propsRaw = parts[2..-1].join(',')
 
-        // Improved JSON cleanup for Neo4j's unquoted/partially quoted properties
+        // Quote unquoted keys + normalize Neo4j booleans (matches db-migration logic)
         def propsFixed = propsRaw
-            .replaceAll(/([{,]\s*)([a-zA-Z0-9_]+):/, '$1"$2":') // Quote keys
-            .replaceAll(/:\s*([a-zA-Z0-9_]+)([},])/, ':"$1"$2') // Quote simple string values
+            .replaceAll(/([{,]\s*)(\w+):/, '$1"$2":')
             .replaceAll(/\bTRUE\b/, 'true')
             .replaceAll(/\bFALSE\b/, 'false')
 

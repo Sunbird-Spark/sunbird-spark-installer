@@ -14,10 +14,9 @@ target:
   cloud: "azure"                     # azure | gcp | aws | onprem
   namespace: "sunbird"               # Namespace of target DB pods (kubectl-exec target)
   useExistingSecrets: true           # true = use existing cluster secrets; false = create secret from values
-  container: "databasebackup"
-
+  container: ""           # Container name for kubectl exec (if multiple containers in pod)s
   # Azure Blob
-  storageAccount: "edsandboxda72f12a"
+  storageAccount: ""
   accessKey: ""
 
   # GCP
@@ -81,7 +80,7 @@ databases:
       - "apzvp_review_comment"
 
   janusgraph:
-    enabled: true
+    enabled: false
     host: "janusgraph.sunbird.svc.cluster.local"
     port: 8182
     username: "janusgraph"
@@ -107,7 +106,7 @@ jobs:
   image: "ubuntu:22.04"
   pullPolicy: "IfNotPresent"
   ttlSecondsAfterFinished: 3600
-  backoffLimit: 10
+  backoffLimit: 50
   resources:
     requests:
       memory: "1Gi"
@@ -129,8 +128,8 @@ validation:
 postMigration:
   keycloakCredentials:
     enabled: false
-    adminPassword: ""                # Admin password for Keycloak master realm
-    secretSuffix: ""                 # Suffix appended to rotated client secrets
+    adminPassword: "S5UHeknOx8EsrStm"                # Admin password for Keycloak master realm
+    secretSuffix: "7o0UDhblKMxogm7f"                 # Suffix appended to rotated client secrets
 
   createdatBackfill:
     enabled: false
@@ -138,7 +137,7 @@ postMigration:
     keyspace: "sunbird"
 
   hierarchyFix:
-    enabled: true
+    enabled: false
     ybPod: "yb-tserver-0"
     knowlgServiceHost: "knowlg-service.sunbird.svc.cluster.local"
     knowlgServicePort: 9000
