@@ -18,13 +18,14 @@ set -euo pipefail
 ###############################################################
 
 # ── CONFIGURE THESE BEFORE RUNNING ──────────────────────────────────────────
-TENANT_ID=""           # Your Azure AD Tenant ID (Azure Portal → Azure Active Directory → Overview)
-SUBSCRIPTION_ID=""     # Your Azure Subscription ID (Azure Portal → Subscriptions)
-BUILDING_BLOCK=""      # Short resource prefix — must match global.building_block in global-values.yaml (e.g. "myorg")
-ENVIRONMENT=""         # Environment name — must match configs/ folder name and GitHub Actions environment name (e.g. "dev")
-RESOURCE_GROUP=""      # Azure resource group where all infra will be created (e.g. "myorg-dev")
-GITHUB_REPO=""         # Your private devops repo as "org/repo" (e.g. "my-org/my-spark-devops")
-GITHUB_ENVIRONMENT=""  # GitHub Actions environment name — must match ENVIRONMENT above
+TENANT_ID="4836227a-1ace-434f-b54c-8a7a14a0b449"           # Your Azure AD Tenant ID (Azure Portal → Azure Active Directory → Overview)
+SUBSCRIPTION_ID="da72f12a-e323-42b4-92d8-b3ec660b6208"     # Your Azure Subscription ID (Azure Portal → Subscriptions)
+BUILDING_BLOCK="ed"      # Short resource prefix — must match global.building_block in global-values.yaml (e.g. "myorg")
+ENVIRONMENT="testing"         # Environment name — must match configs/ folder name and GitHub Actions environment name (e.g. "dev")
+RESOURCE_GROUP="ed-testing"      # Azure resource group where all infra will be created (e.g. "myorg-dev")
+LOCATION="centralindia"          # Azure region for the resource group (e.g. "eastus", "centralindia")
+GITHUB_REPO="Sunbird-Spark/spark-devops-test"         # Your private devops repo as "org/repo" (e.g. "my-org/my-spark-devops")
+GITHUB_ENVIRONMENT="testing"  # GitHub Actions environment name — must match ENVIRONMENT above
 # ─────────────────────────────────────────────────────────────────────────────
 
 CLUSTER_NAME="${BUILDING_BLOCK}-${ENVIRONMENT}"
