@@ -99,6 +99,7 @@ cat > "$ROLE_JSON_FILE" <<EOF
   "IsCustom": true,
   "Description": "Least-privilege role for Sunbird-Spark installer VM. Lets OpenTofu manage AKS, networking, storage, managed identity, and RBAC inside the target resource group.",
   "Actions": [
+    "Microsoft.Resources/subscriptions/read",
     "Microsoft.Resources/subscriptions/resourceGroups/read",
     "Microsoft.Resources/deployments/*",
 
@@ -132,7 +133,9 @@ cat > "$ROLE_JSON_FILE" <<EOF
   "DataActions": [
     "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
     "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
-    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete"
+    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
+    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action",
+    "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action"
   ],
   "NotActions": [],
   "NotDataActions": [],
