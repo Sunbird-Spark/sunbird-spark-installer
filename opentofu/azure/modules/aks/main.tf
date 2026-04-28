@@ -1,4 +1,4 @@
- terraform {
+terraform {
   required_providers {
     azurerm = {
       version = "~> 4.0"
@@ -17,6 +17,25 @@ provider "azurerm" {
         BuildingBlock = "${var.building_block}"
       }
       environment_name = "${var.building_block}-${var.environment}"
+  }
+
+  resource "azurerm_user_assigned_identity" "aks" {
+    name                = "${local.environment_name}-aks-identity"
+    location            = var.location
+    resource_group_name = var.resource_group_name
+
+    tags = merge(
+        local.common_tags,
+        var.additional_tags
+        )
+  }
+
+  # Grant Network Contributor on subnet to AKS UAMI.
+  # Required for AKS to attach/manage route table on BYO subnet.
+  resource "azurerm_role_assignment" "aks_network_contributor" {
+    principal_id         = azurerm_user_assigned_identity.aks.principal_id
+    scope                = var.vnet_subnet_id
+    role_definition_name = "Network Contributor"
   }
 
   resource "azurerm_kubernetes_cluster" "aks" {
@@ -39,32 +58,23 @@ provider "azurerm" {
     }
 
     network_profile {
-      network_plugin      = var.network_plugin
-      network_plugin_mode = "overlay"
-      service_cidr        = var.service_cidr
-      dns_service_ip      = var.dns_service_ip
+      network_plugin = var.network_plugin
+      service_cidr   = var.service_cidr
+      dns_service_ip = var.dns_service_ip
     }
 
-    # Use System-Assigned Managed Identity
-    # No Azure AD permissions needed - only Contributor role on Resource Group
-    # Identity auto-created with cluster, auto-deleted when cluster deleted
+    # User-Assigned MSI required when AKS attaches custom route table on BYO subnet.
     identity {
-      type = "SystemAssigned"
+      type         = "UserAssigned"
+      identity_ids = [azurerm_user_assigned_identity.aks.id]
     }
 
     tags = merge(
         local.common_tags,
         var.additional_tags
         )
-  }
 
-  # Grant Network Contributor role to AKS System-Assigned Identity
-  resource "azurerm_role_assignment" "aks_network_contributor" {
-    principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
-    scope                = var.vnet_subnet_id
-    role_definition_name = "Network Contributor"
-    
-    depends_on = [azurerm_kubernetes_cluster.aks]
+    depends_on = [azurerm_role_assignment.aks_network_contributor]
   }
 
   # resource "azurerm_kubernetes_cluster_node_pool" "small_nodepool" {
