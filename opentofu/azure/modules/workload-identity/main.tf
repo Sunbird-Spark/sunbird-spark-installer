@@ -30,6 +30,9 @@ locals {
   storage_account_name = reverse(split("/", var.storage_account_id))[0]
 }
 
+# uncomment the below block to create namespaces in the cluster. Make sure to add the namespaces in the variable k8s_namespaces in variables.tf file.
+# Should be uncommented only for the first time when the namespaces are not created. Once the namespaces are created, this block should be commented again to avoid terraform trying to recreate the namespaces and failing with "AlreadyExists" error.
+
 # resource "kubernetes_namespace" "namespaces" {
 #   for_each = toset(var.k8s_namespaces)
 #   metadata {
