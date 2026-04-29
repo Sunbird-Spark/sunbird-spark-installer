@@ -8,7 +8,7 @@ Usage (called via install.sh):
   ./install.sh run_form_read
 
 Usage (direct):
-  python3 migration/setup_forms.py --env env.json --collection sunbird-spark-collection-v1.json
+  python3 migration/migrate_forms.py --env env.json --collection sunbird-spark-collection-v1.json
 """
 import json
 import re
