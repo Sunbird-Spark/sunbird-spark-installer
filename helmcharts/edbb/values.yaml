@@ -68,7 +68,7 @@ kafka: &kafka
     existingSecret: ""
 
 knowledgemw:
-  opa_enabled: false
+  opa_enabled: true
 
 migration:
   yugabyte:
