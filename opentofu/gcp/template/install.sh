@@ -34,9 +34,12 @@ function backup_configs() {
 
 function create_tf_resources() {
     source tf.sh
-    echo -e "\nCreating resources on GCP"
-    terragrunt init -upgrade
-    terragrunt run-all apply --terragrunt-non-interactive 
+    echo -e "\nCreating resources on azure cloud"
+    export TG_TF_PATH=tofu
+    tofu init -reconfigure
+    terragrunt init --all --reconfigure --non-interactive
+    # terragrunt plan --all --non-interactive
+    terragrunt run --all apply --non-interactive
     chmod 600 ~/.kube/config
 }
 
