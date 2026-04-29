@@ -67,9 +67,6 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
-knowledgemw:
-  opa_enabled: true
-
 migration:
   yugabyte:
     waitTime: 120
@@ -163,6 +160,7 @@ kong-consumers:
 
 knowledgemw:
   enabled: true
+  opa_enabled: true
 
 global:
   kafka: *kafka
