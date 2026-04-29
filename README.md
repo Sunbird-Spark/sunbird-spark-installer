@@ -122,7 +122,12 @@ The installer has been verified with:
 
 4. To enable DIAL addon integration, set `deployed_dial_addon: true` in `global-values.yaml`.
 
-5. To enable asset enrichment, set `enable_asset_enrichment: true` in `global-values.yaml`.
+5. To enable asset enrichment, deploy the addon:
+    ```bash
+    export ENV_NAME=<env-name>
+    cd addons/asset-enrichment/script
+    ./addon.sh install azure   # or gcp
+    ```
 
 6. Log in to your cloud provider:
     ```bash
