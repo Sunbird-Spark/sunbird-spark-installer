@@ -18,24 +18,30 @@ The Asset Enrichment addon is an Apache Flink job that processes video and image
 - [ ] OpenTofu has been executed successfully
 - [ ] Kafka topic `<env>.knowlg.learning.job.request` exists (created by `knowledgebb` provisioning)
 
-## Quick Installation
+## Installation
+
+**Step 1 — Deploy the Flink job**
 
 ```bash
-cd addons/asset-enrichment
-export ENV_NAME=demo # Replace with your environment name
-./script/addon.sh install
+export ENV_NAME=demo  # Replace with your environment name
+cd addons/asset-enrichment/script
+./addon.sh install azure   # or gcp
 ```
 
-### Installation Options
+**Step 2 — Enable in knowlg-service and redeploy knowledgebb**
 
+In `opentofu/<provider>/<env>/global-values.yaml`, set:
+```yaml
+enable_asset_enrichment: "true"
+```
+
+Then redeploy knowledgebb from your environment folder:
 ```bash
-# Install for a specific cloud provider (defaults to azure)
-./script/addon.sh install azure
-./script/addon.sh install gcp
-
-# Uninstall
-./script/addon.sh uninstall azure
+cd opentofu/azure/<env>
+./install.sh install_component knowledgebb
 ```
+
+This updates the `knowlg-service` config so it starts publishing asset events to the Kafka topic that the Flink job consumes.
 
 ## Verify Installation
 

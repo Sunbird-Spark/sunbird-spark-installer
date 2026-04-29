@@ -118,7 +118,7 @@ Built and pushed via `.github/workflows/build-push-images.yml`; referenced in `h
 - Domain name and SSL certificates
 - Google OAuth, ReCAPTCHA keys
 - Email SMTP settings
-- Feature flags: `deployed_dial_addon`
+- Feature flags: `deployed_dial_addon`, `enable_asset_enrichment`
 
 The template file contains placeholder values (`REPLACE_WITH_*`). Never commit actual credentials.
 
