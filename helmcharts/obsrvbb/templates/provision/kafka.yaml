@@ -1,4 +1,3 @@
-{{- if not .Values.global.migration_enabled }}
 kind: Job
 apiVersion: batch/v1
 metadata:
@@ -97,4 +96,3 @@ spec:
               done
 
               echo "Provisioning succeeded"
-{{- end }}
