@@ -18,11 +18,6 @@ variable "subscription_id" {
   description = "Azure Subscription ID"
 }
 
-variable "unique_uuid" {
-  type        = string
-  description = "Unique UUID for container naming"
-}
-
 variable "building_block" {
   type        = string
   description = "Building block name (e.g., ed)"
