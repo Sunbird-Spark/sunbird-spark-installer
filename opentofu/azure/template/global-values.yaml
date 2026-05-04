@@ -58,7 +58,7 @@ global:
   keycloak:
    keycloak_user: admin
    keycloak_password: *keycloak-password  
-  deployed_dial_addon: *deployed_dial_addon   
+  deployed_dial_addon: *deployed_dial_addon
   enable_asset_enrichment: *enable_asset_enrichment
   # The merge domain is optional and is required  `only if user merge workflow is required.
   # For most audience, this workflow is not required. If you need this workflow, then
