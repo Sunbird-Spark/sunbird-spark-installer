@@ -82,8 +82,9 @@ variable "description" {
 }
 
 variable "kubernetes_version" {
-  description = "GKE Kubernetes version to pin. Find available versions with: gcloud container get-server-config --region <region>"
+  description = "The Kubernetes version of the masters. If set to 'latest' it will pull latest available version in the selected region."
   type        = string
+  default     = "latest"
 }
 
 variable "gke_node_pool_instance_type" {

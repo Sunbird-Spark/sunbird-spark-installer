@@ -29,5 +29,4 @@ inputs = {
   vnet_subnet_id             = dependency.network.outputs.aks_subnet_id
   subscription_id            = local.subscription_id
   location                   = local.location
-  aks_version                = try(local.global_vars.global.aks_version, null)
 }

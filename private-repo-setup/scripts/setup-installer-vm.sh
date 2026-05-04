@@ -99,6 +99,7 @@ cat > "$ROLE_JSON_FILE" <<EOF
   "IsCustom": true,
   "Description": "Least-privilege role for Sunbird-Spark installer VM. Lets OpenTofu manage AKS, networking, storage, managed identity, and RBAC inside the target resource group.",
   "Actions": [
+    "Microsoft.Resources/subscriptions/read",
     "Microsoft.Resources/subscriptions/resourceGroups/read",
     "Microsoft.Resources/deployments/*",
 

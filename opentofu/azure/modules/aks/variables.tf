@@ -3,12 +3,6 @@ variable "environment" {
   description = "environment name. All resources will be prefixed with this value."
 }
 
-variable "aks_version" {
-  type        = string
-  default     = null
-  description = "AKS Kubernetes version to pin. Find available versions with: az aks get-versions --location <region> --output table"
-}
-
 variable "building_block" {
   type        = string
   description = "Building block name. All resources will be prefixed with this value."

@@ -99,7 +99,7 @@ Each Flink job runs with a **JobManager** pod and a **TaskManager** pod (2 pods 
 |-----|---------|-------------|
 | `transaction-event-processor` | Yes | Processes learning graph events, generates audit telemetry and composite search index |
 | `knowlg-publish` | Yes | Handles content/collection publish pipeline |
-| `asset-enrichment` | No (disabled by default) | Video/image enrichment; enable via `enable_asset_enrichment: true` |
+| `asset-enrichment` | No (addon) | Video/image enrichment; deploy via `addons/asset-enrichment/script/addon.sh install` |
 
 ### LearnBB Flink Jobs
 
