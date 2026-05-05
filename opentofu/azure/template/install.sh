@@ -22,8 +22,8 @@ function deploy_tf_module() {
     echo -e "\nDeploying module: $module"
     cd $module
     terragrunt init --reconfigure
-    terragrunt plan --terragrunt-ignore-dependency-errors
-    # terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    # terragrunt plan --terragrunt-ignore-dependency-errors
+    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
     cd ..
 }
 
