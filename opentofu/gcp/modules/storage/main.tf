@@ -41,7 +41,7 @@ resource "google_storage_bucket" "storage_container_public" {
 
 resource "google_storage_bucket_iam_member" "read_write_public" {
   bucket = google_storage_bucket.storage_container_public.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectViewer"
   member = "allUsers"
 }
 
@@ -81,7 +81,7 @@ resource "google_storage_bucket" "dial_state_container_public" {
 
 resource "google_storage_bucket_iam_member" "full_access_dial" {
   bucket = google_storage_bucket.dial_state_container_public.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectViewer"
   member = "allUsers"
 }
 

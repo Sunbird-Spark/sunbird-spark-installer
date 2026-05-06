@@ -1,7 +1,7 @@
 resource "local_sensitive_file" "rclone_config" {
-content  = templatefile("${path.module}/config.tfpl", {
-    storage_account_key = var.storage_account_primary_access_key
-    sunbird_public_artifacts_account = var.sunbird_public_artifacts_account
+  content = templatefile("${path.module}/config.tfpl", {
+    project_number                           = var.project_number
+    sunbird_public_artifacts_account         = var.sunbird_public_artifacts_account
     sunbird_public_artifacts_account_sas_url = var.sunbird_public_artifacts_account_sas_url
   })
   filename = pathexpand("~/.config/rclone/rclone.conf")
