@@ -39,7 +39,7 @@ spec:
         app.kubernetes.io/managed-by: {{ .Release.Service }}
         app.kubernetes.io/version: {{ .Chart.AppVersion }}
         helm.sh/chart: {{ include "velero.chart" . }}
-        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.serviceAccount.name }}
         azure.workload.identity/use: "true"
         {{- end }}
         {{- if .Values.podLabels }}
@@ -67,8 +67,8 @@ spec:
       {{- end }}
     {{- end }}
       restartPolicy: Always
-      {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
-      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- if .Values.global.serviceAccount.name }}
+      serviceAccountName: {{ .Values.global.serviceAccount.name }}
       {{- else }}
       serviceAccountName: {{ include "velero.serverServiceAccount" . }}
       {{- end }}

@@ -1,6 +1,10 @@
 [ownaccount]
-type = gcs
-key = ${storage_account_key}
+type = google cloud storage
+project_number = ${project_number}
+env_auth = true
+# Uses Application Default Credentials.
+# Operator: run `gcloud auth application-default login` before tofu apply.
+# CI: provided by google-github-actions/auth via Workload Identity Federation.
 
 [sunbird]
 type = azureblob

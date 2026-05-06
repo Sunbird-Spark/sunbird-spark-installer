@@ -31,7 +31,7 @@ spec:
       labels:
         app: secor
         release: {{ $jobName }}
-        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.serviceAccount.name }}
         azure.workload.identity/use: "true"
         {{- end }}
     spec:
@@ -39,8 +39,8 @@ spec:
       nodeSelector:
         {{- toYaml .Values.nodeSelector | nindent 8 }}
       {{- end }}
-      {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
-      serviceAccountName: {{ .Values.global.workload_identity_service_account_name }}
+      {{- if .Values.global.serviceAccount.name }}
+      serviceAccountName: {{ .Values.global.serviceAccount.name }}
       {{- else }}
       serviceAccountName: {{ include "base.serviceaccountname" . }}
       {{- end }}
