@@ -3,10 +3,10 @@
 
 global:
   # Service endpoints
-  elasticsearch:
-    host: "elasticsearch"
+  opensearch:
+    host: "opensearch"
     port: 9200
-  
+
   redis:
     host: "redis-master"
     port: 6379
