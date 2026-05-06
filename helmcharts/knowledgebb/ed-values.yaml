@@ -1,5 +1,3 @@
-elasticsearch:
-  enabled: false
 kafka:
   enabled: false
 opensearch:
