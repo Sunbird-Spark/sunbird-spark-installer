@@ -156,7 +156,7 @@ Permanent dual-mode (not migration). Wired in `_common/*.hcl` via `skip_outputs 
 - `cloud_storage_private_key_id: ${cloud_storage_private_key_id}`
 
 **Add:**
-- `cloud_storage_auth_type: WORKLOAD_IDENTITY`
+- (removed `cloud_storage_auth_type` — apps branch on `cloud_storage_provider` instead)
 - `service_account_email: ${service_account_email}`
 - `workload_identity_service_account_name: ${k8s_service_account_name}`
 

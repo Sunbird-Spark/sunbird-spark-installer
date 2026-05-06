@@ -1,5 +1,4 @@
 global:
-  cloud_storage_auth_type: WORKLOAD_IDENTITY
   cloud_storage_access_key: ${service_account_email}  # SA email (non-secret) — kept for helm compat
   cloud_storage_secret_key: ""                        # blank — auth via Workload Identity (ADC)
   workload_identity_service_account_name: ${k8s_service_account_name}
