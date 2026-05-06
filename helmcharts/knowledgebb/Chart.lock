@@ -5,9 +5,6 @@ dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 17.8.3
-- name: elasticsearch
-  repository: https://charts.bitnami.com/bitnami
-  version: 19.5.14
 - name: kafka
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 32.2.15

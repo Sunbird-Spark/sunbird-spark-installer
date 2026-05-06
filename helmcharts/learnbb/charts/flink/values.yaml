@@ -365,7 +365,7 @@ base_config: |
         isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
     }
     es {
-        basePath = "{{.Values.global.elasticsearch.host}}:{{.Values.global.elasticsearch.port}}"
+        basePath = "{{.Values.global.opensearch.host}}:{{.Values.global.opensearch.port}}"
     }
     schema {
       basePath = "{{ include "common.tplvalues.render" (dict "value" .Values.kp_schema_base_path "context" $) }}"
