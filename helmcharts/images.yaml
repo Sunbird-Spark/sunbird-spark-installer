@@ -28,11 +28,6 @@ images:
     repository: "redis"
     tag: "7.0.9-debian-11-r1"
 
-  elasticsearch: &elasticsearch
-    registry: "sunbirded.azurecr.io"
-    repository: "elasticsearch"
-    tag: "7.10.2"
-
   opensearch: &opensearch
     registry: "docker.io"
     repository: "opensearchproject/opensearch"
@@ -183,11 +178,6 @@ internal: &internal
 
   redis:
     image: *redis
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  elasticsearch:
-    image: *elasticsearch
     imagePullSecrets:
       - name: "registry-secret-name"
 
