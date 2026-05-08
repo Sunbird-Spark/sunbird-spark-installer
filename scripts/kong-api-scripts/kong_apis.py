@@ -6,13 +6,48 @@ import copy
 
 from common import get_apis, json_request, get_api_plugins, get_routes
 
-def _sanitize_plugin(plugin):
-    """Strict JWT enforcement (Kong 0.14.1 parity, no anonymous fallback)."""
+def _inject_portal_anonymous_to_acl(plugin):
+    """Append 'portal_anonymous' to ACL plugin allow list (input-side).
+    Used for APIs that opt in via api-level `anonymous: true` flag.
+    No-op for non-ACL plugins.
+    """
+    try:
+        if plugin.get('name') != 'acl':
+            return plugin
+        cfg = plugin.get('config', {}) or {}
+        # Support both nested config.allow and dotted-key form from YAML
+        allow = cfg.get('allow')
+        if allow is None and 'config.allow' in plugin:
+            allow = plugin.get('config.allow')
+            if isinstance(allow, list) and 'portal_anonymous' not in allow:
+                allow.append('portal_anonymous')
+                plugin['config.allow'] = allow
+                return plugin
+        if not isinstance(allow, list):
+            allow = []
+        if 'portal_anonymous' not in allow:
+            allow.append('portal_anonymous')
+        cfg['allow'] = allow
+        plugin['config'] = cfg
+    except Exception:
+        pass
+    return plugin
+
+
+def _sanitize_plugin(plugin, anonymous_allowed=False):
+    """JWT enforcement.
+    Default strict (no anonymous fallback). When anonymous_allowed=True,
+    set anonymous='portal_anonymous' to permit unauthenticated access on
+    public endpoints (e.g. compositeSearch, content/v3/read).
+    """
     try:
         if plugin.get('name') != 'jwt':
             return plugin
         plugin_config = plugin.get('config', {}) or {}
-        plugin_config.pop('anonymous', None)
+        if anonymous_allowed:
+            plugin_config['anonymous'] = 'portal_anonymous'
+        else:
+            plugin_config.pop('anonymous', None)
         plugin_config.pop('claims_to_verify', None)
         plugin['config'] = plugin_config
     except Exception:
@@ -292,9 +327,13 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
     """
     service_name = input_api_details["name"]
     input_plugins = input_api_details.get("plugins", [])
-    
+    anonymous_allowed = bool(input_api_details.get("anonymous", False))
+
     # Filter out None entries (shouldn't happen but safety check)
     input_plugins = [p for p in input_plugins if p is not None]
+
+    if anonymous_allowed:
+        input_plugins = [_inject_portal_anonymous_to_acl(copy.deepcopy(p)) for p in input_plugins]
     
     plugins_url = "{}/services/{}/plugins".format(kong_admin_api_url, service_name)
     
@@ -345,7 +384,7 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
         print("Adding plugin {} for service {}".format(input_plugin["name"], service_name));
         input_plugin = _convert_plugin_for_kong_3(input_plugin)
         try:
-            json_request("POST", plugins_url, _sanitize_plugin(input_plugin))
+            json_request("POST", plugins_url, _sanitize_plugin(input_plugin, anonymous_allowed))
             stats["plugins"]["created"] += 1
         except Exception as e:
             print("ERROR: Failed to create plugin {} for service {}".format(input_plugin["name"], service_name))
@@ -355,7 +394,7 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
         # Deep copy to ensure no shared state leaks between plugins
         # during transformation in _convert_plugin_for_kong_3
         converted_plugin = _convert_plugin_for_kong_3(copy.deepcopy(input_plugin))
-        sanitized_plugin = _sanitize_plugin(converted_plugin)
+        sanitized_plugin = _sanitize_plugin(converted_plugin, anonymous_allowed)
         
         saved_plugin = [p for p in saved_plugins if p["name"] == input_plugin["name"]][0]
         
@@ -530,8 +569,6 @@ if  __name__ == "__main__":
         input_apis = json.load(apis_file)
         try:
             save_apis(args.kong_admin_api_url, input_apis, managed_by=args.managed_by)
-            # Post-migration fix: strip portal_anonymous fallback so JWT enforced strictly
-            strip_portal_anonymous_from_acl_plugins(args.kong_admin_api_url)
         except urllib.error.HTTPError as e:
             error_message = e.read().decode('utf-8')
             print(error_message)
