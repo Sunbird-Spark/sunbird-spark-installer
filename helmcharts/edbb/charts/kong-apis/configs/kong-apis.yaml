@@ -207,7 +207,6 @@ kong_apis:
     config.allow:
     - contentAdmin
     - contentTempAccess
-    - portal_anonymous
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -1425,7 +1424,6 @@ kong_apis:
   - name: acl
     config.allow:
     - anonymousCourseAccess
-    - portal_loggedin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -5586,7 +5584,6 @@ kong_apis:
   - name: acl
     config.allow:
     - userAccess
-    - portal_loggedin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
