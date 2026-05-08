@@ -35,19 +35,16 @@ def _inject_portal_anonymous_to_acl(plugin):
 
 
 def _sanitize_plugin(plugin, anonymous_allowed=False):
-    """JWT enforcement.
-    Default strict (no anonymous fallback). When anonymous_allowed=True,
-    set anonymous='portal_anonymous' to permit unauthenticated access on
-    public endpoints (e.g. compositeSearch, content/v3/read).
+    """JWT enforcement is always strict — every request must present a valid token.
+    The `anonymous_allowed` flag only opens the ACL allow list (handled in
+    `_inject_portal_anonymous_to_acl`) so anonymous-issued tokens (iss=portal_anonymous)
+    pass the group check. Kong still validates the token signature and `iss`.
     """
     try:
         if plugin.get('name') != 'jwt':
             return plugin
         plugin_config = plugin.get('config', {}) or {}
-        if anonymous_allowed:
-            plugin_config['anonymous'] = 'portal_anonymous'
-        else:
-            plugin_config.pop('anonymous', None)
+        plugin_config.pop('anonymous', None)
         plugin_config.pop('claims_to_verify', None)
         plugin['config'] = plugin_config
     except Exception:
