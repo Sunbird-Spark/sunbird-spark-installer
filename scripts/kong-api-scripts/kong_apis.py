@@ -6,39 +6,12 @@ import copy
 
 from common import get_apis, json_request, get_api_plugins, get_routes
 
-def _inject_portal_anonymous_to_acl(plugin):
-    """Append 'portal_anonymous' to ACL plugin allow list (input-side).
-    Used for APIs that opt in via api-level `anonymous: true` flag.
-    No-op for non-ACL plugins.
-    """
-    try:
-        if plugin.get('name') != 'acl':
-            return plugin
-        cfg = plugin.get('config', {}) or {}
-        # Support both nested config.allow and dotted-key form from YAML
-        allow = cfg.get('allow')
-        if allow is None and 'config.allow' in plugin:
-            allow = plugin.get('config.allow')
-            if isinstance(allow, list) and 'portal_anonymous' not in allow:
-                allow.append('portal_anonymous')
-                plugin['config.allow'] = allow
-                return plugin
-        if not isinstance(allow, list):
-            allow = []
-        if 'portal_anonymous' not in allow:
-            allow.append('portal_anonymous')
-        cfg['allow'] = allow
-        plugin['config'] = cfg
-    except Exception:
-        pass
-    return plugin
-
-
-def _sanitize_plugin(plugin, anonymous_allowed=False):
-    """JWT enforcement is always strict — every request must present a valid token.
-    The `anonymous_allowed` flag only opens the ACL allow list (handled in
-    `_inject_portal_anonymous_to_acl`) so anonymous-issued tokens (iss=portal_anonymous)
-    pass the group check. Kong still validates the token signature and `iss`.
+def _sanitize_plugin(plugin):
+    """Strict JWT enforcement (Kong 0.14.1 parity). Every request must present
+    a valid token. ACL allow lists come straight from input YAML — to permit
+    anonymous-issued tokens on a given API, add `portal_anonymous` to that
+    API's `config.allow` list explicitly, the same way the original Sunbird
+    Kong YAML configured public endpoints.
     """
     try:
         if plugin.get('name') != 'jwt':
@@ -324,13 +297,9 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
     """
     service_name = input_api_details["name"]
     input_plugins = input_api_details.get("plugins", [])
-    anonymous_allowed = bool(input_api_details.get("anonymous", False))
 
     # Filter out None entries (shouldn't happen but safety check)
     input_plugins = [p for p in input_plugins if p is not None]
-
-    if anonymous_allowed:
-        input_plugins = [_inject_portal_anonymous_to_acl(copy.deepcopy(p)) for p in input_plugins]
     
     plugins_url = "{}/services/{}/plugins".format(kong_admin_api_url, service_name)
     
@@ -381,7 +350,7 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
         print("Adding plugin {} for service {}".format(input_plugin["name"], service_name));
         input_plugin = _convert_plugin_for_kong_3(input_plugin)
         try:
-            json_request("POST", plugins_url, _sanitize_plugin(input_plugin, anonymous_allowed))
+            json_request("POST", plugins_url, _sanitize_plugin(input_plugin))
             stats["plugins"]["created"] += 1
         except Exception as e:
             print("ERROR: Failed to create plugin {} for service {}".format(input_plugin["name"], service_name))
@@ -391,7 +360,7 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
         # Deep copy to ensure no shared state leaks between plugins
         # during transformation in _convert_plugin_for_kong_3
         converted_plugin = _convert_plugin_for_kong_3(copy.deepcopy(input_plugin))
-        sanitized_plugin = _sanitize_plugin(converted_plugin, anonymous_allowed)
+        sanitized_plugin = _sanitize_plugin(converted_plugin)
         
         saved_plugin = [p for p in saved_plugins if p["name"] == input_plugin["name"]][0]
         
