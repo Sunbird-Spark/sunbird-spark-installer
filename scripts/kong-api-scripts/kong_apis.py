@@ -410,22 +410,20 @@ def _convert_plugin_for_kong_3(plugin_input):
         # ACL schema doesn't have allowed_payload_size, status, etc.
         valid_keys = ['allow', 'deny', 'hide_groups_header']
         plugin_config = {k: v for k, v in plugin_config.items() if k in valid_keys or k.startswith('_')}
-        
-        # Ensure portal_anonymous is present (replicates Kong 0.14.1 anonymous access)
-        if 'allow' in plugin_config and isinstance(plugin_config['allow'], list):
-            if 'portal_anonymous' not in plugin_config['allow']:
-                plugin_config['allow'].append('portal_anonymous')
-        elif 'allow' not in plugin_config:
-             plugin_config['allow'] = ['portal_anonymous']
 
     elif plugin_name == 'jwt':
         # Kong 3.x rejects these fields when null/legacy values are passed in.
-        # Old Kong 0.14.1 ignored them silently — strip for schema compatibility
-        # only. Everything else (anonymous, key_claim_name, header_names, ...)
-        # ships exactly as written in the YAML, matching the old script's
-        # "trust the input" behaviour.
+        # Old Kong 0.14.1 ignored them silently — strip for schema compatibility.
         for k in ['algorithms', 'claims_to_verify', 'maximum_expiration']:
             plugin_config.pop(k, None)
+
+        # Defensive: clear any stale anonymous-fallback config carried in from
+        # earlier syncs. The new policy is strict JWT enforcement (no bypass);
+        # routes that genuinely want anonymous access opt in via their ACL
+        # allow list, not via the JWT plugin's anonymous fallback.
+        # Must explicitly set to None (not pop) — Kong's plugin PATCH merges
+        # fields, so omitting `anonymous` would leave any stale value intact.
+        plugin_config['anonymous'] = None
 
         # Sunbird player builds emit JWTs with the signing-key id in the
         # `kid` header and a random fingerprint in the `iss` payload, while
