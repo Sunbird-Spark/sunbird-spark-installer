@@ -425,27 +425,19 @@ def _convert_plugin_for_kong_3(plugin_input):
         # fields, so omitting `anonymous` would leave any stale value intact.
         plugin_config['anonymous'] = None
 
-        # Force key_claim_name back to Kong's default of "iss" unless the
-        # route's YAML explicitly opts into something else. Previously this
-        # default was "kid", which broke every token that doesn't include
-        # a kid header (HS256 fallback_token, most HS256-issued tokens),
-        # deadlocking the token-generation flow when the bootstrap
-        # fallback_token couldn't authenticate.
+        # Default key_claim_name = "kid" — covers the access tokens (t2)
+        # that almost every protected route receives: RS256, kid in header,
+        # opaque iss (from sunbird-apimanager-util TokenSignStep).
         #
-        # Sunbird stack tokens carry iss in the payload matching a Kong
-        # credential `key`:
-        #   - HS256 fallback_token: iss=portal_anonymous_fallback_token
-        #   - HS256/RS256 from SignCredentialWithKeyStep: iss=consumer_name
-        # iss-default works for these.
-        #
-        # Routes that genuinely need kid lookup (e.g. RS256 refresh-grant
-        # tokens from TokenSignStep with iss=<domain>, kid=<key_id>) must
-        # opt in per-route via YAML `config.key_claim_name: kid`.
+        # The token-generation endpoints (e.g. refreshToken at
+        # /auth/v1/refresh/token) receive an HS256 refresh token (t1) with
+        # iss=<consumer_name> and no kid — those routes MUST opt out by
+        # setting `config.key_claim_name: iss` explicitly in YAML.
         #
         # Set explicitly (not pop) so Kong's plugin PATCH overrides any
-        # stale "kid" value left from earlier syncs.
+        # stale value left on existing plugins from earlier syncs.
         if 'key_claim_name' not in plugin_config:
-            plugin_config['key_claim_name'] = 'iss'
+            plugin_config['key_claim_name'] = 'kid'
 
     elif plugin_name == 'rate-limiting':
         if 'error_code' not in plugin_config:
