@@ -18,6 +18,7 @@ def generate_jwt_token(key, secret, random_string):
     # the credential. Without this every bootstrap token (api_admin,
     # adminutil_learner_api_token, portal_anonymous_fallback_token, etc.)
     # would fail Kong's strict JWT auth with "No mandatory 'kid' in claims".
+    
     headers = {"kid": key}
 
     # Generate the JWT token
