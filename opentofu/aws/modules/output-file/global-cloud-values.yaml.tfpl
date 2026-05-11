@@ -1,0 +1,71 @@
+global:
+  env: ${env}
+  environment: ${environment}
+  building_block: ${building_block}
+  cloud_storage_access_key: ${aws_storage_account_email}      
+  cloud_storage_secret_key: ${aws_storage_account_key}
+  public_container_name: ${aws_public_container_name}
+  private_container_name: ${aws_private_container_name}
+  dial_state_container_public: ${aws_dial_state_container_public}
+  velero_container_name: ${aws_velero_storage_container_private}
+  private_ingressgateway_ip: ${private_ingressgateway_ip}
+  encryption__string: ${encryption_string}
+  random_string: ${random_string}
+  aws_account_id: ${aws_account_id}
+  object_storage_endpoint: s3.amazonaws.com
+  storage_class: ${storage_class}
+  cloud_storage_provider: ${cloud_storage_provider}
+  cloud_storage_region: ${cloud_storage_region}
+  service_account_role_arn: ${service_account_role_arn}
+  
+  serviceAccount: 
+    create: true
+    name: sunbird-sa
+    annotations:
+      eks.amazonaws.com/role-arn: ${service_account_role_arn}
+
+velero:                                                       
+  enabled: true
+  serviceAccount:
+    server:
+      create: true
+      name: velero-sa
+      annotations:
+        eks.amazonaws.com/role-arn: ${service_account_role_arn}
+  credentials:
+    useSecret: false
+  configuration:
+    backupStorageLocation:
+      - name: default
+        provider: aws
+        bucket: "${aws_velero_storage_container_private}"
+        config:
+          region: ${cloud_storage_region}
+    dbbackupbackupStorageLocation:
+      - name: dbbackup
+        provider: aws
+        bucket: "${aws_velero_storage_container_private}"
+        config:
+          region: ${cloud_storage_region}
+    backupSyncPeriod: 15m
+    volumeSnapshotLocation:
+    - name: default
+      provider: aws
+      config:
+        region: ${cloud_storage_region}
+  initContainers:
+    - image: velero/velero-plugin-for-aws:v1.8.0
+      name: velero-plugin-for-aws
+      volumeMounts:
+        - mountPath: /target
+          name: plugins  
+
+spark: 
+  serviceAccount:
+    create: false 
+    name: "sunbird-sa"            
+
+nginx-public-ingress:
+  commonAnnotations:
+    reloader.stakater.com/auto: "true"
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
