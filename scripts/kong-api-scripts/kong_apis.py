@@ -425,14 +425,27 @@ def _convert_plugin_for_kong_3(plugin_input):
         # fields, so omitting `anonymous` would leave any stale value intact.
         plugin_config['anonymous'] = None
 
-        # Sunbird player builds emit JWTs with the signing-key id in the
-        # `kid` header and a random fingerprint in the `iss` payload, while
-        # Kong creds are registered with key=<kid>. Kong's default lookup is
-        # by `iss`, so every request would 401. Default to `kid` lookup so
-        # those tokens validate. (Old Sunbird tokens set iss==kid, so the
-        # default `iss` worked transparently there.)
+        # Force key_claim_name back to Kong's default of "iss" unless the
+        # route's YAML explicitly opts into something else. Previously this
+        # default was "kid", which broke every token that doesn't include
+        # a kid header (HS256 fallback_token, most HS256-issued tokens),
+        # deadlocking the token-generation flow when the bootstrap
+        # fallback_token couldn't authenticate.
+        #
+        # Sunbird stack tokens carry iss in the payload matching a Kong
+        # credential `key`:
+        #   - HS256 fallback_token: iss=portal_anonymous_fallback_token
+        #   - HS256/RS256 from SignCredentialWithKeyStep: iss=consumer_name
+        # iss-default works for these.
+        #
+        # Routes that genuinely need kid lookup (e.g. RS256 refresh-grant
+        # tokens from TokenSignStep with iss=<domain>, kid=<key_id>) must
+        # opt in per-route via YAML `config.key_claim_name: kid`.
+        #
+        # Set explicitly (not pop) so Kong's plugin PATCH overrides any
+        # stale "kid" value left from earlier syncs.
         if 'key_claim_name' not in plugin_config:
-            plugin_config['key_claim_name'] = 'kid'
+            plugin_config['key_claim_name'] = 'iss'
 
     elif plugin_name == 'rate-limiting':
         if 'error_code' not in plugin_config:
