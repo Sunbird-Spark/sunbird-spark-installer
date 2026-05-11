@@ -1,0 +1,9 @@
+[ownaccount]
+type = s3
+provider = AWS
+env_auth = true
+
+[sunbird]
+type = azureblob
+account = ${sunbird_public_artifacts_account}
+sas_url = ${sunbird_public_artifacts_account_sas_url}
