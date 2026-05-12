@@ -65,7 +65,6 @@ kong_apis:
   - name: acl
     config.allow:
     - appCreate
-    - portal_anonymous
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -208,7 +207,6 @@ kong_apis:
     config.allow:
     - contentAdmin
     - contentTempAccess
-    - portal_anonymous
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -492,7 +490,6 @@ kong_apis:
   strip_path: true
   plugins:
   - name: jwt
-    config.key_claim_name: iss
   - name: cors
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
@@ -1174,7 +1171,6 @@ kong_apis:
   - name: acl
     config.allow:
     - anonymousAppAccess
-    - portal_anonymous
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -1895,7 +1891,6 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - contentAdmin
     - contentSuperAdmin
   - name: rate-limiting
     config.policy: local
@@ -2664,7 +2659,6 @@ kong_apis:
   strip_path: true
   plugins:
   - name: jwt
-    config.key_claim_name: iss
   - name: cors
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
@@ -2683,7 +2677,6 @@ kong_apis:
   strip_path: true
   plugins:
   - name: jwt
-    config.key_claim_name: iss
   - name: cors
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
@@ -3795,7 +3788,7 @@ kong_apis:
     - anonymousUserAccess
   - name: rate-limiting
     config.policy: local
-    config.hour: "5"
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
     config.limit_by: credential
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
