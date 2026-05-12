@@ -207,6 +207,7 @@ kong_apis:
     config.allow:
     - contentAdmin
     - contentTempAccess
+    - portal_anonymous
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
