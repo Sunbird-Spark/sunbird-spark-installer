@@ -60,7 +60,6 @@ kong_apis:
   strip_path: true
   plugins:
   - name: jwt
-    config.key_claim_name: iss
   - name: cors
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
@@ -1170,7 +1169,6 @@ kong_apis:
   strip_path: true
   plugins:
   - name: jwt
-    config.key_claim_name: iss
   - name: cors
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
@@ -2558,7 +2556,6 @@ kong_apis:
   strip_path: true
   plugins:
   - name: jwt
-    config.key_claim_name: iss
   - name: cors
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
