@@ -36,7 +36,7 @@ provider "azurerm" {
       vm_size        = var.big_node_size
       vnet_subnet_id = var.vnet_subnet_id
       max_pods       = 250
-      orchestrator_version = var.aks_version
+      orchestrator_version = "1.34.4"
     }
 
     network_profile {
