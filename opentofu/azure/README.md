@@ -147,14 +147,13 @@ Set to `450` (out of 500 free minutes/month). This gives a 50-minute buffer befo
 
 ## Step D — Notification Webhook Setup
 
-This runbook supports any service that accepts a **webhook HTTP POST** with a JSON body:
+This runbook currently posts a **Discord-style webhook HTTP POST** JSON payload using the `content` field, so it supports **Discord or other Discord-compatible webhooks**.
 
 | Service | How to get webhook URL |
 |---------|----------------------|
 | **Discord** | Channel Settings → Integrations → Webhooks → New Webhook |
-| **Slack** | Apps → Incoming Webhooks → Add New Webhook |
-| **Microsoft Teams** | Channel → Connectors → Incoming Webhook |
-| **Google Chat** | Space Settings → Apps & Integrations → Webhooks |
+
+> If you want to use Slack, Microsoft Teams, or Google Chat, you must first update the runbook payload format to match that service's schema (for example, `text` for Slack/Google Chat or a Teams message card/adaptive card payload).
 
 Once you have the webhook URL:
 1. Go to Automation Account → **Variables** → `WebhookUrl`
