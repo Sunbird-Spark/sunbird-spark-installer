@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "f1ee4b6f-1b23-47bd-903a-632109d869cb",
+		"_postman_id": "c1f125f8-d0fa-4dc4-a79a-46000ec84406",
 		"name": "Oneclick Installer - Sunbird Spark - Daylight Release",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "26192103"
+		"_exporter_id": "50198284"
 	},
 	"item": [
 		{
@@ -1803,7 +1803,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"request\": {\n    \"id\": \"portal_google_recaptcha_site_key\",\n    \"field\": \"portal_google_recaptcha_site_key\",\n    \"value\": \"6LeJtnksAAAAAB4EB6ImtvZKJBWd583BuzQIWDxZ\"\n  }\n}",
+							"raw": "{\n  \"request\": {\n    \"id\": \"portal_google_recaptcha_site_key\",\n    \"field\": \"portal_google_recaptcha_site_key\",\n    \"value\": \"{{google_captcha_site_key}}\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
