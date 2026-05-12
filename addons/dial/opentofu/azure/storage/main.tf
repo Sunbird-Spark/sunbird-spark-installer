@@ -8,7 +8,15 @@ terraform {
       source  = "hashicorp/null"
       version = "~> 3.2"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
   }
+}
+
+resource "random_id" "dial_bucket_id" {
+  byte_length = 5
 }
 
 provider "azurerm" {
@@ -17,13 +25,18 @@ provider "azurerm" {
   resource_provider_registrations = "none"
 }
 
+locals {
+  unique_uuid      = random_id.dial_bucket_id.hex
+  environment_name = "${var.building_block}-${var.environment}"
+}
+
 data "azurerm_storage_account" "existing" {
   name                = var.storage_account_name
   resource_group_name = var.resource_group_name
 }
 
 resource "azurerm_storage_container" "dial_state_container_public" {
-  name                  = lower("${var.building_block}-${var.environment}-dial-${var.unique_uuid}")
+  name                  = "${local.environment_name}-dial-${local.unique_uuid}"
   storage_account_name  = data.azurerm_storage_account.existing.name
   container_access_type = "blob"
 }
