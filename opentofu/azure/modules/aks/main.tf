@@ -88,6 +88,7 @@ provider "azurerm" {
     triggers = {
       cluster_id      = azurerm_kubernetes_cluster.aks.id
       cluster_version = azurerm_kubernetes_cluster.aks.kubernetes_version
+      always_run      = timestamp()
     }
 
     provisioner "local-exec" {
