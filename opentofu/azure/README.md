@@ -136,7 +136,9 @@ Always pick the **latest available patch** of the target minor version from the 
      ./install.sh create_tf_resources
      ```
 
-   OpenTofu will detect the version change, upgrade the AKS control plane, and then perform a rolling replacement of the worker nodes. This typically takes **15–30 minutes** per hop.
+   OpenTofu will detect the version change, upgrade the AKS control plane, and then perform a rolling replacement of the worker nodes. This typically takes **25–35 minutes** per hop.
+
+   > **Downtime warning:** Expect **25–35 minutes of service downtime** during the upgrade. AKS upgrades nodes by cordoning, draining, and replacing them one at a time (surge upgrade). During node replacement, pods are evicted and rescheduled — services will be unavailable until pods come back up on the new nodes.
 
 5. **Verify the upgrade**
 
