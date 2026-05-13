@@ -130,7 +130,7 @@ spec:
           - "1111"
           - -w
           - "8282,10000"
-          image: openpolicyagent/proxy_init:v5
+          image: openpolicyagent/proxy_init:v8
           imagePullPolicy: IfNotPresent
           name: proxy-init
           resources:
