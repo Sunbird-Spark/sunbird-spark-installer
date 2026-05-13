@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-Run form/read API for all requests in the '3 - Forms' folder of the Postman collection.
-For any form that returns 404 (not found), automatically runs the collection's create request.
-Prints a table of: API name → read status → create status (if triggered)
+1. Runs two System Settings requests from the Lern folder (requires apikey only):
+     - 29 - System Settings - privacyPolicyConfig
+     - 36 - System Settings - googleClientId
+2. For every form in '3 - Forms', reads first and creates if missing (404).
+   Skips: 4 - Page Create, 3 - Page Section Create.
 
 Usage (called via install.sh):
-  ./install.sh run_form_read
+  ./install.sh migrate_forms
 
 Usage (direct):
-  python3 migration/setup_forms.py --env env.json --collection sunbird-spark-collection-v1.json
+  python3 migration/migrate_forms.py --env env.json --collection sunbird-spark-collection-v1.json
 """
 import json
 import re
@@ -22,6 +24,21 @@ def load_env(path):
     with open(path) as f:
         data = json.load(f)
     return {v["key"]: v["value"] for v in data["values"] if v.get("enabled", True)}
+
+
+def resolve_vars(text, env):
+    return re.sub(r'\{\{(\w+)\}\}', lambda m: env.get(m.group(1), m.group(0)), text)
+
+
+def find_by_name(items, name):
+    for item in items:
+        if item.get("name") == name:
+            return item
+        if "item" in item:
+            found = find_by_name(item["item"], name)
+            if found:
+                return found
+    return None
 
 
 def find_folder(items, name):
@@ -45,11 +62,6 @@ def collect_requests(items):
     return out
 
 
-def resolve_url(url_field, env):
-    raw = url_field if isinstance(url_field, str) else url_field.get("raw", "")
-    return re.sub(r'\{\{(\w+)\}\}', lambda m: env.get(m.group(1), m.group(0)), raw)
-
-
 def http_post(url, apikey, raw_body):
     req = urllib.request.Request(url, data=raw_body.encode(), headers={
         "Content-Type": "application/json",
@@ -64,10 +76,34 @@ def http_post(url, apikey, raw_body):
         return f"ERROR: {e}"
 
 
+def run_system_settings(collection, env, host, apikey):
+    targets = [
+        "29 - System Settings -  privacyPolicyConfig",
+        "36 - System Settings - googleClientId",
+    ]
+    print("Running System Settings\n")
+    print(f"{'Name':<55} {'Status'}")
+    print("-" * 65)
+
+    for target in targets:
+        req = find_by_name(collection["item"], target)
+        if not req:
+            print(f"{target:<55} NOT FOUND in collection")
+            continue
+
+        raw_url = req["request"]["url"]
+        url = resolve_vars(raw_url if isinstance(raw_url, str) else raw_url.get("raw", ""), env)
+        raw_body = resolve_vars(req["request"]["body"]["raw"], env)
+
+        status = http_post(url, apikey, raw_body)
+        print(f"{target:<55} {status}")
+
+    print()
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description="Run form/read API for every form in the '3 - Forms' Postman collection folder. "
-                    "Auto-creates forms that return 404."
+        description="Run System Settings and form setup from the Postman collection."
     )
     parser.add_argument(
         "--collection",
@@ -77,7 +113,7 @@ def main():
     parser.add_argument(
         "--env",
         default="env.json",
-        help="Path to a Postman environment JSON file containing 'host' and 'apikey' values",
+        help="Path to a Postman environment JSON file",
     )
     args = parser.parse_args()
 
@@ -101,6 +137,12 @@ def main():
         print(f"ERROR: collection file not found: {args.collection}")
         sys.exit(1)
 
+    print(f"\nHost : {host}\n")
+
+    # Step 1: run System Settings before forms
+    run_system_settings(collection, env, host, apikey)
+
+    # Step 2: setup forms
     forms_folder = find_folder(collection["item"], "3 - Forms")
     if not forms_folder:
         print("ERROR: '3 - Forms' folder not found in collection")
@@ -108,10 +150,8 @@ def main():
 
     all_requests = collect_requests(forms_folder["item"])
     skip = {"4 - Page Create", "3 - Page Section Create"}
-
     read_url = f"{host}/api/data/v1/form/read"
 
-    print(f"\nHost : {host}")
     print(f"Forms: {len(all_requests)} requests found in '3 - Forms'\n")
     print(f"{'API Name':<55} {'Read':<8} {'Create'}")
     print("-" * 75)
@@ -142,7 +182,10 @@ def main():
         read_status = http_post(read_url, apikey, read_body)
 
         if read_status == 404:
-            create_url = resolve_url(req["request"]["url"], env)
+            create_url = resolve_vars(
+                req["request"]["url"] if isinstance(req["request"]["url"], str)
+                else req["request"]["url"].get("raw", ""), env
+            )
             create_status = http_post(create_url, apikey, raw)
             print(f"{name:<55} {str(read_status):<8} {create_status}")
         else:

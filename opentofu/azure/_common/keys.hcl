@@ -25,13 +25,6 @@ dependency "storage" {
     mock_outputs_merge_strategy_with_state = "shallow"
 }
 
-dependency "workload_identity" {
-  config_path = "../workload-identity"
-  mock_outputs = {
-    deployer_role_ready = "mock"
-  }
-}
-
 inputs = {
   environment               = local.environment
   building_block            = local.building_block
