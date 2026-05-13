@@ -35,7 +35,7 @@ spec:
           args:
             - |
               while true; do
-                status=$(curl --silent --location "http://opensearch-cluster-master:9200/_cluster/health" | grep -o '"status":"[^"]*' | grep -o '[^"]*$');
+                status=$(curl --silent --location "http://{{ .Values.global.opensearch.host }}:{{ .Values.global.opensearch.port }}/_cluster/health" | grep -o '"status":"[^"]*' | grep -o '[^"]*$');
                 status=$(echo $status | tr '[:upper:]' '[:lower:]');
                 if [[ "$status" == "green" || "$status" == "yellow" ]]; then
                   echo "OpenSearch is healthy";
