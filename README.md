@@ -282,6 +282,14 @@ sunbird-ed-installer/helmcharts/edbb/charts/janusgraph
 
 3. Update the JanusGraph version in the configuration files to match the version being used.
 
+## AKS Kubernetes Version & Upgrade
+
+For instructions on pinning the Kubernetes version, checking available versions, planning an upgrade path, and running the upgrade step-by-step, see:
+
+**[opentofu/azure/README.md — AKS Kubernetes Version](opentofu/azure/README.md#aks-kubernetes-version)**
+
+---
+
 ## Kong Upgrade Guide
 
 This section documents the Kong API Gateway upgrade process from version 0.14.1 to 3.9.1 and provides instructions for future upgrades.
