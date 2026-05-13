@@ -132,7 +132,7 @@ yugabytecql:
 opensearch: &opensearch
   enabled: true
   fullnameOverride: "opensearch"
-  host: "opensearch"
+  host: "opensearch-cluster-master"
   port: 9200
   singleNode: true
   extraEnvs:
