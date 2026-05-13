@@ -1,17 +1,154 @@
 import org.apache.tinkerpop.gremlin.structure.Vertex
 import org.apache.tinkerpop.gremlin.structure.T
 import org.apache.tinkerpop.gremlin.structure.Direction
-import groovy.json.JsonSlurper
 
-// Open Graph
+// Closures stored in `binding` so they are visible inside the per-line
+// closures passed to eachLine (groovysh script-scope visibility limitation).
+
+parseValue = { String s ->
+    s = s.trim()
+    if (s.length() == 0) return null
+    if (s == 'null') return null
+    if (s == 'true' || s == 'TRUE') return true
+    if (s == 'false' || s == 'FALSE') return false
+
+    if (s.length() >= 2 && s.charAt(0) == ('"' as char) && s.charAt(s.length() - 1) == ('"' as char)) {
+        return s.substring(1, s.length() - 1)
+                .replace('\\"', '"')
+                .replace('\\\\', '\\')
+                .replace('\\n', '\n')
+                .replace('\\t', '\t')
+                .replace('\\r', '\r')
+    }
+
+    if (s ==~ /-?\d+/) { try { return s.toLong() } catch (e) { return s } }
+    if (s ==~ /-?\d+\.\d+([eE][+-]?\d+)?/) { try { return s.toDouble() } catch (e) { return s } }
+
+    if (s.startsWith('[') && s.endsWith(']')) {
+        String inner = s.substring(1, s.length() - 1).trim()
+        if (inner.length() == 0) return []
+        List items = []
+        int i = 0, len = inner.length()
+        int depth = 0
+        boolean inStr = false
+        char sc = '"' as char
+        int start = 0
+        while (i < len) {
+            char c = inner.charAt(i)
+            if (inStr) {
+                if (c == ('\\' as char)) { i += 2; continue }
+                if (c == sc) inStr = false
+            } else {
+                if (c == ('"' as char) || c == ("'" as char)) { inStr = true; sc = c }
+                else if (c == ('[' as char) || c == ('{' as char)) depth++
+                else if (c == (']' as char) || c == ('}' as char)) depth--
+                else if (c == (',' as char) && depth == 0) {
+                    items << parseValue(inner.substring(start, i).trim())
+                    start = i + 1
+                }
+            }
+            i++
+        }
+        if (start < len) items << parseValue(inner.substring(start).trim())
+        return items
+    }
+
+    if (s.startsWith('{') && s.endsWith('}')) {
+        return parseProps(s)
+    }
+
+    return s
+}
+
+parseProps = { String text ->
+    text = text.trim()
+    if (text.startsWith('{')) text = text.substring(1)
+    if (text.endsWith('}')) text = text.substring(0, text.length() - 1)
+
+    Map result = [:]
+    int i = 0, len = text.length()
+    while (i < len) {
+        while (i < len && Character.isWhitespace(text.charAt(i))) i++
+        if (i >= len) break
+
+        int keyStart = i
+        while (i < len && text.charAt(i) != (':' as char)) i++
+        if (i >= len) break
+        String key = text.substring(keyStart, i).trim()
+        if (key.length() >= 2 && key.charAt(0) == ('"' as char) && key.charAt(key.length() - 1) == ('"' as char)) {
+            key = key.substring(1, key.length() - 1)
+        }
+        i++
+
+        while (i < len && Character.isWhitespace(text.charAt(i))) i++
+
+        int valStart = i
+        int depth = 0
+        boolean inStr = false
+        char strChar = '"' as char
+        while (i < len) {
+            char c = text.charAt(i)
+            if (inStr) {
+                if (c == ('\\' as char)) { i += 2; continue }
+                if (c == strChar) inStr = false
+            } else {
+                if (c == ('"' as char) || c == ("'" as char)) { inStr = true; strChar = c }
+                else if (c == ('[' as char) || c == ('{' as char)) depth++
+                else if (c == (']' as char) || c == ('}' as char)) depth--
+                else if (c == (',' as char) && depth == 0) break
+            }
+            i++
+        }
+        String rawValue = text.substring(valStart, Math.min(i, len)).trim()
+        result[key] = parseValue(rawValue)
+
+        if (i < len && text.charAt(i) == (',' as char)) i++
+    }
+    return result
+}
+
+isLineComplete = { String line ->
+    int depth = 0
+    boolean inStr = false
+    char sc = '"' as char
+    int i = 0, len = line.length()
+    while (i < len) {
+        char c = line.charAt(i)
+        if (inStr) {
+            if (c == ('\\' as char)) { i += 2; continue }
+            if (c == sc) inStr = false
+        } else {
+            if (c == ('"' as char) || c == ("'" as char)) { inStr = true; sc = c }
+            else if (c == ('[' as char) || c == ('{' as char)) depth++
+            else if (c == (']' as char) || c == ('}' as char)) depth--
+        }
+        i++
+    }
+    return depth <= 0
+}
+
 graph = JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph-cql.properties')
-// Bind graph and traversal to global binding for access in closures
 binding.graph = graph
 binding.g = graph.traversal()
 
-println "--- STARTING DATA MIGRATION (User Script Fixed) ---"
+// Cleanup pass: drop any vertices left over from a previous broken run.
+// "Junk" = a vertex that has `node_id` but no `IL_UNIQUE_ID`. These were
+// produced by the old regex-based parser when JSON deserialisation failed
+// and the fallback regex matched single characters as key/value pairs,
+// creating a vertex with garbage props like `o=s, p=k, s=3, i=d, ...`.
+// Re-running the importer must remove these so the correct vertices can
+// be inserted (the importer skips when node_id already exists in JG).
+junkBefore = graph.traversal().V().has('node_id').hasNot('IL_UNIQUE_ID').count().next()
+if (junkBefore > 0) {
+    println "Cleanup: dropping ${junkBefore} junk vertices left over from a previous run..."
+    graph.traversal().V().has('node_id').hasNot('IL_UNIQUE_ID').drop().iterate()
+    graph.tx().commit()
+    println "Cleanup done. Vertices now: " + graph.traversal().V().count().next()
+}
 
-def replaceExisting = false
+println "--- STARTING DATA MIGRATION (quote-aware parser) ---"
+
+replaceExisting = false
 if (binding.hasVariable('args')) {
     replaceExisting = args.any { it == 'replace=true' }
 }
@@ -23,84 +160,87 @@ if (System.getProperty('replace') == 'true') {
 }
 println "replace parameter is set to: ${replaceExisting}"
 
-// --- 1. NODES ---
 println "Importing Nodes..."
 
 binding.tx = graph.buildTransaction().logIdentifier("learning_graph_events").start()
 binding.txG = binding.tx.traversal()
 
 if (!binding.hasVariable('state')) {
-    binding.state = [accumulating: false, jsonBuffer: '', nodeLine: '']
+    binding.state = [accumulating: false, nodeLine: '']
 }
+
+stats_imported = 0
+stats_skipped = 0
+stats_errors = 0
+numericKeys = ['version', 'pkgVersion', 'size', 'compatibilityLevel',
+               'sYS_INTERNAL_LAST_UPDATED_ON', 'me_totalRatingsCount',
+               'me_averageRating', 'totalCompressedSize', 'leafNodesCount',
+               'totalQuestions', 'totalScore', 'maxScore', 'attempts',
+               'maxAttempts', 'copyrightYear', 'ttl',
+               'duration', 'maxTime', 'minScore',
+               'me_totalEnrollments', 'me_totalCompletions',
+               'me_totalDownloads', 'me_totalRatings'] as Set
+booleanKeys = ['showNotification', 'showHints', 'showFeedback',
+               'showTimer', 'showSolutions', 'requiresSubmit',
+               'isPublishedToTOC', 'discussionForum', 'trackable',
+               'unitNotification', 'enableSync'] as Set
 
 new File('/tmp/nodes.csv').eachLine { line, idx ->
     try {
-        if (idx == 1) return // skip header
+        if (idx == 1) return
 
         def state = binding.state
-        // Use transaction traversal for CDC log identifier
         def g = binding.txG
 
         if (state.accumulating) {
-            state.nodeLine += ' ' + line.trim()
-            if (line.trim().endsWith('}')) state.accumulating = false
+            state.nodeLine = state.nodeLine + ' ' + line.trim()
+            if (isLineComplete(state.nodeLine)) state.accumulating = false
             else return
         } else {
             state.nodeLine = line
-            if (!line.trim().endsWith('}')) {
+            if (!isLineComplete(line)) {
                 state.accumulating = true
                 return
             }
         }
 
-        def parts = state.nodeLine.split(/,(?=\s*\[?["{])/)
-        
-        if (parts.size() < 3) {
-             println "Skipping malformed line $idx: ${state.nodeLine}"
-             return
+        String full = state.nodeLine.trim()
+        int p1 = full.indexOf(',')
+        if (p1 < 0) { stats_skipped++; println "Skipping line $idx: no comma"; return }
+        String nodeIdStr = full.substring(0, p1).trim()
+        String rest = full.substring(p1 + 1).trim()
+
+        int labStart = rest.indexOf('[')
+        int labEnd = rest.indexOf(']')
+        if (labStart < 0 || labEnd < 0 || labEnd < labStart) {
+            stats_skipped++; println "Skipping line $idx: malformed label"; return
+        }
+        String labelRaw = rest.substring(labStart + 1, labEnd).replaceAll(/"/, '').trim()
+        String afterLabel = rest.substring(labEnd + 1).trim()
+        if (afterLabel.startsWith(',')) afterLabel = afterLabel.substring(1).trim()
+
+        if (!afterLabel.startsWith('{')) {
+            stats_skipped++; println "Skipping line $idx: no props block"; return
         }
 
-        def nodeIdVal = parts[0].toLong()
-        def labelRaw = parts[1].replaceAll(/\[|\]|"/, '')
-        def label = labelRaw.trim()
-        def propsRaw = parts[2..-1].join(',')
-
-        // Quote unquoted keys + normalize Neo4j booleans (matches db-migration logic)
-        def propsFixed = propsRaw
-            .replaceAll(/([{,]\s*)(\w+):/, '$1"$2":')
-            .replaceAll(/\bTRUE\b/, 'true')
-            .replaceAll(/\bFALSE\b/, 'false')
-
-        def rawMap = [:]
-        try {
-            rawMap = new JsonSlurper().parseText(propsFixed)
-        } catch (Exception e) {
-            // Fallback for very messy lines
-            println "  JSON Parse failed on line $idx, attempting manual extraction..."
-            propsFixed.findAll(/"([^"]+)":\s*("[^"]*"|[^,}]+)/).each { m ->
-                def k = m[1]
-                def v = m[2].replaceAll(/^"|"$/, '')
-                rawMap[k] = v
-            }
+        Long nodeIdVal
+        try { nodeIdVal = nodeIdStr.toLong() } catch (e) {
+            stats_skipped++; println "Skipping line $idx: bad nodeId '${nodeIdStr}'"; return
         }
-        
-        def propsMap = rawMap.collectEntries { k, v ->
-            def cleanVal = v
-            if (v instanceof String) {
-                cleanVal = v.trim()
-            } else if (v instanceof List) {
-                cleanVal = v.collect { it instanceof String ? it.trim() : it }
-            }
-            return [(k.toString().trim()): cleanVal]
+        String label = labelRaw
+
+        Map propsMap = parseProps(afterLabel)
+
+        if (!propsMap['IL_UNIQUE_ID']) {
+            stats_skipped++
+            println "Skipping line $idx: parsed props has no IL_UNIQUE_ID (label=${label}, nodeId=${nodeIdVal})"
+            return
         }
 
         def existing = g.V().has('node_id', nodeIdVal).tryNext().orElse(null)
-        
         if (!existing) {
-            def uniqueId = propsMap['IL_UNIQUE_ID']
-            if (uniqueId) {
-                existing = g.V().has('IL_UNIQUE_ID', uniqueId).tryNext().orElse(null)
-            }
+            def uid = propsMap['IL_UNIQUE_ID']
+            if (uid) existing = g.V().has('IL_UNIQUE_ID', uid).tryNext().orElse(null)
         }
 
         if (existing && replaceExisting) {
@@ -110,66 +250,82 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
             existing = null
         }
 
-        if (!existing) {
-            def v = binding.tx.addVertex(T.label, label, 'node_id', nodeIdVal)
-            propsMap.each { k, vprop ->
-                if (vprop != null) {
-                    if (vprop instanceof List) vprop = vprop.join(',')
-                    else if (vprop instanceof BigDecimal) vprop = vprop.doubleValue()
-                    v.property(k, vprop)
+        if (existing) return
+
+        def v = binding.tx.addVertex(T.label, label, 'node_id', nodeIdVal)
+        propsMap.each { k, vprop ->
+            if (vprop == null) return
+            if (vprop instanceof List) vprop = vprop.join(',')
+            else if (vprop instanceof Map) vprop = vprop.toString()
+            else if (vprop instanceof BigDecimal) vprop = vprop.doubleValue()
+
+            if (numericKeys.contains(k) && vprop instanceof String) {
+                try {
+                    vprop = vprop.contains('.') ? vprop.toDouble() : vprop.toLong()
+                } catch (Exception ne) { }
+            }
+            if (booleanKeys.contains(k) && vprop instanceof String) {
+                String sv = vprop.trim().toLowerCase()
+                if (sv == 'true' || sv == 'yes' || sv == '1') vprop = true
+                else if (sv == 'false' || sv == 'no' || sv == '0') vprop = false
+            }
+            // Per-property try/catch: a single schema-incompatible value
+            // (e.g. ttl=0.08 when the key is declared Long) must NOT abort
+            // the whole vertex — we lose only that property, not the node.
+            try {
+                v.property(k.toString().trim(), vprop)
+            } catch (Exception pe) {
+                // Last-resort: try forcing Long when schema demands it.
+                if (pe.message != null && pe.message.contains('java.lang.Long') && vprop instanceof Number) {
+                    try { v.property(k.toString().trim(), ((Number) vprop).longValue()) } catch (Exception ignore) { }
+                } else if (pe.message != null && pe.message.contains('java.lang.Double') && vprop instanceof Number) {
+                    try { v.property(k.toString().trim(), ((Number) vprop).doubleValue()) } catch (Exception ignore) { }
                 }
             }
         }
+        stats_imported++
     } catch (Exception e) {
+        stats_errors++
         println "Error on line $idx: ${e.message}"
     }
 }
 binding.tx.commit()
-println "\nNodes Imported."
+println "Nodes imported=${stats_imported}, skipped=${stats_skipped}, errors=${stats_errors}"
 
-
-// --- 2. RELATIONSHIPS ---
 println "Importing Relationships..."
 
 binding.tx2 = graph.buildTransaction().logIdentifier("learning_graph_events").start()
 binding.tx2G = binding.tx2.traversal()
 
+edge_imported = 0
+edge_skipped = 0
+
 new File('/tmp/relationships.csv').eachLine { line, idx ->
     try {
         if (idx == 1) return
 
-        def g = binding.tx2G 
+        def g = binding.tx2G
 
-        // Adjusted regex for: from, "label", {props}, to
         def matcher = line =~ /^(\d+),\s*"([^"]+)",\s*(\{.*\}|),\s*(\d+)$/
         if (!matcher.matches()) {
-            // Fallback for simple relations without properties
             matcher = line =~ /^(\d+),\s*"([^"]+)",\s*,\s*(\d+)$/
         }
-
         if (!matcher.matches()) {
-            println "Skipping malformed edge line $idx: $line"
+            edge_skipped++
+            println "Skipping edge line $idx: $line"
             return
         }
 
-        def fromId = matcher[0][1].toLong()
-        def relType = matcher[0][2].trim()
-        def propsRaw = matcher[0][3].trim()
-        def toId = matcher[0][4].toLong()
+        Long fromId = matcher[0][1].toLong()
+        String relType = matcher[0][2].trim()
+        String propsRaw = matcher[0][3].trim()
+        Long toId = matcher[0][4].toLong()
 
-        def propsMap = [:]
-        if (propsRaw && propsRaw != "{}") {
-             // Simple prop parsing for Neo4j edge props like {IL_SEQUENCE_INDEX: 1}
-             propsRaw.replaceAll(/^\{|\}$/, '').split(',').each { kv ->
-                def kvParts = kv.split(':')
-                if (kvParts.size() == 2) {
-                    def k = kvParts[0].trim().replaceAll(/^"|"$/, '')
-                    def v = kvParts[1].trim().replaceAll(/^"|"$/, '')
-                    if (v ==~ /^\d+$/) v = v.toLong()
-                    else if (v ==~ /^\d+\.\d+$/) v = v.toDouble()
-                    propsMap[k] = v
-                }
-             }
+        Map propsMap = [:]
+        if (propsRaw && propsRaw != '{}') {
+            try { propsMap = parseProps(propsRaw) } catch (Exception pe) {
+                println "Edge prop parse failed line $idx: ${pe.message}"
+            }
         }
 
         def fromV = g.V().has('node_id', fromId).tryNext().orElse(null)
@@ -179,25 +335,27 @@ new File('/tmp/relationships.csv').eachLine { line, idx ->
             def existing = fromV.edges(Direction.OUT, relType).find { it.inVertex().value('node_id') == toId }
             if (!existing) {
                 def e = fromV.addEdge(relType, toV)
-                propsMap.each { k, v -> e.property(k, v) }
+                propsMap.each { k, vv ->
+                    if (vv != null) e.property(k, vv instanceof List ? vv.join(',') : vv)
+                }
+                edge_imported++
             }
         } else {
-            // Silently skip if nodes don't exist, matching common bulk load patterns
+            edge_skipped++
         }
     } catch (Exception e) {
+        edge_skipped++
         println "Error on edge line $idx: ${e.message}"
     }
 }
 binding.tx2.commit()
-println "Relationships Imported."
+println "Edges imported=${edge_imported}, skipped=${edge_skipped}"
 
-// Verify
 println "Vertices: " + binding.g.V().count().next()
 println "Edges: " + binding.g.E().count().next()
 
-// Close the graph gracefully to ensure CDC transaction logs are flushed
-println "Closing graph to flush CDC logs..."
+println "Closing graph..."
 graph.close()
-println "Graph closed successfully."
+println "Graph closed."
 
 System.exit(0)

@@ -10,6 +10,10 @@ import re
 import csv
 import ast
 import sys
+
+# Default csv field limit (128KB) is too small for blob columns (body, oldbody,
+# screenshots, stageicons in content_data) which can exceed 1MB per field.
+csv.field_size_limit(sys.maxsize)
 import time
 import uuid
 import json
@@ -295,7 +299,10 @@ def rewrite_statement(stmt, source_ks, target_ks, tx_tables):
         # Add IF NOT EXISTS if missing.
         if "IF NOT EXISTS" not in upper:
             stmt = re.sub(r"^(\s*CREATE\s+TYPE\s+)", r"\1IF NOT EXISTS ", stmt, count=1, flags=re.IGNORECASE)
-        return stmt
+        # YCQL requires collection fields inside UDTs to be `frozen<...>`.
+        # Cassandra source schema may emit `field list<frozen<map<...>>>` (only inner frozen)
+        # which YCQL rejects. Wrap top-level list/set/map with frozen if not already.
+        return _freeze_udt_collections(stmt)
 
     if upper.startswith("CREATE TABLE"):
         body, trailing = _split_table_body(stmt)
@@ -332,6 +339,54 @@ def rewrite_statement(stmt, source_ks, target_ks, tx_tables):
         return stmt
 
     return stmt
+
+
+def _split_top_level(s, sep=","):
+    """Split string on `sep` at depth 0 (ignoring nested <...> or (...))"""
+    parts = []
+    cur = []
+    depth = 0
+    for ch in s:
+        if ch in "<(":
+            depth += 1
+        elif ch in ">)":
+            depth -= 1
+        if ch == sep and depth == 0:
+            parts.append("".join(cur).strip())
+            cur = []
+        else:
+            cur.append(ch)
+    if cur:
+        parts.append("".join(cur).strip())
+    return parts
+
+
+def _freeze_udt_collections(stmt):
+    """Wrap unfrozen list/set/map field types inside CREATE TYPE with frozen<>.
+    Required because YCQL rejects non-frozen collections inside UDTs."""
+    m = re.match(
+        r"^(\s*CREATE\s+TYPE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\w\.]+\s*)\((.*)\)\s*;?\s*$",
+        stmt, re.IGNORECASE | re.DOTALL,
+    )
+    if not m:
+        return stmt
+    head, body = m.group(1), m.group(2)
+    new_fields = []
+    for field in _split_top_level(body, ","):
+        f = field.strip()
+        if not f:
+            continue
+        # Split `name type` — first whitespace separates
+        sp = re.match(r"^(\S+)\s+(.+)$", f, re.DOTALL)
+        if not sp:
+            new_fields.append(f)
+            continue
+        fname, ftype = sp.group(1), sp.group(2).strip()
+        ft_lower = ftype.lower()
+        if ft_lower.startswith(("list<", "set<", "map<")) and not ft_lower.startswith("frozen<"):
+            ftype = f"frozen<{ftype}>"
+        new_fields.append(f"{fname} {ftype}")
+    return f"{head}({', '.join(new_fields)})"
 
 
 def apply_schema(schema_cql, source_ks, target_ks):
@@ -482,16 +537,17 @@ def parse_value(raw, cql_type, udt_map=None):
     if t.startswith("frozen<"):
         inner = t[len("frozen<"):-1].strip()
         return parse_value(raw, inner, udt_map)
-    # UDT — driver-registered namedtuple class. Convert literal -> dict -> namedtuple.
+    # UDT — return as dict. Driver accepts dict for UDT via __getitem__ protocol.
+    # Avoid namedtuple: cassandra-driver rejects namedtuples in nested list<UDT> columns
+    # (matches old direct-stream behavior, which read native UDT objects from source).
     if udt_map and t in udt_map:
         try:
             d = _udt_literal_to_dict(raw)
             if d is None:
                 return raw
             cls = udt_map[t]
-            # Build kwargs mapping field name -> value (None for missing)
-            kwargs = {f: d.get(f) for f in cls._fields}
-            return cls(**kwargs)
+            # Build dict with all expected fields (None for missing)
+            return {f: d.get(f) for f in cls._fields}
         except Exception:
             return raw
     if t.startswith(("list<", "set<", "map<", "tuple<")):
@@ -504,13 +560,27 @@ def parse_value(raw, cql_type, udt_map=None):
                 return {parse_value(str(k), kt, udt_map): parse_value(str(v), vt, udt_map) for k, v in v.items()}
             elif t.startswith(("list<", "set<")):
                 it = inner[0] if inner else "text"
-                # Inner element: if dict-shaped (UDT), pass raw repr; else stringify
+                it_inner = it[len("frozen<"):-1].strip() if it.startswith("frozen<") else it
                 parsed = []
                 for x in v:
                     if isinstance(x, dict):
-                        # Reconstitute UDT literal so recursion can register-bind
-                        lit = "{" + ", ".join(f"{k}: {repr(val)}" for k, val in x.items()) + "}"
-                        parsed.append(parse_value(lit, it, udt_map))
+                        # Map element: pass dict through, recursively convert k/v inner types
+                        if it_inner.startswith("map<"):
+                            map_inner = _get_inner_types(it_inner)
+                            if len(map_inner) == 2:
+                                kt, vt = map_inner
+                                parsed.append({
+                                    parse_value(str(k), kt, udt_map): parse_value(str(val), vt, udt_map)
+                                    for k, val in x.items()
+                                })
+                            else:
+                                parsed.append(x)
+                        # UDT element: reconstitute literal so UDT branch register-binds
+                        elif udt_map and it_inner in udt_map:
+                            lit = "{" + ", ".join(f"{k}: {repr(val)}" for k, val in x.items()) + "}"
+                            parsed.append(parse_value(lit, it, udt_map))
+                        else:
+                            parsed.append(x)
                     else:
                         parsed.append(parse_value(str(x), it, udt_map))
                 return set(parsed) if t.startswith("set<") else parsed
@@ -562,8 +632,8 @@ def _get_inner_types(cql_type):
 # ============================
 # LOAD ONE TABLE FROM CSV
 # ============================
-_BATCH_BYTES_LIMIT = 10 * 1024 * 1024  # 10 MB — well under YCQL's 16 MB hard cap
-_BATCH_ROW_LIMIT   = 500                # secondary guard against degenerate tiny rows
+_BATCH_BYTES_LIMIT = 2 * 1024 * 1024   # 2 MB — keep well under YCQL batch warning threshold
+_BATCH_ROW_LIMIT   = 100                # secondary guard against degenerate tiny rows
 
 
 def _estimate_row_bytes(row):
@@ -583,15 +653,34 @@ def _estimate_row_bytes(row):
 
 
 def _flush_batch(session, stmts):
+    """Try LOGGED batch. On failure (size/timeout), fall back to per-row execute.
+    Per-row fallback ensures big-blob tables (e.g. content_data) don't lose entire batch."""
+    if not stmts:
+        return
+    if len(stmts) == 1:
+        session.execute(stmts[0])
+        return
     bs = BatchStatement(consistency_level=ConsistencyLevel.ONE)
     for s in stmts:
         bs.add(s)
-    session.execute(bs)
+    try:
+        session.execute(bs)
+    except Exception as e:
+        log.warning(f"    batch flush failed ({len(stmts)} rows, {str(e)[:100]}); falling back to per-row inserts")
+        ok = 0
+        for s in stmts:
+            try:
+                session.execute(s)
+                ok += 1
+            except Exception as e2:
+                log.error(f"      per-row insert failed: {str(e2)[:120]}")
+        log.warning(f"    per-row fallback: {ok}/{len(stmts)} succeeded")
 
 
 def _register_udts(cluster, session, keyspace):
-    """Fetch UDTs in keyspace and register them as namedtuples on cluster.
-    Returns dict {udt_name (lowercased): namedtuple_class}."""
+    """Fetch UDTs in keyspace. Build {udt_name: namedtuple_class} for field-shape lookup
+    in parse_value, but do NOT call cluster.register_user_type — driver auto-handles
+    dicts for UDT binding when no class registered (matches old direct-stream behavior)."""
     udt_map = {}
     try:
         rows = session.execute(
@@ -603,11 +692,7 @@ def _register_udts(cluster, session, keyspace):
             if not fields:
                 continue
             cls = namedtuple(r.type_name, fields, rename=True)
-            try:
-                cluster.register_user_type(keyspace, r.type_name, cls)
-                udt_map[r.type_name.lower()] = cls
-            except Exception as e:
-                log.warning(f"    register_user_type {keyspace}.{r.type_name} failed: {str(e)[:80]}")
+            udt_map[r.type_name.lower()] = cls
     except Exception as e:
         log.warning(f"    UDT discovery failed for {keyspace}: {str(e)[:80]}")
     return udt_map
@@ -670,18 +755,59 @@ def load_table(keyspace, table, csv_path):
         query    = f"INSERT INTO {keyspace}.{table} ({col_str}) VALUES ({placeholders})"
         prepared = session.prepare(query)
 
+        # Detect columns whose CQL type is `list<frozen<UDT>>` or contains UDT-in-list.
+        # YCQL's cassandra-driver bind rejects namedtuples in list-of-UDT columns
+        # (only accepts UDT class instances at the top level, not nested via list).
+        # Strategy: build a degraded prepared stmt without those columns, used as
+        # fallback when the full bind fails.
+        udt_list_cols = set()
+        for c in fieldnames:
+            ct = type_by_col.get(c.lower(), "text").lower()
+            # frozen<...> wrappers stripped recursively
+            stripped = ct
+            while stripped.startswith("frozen<") and stripped.endswith(">"):
+                stripped = stripped[len("frozen<"):-1].strip()
+            if stripped.startswith(("list<", "set<")):
+                inner = stripped[stripped.index("<") + 1:-1].strip()
+                if inner.startswith("frozen<"):
+                    inner = inner[len("frozen<"):-1].strip()
+                if udt_map and inner in udt_map:
+                    udt_list_cols.add(c)
+        degraded_prepared = None
+        degraded_idx = None
+        if udt_list_cols:
+            kept = [c for c in fieldnames if c not in udt_list_cols]
+            degraded_idx = [fieldnames.index(c) for c in kept]
+            kept_str = ", ".join(kept)
+            kept_placeholders = ", ".join(["?"] * len(kept))
+            degraded_query = f"INSERT INTO {keyspace}.{table} ({kept_str}) VALUES ({kept_placeholders})"
+            degraded_prepared = session.prepare(degraded_query)
+            log.info(f"    {keyspace}.{table}: list<UDT> columns detected ({udt_list_cols}); will fall back to insert without them on bind failure")
+
         n = 0
         skipped = 0
         batch = []
         batch_bytes = 0
+        degraded_used = 0
         for row_idx, row in enumerate(converted):
             try:
                 bound = prepared.bind(row)
             except Exception as e:
-                skipped += 1
-                if skipped <= 5:
-                    log.warning(f"    bind failed row {row_idx} in {keyspace}.{table}: {str(e)[:120]}")
-                continue
+                # Try degraded insert (drops list<UDT> columns) — preserves PK + other fields
+                if degraded_prepared is not None:
+                    try:
+                        bound = degraded_prepared.bind([row[i] for i in degraded_idx])
+                        degraded_used += 1
+                    except Exception as e2:
+                        skipped += 1
+                        if skipped <= 5:
+                            log.warning(f"    bind failed row {row_idx} in {keyspace}.{table}: {str(e2)[:120]}")
+                        continue
+                else:
+                    skipped += 1
+                    if skipped <= 5:
+                        log.warning(f"    bind failed row {row_idx} in {keyspace}.{table}: {str(e)[:120]}")
+                    continue
             row_bytes = _estimate_row_bytes(row)
             if batch and (batch_bytes + row_bytes > _BATCH_BYTES_LIMIT or len(batch) >= _BATCH_ROW_LIMIT):
                 _flush_batch(session, batch)
@@ -695,6 +821,8 @@ def load_table(keyspace, table, csv_path):
             n += len(batch)
         if skipped:
             log.warning(f"    {keyspace}.{table}: skipped {skipped} unbindable rows")
+        if degraded_used:
+            log.warning(f"    {keyspace}.{table}: {degraded_used} rows inserted WITHOUT list<UDT> columns (data preserved minus those fields)")
         return n
     finally:
         session.shutdown()
