@@ -40,7 +40,7 @@ The main configuration file at `opentofu/azure/<env>/global-values.yaml` is fill
 | `global.cloud_storage_region` | Azure region (e.g. `"eastus"`, `"centralindia"`). |
 | `global.proxy_private_key` | SSL/TLS private key in PEM format. |
 | `global.proxy_certificate` | SSL/TLS certificate chain in PEM format (cert + CA bundle). |
-| `global.aks_version` | Kubernetes version to pin on the AKS cluster (e.g. `"1.35.1"`). Leave blank to let Azure use the latest supported version. |
+| `global.aks_version` | Kubernetes version for the AKS cluster (e.g. `"1.35.1"`). **Always specify a version.** Check available versions with `az aks get-versions --location <region> --output table`. |
 
 > Using Let's Encrypt? Set `global.lets_encrypt_ssl: true` and `global.cert_notifications.email`. Leave `proxy_private_key` and `proxy_certificate` blank.
 
@@ -52,10 +52,10 @@ Set `global.aks_version` in `opentofu/azure/<env>/global-values.yaml` to lock th
 
 ```yaml
 global:
-  aks_version: "1.35.1"   # pin AKS Kubernetes version — leave empty to use Azure's latest
+  aks_version: "1.35.1"   # always specify the exact Kubernetes version you want
 ```
 
-When the field is empty or omitted, Azure provisions the cluster with its current default (latest GA) version. For production clusters, pinning is recommended so that automatic Azure maintenance does not silently change the version during a re-apply.
+Always set this to an explicit version. Leaving it unset risks Azure silently provisioning or re-applying a different version during maintenance, which can cause unexpected upgrades or downtime.
 
 ### Checking available versions
 
