@@ -26,4 +26,10 @@ variable "sunbird_public_artifacts_container" {
     description = "The container name dedicated for this release which holds the storage artifatcs."
     default     = "release700"
 }
+variable "sunbird_branch" {
+    type        = string
+    description = "Git branch/tag used to clone Sunbird-Knowlg editor/player/plugins repos and the upstream sunbird-content-plugins inside builds."
+    default     = "master"
+}
+
 
