@@ -192,8 +192,8 @@ resource "null_resource" "build_and_upload_content_player" {
           set -e
           sed -i "s|deb.debian.org/debian|archive.debian.org/debian|g; s|security.debian.org/debian-security|archive.debian.org/debian-security|g; /stretch-updates/d" /etc/apt/sources.list
           apt-get -o Acquire::Check-Valid-Until=false update
-          apt-get install -y python2 git build-essential
-          ln -sf /usr/bin/python2 /usr/bin/python
+          apt-get install -y python git build-essential
+          ln -sf /usr/bin/python /usr/bin/python2
           npm config set python /usr/bin/python2
           git config --global url."https://".insteadOf git://
           cd player
