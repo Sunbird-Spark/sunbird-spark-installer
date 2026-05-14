@@ -32,6 +32,30 @@ resource "null_resource" "copy_from_sunbird_container" {
   }
 }
 
+resource "null_resource" "clone_and_upload_content_plugins" {
+  triggers = {
+    command = "${timestamp()}"
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      set -e
+      tmpdir=$(mktemp -d)
+      trap 'rm -rf "$tmpdir"' EXIT
+      git clone --depth 1 --branch ${var.sunbird_branch} https://github.com/Sunbird-Knowlg/sunbird-content-plugins.git "$tmpdir/content-plugins"
+      az storage blob upload-batch \
+        --account-name ${var.storage_account_name} \
+        --destination ${var.storage_container_public}/content-plugins \
+        --source "$tmpdir/content-plugins" \
+        --pattern "!.git/*" \
+        --overwrite \
+        --auth-mode login
+    EOT
+  }
+
+  depends_on = [null_resource.copy_from_sunbird_container]
+}
+
 resource "null_resource" "build_and_upload_content_editor" {
   triggers = {
     command = "${timestamp()}"
@@ -51,7 +75,8 @@ resource "null_resource" "build_and_upload_content_editor" {
         node:10.24.1-buster \
         bash -c '
           set -e
-          apt-get update
+          sed -i "s|deb.debian.org/debian|archive.debian.org/debian|g; s|security.debian.org/debian-security|archive.debian.org/debian-security|g; /buster-updates/d" /etc/apt/sources.list
+          apt-get -o Acquire::Check-Valid-Until=false update
           apt-get install -y build-essential libpng-dev git
           npm install -g bower@1.8.14 gulp@4.0.1
           git clone https://github.com/project-sunbird/sunbird-content-plugins.git plugins -b ${var.sunbird_branch}
@@ -140,7 +165,8 @@ resource "null_resource" "build_and_upload_content_player" {
         node:10.16.3-stretch \
         bash -c '
           set -e
-          apt-get update
+          sed -i "s|deb.debian.org/debian|archive.debian.org/debian|g; s|security.debian.org/debian-security|archive.debian.org/debian-security|g; /stretch-updates/d" /etc/apt/sources.list
+          apt-get -o Acquire::Check-Valid-Until=false update
           apt-get install -y python2 git build-essential
           ln -sf /usr/bin/python2 /usr/bin/python
           npm config set python /usr/bin/python2
@@ -159,6 +185,8 @@ resource "null_resource" "build_and_upload_content_player" {
         --auth-mode login
     EOT
   }
+
+  depends_on = [null_resource.copy_from_sunbird_container]
 }
 
 resource "local_file" "output_files" {
@@ -174,7 +202,7 @@ resource "null_resource" "upload_rc_schemas_to_public_blob" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload-batch --account-name ${var.storage_account_name} --destination ${var.storage_container_public}/schemas --source ${path.module}/sunbird-rc/schemas --auth-mode login"
+    command = "az storage blob upload-batch --account-name ${var.storage_account_name} --destination ${var.storage_container_public}/schemas --source ${path.module}/sunbird-rc/schemas --overwrite --auth-mode login"
   }
-  depends_on = [local_file.output_files]
+  depends_on = [local_file.output_files, null_resource.copy_from_sunbird_container]
 }
