@@ -47,7 +47,6 @@ resource "null_resource" "clone_and_upload_content_plugins" {
         --account-name ${var.storage_account_name} \
         --destination ${var.storage_container_public}/content-plugins \
         --source "$tmpdir/content-plugins" \
-        --pattern "!.git/*" \
         --overwrite \
         --auth-mode login
     EOT
@@ -69,7 +68,18 @@ resource "null_resource" "build_and_upload_content_editor" {
 
       git clone --depth 1 --branch ${var.sunbird_branch} https://github.com/Sunbird-Knowlg/sunbird-content-editor.git "$tmpdir/content-editor"
 
+      host_uid=$(id -u)
+      host_gid=$(id -g)
+      build_sha=$(git -C "$tmpdir/content-editor" rev-parse HEAD)
+
       docker run --rm \
+        -e HOST_UID=$host_uid \
+        -e HOST_GID=$host_gid \
+        -e editorType=contentEditor \
+        -e framework_version_number=${var.sunbird_branch} \
+        -e editor_version_number=${var.sunbird_branch} \
+        -e build_number=$build_sha \
+        -e CHROME_BIN=google-chrome \
         -v "$tmpdir/content-editor":/work \
         -w /work \
         node:10.24.1-buster \
@@ -85,10 +95,11 @@ resource "null_resource" "build_and_upload_content_editor" {
           cd app
           bower cache clean --allow-root
           bower prune -f --allow-root
-          bower install --force --allow-root
+          bower install --force -V --allow-root
           cd ..
           npm install gulp-gzip --save-dev
           npm run build-npm-pkg
+          chown -R $HOST_UID:$HOST_GID /work
         '
 
       az storage blob upload-batch \
@@ -116,7 +127,15 @@ resource "null_resource" "build_and_upload_generic_editor" {
 
       git clone --depth 1 --branch ${var.sunbird_branch} https://github.com/Sunbird-Knowlg/sunbird-generic-editor.git "$tmpdir/generic-editor"
 
+      host_uid=$(id -u)
+      host_gid=$(id -g)
+      build_sha=$(git -C "$tmpdir/generic-editor" rev-parse HEAD)
+
       docker run --rm \
+        -e HOST_UID=$host_uid \
+        -e HOST_GID=$host_gid \
+        -e version_number=${var.sunbird_branch} \
+        -e build_number=$build_sha \
         -v "$tmpdir/generic-editor":/work \
         -w /work \
         node:18.20.8-bullseye \
@@ -132,6 +151,7 @@ resource "null_resource" "build_and_upload_generic_editor" {
           bower install --force --allow-root
           cd ..
           npm run build-npm-pkg
+          chown -R $HOST_UID:$HOST_GID /work
         '
 
       az storage blob upload-batch \
@@ -159,7 +179,12 @@ resource "null_resource" "build_and_upload_content_player" {
 
       git clone --depth 1 --branch ${var.sunbird_branch} https://github.com/Sunbird-Knowlg/sunbird-content-player.git "$tmpdir/content-player"
 
+      host_uid=$(id -u)
+      host_gid=$(id -g)
+
       docker run --rm \
+        -e HOST_UID=$host_uid \
+        -e HOST_GID=$host_gid \
         -v "$tmpdir/content-player":/work \
         -w /work \
         node:10.16.3-stretch \
@@ -175,6 +200,7 @@ resource "null_resource" "build_and_upload_content_player" {
           npm install --legacy-peer-deps
           npm run build-preview ekstep
           npm run build-npm-package
+          chown -R $HOST_UID:$HOST_GID /work
         '
 
       az storage blob upload-batch \
