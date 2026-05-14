@@ -228,7 +228,7 @@ resource "null_resource" "upload_rc_schemas_to_public_blob" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload-batch --account-name ${var.storage_account_name} --destination ${var.storage_container_public}/schemas --source ${path.module}/sunbird-rc/schemas --overwrite --auth-mode login"
+    command = "az storage blob upload-batch --account-name ${var.storage_account_name} --destination ${var.storage_container_public}/schemas --source ${path.module}/sunbird-rc/schemas --auth-mode login"
   }
   depends_on = [local_file.output_files, null_resource.copy_from_sunbird_container]
 }
