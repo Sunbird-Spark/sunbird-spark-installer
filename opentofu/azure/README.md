@@ -17,18 +17,96 @@ Two approaches are available, both covering infrastructure provisioning and depl
 
 OpenTofu modules in `opentofu/azure/modules/` create:
 
-| Resource | Purpose |
-|----------|---------|
-| AKS cluster | 2 × Standard_B16as_v2 nodes (16 vCPU / 64 GB RAM each) |
-| Virtual Network | Dedicated VNet and subnet for AKS |
-| Storage Account | Cloud storage for Sunbird content and backups |
-| Key Vault | Secrets management |
-| Managed Identity | Workload identity for AKS pods |
-| OpenTofu state backend | Azure Storage container for Terraform state |
+---
+
+#### Azure Infra Setup
 
 ## global-values.yaml Reference
 
-The main configuration file at `opentofu/azure/<env>/global-values.yaml` is filled in before running the installer. Key fields:
+```
+  building_block: "" # building block name
+  env: "" 
+  environment: "" # use lowercase alphanumeric string between 1-9 characters
+  domain: ""
+  subscription_id: ""
+  sunbird_cloud_storage_provider: azure 
+  sunbird_google_captcha_site_key: 
+  google_captcha_private_key: 
+  sunbird_google_oauth_clientId: 
+  sunbird_google_oauth_clientSecret: 
+  mail_server_from_email: ""
+  mail_server_password: ""
+  mail_server_host: smtp.sendgrid.net
+  mail_server_port: "587"
+  mail_server_username: apikey
+  sunbird_msg_91_auth: ""
+  sunbird_msg_sender: ""
+  youtube_apikey: ""
+  proxy_private_key: |
+   <private_key_generated_when_setting_up_ssl>
+  proxy_certificate: |
+   <certificate_generated_when_setting_up_ssl>
+```
+## AKS Kubernetes Version Upgrade
+
+The AKS cluster is provisioned with a default Kubernetes version defined in `opentofu/azure/modules/aks/variables.tf`. AKS versions have a support lifecycle of approximately **12 months** after GA. When a version approaches end of life, you must upgrade to a supported version.
+
+### When to Upgrade
+
+AKS supports the **3 latest GA minor versions** at any time. Once your version falls outside this window, Microsoft may auto-upgrade your cluster. It is recommended to upgrade proactively before that happens.
+
+Check the currently supported AKS versions at: https://learn.microsoft.com/en-us/azure/aks/supported-kubernetes-versions
+
+### How to Upgrade
+
+**Step 1 — Update the `aks_version` default in `opentofu/azure/modules/aks/variables.tf`:**
+```hcl
+variable "aks_version" {
+  type        = string
+  description = "AKS cluster version"
+  default     = "<new-version>"  # e.g. "1.34.0"
+}
+```
+
+**Step 2 — Apply via OpenTofu:**
+```bash
+cd opentofu/azure/aks
+terragrunt plan
+```
+```
+~ resource "azurerm_kubernetes_cluster" "aks" {
+    ~ kubernetes_version = "1.33.0" -> "1.34.0"
+}
+Plan: 0 to add, 1 to change, 0 to destroy.
+```
+
+✅ **Safe to apply** — the plan shows `1 to change` with the version update.
+
+❌ **Do NOT apply** if the plan shows `1 to destroy` — this means the cluster will be destroyed and recreated, causing downtime. Investigate before proceeding.
+
+**Step 3 — If the plan shows `1 to change`, apply:**
+
+```bash
+terragrunt apply
+```
+
+> **❌ Do NOT apply** if the plan shows `1 to destroy` — this means the cluster will be destroyed and recreated, causing downtime. Investigate before proceeding.
+
+**Step 3 — If the plan shows `1 to change`, apply:**
+
+```bash
+terragrunt apply
+```
+
+> **Note:** AKS only supports upgrading **one minor version at a time** (e.g., 1.33 → 1.34 → 1.35). You cannot skip versions.
+
+### Upgrade Behavior: No Downtime Expected
+
+When `aks_version` is updated, OpenTofu sends an in-place update to the AKS resource — **the cluster is not destroyed or recreated**. Azure performs a rolling upgrade:
+
+1. **Control plane upgrades first** — the API server, etcd, and other control plane components are updated with no node disruption.
+2. **Node pools upgrade in a rolling fashion** — Azure adds a temporary surge node (by default 1 extra node, or 33% of the pool), cordons and drains an old node, upgrades it, then moves on to the next.
+3. **Workloads are rescheduled** — pods are gracefully evicted onto available nodes before each node is upgraded, so running workloads are preserved throughout.
 
 | Field | Description |
 |-------|-------------|
