@@ -3790,8 +3790,8 @@ kong_apis:
     - anonymousUserAccess
   - name: rate-limiting
     config.policy: local
-    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
-    config.limit_by: credential
+    config.hour: "5"
+    config.limit_by: ip
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
