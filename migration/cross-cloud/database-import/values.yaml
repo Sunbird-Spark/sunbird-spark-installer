@@ -155,3 +155,18 @@ postMigration:
     knowlgServiceHost: "knowlg-service.sunbird.svc.cluster.local"
     knowlgServicePort: 9000
     dryRun: false
+
+  userProgressSync:
+    enabled: false
+    ybPod: "yb-tserver-0"
+    keyspace: "sunbird_courses"
+    table: "user_enrolments"
+    keycloakUrl: "http://keycloak.sunbird.svc.cluster.local:8080"
+    keycloakRealm: "sunbird"
+    keycloakClientId: "lms"
+    lernServiceHost: "lern-service.sunbird.svc.cluster.local"
+    lernServicePort: 9000
+    activityApiDelaySeconds: 0.1
+    activityApiTimeoutSeconds: 30
+    progressEvery: 100
+    dryRun: false
