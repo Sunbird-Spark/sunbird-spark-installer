@@ -43,3 +43,33 @@ dependencies:
     repository: https://charts.yugabyte.com
     version: 2025.2.0   # Chart version
     condition: yugabyte.enabled
+  - name: lern
+    version: 0.1.0
+    condition: lern.enabled
+  - name: keycloak
+    version: 0.1.0
+    condition: keycloak.enabled
+  - name: keycloak-kids-keys
+    version: 0.1.0
+    condition: keycloak-kids-keys.enabled
+  - name: flink
+    version: 0.1.0
+    condition: flink.enabled
+  - name: adminutil
+    version: 0.1.0
+    condition: adminutil.enabled
+  - name: cert
+    version: 0.1.0
+    condition: cert.enabled
+  - name: certificateapi
+    version: 0.1.0
+    condition: certificateapi.enabled
+  - name: certificatesign
+    version: 0.1.0
+    condition: certificatesign.enabled
+  - name: certregistry
+    version: 0.1.0
+    condition: certregistry.enabled
+  - name: registry
+    version: 0.1.0
+    condition: registry.enabled

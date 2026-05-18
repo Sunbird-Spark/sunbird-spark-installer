@@ -46,3 +46,12 @@ dependencies:
   - name: janusgraph
     version: 1.4.10
     condition: janusgraph.enabled
+  - name: knowlg
+    version: 0.1.0
+    condition: knowlg.enabled
+  - name: search
+    version: 0.1.0
+    condition: search.enabled
+  - name: flink
+    version: 0.1.0
+    condition: flink.enabled

@@ -6,6 +6,7 @@ channel: &channel
   default: "in.ekstep"
 
 knowlg:
+  enabled: true
   opa_enabled: true
 
 provisioningAnnotations: &provisioningAnnotations
@@ -202,6 +203,12 @@ yugabytecql:
 
 dialservice: &dialservice
   base_url: "http://dial-service:9000"
+
+search:
+  enabled: true
+
+flink:
+  enabled: true
 
 global:
   channel: *channel

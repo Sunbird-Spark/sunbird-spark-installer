@@ -221,6 +221,57 @@ Run in order:
 
 ---
 
+## Deploying Specific Helm Charts
+
+Use this when you need to deploy or upgrade one or more specific services within a bundle without running the full bundle install. Typical time: 3–5 minutes.
+### Via GitHub Actions
+
+1. Enable `5️⃣ Install Helm components`
+2. Set `helm_mode` to `selective`
+3. Enter chart names in the `specific_charts` field (space-separated, e.g. `lern keycloak`)
+4. Check **exactly one** bundle checkbox that contains those charts
+
+### Via Manual Deployment (Azure VM)
+
+```bash
+cd opentofu/azure/<env-name>
+
+# Single chart
+./install.sh install_service <bundle> <chart>
+
+# Multiple charts within the same bundle
+./install.sh install_service <bundle> <chart1> <chart2> <chart3>
+```
+
+Examples:
+
+```bash
+./install.sh install_service learnbb lern
+./install.sh install_service learnbb lern keycloak
+./install.sh install_service edbb player
+./install.sh install_service knowledgebb knowlg search
+```
+
+### Available Charts per Bundle
+
+| Bundle | Targetable Charts |
+|--------|-------------------|
+| `edbb` | `kafka` `yugabyte` `router` `nginx-private-ingress` `nginx-public-ingress` `echo` `player` `kong` `kong-apis` `kong-consumers` `knowledgemw` `secor` |
+| `learnbb` | `kafka` `elasticsearch` `yugabyte` `lern` `keycloak` `keycloak-kids-keys` `flink` `adminutil` `cert` `certificateapi` `certificatesign` `certregistry` `registry` |
+| `knowledgebb` | `elasticsearch` `kafka` `yugabyte` `janusgraph` `knowlg` `search` `flink` |
+| `obsrvbb` | `yugabyte` `superset` |
+| `additional` | `volume-autoscaler` `nlweb` `nlwebflink` `kafka` |
+
+> `monitoring` and `inquirybb` do not use per-chart conditions — use `install_component` to redeploy them.
+
+### Limitations
+
+- **One bundle per call** — charts from two different bundles cannot be targeted in a single call. Run two separate `install_service` calls if needed.
+- **No job-completion wait** — `install_service` returns as soon as Helm submits the resources, without `--wait-for-jobs`. This is intentional for fast iteration; monitor Job-based charts (e.g. `keycloak-kids-keys`, migrations) manually if needed.
+- **GitHub Actions: one bundle checkbox only** — checking multiple bundle checkboxes alongside `specific_charts` is not supported; only one bundle will be used.
+
+---
+
 ## Step 9 (Optional) — Deploy Addons
 
 Go to **Actions → Spark Platform Addons → Run workflow**.
