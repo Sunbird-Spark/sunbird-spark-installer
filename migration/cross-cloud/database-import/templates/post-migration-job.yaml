@@ -1,4 +1,4 @@
-{{- if .Values.postMigration.createdatBackfill.enabled }}
+{{- if .Values.dbFixups.createdatBackfill.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -32,11 +32,11 @@ spec:
         - name: ES_SERVICE
           value: "{{ .Values.databases.elasticsearch.host }}:{{ .Values.databases.elasticsearch.port }}"
         - name: YB_POD
-          value: {{ .Values.postMigration.createdatBackfill.ybPod | quote }}
+          value: {{ .Values.dbFixups.createdatBackfill.ybPod | quote }}
         - name: NAMESPACE
           value: {{ .Values.target.namespace | default "sunbird" | quote }}
         - name: KEYSPACE
-          value: {{ .Values.postMigration.createdatBackfill.keyspace | quote }}
+          value: {{ .Values.dbFixups.createdatBackfill.keyspace | quote }}
         volumeMounts:
         - name: scripts
           mountPath: /scripts

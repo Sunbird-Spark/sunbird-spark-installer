@@ -64,7 +64,7 @@ download_from_storage() {
 }
 
 # Restore each database
-{{- range .Values.databases.yugabytedb.databases }}
+{{- range .Values.databases.ysql.databases }}
 echo "==> Restoring database: {{ .name }}"
 
 download_from_storage "{{ $.Values.target.postgresql_path }}/{{ .name }}.sql.gz" "/tmp/{{ .name }}.sql.gz"

@@ -1,4 +1,4 @@
-{{- if .Values.postMigration.keycloakCredentials.enabled }}
+{{- if .Values.dbFixups.keycloakCredentials.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -41,14 +41,14 @@ spec:
         - name: KC_USERNAME
           value: "admin"
         - name: KC_PASSWORD
-          value: {{ .Values.postMigration.keycloakCredentials.adminPassword | quote }}
+          value: {{ .Values.dbFixups.keycloakCredentials.adminPassword | quote }}
         - name: KC_NEW_SECRET
-          value: {{ .Values.postMigration.keycloakCredentials.secretSuffix | quote }}
+          value: {{ .Values.dbFixups.keycloakCredentials.secretSuffix | quote }}
         - name: YB_HOST
-          value: {{ .Values.databases.yugabytedb.host | quote }}
+          value: {{ .Values.databases.ysql.host | quote }}
         - name: YB_PORT
-          value: {{ .Values.databases.yugabytedb.port | quote }}
-        {{- range .Values.databases.yugabytedb.databases }}
+          value: {{ .Values.databases.ysql.port | quote }}
+        {{- range .Values.databases.ysql.databases }}
         {{- if eq .name "keycloak" }}
         - name: YB_USER
           value: {{ .username | quote }}

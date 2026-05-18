@@ -1,4 +1,4 @@
-{{- if .Values.databases.yugabytedb.enabled }}
+{{- if .Values.databases.ysql.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -30,13 +30,13 @@ spec:
         args: ["/scripts/postgres-to-yugabyte.sh"]
         env:
         - name: POSTGRES_HOST
-          value: {{ .Values.databases.yugabytedb.host | quote }}
+          value: {{ .Values.databases.ysql.host | quote }}
         - name: POSTGRES_PORT
-          value: {{ .Values.databases.yugabytedb.port | quote }}
+          value: {{ .Values.databases.ysql.port | quote }}
         - name: POSTGRES_USER
-          value: {{ .Values.databases.yugabytedb.username | default "yugabyte" | quote }}
+          value: {{ .Values.databases.ysql.username | default "yugabyte" | quote }}
         - name: POSTGRES_PASSWORD
-          value: {{ .Values.databases.yugabytedb.password | default "" | quote }}
+          value: {{ .Values.databases.ysql.password | default "" | quote }}
         - name: STORAGE_TYPE
           value: {{ .Values.target.cloud | quote }}
         - name: STORAGE_CONTAINER
