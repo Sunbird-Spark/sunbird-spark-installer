@@ -131,6 +131,19 @@ graph = JanusGraphFactory.open('/opt/bitnami/janusgraph/conf/janusgraph-cql.prop
 binding.graph = graph
 binding.g = graph.traversal()
 
+// Read schema once; drives per-key type coercion + cardinality-aware writes.
+// Source of truth = schema_init.groovy. No hardcoded numericKeys/booleanKeys here.
+propTypes = [:]   // keyName → [dataType, cardinality]
+schemaMgmt = graph.openManagement()
+try {
+    schemaMgmt.getRelationTypes(org.janusgraph.core.PropertyKey.class).each { pk ->
+        propTypes[pk.name()] = [pk.dataType(), pk.cardinality()]
+    }
+} finally {
+    schemaMgmt.rollback()
+}
+println "Loaded ${propTypes.size()} property keys from schema."
+
 // Cleanup pass: drop any vertices left over from a previous broken run.
 // "Junk" = a vertex that has `node_id` but no `IL_UNIQUE_ID`. These were
 // produced by the old regex-based parser when JSON deserialisation failed
@@ -172,18 +185,50 @@ if (!binding.hasVariable('state')) {
 stats_imported = 0
 stats_skipped = 0
 stats_errors = 0
-numericKeys = ['version', 'pkgVersion', 'size', 'compatibilityLevel',
-               'sYS_INTERNAL_LAST_UPDATED_ON', 'me_totalRatingsCount',
-               'me_averageRating', 'totalCompressedSize', 'leafNodesCount',
-               'totalQuestions', 'totalScore', 'maxScore', 'attempts',
-               'maxAttempts', 'copyrightYear', 'ttl',
-               'duration', 'maxTime', 'minScore',
-               'me_totalEnrollments', 'me_totalCompletions',
-               'me_totalDownloads', 'me_totalRatings'] as Set
-booleanKeys = ['showNotification', 'showHints', 'showFeedback',
-               'showTimer', 'showSolutions', 'requiresSubmit',
-               'isPublishedToTOC', 'discussionForum', 'trackable',
-               'unitNotification', 'enableSync'] as Set
+
+// Coerce raw value → declared schema dataType. Returns null on unrecoverable cast.
+coerceToType = { val, dataType ->
+    if (val == null) return null
+    if (dataType == null) {
+        // Undeclared key: fall back to legacy behavior
+        if (val instanceof BigDecimal) return val.doubleValue()
+        if (val instanceof Map) return val.toString()
+        return val
+    }
+    if (dataType == Long.class) {
+        if (val instanceof Number) return ((Number) val).longValue()
+        if (val instanceof String) { try { return val.toLong() } catch (e) { return null } }
+        return null
+    }
+    if (dataType == Integer.class) {
+        if (val instanceof Number) return ((Number) val).intValue()
+        if (val instanceof String) { try { return val.toInteger() } catch (e) { return null } }
+        return null
+    }
+    if (dataType == Double.class) {
+        if (val instanceof Number) return ((Number) val).doubleValue()
+        if (val instanceof String) { try { return val.toDouble() } catch (e) { return null } }
+        return null
+    }
+    if (dataType == Boolean.class) {
+        if (val instanceof Boolean) return val
+        if (val instanceof String) {
+            String sv = val.trim().toLowerCase()
+            if (sv in ['true','yes','1']) return true
+            if (sv in ['false','no','0']) return false
+            return null
+        }
+        return null
+    }
+    if (dataType == String.class) {
+        // Sunbird convention: SINGLE-cardinality String prop holds JSON-array/object
+        // string when value is collection (e.g. audience=["Student"] → '["Student"]').
+        // Knowlg deserializes this back to list at read time.
+        if (val instanceof List || val instanceof Map) return groovy.json.JsonOutput.toJson(val)
+        return val.toString()
+    }
+    return val
+}
 
 new File('/tmp/nodes.csv').eachLine { line, idx ->
     try {
@@ -255,32 +300,33 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
         def v = binding.tx.addVertex(T.label, label, 'node_id', nodeIdVal)
         propsMap.each { k, vprop ->
             if (vprop == null) return
-            if (vprop instanceof List) vprop = vprop.join(',')
-            else if (vprop instanceof Map) vprop = vprop.toString()
-            else if (vprop instanceof BigDecimal) vprop = vprop.doubleValue()
+            String keyName = k.toString().trim()
+            def schema = propTypes[keyName]
+            def dataType = schema ? schema[0] : null
+            def cardinality = schema ? schema[1] : null
 
-            if (numericKeys.contains(k) && vprop instanceof String) {
-                try {
-                    vprop = vprop.contains('.') ? vprop.toDouble() : vprop.toLong()
-                } catch (Exception ne) { }
-            }
-            if (booleanKeys.contains(k) && vprop instanceof String) {
-                String sv = vprop.trim().toLowerCase()
-                if (sv == 'true' || sv == 'yes' || sv == '1') vprop = true
-                else if (sv == 'false' || sv == 'no' || sv == '0') vprop = false
-            }
-            // Per-property try/catch: a single schema-incompatible value
-            // (e.g. ttl=0.08 when the key is declared Long) must NOT abort
-            // the whole vertex — we lose only that property, not the node.
-            try {
-                v.property(k.toString().trim(), vprop)
-            } catch (Exception pe) {
-                // Last-resort: try forcing Long when schema demands it.
-                if (pe.message != null && pe.message.contains('java.lang.Long') && vprop instanceof Number) {
-                    try { v.property(k.toString().trim(), ((Number) vprop).longValue()) } catch (Exception ignore) { }
-                } else if (pe.message != null && pe.message.contains('java.lang.Double') && vprop instanceof Number) {
-                    try { v.property(k.toString().trim(), ((Number) vprop).doubleValue()) } catch (Exception ignore) { }
+            if (vprop instanceof List && cardinality == org.janusgraph.core.Cardinality.SET) {
+                // Write each element separately so SET / LIST cardinality stores distinct members
+                vprop.each { elem ->
+                    def coerced = coerceToType(elem, dataType)
+                    if (coerced == null) return
+                    try { v.property(keyName, coerced) }
+                    catch (Exception pe) { println "  skip ${keyName}=${coerced}: ${pe.message}" }
                 }
+            } else if (vprop instanceof List && cardinality == org.janusgraph.core.Cardinality.LIST) {
+                vprop.each { elem ->
+                    def coerced = coerceToType(elem, dataType)
+                    if (coerced == null) return
+                    try { v.property(keyName, coerced) }
+                    catch (Exception pe) { println "  skip ${keyName}=${coerced}: ${pe.message}" }
+                }
+            } else {
+                // SINGLE / undeclared: if List, fall back to join
+                def raw = vprop instanceof List ? vprop.join(',') : vprop
+                def coerced = coerceToType(raw, dataType)
+                if (coerced == null) return
+                try { v.property(keyName, coerced) }
+                catch (Exception pe) { println "  skip ${keyName}=${coerced}: ${pe.message}" }
             }
         }
         stats_imported++

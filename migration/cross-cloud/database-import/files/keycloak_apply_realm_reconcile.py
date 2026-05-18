@@ -20,7 +20,7 @@ Strategy:
   5) NEVER touch /users.
 
 Usage (inside cluster):
-  python3 keycloak_apply_realm_diff.py \
+  python3 keycloak_apply_realm_reconcile.py \
     --keycloak-url http://keycloak.sunbird.svc.cluster.local:8080 \
     --admin-user admin --admin-pass "$KC_ADMIN_PASSWORD" \
     --realm sunbird \

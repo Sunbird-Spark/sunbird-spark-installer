@@ -20,8 +20,8 @@ data:
 {{ .Files.Get "files/keycloak-credentials.sh" | indent 4 }}
   update_keycloak_credentials.py: |
 {{ .Files.Get "files/update_keycloak_credentials.py" | indent 4 }}
-  keycloak_apply_realm_diff.py: |
-{{ .Files.Get "files/keycloak_apply_realm_diff.py" | indent 4 }}
+  keycloak_apply_realm_reconcile.py: |
+{{ .Files.Get "files/keycloak_apply_realm_reconcile.py" | indent 4 }}
   createdat-backfill.sh: |
 {{ .Files.Get "files/createdat-backfill.sh" | indent 4 }}
   add_user_createdat_field.py: |
