@@ -3,9 +3,7 @@
 1. Runs two System Settings requests from the Lern folder (requires apikey only):
      - 29 - System Settings - privacyPolicyConfig
      - 36 - System Settings - googleClientId
-2. For every form in '3 - Forms', reads first:
-     - 404 → create
-     - 200 → update
+2. For every form in '3 - Forms', reads first and creates if missing (404).
    Skips: 4 - Page Create, 3 - Page Section Create.
 
 Usage (called via install.sh):
@@ -94,8 +92,14 @@ def run_system_settings(collection, env, host, apikey):
             continue
 
         raw_url = req["request"]["url"]
-        url = resolve_vars(raw_url if isinstance(raw_url, str) else raw_url.get("raw", ""), env)
+        raw_url_str = raw_url if isinstance(raw_url, str) else raw_url.get("raw", "")
+        url = resolve_vars(raw_url_str, env)
         raw_body = resolve_vars(req["request"]["body"]["raw"], env)
+
+        # DEBUG: show what's actually being sent (helps diagnose host substitution)
+        print(f"  RAW URL : {raw_url_str}")
+        print(f"  URL     : {url}")
+        print(f"  BODY    : {raw_body}")
 
         status = http_post(url, apikey, raw_body)
         print(f"{target:<55} {status}")
@@ -155,8 +159,8 @@ def main():
     read_url = f"{host}/api/data/v1/form/read"
 
     print(f"Forms: {len(all_requests)} requests found in '3 - Forms'\n")
-    print(f"{'API Name':<55} {'Read':<8} {'Create':<8} {'Update'}")
-    print("-" * 85)
+    print(f"{'API Name':<55} {'Read':<8} {'Create'}")
+    print("-" * 75)
 
     for req in all_requests:
         name = req["name"]
@@ -189,11 +193,7 @@ def main():
                 else req["request"]["url"].get("raw", ""), env
             )
             create_status = http_post(create_url, apikey, raw)
-            print(f"{name:<55} {str(read_status):<8} {str(create_status):<8}")
-        elif read_status == 200:
-            update_url = f"{host}/api/data/v1/form/update"
-            update_status = http_post(update_url, apikey, raw)
-            print(f"{name:<55} {str(read_status):<8} {'':8} {update_status}")
+            print(f"{name:<55} {str(read_status):<8} {create_status}")
         else:
             print(f"{name:<55} {read_status}")
 
