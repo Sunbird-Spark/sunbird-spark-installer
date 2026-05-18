@@ -3,7 +3,9 @@
 1. Runs two System Settings requests from the Lern folder (requires apikey only):
      - 29 - System Settings - privacyPolicyConfig
      - 36 - System Settings - googleClientId
-2. For every form in '3 - Forms', reads first and creates if missing (404).
+2. For every form in '3 - Forms', reads first:
+     - 404 → create
+     - 200 → update
    Skips: 4 - Page Create, 3 - Page Section Create.
 
 Usage (called via install.sh):
@@ -63,26 +65,17 @@ def collect_requests(items):
 
 
 def http_post(url, apikey, raw_body):
-    status, _ = http_post_full(url, apikey, raw_body)
-    return status
-
-
-def http_post_full(url, apikey, raw_body):
-    """Returns (status, body_str). body_str is '' on non-HTTPError exception."""
     req = urllib.request.Request(url, data=raw_body.encode(), headers={
         "Content-Type": "application/json",
         "Authorization": f"Bearer {apikey}",
     })
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
-            return r.status, r.read().decode("utf-8", errors="replace")
+            return r.status
     except urllib.error.HTTPError as e:
-        try:
-            return e.code, e.read().decode("utf-8", errors="replace")
-        except Exception:
-            return e.code, ""
+        return e.code
     except Exception as e:
-        return f"ERROR: {e}", ""
+        return f"ERROR: {e}"
 
 
 def run_system_settings(collection, env, host, apikey):
@@ -159,12 +152,21 @@ def main():
 
     all_requests = collect_requests(forms_folder["item"])
     skip = {"4 - Page Create", "3 - Page Section Create"}
+    # Spark>>Portal>>Creation forms — leave untouched if already exist (read=200).
+    # Only create them if missing (read=404). Updating wipes creator-customized fields.
+    no_update = {
+        "1 - Resource Create",
+        "2 - Resource Save",
+        "3 - Resource Review",
+        "7 - Assessment Filter",
+        "8 - Assessment Question save",
+        "10 - Textbook create",
+    }
     read_url = f"{host}/api/data/v1/form/read"
-    update_url = f"{host}/api/data/v1/form/update"
 
     print(f"Forms: {len(all_requests)} requests found in '3 - Forms'\n")
     print(f"{'API Name':<55} {'Read':<8} {'Create':<8} {'Update'}")
-    print("-" * 80)
+    print("-" * 85)
 
     for req in all_requests:
         name = req["name"]
@@ -189,14 +191,10 @@ def main():
             }
         })
 
-        read_status, read_resp = http_post_full(read_url, apikey, read_body)
-
-        # Substitute {{host}} (and other env vars) inside the body — without this,
-        # raw {{host}} stays literal in payloads like Auth Config.
+        read_status = http_post(read_url, apikey, read_body)
+        # Substitute {{host}} (and other env vars) inside the body so payloads
+        # like Auth Config don't ship literal {{host}} to the server.
         resolved_body = resolve_vars(raw, env)
-
-        create_status = ""
-        update_status = ""
 
         if read_status == 404:
             create_url = resolve_vars(
@@ -204,23 +202,16 @@ def main():
                 else req["request"]["url"].get("raw", ""), env
             )
             create_status = http_post(create_url, apikey, resolved_body)
+            print(f"{name:<55} {str(read_status):<8} {str(create_status):<8}")
+        elif read_status == 200 and name in no_update:
+            # Creation-flow form already present — leave it as-is.
+            print(f"{name:<55} {str(read_status):<8} {'':8} skip")
         elif read_status == 200:
-            # Compare server's stored form data with target — skip update if identical
-            try:
-                server_data = json.loads(read_resp)["result"]["form"]["data"]["fields"]
-            except (KeyError, json.JSONDecodeError, TypeError):
-                server_data = None
-            try:
-                target_data = json.loads(resolved_body)["request"]["data"]["fields"]
-            except (KeyError, json.JSONDecodeError, TypeError):
-                target_data = None
-
-            if server_data is not None and server_data == target_data:
-                update_status = "skip"
-            else:
-                update_status = http_post(update_url, apikey, resolved_body)
-
-        print(f"{name:<55} {str(read_status):<8} {str(create_status):<8} {update_status}")
+            update_url = f"{host}/api/data/v1/form/update"
+            update_status = http_post(update_url, apikey, resolved_body)
+            print(f"{name:<55} {str(read_status):<8} {'':8} {update_status}")
+        else:
+            print(f"{name:<55} {read_status}")
 
     print()
 
