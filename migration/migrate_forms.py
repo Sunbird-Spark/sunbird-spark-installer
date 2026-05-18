@@ -63,17 +63,26 @@ def collect_requests(items):
 
 
 def http_post(url, apikey, raw_body):
+    status, _ = http_post_full(url, apikey, raw_body)
+    return status
+
+
+def http_post_full(url, apikey, raw_body):
+    """Returns (status, body_str). body_str is '' on non-HTTPError exception."""
     req = urllib.request.Request(url, data=raw_body.encode(), headers={
         "Content-Type": "application/json",
         "Authorization": f"Bearer {apikey}",
     })
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
-            return r.status
+            return r.status, r.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as e:
-        return e.code
+        try:
+            return e.code, e.read().decode("utf-8", errors="replace")
+        except Exception:
+            return e.code, ""
     except Exception as e:
-        return f"ERROR: {e}"
+        return f"ERROR: {e}", ""
 
 
 def run_system_settings(collection, env, host, apikey):
@@ -92,14 +101,8 @@ def run_system_settings(collection, env, host, apikey):
             continue
 
         raw_url = req["request"]["url"]
-        raw_url_str = raw_url if isinstance(raw_url, str) else raw_url.get("raw", "")
-        url = resolve_vars(raw_url_str, env)
+        url = resolve_vars(raw_url if isinstance(raw_url, str) else raw_url.get("raw", ""), env)
         raw_body = resolve_vars(req["request"]["body"]["raw"], env)
-
-        # DEBUG: show what's actually being sent (helps diagnose host substitution)
-        print(f"  RAW URL : {raw_url_str}")
-        print(f"  URL     : {url}")
-        print(f"  BODY    : {raw_body}")
 
         status = http_post(url, apikey, raw_body)
         print(f"{target:<55} {status}")
@@ -157,10 +160,11 @@ def main():
     all_requests = collect_requests(forms_folder["item"])
     skip = {"4 - Page Create", "3 - Page Section Create"}
     read_url = f"{host}/api/data/v1/form/read"
+    update_url = f"{host}/api/data/v1/form/update"
 
     print(f"Forms: {len(all_requests)} requests found in '3 - Forms'\n")
-    print(f"{'API Name':<55} {'Read':<8} {'Create'}")
-    print("-" * 75)
+    print(f"{'API Name':<55} {'Read':<8} {'Create':<8} {'Update'}")
+    print("-" * 80)
 
     for req in all_requests:
         name = req["name"]
@@ -185,17 +189,38 @@ def main():
             }
         })
 
-        read_status = http_post(read_url, apikey, read_body)
+        read_status, read_resp = http_post_full(read_url, apikey, read_body)
+
+        # Substitute {{host}} (and other env vars) inside the body — without this,
+        # raw {{host}} stays literal in payloads like Auth Config.
+        resolved_body = resolve_vars(raw, env)
+
+        create_status = ""
+        update_status = ""
 
         if read_status == 404:
             create_url = resolve_vars(
                 req["request"]["url"] if isinstance(req["request"]["url"], str)
                 else req["request"]["url"].get("raw", ""), env
             )
-            create_status = http_post(create_url, apikey, raw)
-            print(f"{name:<55} {str(read_status):<8} {create_status}")
-        else:
-            print(f"{name:<55} {read_status}")
+            create_status = http_post(create_url, apikey, resolved_body)
+        elif read_status == 200:
+            # Compare server's stored form data with target — skip update if identical
+            try:
+                server_data = json.loads(read_resp)["result"]["form"]["data"]["fields"]
+            except (KeyError, json.JSONDecodeError, TypeError):
+                server_data = None
+            try:
+                target_data = json.loads(resolved_body)["request"]["data"]["fields"]
+            except (KeyError, json.JSONDecodeError, TypeError):
+                target_data = None
+
+            if server_data is not None and server_data == target_data:
+                update_status = "skip"
+            else:
+                update_status = http_post(update_url, apikey, resolved_body)
+
+        print(f"{name:<55} {str(read_status):<8} {str(create_status):<8} {update_status}")
 
     print()
 
