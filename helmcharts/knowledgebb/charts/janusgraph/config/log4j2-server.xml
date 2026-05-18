@@ -4,48 +4,16 @@
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss} %-5level %class.%method{36} - %msg%n"/>
         </Console>
-        
-        <!-- INFO Appender -->
-        <RollingFile name="INFO_LOG" fileName="${sys:janusgraph.log.dir:-/tmp}/info.log"
-                     filePattern="${sys:janusgraph.log.dir:-/tmp}/info-%d{yyyy-MM-dd}.log.gz">
-            <PatternLayout pattern="%d{ISO8601} %-5level [%t] %c{1} - %msg%n"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="100 MB"/>
-            </Policies>
-        </RollingFile>
-        
-        <!-- DEBUG Appender -->
-        <RollingFile name="DEBUG_LOG" fileName="${sys:janusgraph.log.dir:-/tmp}/debug.log"
-                     filePattern="${sys:janusgraph.log.dir:-/tmp}/debug-%d{yyyy-MM-dd}.log.gz">
-            <PatternLayout pattern="%d{ISO8601} %-5level [%t] %c{1} - %msg%n"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="100 MB"/>
-            </Policies>
-        </RollingFile>
-        
-        <!-- ERROR Appender -->
-        <RollingFile name="ERROR_LOG" fileName="${sys:janusgraph.log.dir:-/tmp}/error.log"
-                     filePattern="${sys:janusgraph.log.dir:-/tmp}/error-%d{yyyy-MM-dd}.log.gz">
-            <PatternLayout pattern="%d{ISO8601} %-5level [%t] %c{1} - %msg%n%xEx"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy />
-                <SizeBasedTriggeringPolicy size="100 MB"/>
-            </Policies>
-        </RollingFile>
-        
         <!-- CDC Appender -->
         <RollingFile name="CDC_LOG" fileName="${sys:janusgraph.log.dir:-/tmp}/cdc-events.log"
                      filePattern="${sys:janusgraph.log.dir:-/tmp}/cdc-events-%d{yyyy-MM-dd}.log.gz">
-            <PatternLayout pattern="%d{ISO8601} %-5level [%t] %c{1} - %msg%n"/>
+            <PatternLayout pattern="%d{ISO8601} %msg%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy />
                 <SizeBasedTriggeringPolicy size="100 MB"/>
             </Policies>
         </RollingFile>
     </Appenders>
-    
     <Loggers>
         <Logger name="org.apache.hadoop.hbase" level="warn">
             <AppenderRef ref="STDOUT"/>
@@ -56,27 +24,7 @@
             <AppenderRef ref="CDC_LOG"/>
         </Logger>
 
-        <!-- JanusGraph loggers -->
-        <Logger name="org.janusgraph" level="debug">
-            <AppenderRef ref="INFO_LOG"/>
-            <AppenderRef ref="DEBUG_LOG"/>
-            <AppenderRef ref="STDOUT"/>
-        </Logger>
-        
-        <!-- Cassandra loggers -->
-        <Logger name="com.datastax" level="debug">
-            <AppenderRef ref="INFO_LOG"/>
-            <AppenderRef ref="DEBUG_LOG"/>
-        </Logger>
-
-        <!-- Error logs - catch all errors -->
-        <Logger name="" level="error">
-            <AppenderRef ref="ERROR_LOG"/>
-        </Logger>
-
-        <Root level="debug">
-            <AppenderRef ref="INFO_LOG"/>
-            <AppenderRef ref="DEBUG_LOG"/>
+        <Root level="info">
             <AppenderRef ref="STDOUT"/>
         </Root>
     </Loggers>
