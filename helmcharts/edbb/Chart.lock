@@ -17,5 +17,29 @@ dependencies:
 - name: nginx-private-ingress
   repository: ""
   version: 0.1.0
-digest: sha256:e49e6c76fdff3f325c639aa856b00847635e6335d0e544e13534b697b19548b6
-generated: "2026-02-12T19:30:21.267242606+05:30"
+- name: nginx-public-ingress
+  repository: ""
+  version: 0.1.0
+- name: echo
+  repository: ""
+  version: 0.1.0
+- name: player
+  repository: ""
+  version: 0.1.0
+- name: kong
+  repository: ""
+  version: 0.1.0
+- name: kong-apis
+  repository: ""
+  version: 0.1.0
+- name: kong-consumers
+  repository: ""
+  version: 0.1.0
+- name: knowledgemw
+  repository: ""
+  version: 0.1.0
+- name: secor
+  repository: ""
+  version: 0.1.0
+digest: sha256:06d5e52d6af5c6a5cc812c8487b55f18758d8c9c0b7c6031fbd44992281a50d9
+generated: "2026-04-22T12:49:53.864916621+05:30"
