@@ -76,21 +76,30 @@ def step_1_get_config_from_configmap():
 
     cmd = [
         "kubectl", "get", "cm", "-n", "sunbird", "player-env",
-        "-ojsonpath={.data.DOMAIN_URL}:{.data.SUNBIRD_SESSION_SECRET}"
+        "-ojsonpath={.data.DOMAIN_URL}"
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"  FAILED: {result.stderr.strip()}")
         sys.exit(1)
 
-    output = result.stdout.strip()
-    if ":" not in output:
-        print(f"  FAILED: ConfigMap missing DOMAIN_URL or SUNBIRD_SESSION_SECRET")
+    domain_url = result.stdout.strip()
+    if not domain_url:
+        print(f"  FAILED: ConfigMap key DOMAIN_URL not found or empty")
         sys.exit(1)
 
-    domain_url, session_secret = output.split(":", 1)
-    if not domain_url or not session_secret:
-        print(f"  FAILED: Empty values in ConfigMap")
+    cmd2 = [
+        "kubectl", "get", "cm", "-n", "sunbird", "player-env",
+        "-ojsonpath={.data.SUNBIRD_SESSION_SECRET}"
+    ]
+    result2 = subprocess.run(cmd2, capture_output=True, text=True)
+    if result2.returncode != 0:
+        print(f"  FAILED: {result2.stderr.strip()}")
+        sys.exit(1)
+
+    session_secret = result2.stdout.strip()
+    if not session_secret:
+        print(f"  FAILED: ConfigMap key SUNBIRD_SESSION_SECRET not found or empty")
         sys.exit(1)
 
     client_secret = f"lms{session_secret}"
