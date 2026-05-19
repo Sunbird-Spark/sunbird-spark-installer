@@ -1,5 +1,5 @@
 output "resource_group_name" {
-  value = local.resource_group_name
+  value = data.azurerm_resource_group.rg.name
 }
 
 output "aks_subnet_id" {
