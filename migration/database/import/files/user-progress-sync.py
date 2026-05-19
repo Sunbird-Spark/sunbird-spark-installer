@@ -91,33 +91,63 @@ def step_2_get_keycloak_token(client_secret):
     """Request admin token from Keycloak."""
     print("\n[Step 2/5] Requesting token from Keycloak...")
     token_url = f"{KEYCLOAK_URL}/auth/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token"
+    print(f"  URL       : {token_url}")
+    print(f"  client_id : {KEYCLOAK_CLIENT_ID}")
+    print(f"  client_secret (prefix/length): {client_secret[:8]}... / {len(client_secret)}")
 
+    # Capture status + body separately
     cmd = [
-        "curl", "-s", "-X", "POST", token_url,
+        "curl", "-sS", "-X", "POST", token_url,
+        "-w", "\n__HTTP_STATUS__:%{http_code}",
         "-H", "Content-Type: application/x-www-form-urlencoded",
         "-d", f"client_id={KEYCLOAK_CLIENT_ID}&client_secret={client_secret}&grant_type=client_credentials"
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
     if result.returncode != 0:
-        print(f"  FAILED: {result.stderr.strip()}")
+        print(f"  CURL FAILED (rc={result.returncode}): {result.stderr.strip()}")
+        sys.exit(1)
+
+    # Split off our http_status marker
+    body, _, status_line = result.stdout.rpartition("\n__HTTP_STATUS__:")
+    http_status = status_line.strip() or "000"
+    print(f"  HTTP {http_status}")
+    if http_status != "200":
+        print(f"  Body      : {body[:500]}")
         sys.exit(1)
 
     try:
-        token_resp = json.loads(result.stdout)
+        token_resp = json.loads(body)
         if "error" in token_resp:
             print(f"  FAILED: {token_resp.get('error_description', token_resp.get('error'))}")
             sys.exit(1)
 
         token = token_resp.get("access_token")
         if not token:
-            print(f"  FAILED: No access_token in response")
+            print(f"  FAILED: No access_token in response. Full body: {body[:500]}")
             sys.exit(1)
+
+        # Decode JWT payload (middle segment) so we can inspect claims
+        try:
+            import base64
+            parts = token.split(".")
+            if len(parts) >= 2:
+                pad = "=" * (-len(parts[1]) % 4)
+                claims = json.loads(base64.urlsafe_b64decode(parts[1] + pad))
+                print(f"  Token issuer (iss)  : {claims.get('iss')}")
+                print(f"  Token subject (sub) : {claims.get('sub')}")
+                print(f"  Token azp / clientId: {claims.get('azp')} / {claims.get('clientId')}")
+                print(f"  Token aud           : {claims.get('aud')}")
+                print(f"  Token typ           : {claims.get('typ')}")
+                print(f"  Realm roles         : {(claims.get('realm_access') or {}).get('roles')}")
+                print(f"  Token exp           : {claims.get('exp')}")
+        except Exception as e:
+            print(f"  (couldn't decode JWT claims: {e})")
 
         print(f"  Token obtained: {token[:50]}...")
         return token
     except json.JSONDecodeError:
-        print(f"  FAILED: Invalid JSON response: {result.stdout[:200]}")
+        print(f"  FAILED: Invalid JSON response: {body[:200]}")
         sys.exit(1)
 
 
@@ -186,6 +216,9 @@ def step_5_trigger_activity_api(token, enrollments):
     ok = 0
     failed = 0
     failures = []
+    # Print full response body for the first N failures so we know WHY they fail
+    body_dump_budget = int(os.environ.get("LOG_FAILURE_BODIES", "5"))
+    bodies_dumped = 0
 
     for idx, enr in enumerate(enrollments, start=1):
         payload = json.dumps({
@@ -199,7 +232,7 @@ def step_5_trigger_activity_api(token, enrollments):
         try:
             result = subprocess.run(
                 [
-                    "curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
+                    "curl", "-sS", "-w", "\n__HTTP_STATUS__:%{http_code}",
                     "--max-time", str(ACTIVITY_API_TIMEOUT_SECONDS),
                     "-X", "POST", url_base,
                     "-H", "Content-Type: application/json",
@@ -208,15 +241,22 @@ def step_5_trigger_activity_api(token, enrollments):
                 ],
                 capture_output=True, text=True, timeout=ACTIVITY_API_TIMEOUT_SECONDS + 10,
             )
-            status = result.stdout.strip() or "000"
+            body, _, status_line = result.stdout.rpartition("\n__HTTP_STATUS__:")
+            status = status_line.strip() or "000"
         except subprocess.TimeoutExpired:
             status = "TIMEOUT"
+            body = ""
 
         if status.startswith("2"):
             ok += 1
         else:
             failed += 1
             failures.append((enr["userid"], enr["courseid"], enr["batchid"], status))
+            print(f"  [{idx}/{total}] {enr['userid'][:8]}.../{enr['courseid'][:8]}... -> HTTP {status}")
+            if bodies_dumped < body_dump_budget:
+                print(f"      request : {payload}")
+                print(f"      response: {body[:500]}")
+                bodies_dumped += 1
             print(f"  [{idx}/{total}] {enr['userid'][:8]}.../{enr['courseid'][:8]}... -> HTTP {status}")
 
         if idx % PROGRESS_EVERY == 0:
