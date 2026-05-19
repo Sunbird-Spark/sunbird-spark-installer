@@ -14,10 +14,10 @@ source:
   cloud: "azure"                     # azure | gcp | aws | onprem
   namespace: "sunbird"               # Namespace of source DB pods (kubectl-exec target)
   useExistingSecrets: true           # true = read DB creds from cluster secrets; false = use values below
-  container: "databasebackup"        # Bucket / container name
+  container: ""        # Bucket / container name
 
   # Azure Blob
-  storageAccount: "edsandboxda72f12a"
+  storageAccount: ""
   accessKey: ""                      # Prefer MSI; leave empty if using IRSA / workload identity
 
   # GCP (only fill when cloud=gcp)

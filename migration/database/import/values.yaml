@@ -14,7 +14,7 @@ target:
   cloud: "azure"                     # azure | gcp | aws | onprem
   namespace: "sunbird"               # Namespace of target DB pods (kubectl-exec target)
   useExistingSecrets: true           # true = use existing cluster secrets; false = create secret from values
-  container: "es-backups"           # Container name for kubectl exec (if multiple containers in pod)s
+  container: ""           # Container name for kubectl exec (if multiple containers in pod)s
   # Azure Blob
   storageAccount: ""
   accessKey: ""

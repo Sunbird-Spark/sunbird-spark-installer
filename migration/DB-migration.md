@@ -493,8 +493,9 @@ Trigger the GitHub Action with only these inputs:
 | `database/import/files/user-progress-sync.py` | Phase 6.3 user progress sync |
 | `database/import/keycloak_realm_diff.txt` | OLD vs NEW realm diff reference |
 | `migrate_forms.py` | Phase 8 — seed System Settings and Forms |
-| `migrate.sh` | Pre-deploy orchestration — Phases 2 + 3 + 4 (see appendix) |
-| `post-migrate.sh` | Post-deploy orchestration — Phases 6 + 8, with service-readiness preflight (see appendix) |
+| `export.sh` | Phase 1 orchestration on OLD cluster — 4 helm upgrades (postgresql → cassandra → neo4j → elasticsearch) |
+| `migrate.sh` | Phase 4 orchestration on NEW cluster — 6 helm upgrades (YSQL → keycloakCredentials → YCQL → JanusGraph → ES → createdatBackfill) |
+| `post-migrate.sh` | Phase 6 orchestration on NEW cluster — 3 helm upgrades (keycloakRealmReconcile → hierarchyFix → userProgressSync) with service-readiness preflight |
 
 ---
 
@@ -516,46 +517,68 @@ GitHub Action is the primary path. For the VM path, complete the one-time VM set
 
 ---
 
-### Orchestration helpers — `migrate.sh` + `post-migrate.sh`
+### Orchestration helpers — `export.sh` + `migrate.sh` + `post-migrate.sh`
 
-Two small scripts that wrap only the **helm-driven migration steps** (Phase 4 + Phase 6). Everything else (infra, data-tier install, full deploy, validation) goes through the GitHub Action.
+Three small scripts that wrap only the **helm-driven migration steps** (Phase 1 + Phase 4 + Phase 6). Everything else (infra, data-tier install, full deploy, validation) goes through the GitHub Action.
 
-| Script | What it runs | Pre-req |
-|--------|--------------|---------|
-| `migration/migrate.sh`      | Phase 4 (6 helm upgrades: YSQL → keycloakCredentials → YCQL → JanusGraph → ES → createdatBackfill) | Phases 1, 2, 3 done |
-| `migration/post-migrate.sh` | Phase 6 (3 helm upgrades: keycloakRealmReconcile → hierarchyFix → userProgressSync). Has pre-flight: errors out if `keycloak`, `knowlg-service`, or `lern-service` in `sunbird` ns have no Ready replicas. | Phase 5 done |
+| Script | kubectl context | What it runs | Pre-req |
+|--------|-----------------|--------------|---------|
+| `migration/export.sh`       | OLD cluster | Phase 1 (4 helm upgrades: postgresql → cassandra → neo4j → elasticsearch) | export/values.yaml filled with source DB endpoints + bucket creds |
+| `migration/migrate.sh`      | NEW cluster | Phase 4 (6 helm upgrades: YSQL → keycloakCredentials → YCQL → JanusGraph → ES → createdatBackfill) | Phases 1, 2, 3 done |
+| `migration/post-migrate.sh` | NEW cluster | Phase 6 (3 helm upgrades: keycloakRealmReconcile → hierarchyFix → userProgressSync). **Pre-flight**: fails fast if `keycloak`/`knowlg-service`/`lern-service` in `sunbird` ns have no Ready replicas. | Phase 5 done |
 
-No `ENV` env var required — both scripts are pure `helm` and `kubectl`; no `install.sh` calls. Just point `kubectl` at the NEW cluster.
+No `ENV` env var required — all scripts are pure `helm` and `kubectl`; no `install.sh` calls. Just point `kubectl` at the right cluster (OLD for export, NEW for the rest).
 
-Both use `set -euo pipefail` — any non-zero exit halts execution; subsequent steps do **not** run. Fix root cause, rerun the failed step.
+All use `set -euo pipefail` — any non-zero exit halts execution; subsequent steps do **not** run. Fix root cause, rerun the failed step.
 
 #### End-to-end flow
 
 ```bash
-# 1.  Phase 4 — DB imports + DB-only fixups
+# ----- on OLD cluster (kubectl context = OLD) -----
+# 1. Phase 1 — export 4 source DBs to object storage
+./migration/export.sh
+
+# ----- switch kubectl context to NEW cluster -----
+
+# 2. Phase 2 — trigger GitHub Action: create_tf_backend + backup_configs + create_tf_resources
+# 3. Phase 3 — trigger GitHub Action: install_helm=true, helm_mode=selective
+#    Run Action 3 times:
+#      Run 1: bundle=edbb,         specific_charts="kafka yugabytedb"
+#      Run 2: bundle=learnbb,      specific_charts="elasticsearch"
+#      Run 3: bundle=knowledgebb,  specific_charts="janusgraph"
+
+# 4. Phase 4 — DB imports + DB-only fixups
 ./migration/migrate.sh
-#     ↓
-# 2.  Phase 5 — trigger GitHub Action: install_helm=true, helm_mode=all
-#     Wait until Deployments in ns/sunbird are Ready.
-#     ↓
-# 3.  Phase 6 — post-deploy reconciles (preflight checks services first)
+
+# 5. Phase 5 — trigger GitHub Action: install_helm=true, helm_mode=all
+#    Wait until Deployments in ns/sunbird are Ready.
+
+# 6. Phase 6 — post-deploy reconciles (preflight checks services first)
 ./migration/post-migrate.sh
-#     ↓
-# 4.  Phase 8 — trigger GitHub Action: generate_postman_env + migrate_forms
-#     ↓
-# 5.  Phase 7 — DNS swap (manual)
+
+# 7. Phase 8 — trigger GitHub Action: generate_postman_env + migrate_forms
+
+# 8. Phase 7 — DNS swap (manual)
 ```
 
 #### Per-step invocations (recommended for first-time runs — verify each before moving on)
 
 ```bash
+# OLD cluster
+./migration/export.sh 1.1
+./migration/export.sh 1.2
+./migration/export.sh 1.3
+./migration/export.sh 1.4
+
+# NEW cluster (after Phases 2 + 3 via Action)
 ./migration/migrate.sh 4.1
 ./migration/migrate.sh 4.2
 ./migration/migrate.sh 4.3
 ./migration/migrate.sh 4.4
 ./migration/migrate.sh 4.5
 ./migration/migrate.sh 4.6
-# ... GitHub Action: Phase 5 ...
+
+# After Phase 5 via Action
 ./migration/post-migrate.sh 6.1
 ./migration/post-migrate.sh 6.2
 ./migration/post-migrate.sh 6.3
