@@ -369,6 +369,31 @@ helm upgrade --install database-import . \
   --timeout 30m --wait
 ```
 
+### 6.3 User Progress Sync
+
+Syncs user course progress across frontend and backend for data consistency. Required when migrating from older Sunbird versions where progress data may be out of sync.
+
+```yaml
+postMigration:
+  userProgressSync:
+    enabled: true
+    adminUsername: "<admin-user>"
+    adminPassword: "<admin-password>"
+    dryRun: false
+```
+
+> `adminUsername` and `adminPassword` must match the admin credentials of Sunbird which is created during the initialization (e.g., `admin@yopmail.com` / `Admin@123`).
+
+```bash
+helm upgrade --install database-import . \
+  -f values.yaml -n migration \
+  --timeout 30m --wait
+
+kubectl logs -n migration -l job-name=database-import-user-progress-sync -f
+```
+
+> Job automatically disables `filter_processed_enrolments` in lern-env ConfigMap before sync and re-enables it after completion.
+
 ---
 
 ## Phase 7 — DNS Swap (Cutover)
@@ -465,6 +490,7 @@ Trigger the GitHub Action with only these inputs:
 | `database/export/` | Phase 1 helm chart |
 | `database/import/` | Phase 4 + 6 helm chart |
 | `database/import/files/keycloak_apply_realm_reconcile.py` | Phase 6.1 realm reconciler |
+| `database/import/files/user-progress-sync.py` | Phase 6.3 user progress sync |
 | `database/import/keycloak_realm_diff.txt` | OLD vs NEW realm diff reference |
 | `migrate_forms.py` | Phase 8 — seed System Settings and Forms |
 
