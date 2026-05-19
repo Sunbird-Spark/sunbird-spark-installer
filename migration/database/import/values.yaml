@@ -40,7 +40,7 @@ target:
 # Target databases (Sunbird Spark)
 # -----------------------------------------------------------------------------
 databases:
-  yugabytedb:
+  ysql:
     enabled: false
     host: "yb-tserver-service.sunbird.svc.cluster.local"
     port: 5433
@@ -123,14 +123,25 @@ validation:
   strictMode: false
 
 # -----------------------------------------------------------------------------
-# Post-migration fix-ups (run after DB restores)
+# DB fix-ups (write directly to YB / ES — no Spark app services required)
+# Run between DB restore steps. keycloakCredentials after YSQL; createdatBackfill after ES.
 # -----------------------------------------------------------------------------
-postMigration:
+dbFixups:
   keycloakCredentials:
     enabled: false
     adminPassword: ""                # Admin password for Keycloak master realm
     secretSuffix: ""                 # Suffix appended to rotated client secrets
 
+  createdatBackfill:
+    enabled: false
+    ybPod: "yb-tserver-0"
+    keyspace: "sunbird"
+
+# -----------------------------------------------------------------------------
+# Post-migration fix-ups (require Spark app services running — knowlg, keycloak)
+# Run AFTER bundles are deployed and healthy.
+# -----------------------------------------------------------------------------
+postMigration:
   # Reconcile migrated keycloak realm with the Spark chart's rendered realm.json.
   # Preserves all migrated users/sessions; only patches realm settings,
   # client config, auth flows, required actions to match chart.
@@ -143,11 +154,6 @@ postMigration:
     adminPassword: ""                # Or pull from secret via env
     realmConfigMap: "keycloak"                       # ConfigMap holding rendered realm.json
     realmConfigMapKey: "realm.json"                  # key inside the ConfigMap
-
-  createdatBackfill:
-    enabled: false
-    ybPod: "yb-tserver-0"
-    keyspace: "sunbird"
 
   hierarchyFix:
     enabled: false

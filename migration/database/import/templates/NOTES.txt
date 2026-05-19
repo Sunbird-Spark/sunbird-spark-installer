@@ -2,10 +2,10 @@ Database Import — {{ .Chart.Name }} v{{ .Chart.Version }} (phase 2 of 2)
 =============================================
 
 Enabled jobs (execution order via helm post-install hooks):
-{{- if .Values.databases.yugabytedb.enabled }}
-  1. postgres-restore (YSQL)     → {{ range .Values.databases.yugabytedb.databases }}{{ .name }} {{ end }}
+{{- if .Values.databases.ysql.enabled }}
+  1. postgres-restore (YSQL)     → {{ range .Values.databases.ysql.databases }}{{ .name }} {{ end }}
 {{- end }}
-{{- if .Values.postMigration.keycloakCredentials.enabled }}
+{{- if .Values.dbFixups.keycloakCredentials.enabled }}
   2. keycloak-credentials update
 {{- end }}
 {{- if .Values.databases.ycql.enabled }}
@@ -17,7 +17,7 @@ Enabled jobs (execution order via helm post-install hooks):
 {{- if .Values.databases.elasticsearch.enabled }}
   5. elasticsearch-restore       → {{ .Values.databases.elasticsearch.host }}
 {{- end }}
-{{- if .Values.postMigration.createdatBackfill.enabled }}
+{{- if .Values.dbFixups.createdatBackfill.enabled }}
   6. createdat-backfill (ES + YCQL)
 {{- end }}
 {{- if .Values.postMigration.hierarchyFix.enabled }}

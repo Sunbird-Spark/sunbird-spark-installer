@@ -10,6 +10,7 @@ locals {
   storage_container_public  = local.cloud_vars.global.public_container_name
   storage_container_private = local.cloud_vars.global.private_container_name
   velero_container_name     = local.cloud_vars.global.velero_storage_container_private
+  sunbird_encryption_key    = try(local.cloud_vars.global.sunbird_encryption_key, "")
 }
 
 # For local development
@@ -53,4 +54,5 @@ inputs = {
   cloud_storage_provider             = local.cloud_storage_provider
   azure_client_id                    = dependency.workload_identity.outputs.client_id
   k8s_service_account_name           = "azure-managed-identity-sa"
+  sunbird_encryption_key             = local.sunbird_encryption_key
 }

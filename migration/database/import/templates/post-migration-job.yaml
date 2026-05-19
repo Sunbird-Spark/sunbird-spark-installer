@@ -1,15 +1,15 @@
-{{- if .Values.databases.yugabytedb.enabled }}
+{{- if .Values.dbFixups.createdatBackfill.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "database-import.fullname" . }}-postgres
+  name: {{ include "database-import.fullname" . }}-createdat
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "database-import.labels" . | nindent 4 }}
-    app.kubernetes.io/component: postgres-restore
+    app.kubernetes.io/component: createdat-backfill
   annotations:
     "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-weight": "6"
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   ttlSecondsAfterFinished: {{ .Values.jobs.ttlSecondsAfterFinished }}
@@ -18,33 +18,25 @@ spec:
     metadata:
       labels:
         {{- include "database-import.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: postgres-restore
+        app.kubernetes.io/component: createdat-backfill
     spec:
       restartPolicy: OnFailure
       serviceAccountName: {{ include "database-import.serviceAccountName" . }}
       containers:
-      - name: postgres-restore
+      - name: createdat-backfill
         image: {{ .Values.jobs.image }}
         imagePullPolicy: {{ .Values.jobs.pullPolicy }}
         command: ["/bin/bash"]
-        args: ["/scripts/postgres-to-yugabyte.sh"]
+        args: ["/scripts/createdat-backfill.sh"]
         env:
-        - name: POSTGRES_HOST
-          value: {{ .Values.databases.yugabytedb.host | quote }}
-        - name: POSTGRES_PORT
-          value: {{ .Values.databases.yugabytedb.port | quote }}
-        - name: POSTGRES_USER
-          value: {{ .Values.databases.yugabytedb.username | default "yugabyte" | quote }}
-        - name: POSTGRES_PASSWORD
-          value: {{ .Values.databases.yugabytedb.password | default "" | quote }}
-        - name: STORAGE_TYPE
-          value: {{ .Values.target.cloud | quote }}
-        - name: STORAGE_CONTAINER
-          value: {{ .Values.target.container | quote }}
-        - name: AZURE_STORAGE_ACCOUNT
-          value: {{ .Values.target.storageAccount | quote }}
-        - name: AZURE_STORAGE_KEY
-          value: {{ .Values.target.accessKey | quote }}
+        - name: ES_SERVICE
+          value: "{{ .Values.databases.elasticsearch.host }}:{{ .Values.databases.elasticsearch.port }}"
+        - name: YB_POD
+          value: {{ .Values.dbFixups.createdatBackfill.ybPod | quote }}
+        - name: NAMESPACE
+          value: {{ .Values.target.namespace | default "sunbird" | quote }}
+        - name: KEYSPACE
+          value: {{ .Values.dbFixups.createdatBackfill.keyspace | quote }}
         volumeMounts:
         - name: scripts
           mountPath: /scripts

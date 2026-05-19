@@ -44,3 +44,27 @@ dependencies:
   - name: nginx-private-ingress
     version: 0.1.0
     condition: nginx-private-ingress.enabled
+  - name: nginx-public-ingress
+    version: 0.1.0
+    condition: nginx-public-ingress.enabled
+  - name: echo
+    version: 0.1.0
+    condition: echo.enabled
+  - name: player
+    version: 0.1.0
+    condition: player.enabled
+  - name: kong
+    version: 0.1.0
+    condition: kong.enabled
+  - name: kong-apis
+    version: 0.1.0
+    condition: kong-apis.enabled
+  - name: kong-consumers
+    version: 0.1.0
+    condition: kong-consumers.enabled
+  - name: knowledgemw
+    version: 0.1.0
+    condition: knowledgemw.enabled
+  - name: secor
+    version: 0.1.0
+    condition: secor.enabled

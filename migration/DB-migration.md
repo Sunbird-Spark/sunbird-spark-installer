@@ -1,360 +1,487 @@
-# Data Migration Guide
-## Release 8.1.0 → Sunbird Spark (Cross-Cloud)
+# Database Migration: Sunbird ED 8.1.0 → Sunbird Spark
 
-This guide covers migrating Sunbird ED 8.1.0 data to a new Sunbird Spark cluster using the two-phase cross-cloud workflow under `migration/cross-cloud/`:
+End-to-end runbook for migrating data from a Sunbird ED 8.1.0 cluster into a new Sunbird Spark cluster.
 
-| Phase | Chart | Runs in | Purpose |
-|---|---|---|---|
-| 1 — Export | `migration/cross-cloud/database-export` | Source 8.1.0 cluster | Dumps source DBs to cloud object storage |
-| 2 — Import | `migration/cross-cloud/database-import` | Target Spark cluster | Restores artifacts into Spark DBs + runs post-migration fixes |
+**Supported clouds:** Azure / GCP / AWS (Blob / GCS / S3)
 
-**What changes in Spark:**
-- YugabyteDB replaces both Cassandra and PostgreSQL
-- JanusGraph replaces Neo4j
-- Elasticsearch moves to a new cluster
+> **Scope:** Same-domain migration only (DNS swap at cutover). Different-domain migrations are not validated by this guide.
 
 ---
 
-## Before You Begin
+## Prerequisites — One-time setup
 
-- Take a Velero backup of the 8.1.0 cluster before starting.
-- Keep the 8.1.0 cluster running .
-- Every `enabled` flag in the chart `values.yaml` defaults to **false**. Toggle one DB at a time.
-- Each job is idempotent — safe to re-run if it fails partway.
-- Run **one migration job at a time**. Parallel jobs risk resource conflicts and data loss.
-- Logs retained 7 days after job completion (`jobs.ttlSecondsAfterFinished`).
+Before starting, complete the **one-time setup** in [`private-repo-setup/README.md`](../private-repo-setup/README.md). Required for **both** paths — 
 
----
+- **GitHub Action path** (primary): create private repo, copy workflows, encrypt config, Azure OIDC + GitHub secrets/environment.
+- **VM path** (alternative — see appendix at end): install CLI tools (jq, yq, opentofu, terragrunt, kubectl, helm, postman, az/gcloud), clone repos on VM, place config at `opentofu/<cloud>/<env>/`.
 
-## Architecture Overview
-
-| Component | 8.1.0 | Sunbird Spark |
-|-----------|---------------|---------------|
-| YCQL | Apache Cassandra | YugabyteDB (YCQL) |
-| YSQL | PostgreSQL | YugabyteDB (YSQL) |
-| Graph | Neo4j | JanusGraph |
-| Search | Elasticsearch | Elasticsearch |
-
-Cross-cloud transport = cloud object storage (Azure Blob / GCS / S3). Source pushes artifacts, target pulls. No direct network path between clusters needed.
+Finish that setup, then return here for the migration phases.
 
 ---
 
-# Phase 1 — Export from 8.1.0 cluster
+## Architecture
 
-## Step 1.1 — Configure export values
+```
+SOURCE CLUSTER                  OBJECT STORAGE                TARGET CLUSTER
+(Sunbird ED 8.1.0)             (Blob / GCS / S3)            (Sunbird Spark)
 
-Open `migration/cross-cloud/database-export/values.yaml`.
++-----------------+             +----------------+            +------------------+
+| PostgreSQL    --|--> dump --> |                |--> load -->| YugabyteDB YSQL  |
+| Cassandra     --|--> CSV  --> |   Artifacts    |--> load -->| YugabyteDB YCQL  |
+| Neo4j         --|--> CSV  --> |                |--> load -->| JanusGraph       |
+| Elasticsearch --|--> snap --> |                |--> load -->| Elasticsearch    |
++-----------------+             +----------------+            +------------------+
 
-Fill the `source` block for your cloud:
-
-```yaml
-source:
-  cloud: "azure"                 # azure | gcp | aws | onprem
-  namespace: "sunbird"           # ns where source DB pods live
-  container: "databasebackup"    # bucket / blob container
-
-  # Azure
-  storageAccount: "<source-storage-account>"
-  accessKey: "<source-storage-key>"   # or use MSI / workload identity
-
-  # GCP
-  bucket: ""
-  projectId: ""
-  serviceAccountKey: ""
-
-  # AWS
-  s3Bucket: ""
-  accessKeyId: ""
-  secretAccessKey: ""
-  region: ""
-
-  # Path prefixes inside container
-  postgresql_path: "postgresql"
-  cassandra_path: "cassandra"
-  elasticsearch_path: "elasticsearch"
-  neo4j_path: "neo4j"
+     PHASE 1 (Export)              HANDOFF                      PHASE 4 (Import)
 ```
 
-`databases.<db>.host/port/username/password` are pre-set to in-cluster service names. Override only if non-default.
+---
 
-## Step 1.2 — Export DBs one by one
+## Migration Phases — Overview
 
-Enable exactly one `enabled: true` at a time. Deploy, wait for the Job to finish, verify the artifact landed in the container, then move to the next DB.
+Run phases **in order**. Do not skip ahead.
+
+| Phase | What it does | Where it runs |
+|-------|-------------|---------------|
+| 1 | Export DBs from OLD cluster into object storage | OLD cluster |
+| 2 | Provision NEW infra (no apps yet) | Private repo + Cloud |
+| 3 | Install data-tier only on NEW cluster | NEW cluster |
+| 4 | Restore data one DB at a time | NEW cluster |
+| 5 | Install all remaining services | NEW cluster |
+| 6 | Post-deploy reconciles | NEW cluster |
+| 7 | DNS swap (cutover) | DNS provider |
+| 8 | Validate | NEW cluster |
+
+---
+
+## Phase 1 — Export from OLD Cluster
+
+Runs inside the **source ED 8.1.0 cluster**. Produces tarballs in object storage.
+
+### 1.1 Configure export values
+
+Edit `migration/database/export/values.yaml` with source DB endpoints and storage credentials:
+
+| Cloud | Required fields |
+|-------|----------------|
+| Azure | `storageAccount` + `accessKey` |
+| GCP   | `bucket` + `serviceAccountKey` |
+| AWS   | `s3Bucket` + `accessKeyId` + `secretAccessKey` + `region` |
+
+### 1.2 Run the export chart
 
 ```bash
-# PostgreSQL
-helm upgrade --install database-export ./migration/cross-cloud/database-export \
-  -n sunbird -f ./migration/cross-cloud/database-export/values.yaml \
-  --set databases.postgresql.enabled=true
+cd migration/database/export
 
-# Cassandra
-helm upgrade --install database-export ./migration/cross-cloud/database-export \
-  -n sunbird -f ./migration/cross-cloud/database-export/values.yaml \
-  --set databases.cassandra.enabled=true
-
-# Neo4j
-helm upgrade --install database-export ./migration/cross-cloud/database-export \
-  -n sunbird -f ./migration/cross-cloud/database-export/values.yaml \
-  --set databases.neo4j.enabled=true
-
-# Elasticsearch
-helm upgrade --install database-export ./migration/cross-cloud/database-export \
-  -n sunbird -f ./migration/cross-cloud/database-export/values.yaml \
-  --set databases.elasticsearch.enabled=true
+helm upgrade --install database-export . \
+  -f values.yaml \
+  -n migration --create-namespace \
+  --timeout 60m --wait
 ```
 
-Recommended order: PostgreSQL → Cassandra → Neo4j → Elasticsearch.
+### 1.3 Verify artifacts in cloud storage
 
-Check job + logs:
-```bash
-kubectl get jobs -n sunbird
-kubectl logs -n sunbird -l app=database-export -f
-```
-
-Verify each export by listing the corresponding path prefix in the storage container.
+| Path | Content |
+|------|---------|
+| `<bucket>/postgresql/*.sql.gz` | PostgreSQL dumps |
+| `<bucket>/cassandra/<keyspace>.tar.gz` | Cassandra keyspaces |
+| `<bucket>/neo4j/neo4j_export.tar.gz` | Neo4j export |
+| `<bucket>/cluster-1/snapshots/...` | Elasticsearch snapshot |
 
 ---
 
-# Phase 2 — Set up Spark cluster infrastructure
+## Phase 2 — Provision NEW Spark Cluster (Infra Only)
 
-Clone installer:
-```bash
-git clone https://github.com/Sunbird-Spark/sunbird-spark-installer.git
-cd sunbird-spark-installer
-git checkout develop
+Uses the **private-repo GitHub Action** (`sunbird-spark-platform.yaml`).
+
+> This phase reuses OLD storage — it does **not** create a new storage account. The `skip_storage_module: true` flag prevents tofu from provisioning new storage.
+
+### 2.1 Copy config templates into private repo
+
+```
+opentofu/<cloud>/template/global-values.yaml       →  configs/<env>/global-values.yaml
+opentofu/<cloud>/template/global-cloud-values.yaml →  configs/<env>/global-cloud-values.yaml
 ```
 
-If you reuse the existing 8.1.0 Azure resource group / storage account, set them in `opentofu/<provider>/<env>/global-values.yaml` and `global-cloud-values.yaml`:
+### 2.2 Edit `global-values.yaml`
+
+- Set `resource_group_name` as needed
+- Set `skip_storage_module: true` ← **critical**
+
+### 2.3 Fetch OLD cluster's encryption key
+
+```bash
+kubectl --context <OLD-CLUSTER-CONTEXT> \
+  get configmap learn-service -n sunbird -o yaml \
+  | grep sunbird_encryption_key
+```
+
+> This key is needed so the NEW cluster can decrypt PII (email/phone) migrated into YugabyteDB.
+
+### 2.4 Edit `global-cloud-values.yaml`
+
+Prefill with OLD storage references and the encryption key:
 
 ```yaml
 global:
-  resource_group_name: "<existing-resource-group>"
-  skip_storage_module: true
+  cloud_storage_access_key:          <OLD storage account name>
+  public_container_name:             <OLD public container>
+  private_container_name:            <OLD private container>
+  velero_storage_container_private:  <OLD velero container>
+  sunbird_encryption_key:            "<OLD encryption key>"
+
 ```
 
-Provision the cluster but **do not install application services yet**. Install only the data stores and wait until all three are healthy:
-- YugabyteDB
-- Elasticsearch
-- JanusGraph
+> **Why OLD storage refs?** The NEW cluster reads existing user uploads, content, and certs directly from OLD storage — no data copy needed.
+
+> **Why OLD encryption key?** The `learn-service` configmap uses `{{ default .Values.global.random_string .Values.global.sunbird_encryption_key }}`. Without the OLD key, PII columns will not decrypt and logins will fail.
+
+> **Do not touch `random_string`** — keycloak client secrets, kong consumers, player session secret, and flink all depend on it.
+
+### 2.5 Encrypt and commit both config files
+
+```bash
+ansible-vault encrypt \
+  configs/<env>/global-values.yaml \
+  configs/<env>/global-cloud-values.yaml
+
+```
+
+### 2.6 Trigger GitHub Action — infra only
+
+Enable these inputs:
+
+| Input | Value |
+|-------|-------|
+| `create_tf_backend` | ✅ |
+| `backup_configs` | ✅ |
+| `create_tf_resources` | ✅ |
+
+Wait for AKS/GKE and supporting infra to complete.
 
 ---
 
-# Phase 3 — Import into Spark cluster
+## Phase 3 — Install Data-Tier Only
 
-## Step 3.1 — Configure import values
+Bring up only data services so the import chart has real DBs to target. **Do not install learnbb or knowledgebb yet** — they would repopulate schemas before import runs.
 
-Open `migration/cross-cloud/database-import/values.yaml`.
+Trigger the GitHub Action **3 times** in order with `install_helm: true` and `helm_mode: selective`.
 
-Fill the `target` block — same cloud/container that Phase 1 wrote to:
+| Run | Bundle | `specific_charts` | Installs |
+|-----|--------|-------------------|----------|
+| 1 | edbb | `kafka yugabytedb` | Kafka + YugabyteDB |
+| 2 | learnbb | `elasticsearch` | Elasticsearch |
+| 3 | knowledgebb | `janusgraph` | JanusGraph |
 
-```yaml
-target:
-  cloud: "azure"
-  namespace: "sunbird"
-  container: "databasebackup"
-  storageAccount: "<source-storage-account>"
-  accessKey: "<source-storage-key>"
-  postgresql_path: "postgresql"
-  cassandra_path: "cassandra"
-  elasticsearch_path: "cluster-1"   # default ES snapshot dir
-  neo4j_path: "neo4j"
-```
+After Run 3, all target databases exist (empty/freshly schema'd) and are ready for import.
 
-Spark DB endpoints under `databases.*` are pre-set to in-cluster service names.
+---
 
-**YCQL keyspace prefix rename (mandatory if `global.env` differs from 8.1.0 keyspace prefix):**
-```yaml
-ycql:
-  sourcePrefix: "sb_"             # 8.1.0 keyspace prefix in source data
-  targetPrefix: "dv_"             # MUST equal `global.env` + "_" from opentofu/<provider>/<env>/global-values.yaml
-  truncateBeforeLoad: "true"
-```
-Knowlg/Lern read keyspaces as `{global.env}_content_store`. If `global.env: dv`, set `targetPrefix: "dv_"` so `sb_content_store` → `dv_content_store` at restore. Mismatch = services can't find keyspaces post-migration. Set both to `""` to disable rename when prefixes already match.
+## Phase 4 — Import Data (One DB at a Time)
 
-## Step 3.2 — Run imports one by one
-
-Enable each DB flag in order, run, verify, then move on.
+All steps use the same chart. Enable **one block at a time** in `migration/database/import/values.yaml`, run helm, verify, then proceed to the next. Do not enable all blocks simultaneously.
 
 ```bash
-# 1. YSQL  (PostgreSQL → YugabyteDB YSQL)
---set databases.yugabytedb.enabled=true
-
-# 2. Keycloak credentials  (run AFTER YSQL — rewrites admin password + rotates client secrets in migrated keycloak DB)
---set postMigration.keycloakCredentials.enabled=true
-
-# 3. YCQL  (Cassandra → YugabyteDB YCQL)
---set databases.ycql.enabled=true
-
-# 4. JanusGraph  (Neo4j → JanusGraph)
---set databases.janusgraph.enabled=true
-
-# 5. Elasticsearch  (snapshot restore)
---set databases.elasticsearch.enabled=true
-
-# 6. createdat backfill  (User.createdat in YB + ES)
---set postMigration.createdatBackfill.enabled=true
+cd migration/database/import
 ```
 
-**Step 2 — keycloakCredentials values:**
+### 4.1 PostgreSQL → YugabyteDB YSQL
 
 ```yaml
-postMigration:
+databases:
+  ysql:         { enabled: true }
+  ycql:         { enabled: false }
+  janusgraph:   { enabled: false }
+  elasticsearch:{ enabled: false }
+```
+
+```bash
+helm upgrade --install database-import . \
+  -f values.yaml -n migration --create-namespace \
+  --timeout 60m --wait
+
+kubectl logs -n migration -l job-name=database-import-postgres -f
+```
+
+**Verify:** `kubectl exec -it -n sunbird yb-tserver-0 -- ysqlsh -c '\l'`
+Expected: `keycloak` and `registry` databases visible.
+
+---
+
+### 4.2 Rotate Keycloak Credentials
+
+The PostgreSQL restore brought in OLD keycloak admin password and client secrets. Rotate them now so the NEW keycloak service (starting in Phase 5) finds matching credentials.
+
+```yaml
+databases:
+  ysql: { enabled: false }
+
+dbFixups:
   keycloakCredentials:
     enabled: true
-    adminPassword: "<from-global-values.yaml>"       # opentofu/<provider>/<env>/global-values.yaml → keycloak admin password
-    secretSuffix: "<from-global-cloud-values.yaml>"  # opentofu/<provider>/<env>/global-cloud-values.yaml → random string used for rotated client secrets
+    adminPassword: "<keycloak_password from NEW cluster's global-values.yaml>"
+    secretSuffix:  "<random_string from NEW cluster's global-cloud-values.yaml>"
 ```
 
-This step is **not** part of the PostgreSQL data move (that's step 1 / YSQL). It runs after YSQL import to rewrite the Keycloak admin password hash + append `secretSuffix` to every client secret stored in the migrated `keycloak` DB, aligning credentials with the Spark cluster's chart values.
+**Value sources:**
 
-Deploy command (same for every step — toggle the flag, leave the rest false):
+| Field | Source |
+|-------|--------|
+| `adminPassword` | `keycloak_password` in NEW `global-values.yaml` |
+| `secretSuffix` | `random_string` in NEW `global-cloud-values.yaml` (auto-generated by OpenTofu in Phase 2) |
+
 ```bash
-helm upgrade --install database-import ./migration/cross-cloud/database-import \
-  -n sunbird -f ./migration/cross-cloud/database-import/values.yaml
+helm upgrade --install database-import . \
+  -f values.yaml -n migration \
+  --timeout 30m --wait
+
+kubectl logs -n migration -l job-name=database-import-keycloak -f
 ```
 
-Watch jobs:
-```bash
-kubectl get jobs -n sunbird
-kubectl logs -n sunbird -l app=database-import -f
-```
-
-Verify after each step before enabling the next:
-- YSQL: `\dt` in `keycloak` and `registry` databases via `ysqlsh`
-- YCQL: `DESC KEYSPACES` in `ycqlsh` shows all migrated keyspaces (with target prefix if renamed)
-- JanusGraph: `g.V().count()` and `g.E().count()` match Neo4j source totals
-- Elasticsearch: `_cat/indices?v` shows all indices with expected doc counts
+> Writes directly to YSQL (`keycloak` DB). No keycloak service needed. Safe to rerun.
 
 ---
 
-# Phase 4 — Bring up application services
+### 4.3 Cassandra → YugabyteDB YCQL
 
-After all DB imports verified, install the remaining bundles in order:
-
-```
-monitoring → edbb → learnbb → knowledgebb → obsrvbb → inquirybb → additional
-```
-
-Wait for each bundle to be healthy before starting the next.
-
----
-
-# Phase 5 — Post-migration fix-ups
-
-## Step 5.1 — Hierarchy fix
-
-Strips `.img` suffix from `content_hierarchy` identifiers in YugabyteDB and triggers knowlg-service `update-relation` API for each unique identifier.
-
-```bash
-helm upgrade --install database-import ./migration/cross-cloud/database-import \
-  -n sunbird -f ./migration/cross-cloud/database-import/values.yaml \
-  --set postMigration.hierarchyFix.enabled=true
-```
-
-Config:
 ```yaml
-postMigration:
-  hierarchyFix:
+databases:
+  ycql:
     enabled: true
-    ybPod: "yb-tserver-0"
-    knowlgServiceHost: "knowlg-service.sunbird.svc.cluster.local"
-    knowlgServicePort: 9000
-    dryRun: false
+    sourcePrefix: "sb_"
+    targetPrefix: "<global.env from NEW cluster's global-values.yaml>_"
 ```
 
-## Step 5.2 — Keycloak realm diff
-
-Applies Spark chart `realm.json` diffs onto the migrated Keycloak DB. Preserves all migrated users/sessions; only patches realm settings, client config, auth flows, required actions to match the chart.
+> ⚠️ `targetPrefix` must match the NEW cluster's `global.env` with a trailing underscore.
+> Example: `env: "dv"` → `targetPrefix: "dv_"`
 
 ```bash
-helm upgrade --install database-import ./migration/cross-cloud/database-import \
-  -n sunbird -f ./migration/cross-cloud/database-import/values.yaml \
-  --set postMigration.keycloakRealmReconcile.enabled=true
+helm upgrade --install database-import . \
+  -f values.yaml -n migration \
+  --timeout 60m --wait
 ```
 
-Config:
+Logs show `==> keyspace X -> Y` per keyspace and `<== Y done: tables=N rows=M`.
+
+---
+
+### 4.4 Neo4j → JanusGraph
+
+```yaml
+databases:
+  janusgraph: { enabled: true }
+```
+
+```bash
+helm upgrade --install database-import . \
+  -f values.yaml -n migration \
+  --timeout 30m --wait
+```
+
+Runs `import_data.groovy` → `set_graphid.groovy` → `verify_migration.groovy` inside the JanusGraph pod.
+
+---
+
+### 4.5 Elasticsearch → Elasticsearch
+
+```yaml
+databases:
+  elasticsearch: { enabled: true }
+```
+
+```bash
+helm upgrade --install database-import . \
+  -f values.yaml -n migration \
+  --timeout 60m --wait
+```
+
+Restores snapshot via `repository-azure` (or GCS / S3) plugin.
+
+---
+
+### 4.6 Backfill `createdat` Column
+
+Backfills the `createdat` column on the YugabyteDB user table (not populated in ED 8.1.0). No service dependency.
+
+```yaml
+dbFixups:
+  createdatBackfill: { enabled: true }
+```
+
+```bash
+helm upgrade --install database-import . \
+  -f values.yaml -n migration \
+  --timeout 15m --wait
+```
+
+---
+
+## Phase 5 — Install All Remaining Services
+
+Trigger the GitHub Action with:
+
+| Input | Value |
+|-------|-------|
+| `install_helm` | ✅ |
+| `helm_mode` | `all` |
+
+Runs all 7 bundles (monitoring, edbb, learnbb, knowledgebb, obsrvbb, inquirybb, additional). Charts already installed in Phase 3 upgrade in place — no data loss.
+
+---
+
+## Phase 6 — Post-Deploy Reconciles
+
+Run **after Phase 5** — requires running keycloak and knowlg services.
+
+### 6.1 Keycloak Realm Reconcile
+
+Reconciles the migrated keycloak realm with the NEW chart's `realm.json` (locales, refresh-token policy, client redirectUris, auth flows).
+
+> Migrated user accounts and passwords are **never touched**.
+
 ```yaml
 postMigration:
   keycloakRealmReconcile:
     enabled: true
-    keycloakUrl: "http://keycloak.sunbird.svc.cluster.local:8080"
-    realm: "sunbird"
-    namespace: "sunbird"
-    adminUser: "admin"
-    adminPassword: "<keycloak-admin-password>"
-    realmConfigMap: "keycloak"
-    realmConfigMapKey: "realm.json"
+    adminPassword: "<keycloak_password from NEW cluster's global-values.yaml>"
 ```
 
----
-
-# Phase 6 — DNS + Forms
-
-## Step 6.1 — Map DNS
-
-Get the Spark ingress IP:
 ```bash
-kubectl get svc nginx-public-ingress -n sunbird \
-  -ojsonpath='{.status.loadBalancer.ingress[0].ip}'
+helm upgrade --install database-import . \
+  -f values.yaml -n migration \
+  --timeout 30m --wait
+
+kubectl logs -n migration -l job-name=database-import-keycloak-realm-reconcile -f
 ```
 
-Update the DNS A record to point your domain at this IP. Wait for propagation.
+### 6.2 Hierarchy Fix
 
-## Step 6.2 — Encryption key
+Regenerates content hierarchy relations via knowlg-service.
 
-Update `helmcharts/learnbb/charts/lern/configs/env.yaml`:
 ```yaml
-sunbird_encryption_key: "<release-8.1.0-random-string>"
+postMigration:
+  hierarchyFix: { enabled: true }
 ```
 
-The value **must match** the 8.1.0 cluster's userorg-service `sunbird_encryption_key`. Mismatch = decryption failures across services. Redeploy `learnbb` after this change.
-
-## Step 6.3 — Generate Postman env + run forms
-
-Once DNS is live:
 ```bash
-bash install.sh generate_postman_env
-bash install.sh migrate_forms
+helm upgrade --install database-import . \
+  -f values.yaml -n migration \
+  --timeout 30m --wait
 ```
-
-`migrate_forms`:
-- Runs System Settings APIs (privacyPolicyConfig, googleClientId)
-- For each form in `3 - Forms`:
-  - read=404 → create (env-substituted body)
-  - read=200 → update (env-substituted body)
-  - Skip-update list: `1 - Resource Create`, `2 - Resource Save`, `3 - Resource Review`, `7 - Assessment Filter`, `8 - Assessment Question save`, `10 - Textbook create`
-
-Migration is complete once Spark forms apply cleanly.
 
 ---
 
-# Monitoring & Logs
+## Phase 7 — DNS Swap (Cutover)
 
-Stream live logs for any running migration job:
+### 7.1 Get the NEW cluster's nginx IP
+
 ```bash
-kubectl logs -n sunbird -l app=database-export -f
-kubectl logs -n sunbird -l app=database-import -f
+kubectl get svc -n sunbird ingress-nginx-controller \
+  -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ```
 
-Check job status:
+### 7.2 Update DNS
+
+In the DNS provider (Route53 / Cloud DNS / etc.), update the A record for the OLD domain to point to the new nginx IP. Wait 5–30 minutes for propagation.
+
 ```bash
-kubectl get jobs -n sunbird
+dig +short <your-domain>   # should resolve to new IP
 ```
 
-Log retention in `values.yaml`:
+---
+
+### Recovery — Missed `sunbird_encryption_key` in Phase 2
+
+If `sunbird_encryption_key` was not set in `global-cloud-values.yaml` during Phase 2, `learn-service` falls back to `random_string` as the encryption key. This causes login failures and garbled PII columns.
+
+**Fix:**
+
+1. Fetch OLD key:
+```bash
+kubectl --context <OLD-CLUSTER-CONTEXT> \
+  get configmap learn-service -n sunbird -o yaml \
+  | grep sunbird_encryption_key
+```
+
+2. Add to NEW cluster's `global-cloud-values.yaml`:
 ```yaml
-jobs:
-  backoffLimit: 10                 # retries before failure
-  ttlSecondsAfterFinished: 3600    # cleanup after job completes
+global:
+  sunbird_encryption_key: "<value from OLD cluster>"
+  # Do NOT touch random_string
 ```
+
+3. Re-encrypt, commit, and redeploy learn-service:
+   - `helm_mode: selective`, bundle: learnbb, `specific_charts: learn-service`
 
 ---
 
-# Important Notes
+## Phase 8 — Validate
 
-- **Enable only one `enabled: true` at a time** in `values.yaml`. Run, verify, then enable the next.
-- **All jobs are idempotent** — re-runnable on failure.
-- **Cross-cloud transport via object storage** — source/target clusters need no direct network reach.
-- **YCQL prefix rename** lets you migrate `sb_*` keyspaces into `dv_*` (or any other prefix) without rewriting downstream service config.
-- **Keep 8.1.0 cluster running** until Spark is fully verified — never shut it down mid-migration.
-- **DB endpoints** in `databases.*` are pre-set to in-cluster service DNS names. Override only when those differ in your env.
+Trigger the GitHub Action with only these inputs:
+
+| Input | Purpose |
+|-------|---------|
+| `generate_postman_env` | Builds `env.json` with NEW cluster endpoints |
+| `migrate_forms` | Seeds System Settings + creates/updates Forms |
+
+**Form migration behaviour (`migrate_forms.py`):**
+
+| API response | Action |
+|-------------|--------|
+| `404` | Create form |
+| `200` | Update form |
+| Skipped | 6 Spark Portal Creation forms (left untouched if present) |
+
+> `run_post_install` is not needed for migrations — it is for fresh installs only.
+
+**Manual sanity checks:**
+
+- Login with a migrated user → password works (encryption key correct, keycloak reconciled)
+- Old user-uploaded content is visible (storage refs correct)
+- API endpoints return data
+- Mobile app authenticates (android client redirectUris reconciled in Phase 6.1)
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+|---------|-------------|-----|
+| Login fails / PII columns garbled | `sunbird_encryption_key` not set in `global-cloud-values.yaml` | See Phase 7 recovery section |
+| Old uploads return 404 | Wrong storage container names in `global-cloud-values.yaml` | Re-verify Phase 2.4 |
+| Keycloak admin login fails | `keycloakCredentials` not run or wrong `adminPassword` | Rerun Phase 4.2 |
+| Client secret invalid | Wrong `secretSuffix` in Phase 4.2 | Re-read `random_string` from config, rerun Phase 4.2 |
+| Refresh token rejected | Realm reconcile did not apply | Rerun Phase 6.1 |
+| YCQL keyspace not found | `targetPrefix` mismatch vs `global.env` | Fix prefix in Phase 4.3, rerun |
+| Mobile app cannot login | android client redirectUris not updated | Check Phase 6.1 job logs |
+| `helm timeout` on import job | Job is working but slow | Increase `--timeout 120m` |
+
+---
+
+## File Reference
+
+| Path | Purpose |
+|------|---------|
+| `database/export/` | Phase 1 helm chart |
+| `database/import/` | Phase 4 + 6 helm chart |
+| `database/import/files/keycloak_apply_realm_reconcile.py` | Phase 6.1 realm reconciler |
+| `database/import/keycloak_realm_diff.txt` | OLD vs NEW realm diff reference |
+| `migrate_forms.py` | Phase 8 — seed System Settings and Forms |
+
+---
+
+## Appendix — Running Without GitHub Action (VM path)
+
+GitHub Action is the primary path. For the VM path, complete the one-time VM setup in [`private-repo-setup/README.md`](../private-repo-setup/README.md) first (CLI tools, repo clone, config placement). With the public repo cloned and config files at `opentofu/<cloud>/<env>/`, the Action inputs map to these `install.sh` calls:
+
+| Phase | GitHub Action inputs | VM equivalent |
+|-------|---------------------|---------------|
+| 2 | `create_tf_backend`, `backup_configs`, `create_tf_resources` | `./install.sh create_tf_backend backup_configs create_tf_resources` |
+| 3 — Run 1 | edbb, `specific_charts: kafka yugabytedb` | `./install.sh install_service edbb kafka yugabytedb` |
+| 3 — Run 2 | learnbb, `specific_charts: elasticsearch` | `./install.sh install_service learnbb elasticsearch` |
+| 3 — Run 3 | knowledgebb, `specific_charts: janusgraph` | `./install.sh install_service knowledgebb janusgraph` |
+| 5 | `helm_mode: all` | `./install.sh install_helm_components` |
+| 7 (recovery) | learnbb, `specific_charts: learn-service` | `./install.sh install_service learnbb learn-service` |
+| 8 | `generate_postman_env`, `migrate_forms` | `./install.sh generate_postman_env migrate_forms` |
+
+> Phases 1, 4, and 6 are pure `helm upgrade --install` commands and run identically in both paths.
