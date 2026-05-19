@@ -3,20 +3,24 @@
 Migration script: Sync user course progress for all enrollments.
 
 Steps:
-  1. Get Keycloak client secret from sunbird/player-env ConfigMap
-  2. Request admin token from Keycloak using client_credentials grant
-  3. Query YugabyteDB for all user enrollments (userid, courseid, batchid)
-  4. For each enrollment, POST to lern-service /v1/activity/agg API
+  1. Get DOMAIN_URL + client secret from sunbird/player-env ConfigMap
+  2. Request admin user token from Keycloak (password grant)
+  3. Exchange refresh token at Sunbird /auth/v1/refresh/token endpoint
+  4. Query YugabyteDB for all user enrollments (userid, courseid, batchid)
+  5. For each enrollment, POST to lern-service /v1/activity/agg API
 
 Usage:
   python3 user-progress-sync.py
+
+Required env vars:
+  ADMIN_USERNAME            — admin username for Keycloak
+  ADMIN_PASSWORD            — admin password for Keycloak
 
 Optional env vars:
   YB_POD                    (default: yb-tserver-0)
   YB_NAMESPACE              (default: sunbird)
   KEYSPACE                  (default: sunbird_courses)
   TABLE                     (default: user_enrolments)
-  KEYCLOAK_URL              (default: http://keycloak.sunbird.svc.cluster.local:8080)
   KEYCLOAK_REALM            (default: sunbird)
   KEYCLOAK_CLIENT_ID        (default: lms)
   LERN_SERVICE_HOST         (default: lern-service.sunbird.svc.cluster.local)
@@ -40,10 +44,11 @@ YB_NAMESPACE = os.environ.get("YB_NAMESPACE", "sunbird")
 KEYSPACE = os.environ.get("KEYSPACE", "sunbird_courses")
 TABLE = os.environ.get("TABLE", "user_enrolments")
 
-KEYCLOAK_URL = os.environ.get("KEYCLOAK_URL", "http://keycloak.sunbird.svc.cluster.local:8080")
 KEYCLOAK_REALM = os.environ.get("KEYCLOAK_REALM", "sunbird")
 KEYCLOAK_CLIENT_ID = os.environ.get("KEYCLOAK_CLIENT_ID", "lms")
-KEYCLOAK_CLIENT_SECRET = os.environ.get("KEYCLOAK_CLIENT_SECRET", "")
+
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 
 LERN_SERVICE_HOST = os.environ.get("LERN_SERVICE_HOST", "lern-service.sunbird.svc.cluster.local")
 LERN_SERVICE_PORT = os.environ.get("LERN_SERVICE_PORT", "9000")
@@ -65,95 +70,114 @@ def yb_exec(command, timeout=3600):
     return result
 
 
-def step_1_get_client_secret():
-    """Fetch Keycloak client secret from ConfigMap."""
-    print("\n[Step 1/5] Fetching Keycloak client secret from ConfigMap...")
+def step_1_get_config_from_configmap():
+    """Fetch DOMAIN_URL + client secret from ConfigMap."""
+    print("\n[Step 1/6] Fetching config from sunbird/player-env ConfigMap...")
+
     cmd = [
         "kubectl", "get", "cm", "-n", "sunbird", "player-env",
-        "-ojsonpath={.data.SUNBIRD_SESSION_SECRET}"
+        "-ojsonpath={.data.DOMAIN_URL}:{.data.SUNBIRD_SESSION_SECRET}"
     ]
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:
         print(f"  FAILED: {result.stderr.strip()}")
         sys.exit(1)
 
-    session_secret = result.stdout.strip()
-    if not session_secret:
-        print("  FAILED: ConfigMap key SUNBIRD_SESSION_SECRET not found or empty")
+    output = result.stdout.strip()
+    if ":" not in output:
+        print(f"  FAILED: ConfigMap missing DOMAIN_URL or SUNBIRD_SESSION_SECRET")
         sys.exit(1)
 
-    secret = f"lms{session_secret}"
-    print(f"  Client secret fetched: {secret[:20]}...")
-    return secret
+    domain_url, session_secret = output.split(":", 1)
+    if not domain_url or not session_secret:
+        print(f"  FAILED: Empty values in ConfigMap")
+        sys.exit(1)
+
+    client_secret = f"lms{session_secret}"
+    print(f"  DOMAIN_URL: {domain_url}")
+    print(f"  Client secret: {client_secret[:20]}...")
+    return domain_url, client_secret
 
 
-def step_2_get_keycloak_token(client_secret):
-    """Request admin token from Keycloak."""
-    print("\n[Step 2/5] Requesting token from Keycloak...")
-    token_url = f"{KEYCLOAK_URL}/auth/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token"
-    print(f"  URL       : {token_url}")
-    print(f"  client_id : {KEYCLOAK_CLIENT_ID}")
-    print(f"  client_secret (prefix/length): {client_secret[:8]}... / {len(client_secret)}")
+def step_2_get_user_token(domain_url, client_secret):
+    """Request admin user token using password grant."""
+    print("\n[Step 2/6] Requesting admin user token from Keycloak (password grant)...")
 
-    # Capture status + body separately
+    if not ADMIN_USERNAME or not ADMIN_PASSWORD:
+        print(f"  FAILED: ADMIN_USERNAME or ADMIN_PASSWORD not set")
+        sys.exit(1)
+
+    token_url = f"{domain_url}/auth/realms/{KEYCLOAK_REALM}/protocol/openid-connect/token"
+
     cmd = [
-        "curl", "-sS", "-X", "POST", token_url,
-        "-w", "\n__HTTP_STATUS__:%{http_code}",
+        "curl", "-s", "-X", "POST", token_url,
         "-H", "Content-Type: application/x-www-form-urlencoded",
-        "-d", f"client_id={KEYCLOAK_CLIENT_ID}&client_secret={client_secret}&grant_type=client_credentials"
+        "-d", f"client_id={KEYCLOAK_CLIENT_ID}&client_secret={client_secret}&grant_type=password&username={ADMIN_USERNAME}&password={ADMIN_PASSWORD}"
     ]
 
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
     if result.returncode != 0:
-        print(f"  CURL FAILED (rc={result.returncode}): {result.stderr.strip()}")
-        sys.exit(1)
-
-    # Split off our http_status marker
-    body, _, status_line = result.stdout.rpartition("\n__HTTP_STATUS__:")
-    http_status = status_line.strip() or "000"
-    print(f"  HTTP {http_status}")
-    if http_status != "200":
-        print(f"  Body      : {body[:500]}")
+        print(f"  FAILED: {result.stderr.strip()}")
         sys.exit(1)
 
     try:
-        token_resp = json.loads(body)
+        token_resp = json.loads(result.stdout)
         if "error" in token_resp:
             print(f"  FAILED: {token_resp.get('error_description', token_resp.get('error'))}")
             sys.exit(1)
 
-        token = token_resp.get("access_token")
-        if not token:
-            print(f"  FAILED: No access_token in response. Full body: {body[:500]}")
+        refresh_token = token_resp.get("refresh_token")
+        if not refresh_token:
+            print(f"  FAILED: No refresh_token in response")
             sys.exit(1)
 
-        # Decode JWT payload (middle segment) so we can inspect claims
-        try:
-            import base64
-            parts = token.split(".")
-            if len(parts) >= 2:
-                pad = "=" * (-len(parts[1]) % 4)
-                claims = json.loads(base64.urlsafe_b64decode(parts[1] + pad))
-                print(f"  Token issuer (iss)  : {claims.get('iss')}")
-                print(f"  Token subject (sub) : {claims.get('sub')}")
-                print(f"  Token azp / clientId: {claims.get('azp')} / {claims.get('clientId')}")
-                print(f"  Token aud           : {claims.get('aud')}")
-                print(f"  Token typ           : {claims.get('typ')}")
-                print(f"  Realm roles         : {(claims.get('realm_access') or {}).get('roles')}")
-                print(f"  Token exp           : {claims.get('exp')}")
-        except Exception as e:
-            print(f"  (couldn't decode JWT claims: {e})")
-
-        print(f"  Token obtained: {token[:50]}...")
-        return token
+        print(f"  Refresh token obtained: {refresh_token[:50]}...")
+        return refresh_token
     except json.JSONDecodeError:
-        print(f"  FAILED: Invalid JSON response: {body[:200]}")
+        print(f"  FAILED: Invalid JSON response: {result.stdout[:200]}")
         sys.exit(1)
 
 
-def step_3_export_enrollments():
+def step_3_get_sunbird_access_token(domain_url, refresh_token):
+    """Exchange refresh token at Sunbird /auth/v1/refresh/token."""
+    print("\n[Step 3/6] Exchanging refresh token at Sunbird /auth/v1/refresh/token...")
+
+    refresh_url = f"{domain_url}/auth/v1/refresh/token"
+
+    cmd = [
+        "curl", "-s", "-X", "POST", refresh_url,
+        "-H", "Content-Type: application/x-www-form-urlencoded",
+        "-d", f"refresh_token={refresh_token}"
+    ]
+
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+    if result.returncode != 0:
+        print(f"  FAILED: {result.stderr.strip()}")
+        sys.exit(1)
+
+    try:
+        refresh_resp = json.loads(result.stdout)
+        if refresh_resp.get("params", {}).get("status") != "successful":
+            err = refresh_resp.get("params", {}).get("err")
+            errmsg = refresh_resp.get("params", {}).get("errmsg")
+            print(f"  FAILED: {err} - {errmsg}")
+            sys.exit(1)
+
+        access_token = refresh_resp.get("result", {}).get("access_token")
+        if not access_token:
+            print(f"  FAILED: No access_token in result")
+            sys.exit(1)
+
+        print(f"  Sunbird access token obtained: {access_token[:50]}...")
+        return access_token
+    except json.JSONDecodeError:
+        print(f"  FAILED: Invalid JSON response: {result.stdout[:200]}")
+        sys.exit(1)
+
+
+def step_4_export_enrollments():
     """Export user enrollments (userid, courseid, batchid) from YugabyteDB."""
-    print("\n[Step 3/5] Exporting user enrollments from YugabyteDB...")
+    print("\n[Step 4/6] Exporting user enrollments from YugabyteDB...")
     print(f"  Source: {KEYSPACE}.{TABLE}  (pod: {YB_POD}/{YB_NAMESPACE})")
 
     copy_cmd = (
@@ -172,9 +196,9 @@ def step_3_export_enrollments():
     print("  Done.")
 
 
-def step_4_read_enrollments():
+def step_5_read_enrollments():
     """Read enrollments from CSV inside YugabyteDB pod."""
-    print("\n[Step 4/5] Reading exported enrollments...")
+    print("\n[Step 5/6] Reading exported enrollments...")
     result = yb_exec(["cat", REMOTE_CSV])
     if result.returncode != 0:
         print(f"  FAILED: {result.stderr.strip()}")
@@ -197,12 +221,12 @@ def step_4_read_enrollments():
     return enrollments
 
 
-def step_5_trigger_activity_api(token, enrollments):
+def step_6_trigger_activity_api(token, enrollments):
     """Call activity/agg API for each enrollment on lern-service."""
     url_base = f"http://{LERN_SERVICE_HOST}:{LERN_SERVICE_PORT}/v1/activity/agg"
     total = len(enrollments)
 
-    print(f"\n[Step 5/5] Triggering activity sync for {total} enrollments")
+    print(f"\n[Step 6/6] Triggering activity sync for {total} enrollments")
     print(f"  Endpoint : POST {url_base}")
     print(f"  Delay    : {ACTIVITY_API_DELAY_SECONDS}s between calls")
     print(f"  DRY_RUN  : {DRY_RUN}")
@@ -216,9 +240,6 @@ def step_5_trigger_activity_api(token, enrollments):
     ok = 0
     failed = 0
     failures = []
-    # Print full response body for the first N failures so we know WHY they fail
-    body_dump_budget = int(os.environ.get("LOG_FAILURE_BODIES", "5"))
-    bodies_dumped = 0
 
     for idx, enr in enumerate(enrollments, start=1):
         payload = json.dumps({
@@ -232,7 +253,7 @@ def step_5_trigger_activity_api(token, enrollments):
         try:
             result = subprocess.run(
                 [
-                    "curl", "-sS", "-w", "\n__HTTP_STATUS__:%{http_code}",
+                    "curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
                     "--max-time", str(ACTIVITY_API_TIMEOUT_SECONDS),
                     "-X", "POST", url_base,
                     "-H", "Content-Type: application/json",
@@ -241,22 +262,15 @@ def step_5_trigger_activity_api(token, enrollments):
                 ],
                 capture_output=True, text=True, timeout=ACTIVITY_API_TIMEOUT_SECONDS + 10,
             )
-            body, _, status_line = result.stdout.rpartition("\n__HTTP_STATUS__:")
-            status = status_line.strip() or "000"
+            status = result.stdout.strip() or "000"
         except subprocess.TimeoutExpired:
             status = "TIMEOUT"
-            body = ""
 
         if status.startswith("2"):
             ok += 1
         else:
             failed += 1
             failures.append((enr["userid"], enr["courseid"], enr["batchid"], status))
-            print(f"  [{idx}/{total}] {enr['userid'][:8]}.../{enr['courseid'][:8]}... -> HTTP {status}")
-            if bodies_dumped < body_dump_budget:
-                print(f"      request : {payload}")
-                print(f"      response: {body[:500]}")
-                bodies_dumped += 1
             print(f"  [{idx}/{total}] {enr['userid'][:8]}.../{enr['courseid'][:8]}... -> HTTP {status}")
 
         if idx % PROGRESS_EVERY == 0:
@@ -276,25 +290,26 @@ def main():
     print(f"  YB_POD                      : {YB_POD}")
     print(f"  YB_NAMESPACE                : {YB_NAMESPACE}")
     print(f"  KEYSPACE.TABLE              : {KEYSPACE}.{TABLE}")
-    print(f"  KEYCLOAK_URL                : {KEYCLOAK_URL}")
     print(f"  KEYCLOAK_REALM              : {KEYCLOAK_REALM}")
     print(f"  KEYCLOAK_CLIENT_ID          : {KEYCLOAK_CLIENT_ID}")
+    print(f"  ADMIN_USERNAME              : {ADMIN_USERNAME}")
     print(f"  LERN_SERVICE_HOST           : {LERN_SERVICE_HOST}")
     print(f"  LERN_SERVICE_PORT           : {LERN_SERVICE_PORT}")
     print(f"  ACTIVITY_API_DELAY_SECONDS  : {ACTIVITY_API_DELAY_SECONDS}")
     print(f"  DRY_RUN                     : {DRY_RUN}")
     print("=" * 70)
 
-    client_secret = step_1_get_client_secret()
-    token = step_2_get_keycloak_token(client_secret)
-    step_3_export_enrollments()
-    enrollments = step_4_read_enrollments()
+    domain_url, client_secret = step_1_get_config_from_configmap()
+    refresh_token = step_2_get_user_token(domain_url, client_secret)
+    access_token = step_3_get_sunbird_access_token(domain_url, refresh_token)
+    step_4_export_enrollments()
+    enrollments = step_5_read_enrollments()
 
     if not enrollments:
         print("\nNo enrollments to process. Exiting.")
         return
 
-    ok, failed, failures = step_5_trigger_activity_api(token, enrollments)
+    ok, failed, failures = step_6_trigger_activity_api(access_token, enrollments)
 
     duration = (datetime.now() - start).total_seconds()
     print("\n" + "=" * 70)

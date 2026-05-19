@@ -167,9 +167,10 @@ postMigration:
     ybPod: "yb-tserver-0"
     keyspace: "sunbird_courses"
     table: "user_enrolments"
-    keycloakUrl: "http://keycloak.sunbird.svc.cluster.local:8080"
     keycloakRealm: "sunbird"
     keycloakClientId: "lms"
+    adminUsername: ""                  # Admin username (e.g., admin@yopmail.com)
+    adminPassword: ""                  # Admin password
     lernServiceHost: "lern-service.sunbird.svc.cluster.local"
     lernServicePort: 9000
     activityApiDelaySeconds: 0.1

@@ -37,12 +37,14 @@ spec:
           value: {{ .Values.postMigration.userProgressSync.keyspace | quote }}
         - name: TABLE
           value: {{ .Values.postMigration.userProgressSync.table | quote }}
-        - name: KEYCLOAK_URL
-          value: {{ .Values.postMigration.userProgressSync.keycloakUrl | quote }}
         - name: KEYCLOAK_REALM
           value: {{ .Values.postMigration.userProgressSync.keycloakRealm | quote }}
         - name: KEYCLOAK_CLIENT_ID
           value: {{ .Values.postMigration.userProgressSync.keycloakClientId | quote }}
+        - name: ADMIN_USERNAME
+          value: {{ .Values.postMigration.userProgressSync.adminUsername | quote }}
+        - name: ADMIN_PASSWORD
+          value: {{ .Values.postMigration.userProgressSync.adminPassword | quote }}
         - name: LERN_SERVICE_HOST
           value: {{ .Values.postMigration.userProgressSync.lernServiceHost | quote }}
         - name: LERN_SERVICE_PORT
