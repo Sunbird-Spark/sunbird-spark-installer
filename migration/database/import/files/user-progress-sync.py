@@ -70,6 +70,37 @@ def yb_exec(command, timeout=3600):
     return result
 
 
+def disable_enrollment_filter():
+    """Disable filter_processed_enrolments in lern-env ConfigMap."""
+    print("\n[Pre-job] Disabling filter_processed_enrolments in lern-env ConfigMap...")
+    cmd = [
+        "kubectl", "patch", "configmap", "lern-env", "-n", "sunbird",
+        "--type", "merge",
+        "-p", '{"data":{"filter_processed_enrolments":"false"}}'
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"  WARNING: Could not disable filter. {result.stderr.strip()}")
+        print("  Continuing anyway...")
+    else:
+        print("  Filter disabled successfully")
+
+
+def enable_enrollment_filter():
+    """Re-enable filter_processed_enrolments in lern-env ConfigMap."""
+    print("\n[Post-job] Re-enabling filter_processed_enrolments in lern-env ConfigMap...")
+    cmd = [
+        "kubectl", "patch", "configmap", "lern-env", "-n", "sunbird",
+        "--type", "merge",
+        "-p", '{"data":{"filter_processed_enrolments":"true"}}'
+    ]
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"  WARNING: Could not re-enable filter. {result.stderr.strip()}")
+    else:
+        print("  Filter re-enabled successfully")
+
+
 def step_1_get_config_from_configmap():
     """Fetch DOMAIN_URL + client secret from ConfigMap."""
     print("\n[Step 1/6] Fetching config from sunbird/player-env ConfigMap...")
@@ -104,7 +135,6 @@ def step_1_get_config_from_configmap():
 
     client_secret = f"lms{session_secret}"
     print(f"  DOMAIN_URL: {domain_url}")
-    print(f"  Client secret: {client_secret[:20]}...")
     return domain_url, client_secret
 
 
@@ -140,7 +170,7 @@ def step_2_get_user_token(domain_url, client_secret):
             print(f"  FAILED: No refresh_token in response")
             sys.exit(1)
 
-        print(f"  Refresh token obtained: {refresh_token[:50]}...")
+        print(f"  Refresh token obtained successfully")
         return refresh_token
     except json.JSONDecodeError:
         print(f"  FAILED: Invalid JSON response: {result.stdout[:200]}")
@@ -177,7 +207,7 @@ def step_3_get_sunbird_access_token(domain_url, refresh_token):
             print(f"  FAILED: No access_token in result")
             sys.exit(1)
 
-        print(f"  Sunbird access token obtained: {access_token[:50]}...")
+        print(f"  Sunbird access token obtained successfully")
         return access_token
     except json.JSONDecodeError:
         print(f"  FAILED: Invalid JSON response: {result.stdout[:200]}")
@@ -308,33 +338,43 @@ def main():
     print(f"  DRY_RUN                     : {DRY_RUN}")
     print("=" * 70)
 
-    domain_url, client_secret = step_1_get_config_from_configmap()
-    refresh_token = step_2_get_user_token(domain_url, client_secret)
-    access_token = step_3_get_sunbird_access_token(domain_url, refresh_token)
-    step_4_export_enrollments()
-    enrollments = step_5_read_enrollments()
+    disable_enrollment_filter()
 
-    if not enrollments:
-        print("\nNo enrollments to process. Exiting.")
-        return
+    try:
+        domain_url, client_secret = step_1_get_config_from_configmap()
+        refresh_token = step_2_get_user_token(domain_url, client_secret)
+        access_token = step_3_get_sunbird_access_token(domain_url, refresh_token)
+        step_4_export_enrollments()
+        enrollments = step_5_read_enrollments()
 
-    ok, failed, failures = step_6_trigger_activity_api(access_token, enrollments)
+        if not enrollments:
+            print("\nNo enrollments to process. Exiting.")
+            enable_enrollment_filter()
+            return
 
-    duration = (datetime.now() - start).total_seconds()
-    print("\n" + "=" * 70)
-    print(" Migration complete")
-    print("=" * 70)
-    print(f"  Total enrollments : {len(enrollments)}")
-    print(f"  API OK            : {ok}")
-    print(f"  API FAILED        : {failed}")
-    print(f"  Duration          : {duration:.1f}s")
-    print("=" * 70)
+        ok, failed, failures = step_6_trigger_activity_api(access_token, enrollments)
 
-    if failures:
-        print("\nFirst 20 failures:")
-        for userid, courseid, batchid, status in failures[:20]:
-            print(f"  {userid[:8]}.../{courseid[:8]}.../{batchid[:8]}...  ->  HTTP {status}")
-        sys.exit(1)
+        duration = (datetime.now() - start).total_seconds()
+        print("\n" + "=" * 70)
+        print(" Migration complete")
+        print("=" * 70)
+        print(f"  Total enrollments : {len(enrollments)}")
+        print(f"  API OK            : {ok}")
+        print(f"  API FAILED        : {failed}")
+        print(f"  Duration          : {duration:.1f}s")
+        print("=" * 70)
+
+        enable_enrollment_filter()
+
+        if failures:
+            print("\nFirst 20 failures:")
+            for userid, courseid, batchid, status in failures[:20]:
+                print(f"  {userid[:8]}.../{courseid[:8]}.../{batchid[:8]}...  ->  HTTP {status}")
+            sys.exit(1)
+    except Exception as e:
+        print(f"\nERROR: {e}")
+        enable_enrollment_filter()
+        raise
 
 
 if __name__ == "__main__":
