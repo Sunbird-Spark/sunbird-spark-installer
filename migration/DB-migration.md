@@ -493,6 +493,8 @@ Trigger the GitHub Action with only these inputs:
 | `database/import/files/user-progress-sync.py` | Phase 6.3 user progress sync |
 | `database/import/keycloak_realm_diff.txt` | OLD vs NEW realm diff reference |
 | `migrate_forms.py` | Phase 8 — seed System Settings and Forms |
+| `migrate.sh` | Pre-deploy orchestration — Phases 2 + 3 + 4 (see appendix) |
+| `post-migrate.sh` | Post-deploy orchestration — Phases 6 + 8, with service-readiness preflight (see appendix) |
 
 ---
 
@@ -511,3 +513,62 @@ GitHub Action is the primary path. For the VM path, complete the one-time VM set
 | 8 | `generate_postman_env`, `migrate_forms` | `./install.sh generate_postman_env migrate_forms` |
 
 > Phases 1, 4, and 6 are pure `helm upgrade --install` commands and run identically in both paths.
+
+---
+
+### Orchestration helpers — `migrate.sh` + `post-migrate.sh`
+
+Two small scripts that wrap only the **helm-driven migration steps** (Phase 4 + Phase 6). Everything else (infra, data-tier install, full deploy, validation) goes through the GitHub Action.
+
+| Script | What it runs | Pre-req |
+|--------|--------------|---------|
+| `migration/migrate.sh`      | Phase 4 (6 helm upgrades: YSQL → keycloakCredentials → YCQL → JanusGraph → ES → createdatBackfill) | Phases 1, 2, 3 done |
+| `migration/post-migrate.sh` | Phase 6 (3 helm upgrades: keycloakRealmReconcile → hierarchyFix → userProgressSync). Has pre-flight: errors out if `keycloak`, `knowlg-service`, or `lern-service` in `sunbird` ns have no Ready replicas. | Phase 5 done |
+
+No `ENV` env var required — both scripts are pure `helm` and `kubectl`; no `install.sh` calls. Just point `kubectl` at the NEW cluster.
+
+Both use `set -euo pipefail` — any non-zero exit halts execution; subsequent steps do **not** run. Fix root cause, rerun the failed step.
+
+#### End-to-end flow
+
+```bash
+# 1.  Phase 4 — DB imports + DB-only fixups
+./migration/migrate.sh
+#     ↓
+# 2.  Phase 5 — trigger GitHub Action: install_helm=true, helm_mode=all
+#     Wait until Deployments in ns/sunbird are Ready.
+#     ↓
+# 3.  Phase 6 — post-deploy reconciles (preflight checks services first)
+./migration/post-migrate.sh
+#     ↓
+# 4.  Phase 8 — trigger GitHub Action: generate_postman_env + migrate_forms
+#     ↓
+# 5.  Phase 7 — DNS swap (manual)
+```
+
+#### Per-step invocations (recommended for first-time runs — verify each before moving on)
+
+```bash
+./migration/migrate.sh 4.1
+./migration/migrate.sh 4.2
+./migration/migrate.sh 4.3
+./migration/migrate.sh 4.4
+./migration/migrate.sh 4.5
+./migration/migrate.sh 4.6
+# ... GitHub Action: Phase 5 ...
+./migration/post-migrate.sh 6.1
+./migration/post-migrate.sh 6.2
+./migration/post-migrate.sh 6.3
+```
+
+> **How does `post-migrate.sh` know Phase 5 is done?** It doesn't trust a flag — it queries `kubectl` for `keycloak` / `knowlg-service` / `lern-service` Deployments in `sunbird` ns and requires each has ≥ 1 Ready replica. If any check fails the script exits with a clear error. Wait for the Action to finish + pods to become Ready, then rerun.
+
+Inputs (env vars):
+
+| Var | Default | Purpose |
+|-----|---------|---------|
+| `ENV` | — (required) | Env name under `opentofu/<cloud>/<env>/` |
+| `CLOUD` | `azure` | `azure` or `gcp` |
+| `NAMESPACE` | `migration` | Helm release namespace for the import chart |
+| `RELEASE` | `db-migration` | Helm release name |
+| `HELM_TIMEOUT` | `60m` | Per-helm-upgrade timeout |
