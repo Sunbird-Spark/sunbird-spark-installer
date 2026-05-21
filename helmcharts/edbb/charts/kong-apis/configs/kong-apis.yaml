@@ -1739,6 +1739,20 @@ kong_apis:
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
+- name: mobileKeycloakLogin
+  uris: "/mobile/keycloak/login"
+  url: "{{ .Values.player_service_url }}/mobile/keycloak/login"
+  strip_path: true
+  plugins:
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: ip
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
 - name: orgAssignKeys
   uris: "{{ .Values.org_service_prefix }}/v1/assign/key"
   url: "{{ .Values.userorg_service_url }}/v1/org/assign/key"
