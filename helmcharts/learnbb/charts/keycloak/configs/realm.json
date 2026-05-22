@@ -906,7 +906,7 @@
       "secret": "{{ .Values.android_client_secret }}{{ .Values.global.random_string }}",
       "redirectUris": [
         "https://{{ .Values.global.domain }}/oauth2callback",
-        "org.sunbird.app://oauth2callback",
+        "org.sunbird.spark.app://oauth2callback",
         "{{ .Values.global.env }}.sunbird.app://mobile"
       ],
       "webOrigins": [],

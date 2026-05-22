@@ -17,16 +17,30 @@ function backup_configs() {
     export KUBECONFIG=~/.kube/config
 }
 
+function deploy_tf_module() {
+    local module=$1
+    echo -e "\nDeploying module: $module"
+    cd $module
+    terragrunt init --reconfigure
+    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    cd ..
+}
+
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    export TG_TF_PATH=tofu
-    tofu init -reconfigure
-    terragrunt init --all --reconfigure --non-interactive
-    # terragrunt plan --all --non-interactive
-    terragrunt run --all apply --non-interactive
-    chmod 600 ~/.kube/config
+    deploy_tf_module network
+    deploy_tf_module storage
+    deploy_tf_module aks
+    deploy_tf_module workload-identity
+    deploy_tf_module random_passwords
+    deploy_tf_module keys
+    deploy_tf_module output-file
+    deploy_tf_module upload-files
+    [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
 }
+
+
 function certificate_keys() {
     #  # If keys already present in global-values.yaml → skip writing
     if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/azure/$environment/global-values.yaml 2>/dev/null; then
@@ -291,6 +305,18 @@ function run_post_install() {
     postman collection run sunbird-spark-collection-v1.json --environment env.json --delay-request 500 --bail --insecure
 }
 
+function migrate_forms() {
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "$environment" ]; then
+        cd ../opentofu/azure/$environment 2>/dev/null || true
+    fi
+    echo "Migrating missing forms..."
+    cp ../../../postman-collection/sunbird-spark-collection-v1.json .
+    python3 ../../../migration/migrate_forms.py \
+        --collection sunbird-spark-collection-v1.json \
+        --env env.json
+}
+
 function create_client_forms() {
     local current_directory="$(pwd)"
     if [ "$(basename $current_directory)" != "$environment" ]; then
@@ -399,6 +425,9 @@ else
         ;;
     "run_post_install")
         run_post_install
+        ;;
+    "migrate_forms")
+        migrate_forms
         ;;
     "destroy_tf_resources")
         destroy_tf_resources

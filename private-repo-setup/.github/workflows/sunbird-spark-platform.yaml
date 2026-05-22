@@ -103,8 +103,8 @@ on:
         description: '1️⃣2️⃣ Create client forms'
         type: boolean
         default: false
-      setup_forms:
-        description: '1️⃣3️⃣ Setup missing forms (read-check then create)'
+      migrate_forms:
+        description: '1️⃣3️⃣ Migrate forms (read-check then create missing)'
         type: boolean
         default: false
 
@@ -464,7 +464,7 @@ jobs:
 # ════════════════════════════════════════════════════════════════════════════
   platform:
     name: "3 — Platform (Post-Install Config)"
-    if: ${{ always() && (inputs.restart_workloads || inputs.certificate_config || inputs.dns_mapping || inputs.generate_postman_env || inputs.run_post_install || inputs.create_client_forms || inputs.setup_forms) }}
+    if: ${{ always() && (inputs.restart_workloads || inputs.certificate_config || inputs.dns_mapping || inputs.generate_postman_env || inputs.run_post_install || inputs.create_client_forms || inputs.migrate_forms) }}
     needs: [deploy]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
@@ -597,11 +597,11 @@ jobs:
           cd $ENV_FOLDER && bash install.sh create_client_forms
           echo "✅ create_client_forms done"
 
-      - name: 1️⃣3️⃣ setup_forms
-        if: ${{ inputs.setup_forms }}
+      - name: 1️⃣3️⃣ migrate_forms
+        if: ${{ inputs.migrate_forms }}
         run: |
-          cd $ENV_FOLDER && bash install.sh setup_forms
-          echo "✅ setup_forms done"
+          cd $ENV_FOLDER && bash install.sh migrate_forms
+          echo "✅ migrate_forms done"
 
       - name: Platform Summary
         if: always()
@@ -616,5 +616,5 @@ jobs:
           [ "${{ inputs.generate_postman_env }}" == "true" ] && echo "  ✅ 🔟   generate_postman_env" || echo "  ⏭️  🔟   generate_postman_env (skipped)"
           [ "${{ inputs.run_post_install }}"     == "true" ] && echo "  ✅ 1️⃣1️⃣  run_post_install"     || echo "  ⏭️  1️⃣1️⃣  run_post_install (skipped)"
           [ "${{ inputs.create_client_forms }}"  == "true" ] && echo "  ✅ 1️⃣2️⃣  create_client_forms"  || echo "  ⏭️  1️⃣2️⃣  create_client_forms (skipped)"
-          [ "${{ inputs.setup_forms }}"          == "true" ] && echo "  ✅ 1️⃣3️⃣  setup_forms"          || echo "  ⏭️  1️⃣3️⃣  setup_forms (skipped)"
+          [ "${{ inputs.migrate_forms }}"          == "true" ] && echo "  ✅ 1️⃣3️⃣  migrate_forms"          || echo "  ⏭️  1️⃣3️⃣  migrate_forms (skipped)"
           echo "================================================"
