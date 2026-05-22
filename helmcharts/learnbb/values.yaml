@@ -17,51 +17,10 @@ registry:
 migration:
   yugabyte:
     waitTime: 120
-  elasticsearch:
-    waitTime: 120
   postgresql:
     waitTime: 120
 
 postgres_migration_image: sunbirded.azurecr.io/postgresql:11.14.0
-
-elasticsearch: &es
-  enabled: true
-  fullnameOverride: "elasticsearch"
-  host: "elasticsearch"
-  port: 9200
-  image:
-    registry: docker.io
-    repository: bitnami/elasticsearch
-    tag: 7.10.2
-  master:
-    masterOnly: false
-    replicaCount: 1
-    resources:
-      requests:
-        cpu: "1"
-        memory: "2Gi"
-      limits:
-        cpu: "2"
-        memory: "4Gi"
-    heapSize: 2G
-    persistence:
-      size: 25Gi
-  extraConfig:
-    reindex.remote.whitelist: "" # Allow all remote hosts for reindexing, adjust as needed for security
-  data:
-    replicaCount: 0
-  coordinating:
-    replicaCount: 0
-  ingest:
-    enabled: false
-  commonAnnotations:
-    "helm.sh/hook-weight": "-5"
-  provisioning:
-    annotations: *provisioningAnnotations
-  sysctlImage:
-    registry: sunbirded.azurecr.io
-    repository: bitnami-shell-archived
-    tag: 11-debian-11-r54
 
 kafka: &kafka
   enabled: true
@@ -170,6 +129,24 @@ yugabytecql:
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_499032f"
 
+opensearch: &opensearch
+  enabled: true
+  fullnameOverride: "opensearch"
+  host: "opensearch-cluster-master"
+  port: 9200
+  singleNode: true
+  extraEnvs:
+    - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+      value: "Lern@Migr8#2026!"
+  config:
+    opensearch.yml: |
+      plugins.security.disabled: true
+      search.insights.top_queries.latency.enabled: false
+      search.insights.top_queries.cpu.enabled: false
+      search.insights.top_queries.memory.enabled: false
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+
 keycloak:
   enabled: true
 
@@ -192,7 +169,7 @@ certificatesign:
   enabled: true
 
 global:
-  elasticsearch: *es
+  opensearch: *opensearch
   kafka: *kafka
   keycloak_key_configmap: keycloak-key
   keycloak_kid_keys_configmap: keycloak-kids-keys
