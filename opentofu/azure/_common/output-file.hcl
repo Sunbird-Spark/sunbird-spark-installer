@@ -1,6 +1,8 @@
 locals {
   global_vars  = yamldecode(file(find_in_parent_folders("global-values.yaml")))
-  cloud_vars   = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {global: {cloud_storage_access_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: ""}})
+  _cloud_defaults = {cloud_storage_access_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: "", sunbird_encryption_key: ""}
+  _cloud_raw   = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {})
+  cloud_vars   = {global: merge(local._cloud_defaults, try(local._cloud_raw.global, {}))}
   env                    = local.global_vars.global.env
   environment            = local.global_vars.global.environment
   building_block         = local.global_vars.global.building_block
@@ -10,7 +12,7 @@ locals {
   storage_container_public  = local.cloud_vars.global.public_container_name
   storage_container_private = local.cloud_vars.global.private_container_name
   velero_container_name     = local.cloud_vars.global.velero_storage_container_private
-  sunbird_encryption_key    = try(local.cloud_vars.global.sunbird_encryption_key, "")
+  sunbird_encryption_key    = local.cloud_vars.global.sunbird_encryption_key
 }
 
 # For local development
