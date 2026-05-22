@@ -353,6 +353,3 @@ if saved_credential.get('key') == credential_iss:
 - [Kong Migration Guide](https://docs.konghq.com/gateway/latest/upgrade/)
 - [Kong 3.9.x Release Notes](https://docs.konghq.com/gateway/changelog/)
 - [YugabyteDB PostgreSQL Compatibility](https://docs.yugabyte.com/preview/explore/ysql-language-features/)
-
----
-

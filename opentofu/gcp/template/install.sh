@@ -296,6 +296,18 @@ function run_post_install() {
     postman collection run sunbird-spark-collection-v1.json --environment env.json --delay-request 500 --bail --insecure
 }
 
+function migrate_forms() {
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "$environment" ]; then
+        cd ../opentofu/gcp/$environment 2>/dev/null || true
+    fi
+    echo "Migrating missing forms..."
+    cp ../../../postman-collection/sunbird-spark-collection-v1.json .
+    python3 ../../../migration/migrate_forms.py \
+        --collection sunbird-spark-collection-v1.json \
+        --env env.json
+}
+
 function create_client_forms() {
     local current_directory="$(pwd)"
     if [ "$(basename $current_directory)" != "$environment" ]; then
@@ -404,6 +416,9 @@ else
         ;;
     "run_post_install")
         run_post_install
+        ;;
+    "migrate_forms")
+        migrate_forms
         ;;
     "destroy_tf_resources")
         destroy_tf_resources
