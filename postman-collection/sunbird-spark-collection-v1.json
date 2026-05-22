@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "c1f125f8-d0fa-4dc4-a79a-46000ec84406",
+		"_postman_id": "f801afb5-d27d-4e3f-9bb2-caced23c82d8",
 		"name": "Oneclick Installer - Sunbird Spark - Daylight Release",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "50198284"
@@ -1928,11 +1928,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer"
-							},
-							{
-								"key": "x-authenticated-user-token",
-								"value": ""
+								"value": "Bearer {{apikey}}"
 							},
 							{
 								"key": "Content-Type",
@@ -1941,7 +1937,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"request\": {\n        \"id\": \"certContextOrigins\",\n        \"field\": \"certContextOrigins\",\n        \"value\": \"https://downloadableartifacts.blob.core.windows.net/\"\n    }\n}",
+							"raw": "{\n    \"request\": {\n        \"id\": \"certContextOrigins\",\n        \"field\": \"certContextOrigins\",\n        \"value\": \"{{blob_store_path}},https://downloadableartifacts.blob.core.windows.net/\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
