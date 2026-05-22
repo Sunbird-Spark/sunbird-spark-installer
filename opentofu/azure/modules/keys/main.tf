@@ -45,7 +45,10 @@ resource "null_resource" "upload_global_jwt_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-jwt-tokens.yaml --file ${local.global_values_jwt_file_location} --auth-mode login --overwrite"
+    command = <<EOT
+      [ -f ${local.global_values_jwt_file_location} ] || python3 ${local.jwt_script_location} ${random_password.generated_string.result}
+      az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-jwt-tokens.yaml --file ${local.global_values_jwt_file_location} --auth-mode login --overwrite
+    EOT
   }
   depends_on = [ null_resource.generate_jwt_keys ]
 }
@@ -55,7 +58,10 @@ resource "null_resource" "upload_global_rsa_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-rsa-keys.yaml --file ${local.global_values_rsa_file_location} --auth-mode login --overwrite"
+    command = <<EOT
+      [ -f ${local.global_values_rsa_file_location} ] || python3 ${local.rsa_script_location} ${var.rsa_keys_count}
+      az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-rsa-keys.yaml --file ${local.global_values_rsa_file_location} --auth-mode login --overwrite
+    EOT
   }
   depends_on = [ null_resource.generate_rsa_keys ]
 }
