@@ -15,7 +15,7 @@ keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
 global:
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
-  resource_group_name: ""    # Azure resource group name; created if it does not exist
+  resource_group_name: ""    # Azure resource group name
   building_block: "" # building block name
   env: ""
   environment: "" # use lowercase alphanumeric string between 1-9 characters

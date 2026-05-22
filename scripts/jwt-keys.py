@@ -14,8 +14,14 @@ def generate_jwt_token(key, secret, random_string):
         "iss": key
     }
 
+    # Stamp kid in the JOSE header so Kong's kid-default lookup can resolve
+    # the credential. Without this every bootstrap token (api_admin,
+    # adminutil_learner_api_token, portal_anonymous_fallback_token, etc.)
+    # would fail Kong's strict JWT auth with "No mandatory 'kid' in claims".
+    headers = {"kid": key}
+
     # Generate the JWT token
-    jwt_token = jwt.encode(payload, secret_with_random, algorithm="HS256")
+    jwt_token = jwt.encode(payload, secret_with_random, algorithm="HS256", headers=headers)
 
     return jwt_token
 
