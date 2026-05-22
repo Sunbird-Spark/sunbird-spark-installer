@@ -1,13 +1,8 @@
 locals {
   global_vars  = yamldecode(file(find_in_parent_folders("global-values.yaml")))
   _cloud_defaults = {cloud_storage_access_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: "", sunbird_encryption_key: ""}
-<<<<<<< HEAD
   _cloud_raw   = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {})
   cloud_vars   = {global: merge(local._cloud_defaults, try(local._cloud_raw.global, {}))}
-=======
-  _cloud_raw      = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {})
-  cloud_vars      = {global: merge(local._cloud_defaults, try(local._cloud_raw.global, {}))}
->>>>>>> main
   env                    = local.global_vars.global.env
   environment            = local.global_vars.global.environment
   building_block         = local.global_vars.global.building_block
