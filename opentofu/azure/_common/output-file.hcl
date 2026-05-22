@@ -24,6 +24,18 @@ dependency "aks" {
     config_path = "../aks"
 }
 
+dependency "storage" {
+    config_path = "../storage"
+    mock_outputs = {
+      azurerm_storage_account_name         = "dummy-storage"
+      azurerm_storage_container_private    = "dummy-private"
+      azurerm_storage_container_public     = "dummy-public"
+      azurerm_velero_container_name        = "dummy-velero"
+    }
+    mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
+    mock_outputs_merge_strategy_with_state  = "shallow"
+}
+
 dependency "workload_identity" {
     config_path = "../workload-identity"
     mock_outputs = {
@@ -48,11 +60,11 @@ inputs = {
   building_block                     = local.building_block
   subscription_id                    = local.subscription_id
   private_ingressgateway_ip          = dependency.aks.outputs.private_ingressgateway_ip
-  storage_account_name               = local.storage_account_name
-  storage_container_public           = local.storage_container_public
-  storage_container_private          = local.storage_container_private
+  storage_account_name               = coalesce(local.storage_account_name, dependency.storage.outputs.azurerm_storage_account_name)
+  storage_container_public           = coalesce(local.storage_container_public, dependency.storage.outputs.azurerm_storage_container_public)
+  storage_container_private          = coalesce(local.storage_container_private, dependency.storage.outputs.azurerm_storage_container_private)
   random_string                      = dependency.keys.outputs.random_string
-  velero_container_name              = local.velero_container_name
+  velero_container_name              = coalesce(local.velero_container_name, dependency.storage.outputs.azurerm_velero_container_name)
   cloud_storage_provider             = local.cloud_storage_provider
   azure_client_id                    = dependency.workload_identity.outputs.client_id
   k8s_service_account_name           = "azure-managed-identity-sa"
