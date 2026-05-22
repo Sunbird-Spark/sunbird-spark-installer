@@ -28,6 +28,9 @@ opensearch: &opensearch
   config:
     opensearch.yml: |
       plugins.security.disabled: true
+      search.insights.top_queries.latency.enabled: false
+      search.insights.top_queries.cpu.enabled: false
+      search.insights.top_queries.memory.enabled: false
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
 
