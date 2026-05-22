@@ -49,8 +49,10 @@ resource "null_resource" "upload_global_jwt_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-      command = "gsutil cp ${var.base_location}/../../../../scripts/global-values-jwt-tokens.yaml gs://${var.storage_container_private}/${var.environment}-global-values-jwt-tokens.yaml"
-                
+    command = <<EOT
+      [ -f ${local.global_values_jwt_file_location} ] || python3 ${local.jwt_script_location} ${random_password.generated_string.result}
+      gsutil cp ${local.global_values_jwt_file_location} gs://${var.storage_container_private}/${var.environment}-global-values-jwt-tokens.yaml
+    EOT
   }
   depends_on = [ null_resource.generate_jwt_keys ]
 }
@@ -60,9 +62,10 @@ resource "null_resource" "upload_global_rsa_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-      command = "gsutil cp ${var.base_location}/../../../../scripts/global-values-rsa-keys.yaml gs://${var.storage_container_private}/${var.environment}-global-values-rsa-keys.yaml"
-                
-
+    command = <<EOT
+      [ -f ${local.global_values_rsa_file_location} ] || python3 ${local.rsa_script_location} ${var.rsa_keys_count}
+      gsutil cp ${local.global_values_rsa_file_location} gs://${var.storage_container_private}/${var.environment}-global-values-rsa-keys.yaml
+    EOT
   }
   depends_on = [ null_resource.generate_rsa_keys ]
 }
