@@ -100,3 +100,9 @@ variable "subscription_id" {
   description = "Azure Subscription ID"
   type        = string
 }
+
+variable "kubernetes_version" {
+  description = "Kubernetes version for the AKS cluster control plane and default node pool."
+  type        = string
+  default     = null
+}
