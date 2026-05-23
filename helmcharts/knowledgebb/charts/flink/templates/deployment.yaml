@@ -89,6 +89,9 @@ spec:
           - name: AZURE_CLIENT_ID
             value: "{{ .Values.global.azure_client_id }}"
           {{- end }}
+          {{- if $jobData.extraEnv }}
+          {{- toYaml $jobData.extraEnv | nindent 10 }}
+          {{- end }}
           resources:
             {{- if $jobData.resources }}
             {{- toYaml $jobData.resources | nindent 12 }}
@@ -204,6 +207,9 @@ spec:
           {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
           - name: AZURE_CLIENT_ID
             value: "{{ .Values.global.azure_client_id }}"
+          {{- end }}
+          {{- if $jobData.extraEnv }}
+          {{- toYaml $jobData.extraEnv | nindent 10 }}
           {{- end }}
           resources:
             {{- if $jobData.resources }}
