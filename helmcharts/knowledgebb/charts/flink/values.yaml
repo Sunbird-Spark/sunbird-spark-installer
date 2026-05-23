@@ -341,7 +341,16 @@ flink_jobs:
         error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
         groupId = "{{ .Values.global.env }}-knowlg-publish-group"
         content_metadata.topic = "dv.telemetry.coss"
+        enriched_metadata.topic = "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
         zookeeper = ""
+      }
+
+      enriched {
+        field_config_path = "enriched-metadata-fields.json"
+        metadata {
+          enabled = true
+          include_hierarchy = false
+        }
       }
 
       task {
@@ -557,6 +566,88 @@ flink_jobs:
       # classloader.resolve-order: "parent-first"
       # state.savepoints.dir: file:///tmp
     job_classname: org.sunbird.job.knowlg.task.KnowlgPublishStreamTask
+
+  content-embedding:
+    enabled: true
+    serviceMonitor: *serviceMonitor
+    config: |+
+      include file("/data/flink/conf/base-config.conf")
+
+      job {
+        env = "{{ .Values.global.env }}"
+      }
+
+      kafka {
+        input.topic = "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
+        output.topic = "{{ .Values.global.env }}.knowlg.embedding.chunks"
+        error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
+        groupId = "{{ .Values.global.env }}-content-embedding-group"
+      }
+
+      task {
+        consumer.parallelism = 1
+        extract.parallelism = 2
+        chunking.parallelism = 2
+        embedding.parallelism = 2
+        quantization.parallelism = 2
+        sink.parallelism = 1
+      }
+
+      chunking {
+        strategy = "semantic"
+
+        semantic {
+          max_chunk_size = 1000
+        }
+
+        sliding-window {
+          max_tokens     = 512
+          overlap_tokens = 102
+        }
+      }
+
+      embedding {
+        service = "openai"
+        batch_size = 32
+
+        openai {
+          api_key = ""
+          model = "text-embedding-3-small"
+          dimensions = 1536
+          timeout = 30
+          azure_endpoint = ""
+          azure_deployment = "text-embedding-3-small"
+          azure_api_version = "2024-12-01-preview"
+        }
+      }
+
+      quantization {
+        strategy = "int8"
+      }
+
+      opensearch {
+        host = "{{ .Values.global.elasticsearch.host }}"
+        port = {{ .Values.global.elasticsearch.port }}
+        index.name = "compositesearch"
+        user = ""
+        password = ""
+      }
+
+    flink-conf: |+
+      jobmanager.memory.flink.size: 1024m
+      taskmanager.memory.flink.size: 2048m
+      taskmanager.numberOfTaskSlots: 1
+      jobManager.numberOfTaskSlots: 1
+      parallelism.default: 1
+      jobmanager.execution.failover-strategy: region
+      taskmanager.memory.network.fraction: 0.1
+      scheduler-mode: reactive
+      heartbeat.timeout: 8000
+      heartbeat.interval: 5000
+      taskmanager.memory.process.size: 2800m
+      jobmanager.memory.process.size: 1600m
+
+    job_classname: org.sunbird.job.contentembedding.task.ContentEmbeddingStreamTask
 
 commonAnnotations:
   reloader.stakater.com/auto: "true"
