@@ -350,6 +350,10 @@ flink_jobs:
         metadata {
           enabled = true
           include_hierarchy = false
+          content.enabled = true
+          collection.enabled = true
+          question.enabled = false
+          questionset.enabled = false
         }
       }
 
@@ -594,7 +598,7 @@ flink_jobs:
       }
 
       chunking {
-        strategy = "semantic"
+        strategy = "sliding-window"
 
         semantic {
           max_chunk_size = 1000
@@ -615,9 +619,9 @@ flink_jobs:
           model = "text-embedding-3-small"
           dimensions = 1536
           timeout = 30
-          azure_endpoint = ""
+          azure_endpoint = "https://coss-semanticsearch.openai.azure.com/"
           azure_deployment = "text-embedding-3-small"
-          azure_api_version = "2024-12-01-preview"
+          azure_api_version = "2023-05-15"
         }
       }
 
