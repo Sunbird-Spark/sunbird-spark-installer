@@ -597,22 +597,38 @@ flink_jobs:
         sink.parallelism = 1
       }
 
+      schema {
+        # Events with _schema_version outside this list are routed to the DLQ.
+        supported_versions = ["1.0"]
+      }
+
       chunking {
         strategy = "sliding-window"
 
         semantic {
           max_chunk_size = 1000
+          excluded_fields = [
+            "hierarchy",
+            "children",
+            "id",
+            "identifier",
+            "contentType",
+            "_schema_version",
+            "timestamp"
+          ]
         }
 
         sliding-window {
-          max_tokens     = 512
-          overlap_tokens = 102
+          max_words    = 512
+          overlap_words = 102
         }
       }
 
       embedding {
         service = "openai"
         batch_size = 32
+        # Warn + counter when an embed API call exceeds this many millis.
+        slow_call_threshold_ms = 5000
 
         openai {
           api_key = ""
