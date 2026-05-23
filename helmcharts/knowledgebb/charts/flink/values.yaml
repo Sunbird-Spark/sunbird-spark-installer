@@ -626,8 +626,8 @@ flink_jobs:
       }
 
       opensearch {
-        host = "{{ .Values.global.elasticsearch.host }}"
-        port = {{ .Values.global.elasticsearch.port }}
+        host = "{{ .Values.global.opensearch.host }}"
+        port = {{ .Values.global.opensearch.port }}
         index.name = "compositesearch"
         user = ""
         password = ""
