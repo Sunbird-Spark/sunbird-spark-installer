@@ -112,6 +112,33 @@ search:
   content_tagging_property: '["subject","medium"]'
   search_payload_log_enable: true
   ekstepPlatformApiUserId: "search-service"
+  semantic:
+    enabled: false
+    embedding_service: "openai"
+    openai:
+      model: "text-embedding-3-small"
+      dimensions: 1536
+      timeout: 5
+      azure_endpoint: ""
+      azure_deployment: ""
+      azure_api_version: "2023-05-15"
+    e5:
+      host: "localhost"
+      port: 80
+      dimensions: 768
+      timeout: 5
+    quantization_strategy: "int8"
+    vector_field: "chunks.embedding"
+    vector_path: "chunks"
+    default_k: 50
+    max_k: 1000
+    min_score: 0.0
+    schema_versions: '["1.0"]'
+    rrf_k: 60
+    embedding_cache:
+      enabled: true
+      size: 1024
+      ttl_seconds: 300
   language:
     map:
       Hindi: hi
