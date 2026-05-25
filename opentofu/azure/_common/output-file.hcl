@@ -1,8 +1,8 @@
 locals {
   global_vars  = yamldecode(file(find_in_parent_folders("global-values.yaml")))
   _cloud_defaults = {cloud_storage_access_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: "", sunbird_encryption_key: ""}
-  _cloud_raw   = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {})
-  cloud_vars   = {global: merge(local._cloud_defaults, try(local._cloud_raw.global, {}))}
+  _cloud_raw      = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {})
+  cloud_vars      = {global: merge(local._cloud_defaults, try(local._cloud_raw.global, {}))}
   env                    = local.global_vars.global.env
   environment            = local.global_vars.global.environment
   building_block         = local.global_vars.global.building_block
@@ -27,10 +27,10 @@ dependency "aks" {
 dependency "storage" {
     config_path = "../storage"
     mock_outputs = {
-      azurerm_storage_account_name         = "dummy-storage"
-      azurerm_storage_container_private    = "dummy-private"
-      azurerm_storage_container_public     = "dummy-public"
-      azurerm_velero_container_name        = "dummy-velero"
+      azurerm_storage_account_name      = "dummy-storage"
+      azurerm_storage_container_private = "dummy-private"
+      azurerm_storage_container_public  = "dummy-public"
+      azurerm_velero_container_name     = "dummy-velero"
     }
     mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
     mock_outputs_merge_strategy_with_state  = "shallow"
@@ -48,7 +48,7 @@ dependency "workload_identity" {
 dependency "keys" {
     config_path = "../keys"
     mock_outputs = {
-      random_string = "dummy-string"
+      random_string     = "dummy-string"
     }
     mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
 }

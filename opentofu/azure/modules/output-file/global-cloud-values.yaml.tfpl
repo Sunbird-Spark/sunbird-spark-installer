@@ -8,6 +8,10 @@ global:
   velero_storage_container_private: ${azure_velero_container_name}
   private_ingressgateway_ip: ${private_ingressgateway_ip}
   random_string: ${random_string}
+  # Set only during a migration FROM an older cluster: paste the OLD cluster's
+  # sunbird_encryption_key into global-cloud-values.yaml before tofu runs.
+  # When empty, learn-service falls back to `random_string` (fresh install default).
+  sunbird_encryption_key: "${sunbird_encryption_key}"
   object_storage_endpoint: ${azure_storage_account_name}.blob.core.windows.net
   storage_class: managed-premium
   cloud_storage_provider:  ${cloud_storage_provider}
