@@ -5,9 +5,6 @@ dependencies:
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 17.8.3
-- name: elasticsearch
-  repository: https://charts.bitnami.com/bitnami
-  version: 19.5.14
 - name: kafka
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 32.2.15
@@ -17,5 +14,8 @@ dependencies:
 - name: janusgraph
   repository: ""
   version: 1.4.10
-digest: sha256:37f618d54d3c94f0fe9c2c81c313637989afc291b3635a13b469a51174bc4335
-generated: "2026-02-24T13:02:39.541458418+05:30"
+- name: opensearch
+  repository: https://opensearch-project.github.io/helm-charts
+  version: 2.37.0
+digest: sha256:08764e0e31e0c29bb30369875065e8da9c50510865b3f1a6117020a4d69a3440
+generated: "2026-04-27T12:39:33.544316+05:30"

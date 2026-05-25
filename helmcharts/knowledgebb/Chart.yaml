@@ -31,10 +31,6 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     version: 17.8.3
     condition: redis.enabled
-  - name: elasticsearch
-    repository: https://charts.bitnami.com/bitnami
-    version: 19.5.14
-    condition: elasticsearch.enabled
   - name: kafka
     repository: oci://registry-1.docker.io/bitnamicharts
     version: 32.2.15
@@ -46,6 +42,10 @@ dependencies:
   - name: janusgraph
     version: 1.4.10
     condition: janusgraph.enabled
+  - name: opensearch
+    repository: https://opensearch-project.github.io/helm-charts
+    version: 2.37.0
+    condition: opensearch.enabled
   - name: knowlg
     version: 0.1.0
     condition: knowlg.enabled

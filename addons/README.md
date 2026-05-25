@@ -85,7 +85,7 @@ Addons use a layered configuration approach:
 
 4. **Addon Global Values** (`addons/global-values.yaml`)
    - Shared configuration for all addons (service endpoints, shared settings)
-   - Contains connections to Elasticsearch, Redis, Kafka, Yugabyte, etc.
+   - Contains connections to OpenSearch, Redis, Kafka, Yugabyte, etc.
    - Values here are merged with cloud-generated values and passed to Helm.
 
 5. **Addon Cloud-Generated Values** (`addons/global-cloud-values.yaml`)
@@ -101,7 +101,7 @@ Before installing any addon:
 - ✅ `kubectl` is configured and connected to the cluster
 - ✅ `helm` 3.x is installed
 - ✅ **OpenTofu has been run** to generate cloud configuration files
-- ✅ Main Sunbird services are deployed (Elasticsearch, Redis, Kafka, Yugabyte, etc.)
+- ✅ Main Sunbird services are deployed (OpenSearch, Redis, Kafka, Yugabyte, etc.)
 
 ## General Usage
 

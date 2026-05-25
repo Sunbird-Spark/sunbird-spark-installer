@@ -28,10 +28,10 @@ images:
     repository: "redis"
     tag: "7.0.9-debian-11-r1"
 
-  elasticsearch: &elasticsearch
-    registry: "sunbirded.azurecr.io"
-    repository: "elasticsearch"
-    tag: "7.10.2"
+  opensearch: &opensearch
+    registry: "docker.io"
+    repository: "opensearchproject/opensearch"
+    tag: "2.19.5"
 
   grafana: &grafana
     registry: "docker.io"
@@ -111,7 +111,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v1.0.0_a66d3e7_25"
+    tag: "spark-v0.21_9d043d3_26"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -119,11 +119,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.1_d80ed5e"
+    tag: "spark-v18_e855ae6"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.0.1_d80ed5e"
+    tag: "spark-v18_e855ae6"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
@@ -181,8 +181,8 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  elasticsearch:
-    image: *elasticsearch
+  opensearch:
+    image: *opensearch
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -343,9 +343,9 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.0.1_4c96414"
+    tag: "spark-v16_b0eceba"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v1.0.0_c3b332f"
+    tag: "spark-v0.7_e13f0eb"

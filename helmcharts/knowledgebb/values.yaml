@@ -16,42 +16,23 @@ migration:
   yugabyte:
     waitTime: 120
 
-elasticsearch: &es
+opensearch: &opensearch
   enabled: true
-  fullnameOverride: "elasticsearch"
-  host: "elasticsearch"
+  fullnameOverride: "opensearch"
+  host: "opensearch-cluster-master"
   port: 9200
-  image:
-    registry: docker.io
-    repository: bitnami/elasticsearch
-    tag: 7.10.2
-  master:
-    masterOnly: false
-    replicaCount: 1
-    resources:
-      requests:
-        cpu: "1"
-        memory: "2Gi"
-      limits:
-        cpu: "2"
-        memory: "4Gi"
-    heapSize: 2G
-    persistence:
-      size: 25Gi
-  data:
-    replicaCount: 0
-  coordinating:
-    replicaCount: 0
-  ingest:
-    enabled: false
+  singleNode: true
+  extraEnvs:
+    - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+      value: "Lern@Migr8#2026!"
+  config:
+    opensearch.yml: |
+      plugins.security.disabled: true
+      search.insights.top_queries.latency.enabled: false
+      search.insights.top_queries.cpu.enabled: false
+      search.insights.top_queries.memory.enabled: false
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
-  provisioning:
-    annotations: *provisioningAnnotations
-  sysctlImage:
-    registry: sunbirded.azurecr.io
-    repository: bitnami-shell-archived
-    tag: 11-debian-11-r54
 
 graph_passport: &graph_passport
   key_base: "secretKey"
@@ -212,7 +193,7 @@ flink:
 
 global:
   channel: *channel
-  elasticsearch: *es
+  opensearch: *opensearch
   graph_passport: *graph_passport
   installation: *installation
   janusgraph: *janusgraph

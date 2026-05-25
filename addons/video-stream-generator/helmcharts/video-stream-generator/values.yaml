@@ -174,7 +174,7 @@ base_config: |
     log.learning_graph_events.backend = "default"
   }
   es {
-    basePath = "{{ .Values.global.elasticsearch.host }}:{{ .Values.global.elasticsearch.port }}"
+    basePath = "{{ .Values.global.opensearch.host }}:{{ .Values.global.opensearch.port }}"
   }
 
 flink_jobs:
