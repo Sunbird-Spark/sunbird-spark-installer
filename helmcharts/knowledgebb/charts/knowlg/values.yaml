@@ -131,6 +131,14 @@ drive_apiKey: ""
 collection_keyspace: "{{ .Values.global.env }}_hierarchy_store"
 content_keyspace: "{{ .Values.global.env }}_content_store"
 kafka_dial_request_topic: "{{ .Values.global.env }}.knowlg.qrimage.request"
+
+enriched_metadata_enabled: false
+enriched_metadata_include_hierarchy: false
+enriched_metadata_content_enabled: true
+enriched_metadata_collection_enabled: true
+enriched_metadata_question_enabled: false
+enriched_metadata_questionset_enabled: false
+
 dialcode_keyspace: dialcodes
 dial_container: dial
 cloud_storage_content_folder: "content"
