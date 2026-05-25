@@ -28,6 +28,7 @@ global:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
   subscription_id: ""
   cloud_storage_region: ""
+  aks_version: "1.35.4"  # AKS k8s version. Run: az aks get-versions --location <region> --output table
   sunbird_cloud_storage_provider: "azure" # Provide the cloud storage provider
   checkpoint_store_type: "azure"
   cloud_service_provider: "azure"

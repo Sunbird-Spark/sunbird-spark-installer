@@ -27,10 +27,10 @@ dependency "aks" {
 dependency "storage" {
     config_path = "../storage"
     mock_outputs = {
-      azurerm_storage_account_name      = "dummy-storage"
-      azurerm_storage_container_private = "dummy-private"
-      azurerm_storage_container_public  = "dummy-public"
-      azurerm_velero_container_name     = "dummy-velero"
+      azurerm_storage_account_name         = "dummy-storage"
+      azurerm_storage_container_private    = "dummy-private"
+      azurerm_storage_container_public     = "dummy-public"
+      azurerm_velero_container_name        = "dummy-velero"
     }
     mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
     mock_outputs_merge_strategy_with_state  = "shallow"
