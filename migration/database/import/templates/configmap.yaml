@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "database-import.scriptsConfigMap" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "database-import.labels" . | nindent 4 }}
+data:
+  postgres-to-yugabyte.sh: |
+{{ tpl (.Files.Get "files/postgres-to-yugabyte.sh") . | indent 4 }}
+  cassandra-to-yugabyte.py: |
+{{ .Files.Get "files/cassandra-to-yugabyte.py" | indent 4 }}
+  neo4j-to-janusgraph.sh: |
+{{ tpl (.Files.Get "files/neo4j-to-janusgraph.sh") . | indent 4 }}
+  neo4j-to-janusgraph.py: |
+{{ tpl (.Files.Get "files/neo4j-to-janusgraph.py") . | indent 4 }}
+  elasticsearch-to-elasticsearch.py: |
+{{ .Files.Get "files/elasticsearch-to-elasticsearch.py" | indent 4 }}
+  keycloak-credentials.sh: |
+{{ .Files.Get "files/keycloak-credentials.sh" | indent 4 }}
+  update_keycloak_credentials.py: |
+{{ .Files.Get "files/update_keycloak_credentials.py" | indent 4 }}
+  keycloak_apply_realm_reconcile.py: |
+{{ .Files.Get "files/keycloak_apply_realm_reconcile.py" | indent 4 }}
+  createdat-backfill.sh: |
+{{ .Files.Get "files/createdat-backfill.sh" | indent 4 }}
+  add_user_createdat_field.py: |
+{{ .Files.Get "files/add_user_createdat_field.py" | indent 4 }}
+  hierarchy-fix.sh: |
+{{ .Files.Get "files/hierarchy-fix.sh" | indent 4 }}
+  generate_hierarchy_relations.py: |
+{{ .Files.Get "files/generate_hierarchy_relations.py" | indent 4 }}
+  user-progress-sync.sh: |
+{{ .Files.Get "files/user-progress-sync.sh" | indent 4 }}
+  user-progress-sync.py: |
+{{ .Files.Get "files/user-progress-sync.py" | indent 4 }}
+  import_data.groovy: |
+{{ .Files.Get "files/import_data.groovy" | indent 4 }}
+  set_graphid.groovy: |
+{{ .Files.Get "files/set_graphid.groovy" | indent 4 }}
+  verify_migration.groovy: |
+{{ .Files.Get "files/verify_migration.groovy" | indent 4 }}

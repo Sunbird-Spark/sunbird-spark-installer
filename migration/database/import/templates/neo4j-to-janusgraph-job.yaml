@@ -1,0 +1,68 @@
+{{- if .Values.databases.janusgraph.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "database-import.fullname" . }}-janusgraph
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "database-import.labels" . | nindent 4 }}
+    app.kubernetes.io/component: janusgraph-restore
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "4"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: {{ .Values.jobs.ttlSecondsAfterFinished }}
+  backoffLimit: {{ .Values.jobs.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "database-import.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: janusgraph-restore
+    spec:
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
+      restartPolicy: OnFailure
+      containers:
+      - name: janusgraph-restore
+        image: {{ .Values.jobs.image }}
+        imagePullPolicy: {{ .Values.jobs.pullPolicy }}
+        command: ["/bin/bash"]
+        args:
+          - -c
+          - |
+            # Reuse the download logic from the shell script
+            source /scripts/neo4j-to-janusgraph.sh --download-only
+            python3 /scripts/neo4j-to-janusgraph.py
+        env:
+        - name: JANUSGRAPH_HOST
+          value: {{ .Values.databases.janusgraph.host | quote }}
+        - name: JANUSGRAPH_PORT
+          value: {{ .Values.databases.janusgraph.port | quote }}
+        - name: JANUSGRAPH_USERNAME
+          value: {{ .Values.databases.janusgraph.username | quote }}
+        - name: JANUSGRAPH_PASSWORD
+          value: {{ .Values.databases.janusgraph.password | quote }}
+        - name: STORAGE_TYPE
+          value: {{ .Values.target.cloud | quote }}
+        - name: STORAGE_CONTAINER
+          value: {{ .Values.target.container | quote }}
+        - name: AZURE_STORAGE_ACCOUNT
+          value: {{ .Values.target.storageAccount | quote }}
+        - name: AZURE_STORAGE_KEY
+          value: {{ .Values.target.accessKey | quote }}
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+          readOnly: true
+        - name: temp
+          mountPath: /tmp
+        resources:
+          {{- toYaml .Values.jobs.resources | nindent 12 }}
+      volumes:
+      - name: scripts
+        configMap:
+          name: {{ include "database-import.scriptsConfigMap" . }}
+          defaultMode: 0755
+      - name: temp
+        emptyDir: {}
+{{- end }}

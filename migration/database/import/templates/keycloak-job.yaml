@@ -1,0 +1,76 @@
+{{- if .Values.dbFixups.keycloakCredentials.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "database-import.fullname" . }}-keycloak
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "database-import.labels" . | nindent 4 }}
+    app.kubernetes.io/component: keycloak-credentials
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: {{ .Values.jobs.ttlSecondsAfterFinished }}
+  backoffLimit: {{ .Values.jobs.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "database-import.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: keycloak-credentials
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
+      containers:
+      - name: keycloak-credentials
+        image: {{ .Values.jobs.image }}
+        imagePullPolicy: {{ .Values.jobs.pullPolicy }}
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            set -e
+            export DEBIAN_FRONTEND=noninteractive
+            echo "==> Installing python3, pip, psycopg2..."
+            apt-get update -qq
+            apt-get install -y -qq --no-install-recommends python3 python3-pip ca-certificates
+            pip3 install --no-cache-dir --quiet psycopg2-binary
+            echo "==> Running update_keycloak_credentials.py..."
+            python3 /scripts/update_keycloak_credentials.py
+        env:
+        - name: KC_USERNAME
+          value: "admin"
+        - name: KC_PASSWORD
+          value: {{ .Values.dbFixups.keycloakCredentials.adminPassword | quote }}
+        - name: KC_NEW_SECRET
+          value: {{ .Values.dbFixups.keycloakCredentials.secretSuffix | quote }}
+        - name: YB_HOST
+          value: {{ .Values.databases.ysql.host | quote }}
+        - name: YB_PORT
+          value: {{ .Values.databases.ysql.port | quote }}
+        {{- range .Values.databases.ysql.databases }}
+        {{- if eq .name "keycloak" }}
+        - name: YB_USER
+          value: {{ .username | quote }}
+        - name: YB_PASSWORD
+          value: {{ .password | quote }}
+        {{- end }}
+        {{- end }}
+        - name: YB_DB
+          value: "keycloak"
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+          readOnly: true
+        - name: temp
+          mountPath: /tmp
+        resources:
+          {{- toYaml .Values.jobs.resources | nindent 12 }}
+      volumes:
+      - name: scripts
+        configMap:
+          name: {{ include "database-import.scriptsConfigMap" . }}
+          defaultMode: 0755
+      - name: temp
+        emptyDir: {}
+{{- end }}
