@@ -17,19 +17,22 @@ generate "backend" {
 EOF
 }
 
+skip = local.skip_storage_module
+
 locals {
-  # Read global values from main opentofu based on ENV_NAME
-  env_name    = get_env("ENV_NAME")
-  repo_root   = get_repo_root()
-  global_vars = yamldecode(file("${local.repo_root}/opentofu/azure/${local.env_name}/global-values.yaml"))
-  cloud_vars  = yamldecode(file("${local.repo_root}/opentofu/azure/${local.env_name}/global-cloud-values.yaml"))
+  env_name            = get_env("ENV_NAME")
+  repo_root           = get_repo_root()
+  global_vars         = yamldecode(file("${local.repo_root}/opentofu/azure/${local.env_name}/global-values.yaml"))
+  cloud_vars          = try(yamldecode(file("${local.repo_root}/opentofu/azure/${local.env_name}/global-cloud-values.yaml")), { global: { cloud_storage_access_key: "" } })
+  skip_storage_module = local.global_vars.global.skip_storage_module
 }
 
 inputs = {
-  environment          = local.cloud_vars.global.environment
-  storage_account_name = local.cloud_vars.global.cloud_storage_access_key
-  resource_group_name  = "${local.cloud_vars.global.building_block}-${local.cloud_vars.global.environment}"
-  subscription_id      = local.global_vars.global.subscription_id
-  building_block       = local.cloud_vars.global.building_block
+  environment              = local.global_vars.global.environment
+  storage_account_name     = local.cloud_vars.global.cloud_storage_access_key
+  resource_group_name      = "${local.global_vars.global.building_block}-${local.global_vars.global.environment}"
+  subscription_id          = local.global_vars.global.subscription_id
+  building_block           = local.global_vars.global.building_block
   global_cloud_values_file = "${get_repo_root()}/addons/global-cloud-values.yaml"
 }
+
