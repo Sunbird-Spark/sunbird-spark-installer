@@ -1,0 +1,82 @@
+{{- if .Values.databases.neo4j.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "database-export.fullname" . }}-neo4j
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "database-export.labels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j-export
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: {{ .Values.jobs.ttlSecondsAfterFinished }}
+  backoffLimit: {{ .Values.jobs.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "database-export.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: neo4j-export
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "database-export.fullname" . }}-sa
+      containers:
+      - name: neo4j-export
+        image: {{ .Values.databases.neo4j.image | default .Values.jobs.image }}
+        imagePullPolicy: {{ .Values.jobs.pullPolicy }}
+        securityContext:
+          runAsUser: 0
+        command: ["/bin/bash"]
+        args: ["/scripts/neo4j-export.sh"]
+        env:
+        - name: NEO4J_HOST
+          value: {{ .Values.databases.neo4j.host | quote }}
+        - name: NEO4J_PORT
+          value: {{ .Values.databases.neo4j.port | quote }}
+        - name: NEO4J_POD_NAME
+          value: {{ .Values.databases.neo4j.podName | quote }}
+        - name: NEO4J_POD_NAMESPACE
+          value: {{ .Values.databases.neo4j.podNamespace | quote }}
+        {{- if .Values.databases.neo4j.secretName }}
+        - name: NEO4J_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.databases.neo4j.secretName }}
+              key: username
+        - name: NEO4J_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.databases.neo4j.secretName }}
+              key: password
+        {{- else }}
+        - name: NEO4J_USERNAME
+          value: {{ .Values.databases.neo4j.username | quote }}
+        - name: NEO4J_PASSWORD
+          value: {{ .Values.databases.neo4j.password | quote }}
+        {{- end }}
+        - name: STORAGE_TYPE
+          value: {{ .Values.source.cloud | quote }}
+        - name: STORAGE_CONTAINER
+          value: {{ .Values.source.container | quote }}
+        - name: AZURE_STORAGE_ACCOUNT
+          value: {{ .Values.source.storageAccount | quote }}
+        - name: AZURE_STORAGE_KEY
+          value: {{ .Values.source.accessKey | quote }}
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+          readOnly: true
+        - name: temp
+          mountPath: /tmp
+        resources:
+          {{- toYaml .Values.jobs.resources | nindent 12 }}
+      volumes:
+      - name: scripts
+        configMap:
+          name: {{ include "database-export.scriptsConfigMap" . }}
+          defaultMode: 0755
+      - name: temp
+        emptyDir: {}
+{{- end }}

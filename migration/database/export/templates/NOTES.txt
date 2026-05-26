@@ -1,0 +1,33 @@
+Database Export — {{ .Chart.Name }} v{{ .Chart.Version }} (phase 1 of 2)
+=============================================
+
+Enabled jobs (execution order via helm post-install hooks):
+{{- if .Values.databases.postgresql.enabled }}
+  1. postgres-export      → {{ range .Values.databases.postgresql.databases }}{{ .name }} {{ end }}
+{{- end }}
+{{- if .Values.databases.cassandra.enabled }}
+  2. cassandra-export     → {{ len .Values.databases.cassandra.keyspaces }} keyspaces
+{{- end }}
+{{- if .Values.databases.neo4j.enabled }}
+  3. neo4j-export         → {{ .Values.databases.neo4j.host }}
+{{- end }}
+{{- if .Values.databases.elasticsearch.enabled }}
+  4. elasticsearch-snapshot → {{ .Values.databases.elasticsearch.host }}
+{{- end }}
+
+Destination:         {{ .Values.source.cloud }} / {{ .Values.source.container }}
+Release namespace:   {{ .Release.Namespace }}   (jobs + SA + ConfigMap live here)
+Source DB namespace: {{ .Values.source.namespace }}   (kubectl-exec target; must already exist)
+{{- if ne .Release.Namespace .Values.source.namespace }}
+
+NOTE: Release namespace ({{ .Release.Namespace }}) differs from source DB namespace ({{ .Values.source.namespace }}).
+      RoleBinding in {{ .Values.source.namespace }} allows the migration SA to exec into DB pods. OK.
+{{- end }}
+
+Jobs run sequentially (postgres → cassandra → neo4j → elasticsearch). Re-runs overwrite.
+
+Monitor:
+  kubectl get jobs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+  kubectl logs -n {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }} -f --tail=200
+
+Next phase: install the `database-import` chart on the target cluster.
