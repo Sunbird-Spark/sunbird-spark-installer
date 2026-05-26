@@ -596,6 +596,42 @@ html[data-client="mobileApp"] .close-button {
     display: none;
 }
 
+/* Modern template — sharper radius, real layered shadow, neutral surface.
+   Mirrors portal's template-overrides.css. Applied when html[data-template="modern"]. */
+html[data-template="modern"] .login-split-container {
+    border-radius: 8px;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12), 0 4px 8px rgba(15, 23, 42, 0.06);
+}
+html[data-template="modern"] .login-left-panel {
+    border-radius: 8px 0 0 8px;
+}
+html[data-template="modern"] .login-left-panel-container {
+    border-radius: 8px;
+}
+html[data-template="modern"] .login-card {
+    border-radius: 0 8px 8px 0;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+html[data-template="modern"] .login-wrapper {
+    background-color: hsl(210, 16%, 96%);
+    background-image: none;
+}
+html[data-template="modern"] h1,
+html[data-template="modern"] h2,
+html[data-template="modern"] h3,
+html[data-template="modern"] h4,
+html[data-template="modern"] .welcome-title,
+html[data-template="modern"] .left-panel-title {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+/* Modern + mobileApp — sharp/full bleed wins over modern rounded */
+html[data-template="modern"][data-client="mobileApp"] .login-card,
+html[data-template="modern"][data-client="mobileApp"] .login-split-container {
+    border-radius: 0;
+    box-shadow: none;
+}
+
 /* Appended Styles from login1.css for Reset Password Page */
 
 :root {
