@@ -70,7 +70,7 @@
         if (templateId === 'classic' || templateId === 'modern') {
           root.setAttribute('data-template', templateId);
         }
-        // Mobile-app client flag — persisted across Keycloak redirects so the
+        // Mobile-app client flag — persisted across Keycloak redirects so the 
         // narrow single-pane layout sticks even when URL params are stripped.
         try {
           var qs = new URLSearchParams(window.location.search);
