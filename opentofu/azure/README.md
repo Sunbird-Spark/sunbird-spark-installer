@@ -118,8 +118,117 @@ When `aks_version` is updated, OpenTofu sends an in-place update to the AKS reso
 | `global.cloud_storage_region` | Azure region (e.g. `"eastus"`, `"centralindia"`). |
 | `global.proxy_private_key` | SSL/TLS private key in PEM format. |
 | `global.proxy_certificate` | SSL/TLS certificate chain in PEM format (cert + CA bundle). |
+| `global.aks_version` | Kubernetes version for the AKS cluster (e.g. `"1.35.1"`). **Always specify a version.** Check available versions with `az aks get-versions --location <region> --output table`. |
 
 > Using Let's Encrypt? Set `global.lets_encrypt_ssl: true` and `global.cert_notifications.email`. Leave `proxy_private_key` and `proxy_certificate` blank.
+
+## AKS Kubernetes Version
+
+### Pinning the version
+
+Set `global.aks_version` in `opentofu/azure/<env>/global-values.yaml` to lock the cluster to a specific Kubernetes release:
+
+```yaml
+global:
+  aks_version: "1.35.1"   # always specify the exact Kubernetes version you want
+```
+
+Always set this to an explicit version. Leaving it unset risks Azure silently provisioning or re-applying a different version during maintenance, which can cause unexpected upgrades or downtime.
+
+### Checking available versions
+
+Before upgrading, list the versions available in your region:
+
+```bash
+az aks get-versions --location <your-region> --output table
+```
+
+Example output (truncated):
+
+```
+KubernetesVersion    Upgrades                                                                    Capabilities
+-------------------  --------------------------------------------------------------------------  ---------------------------------------
+1.35.3               None available                                                              KubernetesOfficial, AKSLongTermSupport
+1.35.2               1.35.3                                                                      KubernetesOfficial, AKSLongTermSupport
+1.35.1               1.35.2, 1.35.3                                                              KubernetesOfficial, AKSLongTermSupport
+1.35.0               1.35.1, 1.35.2, 1.35.3                                                      KubernetesOfficial, AKSLongTermSupport
+1.34.6               1.35.0, 1.35.1, 1.35.2, 1.35.3                                             KubernetesOfficial, AKSLongTermSupport
+1.34.5               1.34.6, 1.35.0, 1.35.1, 1.35.2, 1.35.3                                     KubernetesOfficial, AKSLongTermSupport
+1.34.4               1.34.5, 1.34.6, 1.35.0, 1.35.1, 1.35.2, 1.35.3                             KubernetesOfficial, AKSLongTermSupport
+1.33.6               1.33.7, 1.33.8, 1.33.9, 1.33.10, 1.34.0, 1.34.1, 1.34.2, 1.34.3, 1.34.4   KubernetesOfficial, AKSLongTermSupport
+```
+
+The **Upgrades** column shows every version your current cluster can move to in a single operation. To reach a version that is not listed, you must upgrade in hops.
+
+**Example — upgrading from `1.33.6` to `1.35.3`**
+
+Looking at the `1.33.6` row, the highest available target is `1.34.4` — `1.35.x` does not appear. So a direct jump is not possible. The two-hop path is:
+
+```
+1.33.6  →  1.34.4  →  1.35.3
+```
+
+1. Set `aks_version: "1.34.4"` in `global-values.yaml` and apply.
+2. Once the cluster is on `1.34.4`, set `aks_version: "1.35.3"` and apply again.
+
+Always pick the **latest available patch** of the target minor version from the Upgrades list to get the most recent fixes in each hop.
+
+### When to upgrade
+
+| Trigger | Action |
+|---------|--------|
+| Azure announces end-of-support for your minor version (~12 months notice) | Plan an upgrade before the retirement date. |
+| A CVE patch is released for your current minor version | Upgrade to the latest patch of the same minor (e.g. `1.34.3` → `1.34.7`). |
+| A new minor version is required for a feature or dependency | Follow the incremental upgrade path below. |
+
+### Step-by-step upgrade process
+
+1. **Check available versions**
+
+   ```bash
+   az aks get-versions --location <your-region> --output table
+   ```
+
+   Identify the upgrade path. If you need to traverse multiple minor versions, plan each hop separately.
+
+2. **Determine the next target version**
+
+   Pick the version shown in the **Upgrades** column for your current version. If the final target is two or more minor versions away, start with the first intermediate version.
+
+3. **Update `global-values.yaml`**
+
+   Edit `opentofu/azure/<env>/global-values.yaml` (or the encrypted copy in your private repo):
+
+   ```yaml
+   global:
+     aks_version: "1.34.4"   # set to next version in the upgrade path
+   ```
+
+4. **Apply the change**
+
+   - **GitHub Actions**: commit the updated `global-values.yaml` and trigger the workflow (or push to the branch that runs it).  
+   - **Manual / Azure VM**: run from the environment directory:
+
+     ```bash
+     cd opentofu/azure/<env>
+     ./install.sh create_tf_resources
+     ```
+
+   OpenTofu will detect the version change, upgrade the AKS control plane, and then perform a rolling replacement of the worker nodes. This typically takes **25–35 minutes** per hop.
+
+   > **Downtime warning:** Expect **25–35 minutes of service downtime** during the upgrade. AKS upgrades nodes by cordoning, draining, and replacing them one at a time (surge upgrade). During node replacement, pods are evicted and rescheduled — services will be unavailable until pods come back up on the new nodes.
+
+5. **Verify the upgrade**
+
+   ```bash
+   kubectl version --short
+   # or
+   az aks show --resource-group <rg-name> --name <cluster-name> --query kubernetesVersion -o tsv
+   ```
+
+6. **Repeat for each hop** (if upgrading across multiple minor versions)
+
+   Go back to step 3 with the next version in the path until you reach the final target.
 
 # Azure Automation — AKS Auto Start/Stop Setup Guide
 

@@ -6,7 +6,7 @@ locals {
   building_block = local.global_vars.global.building_block
   subscription_id = local.global_vars.global.subscription_id
   location = local.global_vars.global.cloud_storage_region
-  # random_string  = local.environment_vars.locals.random_string 
+  aks_version = try(local.global_vars.global.aks_version, null)
 }
 
 # For local development
@@ -23,10 +23,11 @@ dependency "network" {
 }
 
 inputs = {
-  environment                        = local.environment
-  building_block             = local.building_block
-  resource_group_name        = dependency.network.outputs.resource_group_name
-  vnet_subnet_id             = dependency.network.outputs.aks_subnet_id
-  subscription_id            = local.subscription_id
-  location                   = local.location
+  environment         = local.environment
+  building_block      = local.building_block
+  resource_group_name = dependency.network.outputs.resource_group_name
+  vnet_subnet_id      = dependency.network.outputs.aks_subnet_id
+  subscription_id     = local.subscription_id
+  location            = local.location
+  aks_version         = local.aks_version
 }

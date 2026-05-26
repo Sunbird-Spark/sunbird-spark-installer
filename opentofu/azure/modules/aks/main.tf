@@ -24,6 +24,7 @@ provider "azurerm" {
     location            = var.location
     resource_group_name = var.resource_group_name
     dns_prefix          = "${local.environment_name}"
+    kubernetes_version  = var.aks_version
 
     #Uncomment the below line to create a private cluster
     # private_cluster_enabled = true
@@ -35,6 +36,7 @@ provider "azurerm" {
       vm_size        = var.big_node_size
       vnet_subnet_id = var.vnet_subnet_id
       max_pods       = 250
+      orchestrator_version = var.aks_version
     }
 
     network_profile {
@@ -82,10 +84,18 @@ provider "azurerm" {
   #       )
   #   depends_on = [ azurerm_kubernetes_cluster.aks ]
   # }
-  resource "local_file" "kubeconfig" {
-    content      = azurerm_kubernetes_cluster.aks.kube_config_raw
-    filename     = pathexpand("~/.kube/config")
-    depends_on = [ azurerm_kubernetes_cluster.aks ]
+  resource "null_resource" "kubeconfig" {
+    triggers = {
+      cluster_id      = azurerm_kubernetes_cluster.aks.id
+      cluster_version = azurerm_kubernetes_cluster.aks.kubernetes_version
+      always_run      = timestamp()
+    }
+
+    provisioner "local-exec" {
+      command = "az aks get-credentials --resource-group ${var.resource_group_name} --name ${azurerm_kubernetes_cluster.aks.name} --overwrite-existing"
+    }
+
+    depends_on = [azurerm_kubernetes_cluster.aks]
   }
 
   # Pre-create private LB in future if ever there is an instance of private ip
