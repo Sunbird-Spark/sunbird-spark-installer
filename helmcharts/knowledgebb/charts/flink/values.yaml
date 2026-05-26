@@ -352,13 +352,13 @@ flink_jobs:
 
           global {
             includeFields = [
-              "identifier", "name", "code", "status", "mimeType", "primaryCategory",
-              "description", "keywords", "author", "creator", "license", "copyright",
-              "visibility", "audience", "language", "channel", "framework",
-              "subject", "topic", "board", "medium", "gradeLevel",
-              "createdBy", "createdOn", "lastUpdatedBy", "lastUpdatedOn",
-              "se_subjects", "se_boards", "se_mediums", "se_gradeLevels"
+              "identifier", "name", "status", "mimeType", "primaryCategory",
+              "description", "keywords", "author", "creator", "license",
+              "visibility", "audience", "language", "channel",
+              "createdBy"
             ]
+            # Auto-include all framework enrichment fields (se_subjects, se_boards, se_mediums, se_gradeLevels, etc.)
+            autoIncludeSearchEnrichmentFields = true
           }
 
           content {
