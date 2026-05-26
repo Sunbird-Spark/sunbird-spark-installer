@@ -1,0 +1,58 @@
+{{/*
+  Shared RBAC for jobs that need to kubectl-exec into the source DB namespace
+  (elasticsearch-snapshot, neo4j-export).
+*/}}
+{{- $ns := .Values.source.namespace | default "sunbird" -}}
+{{- $needsExec := or .Values.databases.elasticsearch.enabled .Values.databases.neo4j.enabled .Values.databases.cassandra.enabled -}}
+{{- if $needsExec }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "database-export.fullname" . }}-sa
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "database-export.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "database-export.fullname" . }}-pod-exec
+  namespace: {{ $ns }}
+  labels:
+    {{- include "database-export.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create", "get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "database-export.fullname" . }}-pod-exec
+  namespace: {{ $ns }}
+  labels:
+    {{- include "database-export.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation
+subjects:
+- kind: ServiceAccount
+  name: {{ include "database-export.fullname" . }}-sa
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "database-export.fullname" . }}-pod-exec
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

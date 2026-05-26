@@ -1,0 +1,81 @@
+{{- if .Values.databases.elasticsearch.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "database-import.fullname" . }}-elasticsearch
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "database-import.labels" . | nindent 4 }}
+    app.kubernetes.io/component: elasticsearch-restore
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  ttlSecondsAfterFinished: {{ .Values.jobs.ttlSecondsAfterFinished }}
+  backoffLimit: {{ .Values.jobs.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "database-import.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: elasticsearch-restore
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ include "database-import.serviceAccountName" . }}
+      containers:
+      - name: elasticsearch-restore
+        image: {{ .Values.jobs.image }}
+        imagePullPolicy: {{ .Values.jobs.pullPolicy }}
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            set -e
+            export DEBIAN_FRONTEND=noninteractive
+            echo "==> Installing python3 and curl..."
+            apt-get update -qq
+            apt-get install -y -qq --no-install-recommends python3 curl ca-certificates
+            echo "==> Downloading kubectl (v1.28.0)..."
+            curl -fL --connect-timeout 30 --max-time 180 --retry 3 --retry-delay 5 \
+              -o /usr/local/bin/kubectl \
+              "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
+            chmod +x /usr/local/bin/kubectl
+            kubectl version --client=true || true
+            echo "==> Running elasticsearch-to-elasticsearch.py..."
+            python3 /scripts/elasticsearch-to-elasticsearch.py
+        env:
+        - name: NEW_ES_URL
+          value: "http://{{ .Values.databases.elasticsearch.host }}:{{ .Values.databases.elasticsearch.port }}"
+        - name: AZURE_STORAGE_ACCOUNT_NAME
+          value: {{ .Values.target.storageAccount | quote }}
+        - name: AZURE_STORAGE_ACCOUNT_KEY
+          value: {{ .Values.target.accessKey | quote }}
+        - name: AZURE_CONTAINER_NAME
+          value: {{ .Values.target.container | quote }}
+        - name: AZURE_BASE_PATH
+          value: {{ .Values.target.elasticsearch_path | quote }}
+        - name: SNAPSHOT_NAME
+          value: {{ .Values.databases.elasticsearch.snapshotName | quote }}
+        - name: REPOSITORY_NAME
+          value: {{ .Values.databases.elasticsearch.repositoryName | quote }}
+        - name: NEW_ES_POD_NAME
+          value: {{ .Values.databases.elasticsearch.podName | quote }}
+        - name: NEW_ES_NAMESPACE
+          value: {{ .Values.target.namespace | default "sunbird" | quote }}
+        - name: ES_KEYSTORE_PATH
+          value: {{ .Values.databases.elasticsearch.keystorePath | quote }}
+        volumeMounts:
+        - name: scripts
+          mountPath: /scripts
+          readOnly: true
+        - name: temp
+          mountPath: /tmp
+        resources:
+          {{- toYaml .Values.jobs.resources | nindent 12 }}
+      volumes:
+      - name: scripts
+        configMap:
+          name: {{ include "database-import.scriptsConfigMap" . }}
+          defaultMode: 0755
+      - name: temp
+        emptyDir: {}
+{{- end }}
