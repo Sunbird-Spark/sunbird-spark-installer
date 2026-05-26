@@ -70,6 +70,19 @@
         if (templateId === 'classic' || templateId === 'modern') {
           root.setAttribute('data-template', templateId);
         }
+        // Mobile-app client flag — persisted across Keycloak redirects so the
+        // narrow single-pane layout sticks even when URL params are stripped.
+        try {
+          var qs = new URLSearchParams(window.location.search);
+          var clientParam = qs.get('client');
+          if (clientParam === 'mobileApp') {
+            localStorage.setItem('sunbird-client', 'mobileApp');
+          }
+        } catch(_) {}
+        var clientId = read('sunbird-client');
+        if (clientId === 'mobileApp') {
+          root.setAttribute('data-client', 'mobileApp');
+        }
       } catch(e) {}
     })();
     </script>
