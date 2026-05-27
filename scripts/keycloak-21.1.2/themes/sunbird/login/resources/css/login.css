@@ -612,10 +612,6 @@ html[data-template="modern"] .login-card {
     border-radius: 0 8px 8px 0;
     box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.05);
 }
-html[data-template="modern"] .login-wrapper {
-    background-color: hsl(210, 16%, 96%);
-    background-image: none;
-}
 html[data-template="modern"] h1,
 html[data-template="modern"] h2,
 html[data-template="modern"] h3,
@@ -850,6 +846,10 @@ html[data-template="modern"][data-client="mobileApp"] .login-split-container {
         flex: 1;
         padding: 60px 24px;
     }
+}
+
+html[data-client="mobileApp"] .spark-form-pane {
+    padding: 0px 24px;
 }
 
 /* OTP Validation Styles */
