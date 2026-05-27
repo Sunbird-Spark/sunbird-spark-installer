@@ -82,6 +82,13 @@ function certificate_config() {
     fi
 }
 function install_component() {
+    export KUBECONFIG="${HOME}/.kube/config"
+    # Source AWS credentials so EKS auth works when called standalone
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ -f "$script_dir/tf.sh" ]; then
+        source "$script_dir/tf.sh"
+    fi
     # We need a dummy cm for configmap to start. Later Lernbb will create real one
     kubectl create configmap keycloak-key -n sunbird 2>/dev/null || true
     local current_directory="$(pwd)"
