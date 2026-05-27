@@ -48,6 +48,27 @@
     --sunbird-spark-theme-icon-h: 28;
     --app-font-family: 'Rubik', sans-serif;
 
+    /* Radius tokens — Classic defaults. Every panel / form control consumes
+       these, so a template switch only needs to redefine the token (see
+       html[data-template="modern"]). New elements that use var(--r-*) become
+       template-aware automatically — no extra modern selector needed. */
+    --r-frame: 3rem;
+    /* split-container + side panels */
+    --r-lg: 16px;
+    /* reset-password inputs / buttons */
+    --r-md: 10px;
+    /* login inputs / buttons, alert */
+    --r-sm: 8px;
+    /* google button, OTP boxes, toast */
+    --r-xs: 6px;
+    /* toast close */
+
+    /* Elevation tokens — Classic defaults. Modern redefines these. */
+    --shadow-frame: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    /* split-container */
+    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.15);
+    /* login card */
+
     --sunbird-primary: hsl(var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l));
     --sunbird-primary-hover: hsl(var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) calc(var(--sunbird-spark-theme-primary-l) - 10%));
     --sunbird-primary-focus-shadow: hsl(var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l) / 0.2);
@@ -63,6 +84,29 @@ body {
 /* Arabic font */
 [dir="rtl"] body {
     font-family: 'Noto Sans Arabic', var(--app-font-family), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Form controls don't inherit body font in all browsers (UA defaults).
+   Force the theme font on buttons, inputs, and placeholders so the login /
+   reset-password pages stay font-reactive. */
+button,
+input,
+textarea,
+select,
+.login-button,
+.kc-button,
+.kc-input,
+input[type="text"],
+input[type="password"] {
+    font-family: var(--app-font-family), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+input::placeholder,
+textarea::placeholder,
+.kc-input::placeholder,
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+    font-family: var(--app-font-family), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Utility: Hide class used by login scripts to toggle visibility */
@@ -116,11 +160,11 @@ body {
     max-width: 64rem;
     min-height: max(520px, calc(100vh - 80px));
     margin: 10px auto;
-    border-radius: 3rem;
+    border-radius: var(--r-frame);
     overflow: hidden;
     position: relative;
     z-index: 10;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-frame);
 }
 
 @media (min-width: 768px) {
@@ -141,7 +185,7 @@ body {
     border: var(--card-bg);
     box-shadow: none;
     border-width: 2px;
-    border-radius: 3rem 0 0 3rem;
+    border-radius: var(--r-frame) 0 0 var(--r-frame);
 }
 
 .login-left-panel-container {
@@ -155,7 +199,7 @@ body {
     width: 100%;
     height: 100%;
     align-self: stretch;
-    border-radius: 3rem;
+    border-radius: var(--r-frame);
 }
 
 .left-panel-content {
@@ -189,8 +233,8 @@ body {
     width: 100%;
     position: relative;
     background: var(--card-bg);
-    border-radius: 0 3rem 3rem 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 0 var(--r-frame) var(--r-frame) 0;
+    box-shadow: var(--shadow-card);
     padding: 48px;
 }
 
@@ -282,7 +326,7 @@ body {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     background: white;
     color: #374151;
     text-decoration: none;
@@ -390,7 +434,7 @@ body {
     font-size: 16px !important;
     font-weight: 500 !important;
     padding: 16px 24px !important;
-    border-radius: 10px !important;
+    border-radius: var(--r-md) !important;
     width: 100%;
     cursor: pointer !important;
     transition: background-color 0.2s ease;
@@ -433,7 +477,7 @@ body {
 /* Form Input Styling */
 input[type="text"],
 input[type="password"] {
-    border-radius: 10px !important;
+    border-radius: var(--r-md) !important;
     border: 1px solid #ddd !important;
     padding: 12px 16px !important;
     height: 48px !important;
@@ -476,7 +520,7 @@ input[type="password"]:focus {
     outline: none !important;
     background: white !important;
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--sunbird-primary) !important;
-    border-radius: 10px !important;
+    border-radius: var(--r-md) !important;
 }
 
 /* Apply the same precise double-border effect on hover for consistency */
@@ -485,7 +529,7 @@ input[type="password"]:hover {
     border-color: var(--sunbird-primary) !important;
     background: white !important;
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--sunbird-primary) !important;
-    border-radius: 10px !important;
+    border-radius: var(--r-md) !important;
 }
 
 label {
@@ -541,7 +585,7 @@ div[class*="kcFormGroupClass"] {
 
     .login-card {
         height: fit-content !important;
-        border-radius: 3rem;
+        border-radius: var(--r-frame);
     }
 }
 
@@ -579,7 +623,6 @@ html[data-client="mobileApp"] .login-right-panel {
 }
 
 html[data-client="mobileApp"] .login-split-container {
-    box-shadow: none !important;
     max-width: 100%;
     padding: 0;
 }
@@ -587,45 +630,34 @@ html[data-client="mobileApp"] .login-split-container {
 html[data-client="mobileApp"] .login-card {
     width: 100%;
     height: fit-content !important;
-    border-radius: 0;
     padding: 0;
-    box-shadow: none;
 }
 
 html[data-client="mobileApp"] .close-button {
     display: none;
 }
 
-/* Modern template — sharper radius, real layered shadow, neutral surface.
-   Mirrors portal's template-overrides.css. Applied when html[data-template="modern"]. */
-html[data-template="modern"] .login-split-container {
-    border-radius: 8px;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12), 0 4px 8px rgba(15, 23, 42, 0.06);
+/* Modern template — sharpen everything by redefining the radius tokens.
+   Every panel / input / button / OTP box already consumes var(--r-*), so this
+   single block sharpens the whole login UI. Mirrors portal template-overrides.
+   Shadows + heading weight stay as explicit modern rules below. */
+html[data-template="modern"] {
+    --r-frame: 8px;
+    --r-lg: 3px;
+    --r-md: 3px;
+    --r-sm: 3px;
+    --r-xs: 3px;
+    --shadow-frame: 0 12px 28px rgba(15, 23, 42, 0.12), 0 4px 8px rgba(15, 23, 42, 0.06);
+    --shadow-card: 0 4px 10px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.05);
 }
-html[data-template="modern"] .login-left-panel {
-    border-radius: 8px 0 0 8px;
-}
-html[data-template="modern"] .login-left-panel-container {
-    border-radius: 8px;
-}
-html[data-template="modern"] .login-card {
-    border-radius: 0 8px 8px 0;
-    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.05);
-}
-html[data-template="modern"] h1,
-html[data-template="modern"] h2,
-html[data-template="modern"] h3,
-html[data-template="modern"] h4,
-html[data-template="modern"] .welcome-title,
-html[data-template="modern"] .left-panel-title {
-    font-weight: 700;
-    letter-spacing: -0.02em;
-}
-/* Modern + mobileApp — sharp/full bleed wins over modern rounded */
-html[data-template="modern"][data-client="mobileApp"] .login-card,
-html[data-template="modern"][data-client="mobileApp"] .login-split-container {
-    border-radius: 0;
-    box-shadow: none;
+
+/* mobileApp — flat, full-bleed frame with no elevation, in ANY template.
+   Token override (not per-selector) placed AFTER the modern block so it wins
+   for modern+mobileApp by source order (equal single-attribute specificity). */
+html[data-client="mobileApp"] {
+    --r-frame: 0;
+    --shadow-frame: none;
+    --shadow-card: none;
 }
 
 /* Appended Styles from login1.css for Reset Password Page */
@@ -703,7 +735,7 @@ html[data-template="modern"][data-client="mobileApp"] .login-split-container {
     padding: 14px 22px;
     /* Slightly more breathing room */
     border: 1.5px solid #E2E8F0;
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     /* Matched to image curvature */
     font-size: 0.95rem;
     box-sizing: border-box;
@@ -718,7 +750,7 @@ html[data-template="modern"][data-client="mobileApp"] .login-split-container {
     background: white;
     /* Precise double border: Main Border -> White Gap -> Second Border */
     box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--sunbird-primary);
-    border-radius: 16px;
+    border-radius: var(--r-lg);
 }
 
 /* Ensure hover effects on other fields are hidden when one field is focused */
@@ -743,7 +775,7 @@ html[data-template="modern"][data-client="mobileApp"] .login-split-container {
     background: var(--sunbird-primary);
     color: white;
     border: none;
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
@@ -820,7 +852,7 @@ html[data-template="modern"][data-client="mobileApp"] .login-split-container {
 
 .alert {
     padding: 14px;
-    border-radius: 10px;
+    border-radius: var(--r-md);
     margin-bottom: 25px;
     font-size: 0.95rem;
     text-align: center;
@@ -871,7 +903,7 @@ html[data-client="mobileApp"] .spark-form-pane {
     text-align: center;
     font-size: 1.25rem !important;
     padding: 0 !important;
-    border-radius: 8px !important;
+    border-radius: var(--r-sm) !important;
     border: 1px solid #E2E8F0 !important;
     background: #fff !important;
 }
@@ -936,7 +968,7 @@ html[data-client="mobileApp"] .spark-form-pane {
     max-width: 360px;
     background: #EDEBE3;
     color: #111;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     padding: 12px 40px 12px 12px;
     line-height: 1.4;
@@ -979,7 +1011,7 @@ html[data-client="mobileApp"] .spark-form-pane {
     width: 24px;
     height: 24px;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--r-xs);
     background: none;
     color: #111;
     cursor: pointer;
@@ -1029,7 +1061,7 @@ html[data-client="mobileApp"] .spark-form-pane {
 
 /* Left panel border-radius flipped */
 [dir="rtl"] .login-left-panel {
-    border-radius: 0 3rem 3rem 0;
+    border-radius: 0 var(--r-frame) var(--r-frame) 0;
 }
 
 [dir="rtl"] .login-left-panel-container {
@@ -1044,7 +1076,7 @@ html[data-client="mobileApp"] .spark-form-pane {
 
 /* Login card border-radius flipped */
 [dir="rtl"] .login-card {
-    border-radius: 3rem 0 0 3rem;
+    border-radius: var(--r-frame) 0 0 var(--r-frame);
 }
 
 /* Close button flipped */
