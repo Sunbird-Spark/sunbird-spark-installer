@@ -13,7 +13,7 @@ terraform {
 
 locals {
   template_files        = fileset("${path.module}/sunbird-rc/schemas", "*.json")
-  public_artifacts_path = var.public_artifacts_path != "" ? var.public_artifacts_path : "${path.module}/../../../../public-artifacts"
+  public_artifacts_path = var.public_artifacts_path
 }
 
 resource "null_resource" "upload_public_artifacts" {
@@ -251,7 +251,7 @@ resource "null_resource" "upload_rc_schemas_to_public_blob" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload-batch --account-name ${var.storage_account_name} --destination ${var.storage_container_public}/schemas --source ${path.module}/sunbird-rc/schemas --auth-mode login"
+    command = "az storage blob upload-batch --account-name ${var.storage_account_name} --destination ${var.storage_container_public}/schemas --source ${path.module}/sunbird-rc/schemas --overwrite --auth-mode login"
   }
   depends_on = [local_file.output_files]
 }

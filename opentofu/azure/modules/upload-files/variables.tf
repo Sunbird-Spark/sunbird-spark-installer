@@ -11,8 +11,7 @@ variable "storage_container_public" {
 
 variable "public_artifacts_path" {
     type        = string
-    description = "Absolute or relative path to the public-artifacts directory in the sunbird-spark-installer repo. Defaults to the repo root resolved from the module path."
-    default     = ""
+    description = "Absolute path to the public-artifacts directory. Pass get_repo_root()/public-artifacts from Terragrunt."
 }
 
 variable "sunbird_player_editor_tag" {
