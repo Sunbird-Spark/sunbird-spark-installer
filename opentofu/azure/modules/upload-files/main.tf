@@ -225,7 +225,7 @@ resource "null_resource" "clone_and_upload_knowledge_platform_schemas" {
       set -e
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
-      git clone --depth 1 --branch ${var.knowledge_platform_tag} https://github.com/Sunbird-Knowlg/knowledge-platform.git "$tmpdir/knowledge-platform"
+      git clone --depth 1 --branch ${var.knowledge_platform_tag} https://github.com/divyagovindaiah/knowledge-platform.git "$tmpdir/knowledge-platform"
       az storage blob upload-batch \
         --account-name ${var.storage_account_name} \
         --destination ${var.storage_container_public}/schemas/local \

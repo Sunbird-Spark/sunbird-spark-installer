@@ -23,6 +23,6 @@ variable "sunbird_player_editor_tag" {
 
 variable "knowledge_platform_tag" {
     type        = string
-    description = "Git tag for Sunbird-Knowlg/knowledge-platform repo (schemas/local upload)."
+    description = "Git branch/tag for the knowledge-platform repo (schemas/local upload)."
     default     = "master"
 }
