@@ -1,4 +1,4 @@
-# Stage 1: Build the JAR
+# Stage 1: Build the JAR (fix: LogProcessorFramework stored to prevent CDC GC)
 FROM maven:3.9-eclipse-temurin-11 AS builder
 
 WORKDIR /build

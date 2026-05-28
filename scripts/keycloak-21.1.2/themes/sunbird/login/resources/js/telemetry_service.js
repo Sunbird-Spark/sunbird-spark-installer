@@ -2294,7 +2294,7 @@ let pdataId = "";
 let tenantSlug;
 if (window.location.origin.indexOf("sandbox.sunbirded.org") >= 0) {
   pdataId = "staging.sunbird.portal";
-} else if (window.location.origin.indexOf("dev.sunbirded.org") >= 0) {
+} else if (window.location.origin.indexOf("dummy.sunbirded.org") >= 0) {
   pdataId = "dev.sunbird.portal";
   tenantSlug = "sunbird";
 } else {
