@@ -354,7 +354,7 @@ flink_jobs:
             includeFields = [
               "identifier", "name", "status", "mimeType", "primaryCategory",
               "description", "keywords", "author", "creator", "license",
-              "visibility", "audience", "language", "channel",
+              "visibility", "audience", "language",
               "createdBy"
             ]
             # Auto-include all framework enrichment fields (se_subjects, se_boards, se_mediums, se_gradeLevels, etc.)
@@ -363,33 +363,23 @@ flink_jobs:
 
           content {
             enabled = true
-            includeFields = [
-              "contentType", "resourceType", "ageGroup", "interactivityLevel",
-              "genre", "theme", "skills", "learningObjective",
-              "totalQuestions", "totalScore", "maxAttempts"
-            ]
+            includeFields = []
           }
 
           collection {
             enabled = true
-            includeFields = [
-              "contentType", "childNodes", "leafNodesCount", "depth"
-            ]
+            includeFields = []
             includeHierarchy = true
           }
 
           question {
             enabled = false
-            includeFields = [
-              "qumlVersion", "body", "answer", "difficulty"
-            ]
+            includeFields = []
           }
 
           questionset {
             enabled = false
-            includeFields = [
-              "childNodes", "leafNodesCount", "depth", "totalQuestions"
-            ]
+            includeFields = []
             includeHierarchy = true
           }
         }
