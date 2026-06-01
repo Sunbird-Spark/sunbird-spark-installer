@@ -660,6 +660,7 @@ flink_jobs:
 
         openai {
           api_key = ""
+          api_key = ${?OPENAI_API_KEY}
           model = "text-embedding-3-small"
           dimensions = 1536
           timeout = 30
@@ -696,6 +697,14 @@ flink_jobs:
       jobmanager.memory.process.size: 1600m
 
     job_classname: org.sunbird.job.contentembedding.task.ContentEmbeddingStreamTask
+
+    extraEnv:
+      - name: OPENAI_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: openai-secret
+            key: OPENAI_API_KEY
+            optional: true
 
 commonAnnotations:
   reloader.stakater.com/auto: "true"
