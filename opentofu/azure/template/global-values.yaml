@@ -16,7 +16,7 @@ keycloak-kids-keys:
 global:
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
   sunbird_player_editor_tag: "master"  # git tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
-  knowledge_platform_tag: "spark-v19"  # git branch/tag for knowledge-platform (schemas/local upload)
+  knowledge_platform_ref: "spark-v19"  # git branch or tag for knowledge-platform (schemas/local upload)
   resource_group_name: ""    # Azure resource group name
   building_block: "" # building block name
   env: ""
