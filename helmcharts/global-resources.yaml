@@ -397,6 +397,28 @@ velero:
         memory: 1024Mi
     
 yugabyte:
+  serviceEndpoints:
+    - name: "yb-master-ui"
+      app: "yb-master"
+      loadBalancerIP: ""
+      type: "ClusterIP"
+      ports:
+        http: 7000
+    - name: "yb-tserver-service"
+      app: "yb-tserver"
+      loadBalancerIP: ""
+      type: "ClusterIP"
+      ports:
+        tcp-yql-port: 9042
+        tcp-yedis-port: 6379
+        tcp-rpc-port: 9100
+        http-ysql: 5433
+    - name: "yugabyted-ui-service"
+      app: "yb-tserver"
+      loadBalancerIP: ""
+      type: "ClusterIP"
+      ports:
+        http: 15433
   resource:
     master:
       requests:
