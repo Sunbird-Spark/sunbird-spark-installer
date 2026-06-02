@@ -49,8 +49,8 @@ images:
     tag: "release-7.7.0_rc1_50b5b2d_2"
 
   player: &player
-    repository: "sunbirded.azurecr.io/sunbird-portal"
-    tag: "spark-v1.0.8_13fe021"
+    repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
+    tag: "spark-v1.0.13_afdf6db"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -71,7 +71,7 @@ images:
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "spark-v1.0.1_95d0c60_14"
+    tag: "spark-v1.0.3_61d7904_16"
     
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -149,7 +149,7 @@ images:
   janusgraph: &janusgraph
     registry: ghcr.io
     repository: sunbird-spark/janusgraph
-    tag: develop_cb093d4
+    tag: develop_f780e7f
 
   secor: &secor
     repository: "sunbirded.azurecr.io/secor"
