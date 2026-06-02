@@ -20,8 +20,8 @@ variable "sunbird_player_editor_tag" {
     default     = "master"
 }
 
-variable "knowledge_platform_tag" {
+variable "knowledge_platform_ref" {
     type        = string
-    description = "Git branch/tag for the knowledge-platform repo (schemas/local upload)."
+    description = "Git branch or tag for the knowledge-platform repo (schemas/local upload)."
     default     = "master"
 }
