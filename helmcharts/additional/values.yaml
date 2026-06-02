@@ -76,10 +76,10 @@ velero:
       schedule: "30 1 * * 5"
       useOwnerReferencesInBackup: false
       template:
-        ttl: "336h"
+        ttl: "240h"
         includedNamespaces:
           - "sunbird"
-        snapshotVolumes: true  
+        snapshotVolumes: true
 
 # This section is for the Velero configuration for database backup. To enable DB backup, set disabled to false
     database-backup:
@@ -87,7 +87,7 @@ velero:
       schedule: "30 1 * * 5"
       useOwnerReferencesInBackup: false
       template:
-        ttl: "336h"
+        ttl: "240h"
         includedNamespaces:
           - "sunbird"
         labelSelector:
