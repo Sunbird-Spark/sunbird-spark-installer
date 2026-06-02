@@ -29,13 +29,13 @@ function deploy_tf_module() {
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    # deploy_tf_module network
-    # deploy_tf_module storage
-    # deploy_tf_module aks
-    # deploy_tf_module workload-identity
-    # deploy_tf_module random_passwords
-    # deploy_tf_module keys
-    # deploy_tf_module output-file
+    deploy_tf_module network
+    deploy_tf_module storage
+    deploy_tf_module aks
+    deploy_tf_module workload-identity
+    deploy_tf_module random_passwords
+    deploy_tf_module keys
+    deploy_tf_module output-file
     deploy_tf_module upload-files
     [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
 }
