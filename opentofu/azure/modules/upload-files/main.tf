@@ -42,7 +42,7 @@ resource "null_resource" "clone_and_upload_content_plugins" {
       set -e
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
-      git clone --depth 1 --branch ${var.sunbird_player_editor_tag} https://github.com/Sunbird-Knowlg/sunbird-content-plugins.git "$tmpdir/content-plugins"
+      git clone --depth 1 --branch ${var.sunbird_player_editor_ref} https://github.com/Sunbird-Knowlg/sunbird-content-plugins.git "$tmpdir/content-plugins"
       az storage blob upload-batch \
         --account-name ${var.storage_account_name} \
         --destination ${var.storage_container_public}/content-plugins \
@@ -66,7 +66,7 @@ resource "null_resource" "build_and_upload_content_editor" {
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
 
-      git clone --depth 1 --branch ${var.sunbird_player_editor_tag} https://github.com/Sunbird-Knowlg/sunbird-content-editor.git "$tmpdir/content-editor"
+      git clone --depth 1 --branch ${var.sunbird_player_editor_ref} https://github.com/Sunbird-Knowlg/sunbird-content-editor.git "$tmpdir/content-editor"
 
       host_uid=$(id -u)
       host_gid=$(id -g)
@@ -76,8 +76,8 @@ resource "null_resource" "build_and_upload_content_editor" {
         -e HOST_UID=$host_uid \
         -e HOST_GID=$host_gid \
         -e editorType=contentEditor \
-        -e framework_version_number=${var.sunbird_player_editor_tag} \
-        -e editor_version_number=${var.sunbird_player_editor_tag} \
+        -e framework_version_number=${var.sunbird_player_editor_ref} \
+        -e editor_version_number=${var.sunbird_player_editor_ref} \
         -e build_number=$build_sha \
         -e CHROME_BIN=google-chrome \
         -v "$tmpdir/content-editor":/work \
@@ -89,7 +89,7 @@ resource "null_resource" "build_and_upload_content_editor" {
           apt-get -o Acquire::Check-Valid-Until=false update
           apt-get install -y build-essential libpng-dev git
           npm install -g bower@1.8.14 gulp@4.0.1
-          git clone https://github.com/project-sunbird/sunbird-content-plugins.git plugins -b ${var.sunbird_player_editor_tag}
+          git clone https://github.com/project-sunbird/sunbird-content-plugins.git plugins -b ${var.sunbird_player_editor_ref}
           npm cache clean --force
           npm install
           cd app
@@ -125,7 +125,7 @@ resource "null_resource" "build_and_upload_generic_editor" {
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
 
-      git clone --depth 1 --branch ${var.sunbird_player_editor_tag} https://github.com/Sunbird-Knowlg/sunbird-generic-editor.git "$tmpdir/generic-editor"
+      git clone --depth 1 --branch ${var.sunbird_player_editor_ref} https://github.com/Sunbird-Knowlg/sunbird-generic-editor.git "$tmpdir/generic-editor"
 
       host_uid=$(id -u)
       host_gid=$(id -g)
@@ -134,7 +134,7 @@ resource "null_resource" "build_and_upload_generic_editor" {
       docker run --rm \
         -e HOST_UID=$host_uid \
         -e HOST_GID=$host_gid \
-        -e version_number=${var.sunbird_player_editor_tag} \
+        -e version_number=${var.sunbird_player_editor_ref} \
         -e build_number=$build_sha \
         -v "$tmpdir/generic-editor":/work \
         -w /work \
@@ -144,7 +144,7 @@ resource "null_resource" "build_and_upload_generic_editor" {
           apt-get update
           apt-get install -y build-essential libpng-dev git
           npm install -g bower@1.8.0
-          git clone https://github.com/project-sunbird/sunbird-content-plugins.git plugins -b ${var.sunbird_player_editor_tag}
+          git clone https://github.com/project-sunbird/sunbird-content-plugins.git plugins -b ${var.sunbird_player_editor_ref}
           npm install --legacy-peer-deps
           cd app
           bower cache clean --allow-root
@@ -177,7 +177,7 @@ resource "null_resource" "build_and_upload_content_player" {
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
 
-      git clone --depth 1 --branch ${var.sunbird_player_editor_tag} https://github.com/Sunbird-Knowlg/sunbird-content-player.git "$tmpdir/content-player"
+      git clone --depth 1 --branch ${var.sunbird_player_editor_ref} https://github.com/Sunbird-Knowlg/sunbird-content-player.git "$tmpdir/content-player"
 
       host_uid=$(id -u)
       host_gid=$(id -g)
