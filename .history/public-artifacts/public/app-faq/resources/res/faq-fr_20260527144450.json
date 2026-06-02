@@ -1,0 +1,228 @@
+{
+  "categories": [
+    {
+      "name": "Contenu (recherche)",
+      "videos": [],
+      "faqs": [
+        {
+          "topic": "Un message \"Contenu à venir\" s'affiche sur mon écran et je ne peux voir aucun contenu pour le code QR scanné",
+          "description": "Votre État est en train de créer du contenu pour ce code QR. Le délai est dû au grand nombre de manuels scolaires pour de nombreuses classes, filières et matières. Vous verrez le contenu dès que l'État l'aura créé."
+        },
+        {
+          "topic": "Je ne peux pas voir le contenu de mon réseau, ma filière, ma classe ou ma matière",
+          "description": "Votre État n'a pas encore créé ou ajouté de contenu pour votre filière, réseau, classe ou matière. Si vous voyez des livres répertoriés dans la bibliothèque de l'application, vous obtiendrez très probablement le contenu au cours de cette année académique."
+        },
+        {
+          "topic": "Je veux obtenir l'application mobile sur iOS ou sur ordinateur",
+          "description": "Vous pouvez visiter https://dummy.sunbirded.org/explore/ en utilisant votre navigateur sur des appareils iOS ou sur ordinateur pour voir le contenu. Nous travaillons actuellement sur une application de bureau pour une utilisation hors ligne, qui devrait être prête plus tard cette année."
+        },
+        {
+          "topic": "Je ne peux pas voir le bouton de scan du code QR",
+          "description": "Cela est causé par une version obsolète du composant <b>Android System WebView</b> sur votre téléphone. Pour mettre à jour le composant WebView :\n1. Allez sur le Google Play Store\n2. Accédez au lien Android WebView. Utilisez https://play.google.com/store/apps/details?id=com.google.android.webview.\n\nRemarque : L'Android WebView est un composant préinstallé qui permet aux applications Android d'afficher du contenu web.\nIl doit être maintenu à jour pour garantir les dernières mises à jour de sécurité."
+        },
+        {
+          "topic": "Je veux accéder à des ressources particulières par type",
+          "description": "<ul><li>Cliquez sur l'onglet <b>Type de ressource</b> sur la page d'accueil</li><li>Sélectionnez soit Projet, Observation, Sondage ou Cours</li><li>Une liste des ressources disponibles du type de ressource sélectionné pour votre rôle et votre emplacement est affichée</li><li>Cliquez sur la ressource requise dans la liste pour l'utiliser ou la démarrer</li></ul>"
+        }
+      ]
+    },
+    {
+      "name": "Lecture de contenu",
+      "videos": [],
+      "faqs": [
+        {
+          "topic": "J'ai un appareil Android 4.4, je ne peux pas lire le contenu dessus",
+          "description": "La version Android 4.4 ne supporte pas html5 et donc tout le contenu ne peut pas être lu. Pour lire du contenu sur un appareil avec Android 4.4, essayez ce qui suit :\n<ul>\n<li>Mettez à jour la version Android vers la dernière version, de préférence vers une version supérieure à 5.1</li>\n<li>Mettez à jour l'application mobile {{APP_NAME}} vers la dernière version</li>\n</ul>\nL'application invite à télécharger et installer Crosswalk lors de la lecture de contenu sur Android 4.4. L'utilisation de Crosswalk permet de lire la plupart des contenus sur Android 4.4.\n\n"
+        },
+        {
+          "topic": "Je veux lire du contenu quand il n'y a pas d'Internet",
+          "description": "Vous ne pouvez télécharger du contenu que lorsque vous êtes connecté à Internet. Seul le contenu téléchargé peut être lu ultérieurement sans Internet. \nVous ne pouvez regarder des vidéos YouTube que lorsque vous êtes connecté à Internet car YouTube ne permet pas aux autres applications de télécharger des vidéos."
+        },
+        {
+          "topic": "Le contenu prend beaucoup de place sur mon téléphone",
+          "description": "Vous pouvez supprimer le contenu téléchargé dans l'onglet téléchargements de l'application pour libérer de l'espace"
+        },
+        {
+          "topic": "Quand j'essaie de lire une vidéo, j'obtiens une erreur : \"Le média n'a pas pu être chargé\"",
+          "description": "Si vous obtenez cette erreur, vous pouvez soit :\n<ul><li> Télécharger la vidéo et la lire,</li></ul>\nOU\n<ul><li>Si vous ne voyez pas l'option de téléchargement, et si vous avez une carte SIM d'un autre opérateur réseau, passez à l'autre réseau et réessayez</li></ul>"
+        },
+        {
+          "topic": "Quand j'essaie de lire un PDF, j'obtiens une erreur : \"PDF manquant\"",
+          "description": "Si vous obtenez cette erreur, vous devez :\n<ul><li>Mettre à jour l'application (si une mise à jour est disponible)</ul></li>\nSi vous rencontrez toujours ce problème après la mise à jour, alors\n<ul><li>Supprimez le PDF si vous l'avez téléchargé</li>\n<li>Vérifiez votre connexion Internet et essayez de lire le contenu à nouveau</li></ul>"
+        }
+      ]
+    },
+    {
+      "name": "Profil",
+      "videos": [],
+      "faqs": [
+        {
+          "topic": "Je ne peux pas voir mon réseau, ma filière, ma classe et ma matière",
+          "description": "Votre État ne prend pas encore en charge tous les réseaux, filières, classes et matières. Dès que votre État les ajoute, vous les verrez dans la liste."
+        },
+        {
+          "topic": "Je ne peux pas voir les paramètres de mon profil",
+          "description": "Cela est causé par une version obsolète du composant <b>Android System WebView</b> sur votre téléphone. Pour mettre à jour le composant WebView :\n1. Allez sur le Google Play Store\n2. Accédez au lien Android WebView. Utilisez https://play.google.com/store/apps/details?id=com.google.android.webview\n\nRemarque : L'Android WebView est un composant préinstallé qui permet aux applications Android d'afficher du contenu web.\nIl doit être maintenu à jour pour garantir les dernières mises à jour de sécurité."
+        },
+        {
+          "topic": "Je suis connecté en tant qu'Enseignant ou Autre. Je veux changer mon rôle",
+          "description": "<ul><li>Allez sur la page <b>Profil</b></li><li>Cliquez sur <b>Modifier</b> sous vos détails de rôle et d'emplacement</li><li>Modifiez votre rôle</li><li><b> Remarque :</b> Si vous souhaitez modifier votre rôle en <b>Leader</b>, sélectionnez votre sous-rôle et les détails d'emplacement pertinents</li><li>Cliquez sur <b>Soumettre</b></li></ul>"
+        },
+        {
+          "topic": "Je veux voir les programmes et ressources pour mon rôle et mon emplacement",
+          "description": "<ul><li>Cliquez sur <b>Programmes</b> sur la page d'accueil</li><li> La liste des programmes pour votre rôle et votre emplacement est affichée</li><li>Sélectionnez un programme pour voir toutes ses ressources</li><li>Cliquez sur la ressource pour l'utiliser ou la démarrer</li></ul>"
+        },
+        {
+          "topic": "Mon profil ne reflète pas correctement ma progression dans le cours",
+          "description": "Pour mettre à jour votre progression dans le cours dans votre profil, allez dans <b>Mes apprentissages</b>. Cliquez sur le Cours. Après l'ouverture du cours, allez dans le menu kebab (trois points verticaux à droite) > cliquez sur <b>Synchroniser la progression maintenant</b>. Attendez quelques minutes. Votre profil devrait maintenant refléter votre progression correcte dans le cours."
+        }
+      ]
+    },
+    {
+      "name": "Connexion",
+      "videos": [
+        {
+          "id": "01",
+          "name": "Sample Video",
+          "thumbnail": "https://ntpproductionall.blob.core.windows.net/ntp-content-production/content/do_31309320735055872011111/artifact/nishtha_icon.thumb.jpg",
+          "url": "https://ntpproductionall.blob.core.windows.net/ntp-content-production/content/assets/do_31309320735055872011111/engagement-with-language-.mp4"
+        }
+      ],
+      "faqs": [
+        {
+          "topic": "Je ne peux pas me connecter",
+          "description": "Pour utiliser l'application mobile {{APP_NAME}}, vous devez d'abord vous inscrire. Vous pouvez vous inscrire lorsque vous êtes connecté à Internet en utilisant l'une de ces options :\n\t\t<ul>\n\t\t<li> Numéro de mobile ou adresse e-mail enregistrés </li>\n\t\t<li> Identifiant fourni par l'État </li>\n\t\t<li> Identifiant Google (Gmail) existant </li>\n\t\t</ul>\nSi vous vous êtes déjà inscrit, vérifiez si vous disposez d'une connexion Internet correcte."
+        }
+      ]
+    },
+    {
+      "name": "Création de contenu",
+      "videos": [],
+      "faqs": [
+        {
+          "topic": "Je veux créer et ajouter du contenu sur {{APP_NAME}}",
+          "description": "Actuellement, l'État désigne des enseignants pour créer et ajouter du contenu sur {{APP_NAME}}. Si vous êtes intéressé par la création de contenu, envoyez une demande à l'autorité de votre État pour obtenir des droits de création."
+        }
+      ]
+    },
+    {
+      "name": "Cours et certificats",
+      "videos": [],
+      "faqs": [
+        {
+          "topic": "Je veux me désinscrire d'un cours",
+          "description": "Sélectionnez le cours dont vous souhaitez vous désinscrire, appuyez sur le menu d'options (trois points verticaux) dans le coin supérieur droit et appuyez sur 'Se désinscrire'"
+        },
+        {
+          "topic": "Je veux connaître le statut de ma progression dans le cours",
+          "description": "Après avoir réussi à terminer un cours, le nom du cours sera affiché dans la section 'Formations suivies' sur votre page de profil"
+        },
+        {
+          "topic": "J'ai terminé la formation mais ma progression n'est pas à 100%.",
+          "description": "Sunbird marque la progression de la formation à 100% uniquement après avoir visionné toutes les vidéos ou lu tous les documents PDF complètement. Si vous regardez une vidéo partiellement ou sautez des pages lors de la lecture d'un document, votre progression n'est pas marquée à 100%."
+        },
+        {
+          "topic": "Je ne peux pas télécharger mon certificat de cours",
+          "description": "Vous avez peut-être une ancienne version de l'application. Allez sur <b>Play Store > Sunbird</b>. Cliquez sur <b>Mettre à jour</b> pour obtenir la dernière version de l'application. Vous devriez pouvoir télécharger le certificat une fois l'application mise à jour avec succès."
+        }
+      ]
+    },
+    {
+      "name": "Autre",
+      "faqs": [
+        {
+          "topic": "J'ai terminé ma formation iGOT COVID, mais je n'ai pas reçu mon certificat",
+          "description": "Votre certificat de réussite de la formation COVID sera délivré dans un délai de 7 jours ouvrables après avoir terminé toute formation COVID. Vous serez informé par e-mail ou SMS lors de la délivrance du certificat. Si vous ne recevez pas votre certificat dans les 7 jours ouvrables, contactez <a href=\"mailto:support@i-got.freshdesk.com\">support@i-got.freshdesk.com</a>."
+        },
+        {
+          "topic": "Je veux télécharger mon certificat de réussite de la formation iGOT COVID",
+          "description": "Votre certificat de réussite de la formation iGOT COVID sera délivré dans un délai de 7 jours ouvrables après avoir terminé toute formation COVID. Vous serez informé par e-mail ou SMS lors de la délivrance du certificat. Après avoir reçu l'information, pour télécharger votre certificat :<ul><li>Allez dans <b>Profil</b> > <b>Formations suivies</b></li><li>Cliquez sur <b>Télécharger</b></li><li> Le certificat est téléchargé en arrière-plan </li><li>Visualisez-le et ouvrez-le depuis votre gestionnaire de fichiers Android</li></ul>\nSi vous ne recevez pas votre certificat dans les 7 jours ouvrables, contactez <a href=\"mailto:support@i-got.freshdesk.com\">support@i-got.freshdesk.com</a>."
+        },
+        {
+          "topic": "Je veux savoir si j'ai terminé ma formation",
+          "description": "Pour savoir si vous avez terminé la formation COVID, vérifiez si :<ul><li>Le statut de progression de votre formation est à 100%</li><li>Le nom de la formation apparaît sous <b>Profil</b> > <b>Formations suivies</b></li></ul>"
+        }
+      ]
+    },
+    {
+      "name": "Gestion de projets",
+      "videos": [],
+      "faqs": [
+        {
+          "topic": "Je veux modifier les détails du projet",
+          "description": "<ul><li>1. Ouvrez le projet</li><li>2. Cliquez sur les 3 points dans le coin supérieur droit</li><li>Cliquez sur <b>Modifier</b></li><li>Cliquez sur l'icône <b>Modifier</b> (crayon) pour modifier les détails</li><li>Cliquez sur <b>Enregistrer les modifications</b> pour sauvegarder les changements</li></ul>"
+        },
+        {
+          "topic": "Je veux changer le statut d'une tâche quand aucune sous-tâche n'est présente",
+          "description": "<ul><li>Ouvrez le projet</li><li>Cliquez sur la tâche</li><li>Cliquez sur le menu déroulant sous la tâche</li><li>Modifiez le statut et cliquez sur OK</li></ul>"
+        },
+        {
+          "topic": "Je veux changer le statut d'une tâche quand une sous-tâche est présente",
+          "description": "<ul><li>Ouvrez le projet</li><li>Cliquez sur la tâche requise</li><li>Une liste de sous-tâches est affichée</li><li>Cliquez sur le menu déroulant de la sous-tâche</li><li>Modifiez le statut et cliquez sur OK</li><li><b>Remarque :</b> Le statut de la tâche est marqué comme complet automatiquement seulement si le statut de toutes ses sous-tâches est complet.</li></ul>"
+        },
+        {
+          "topic": "Je veux ajouter un fichier de preuve au projet après l'achèvement de la tâche",
+          "description": "<ul><li>1. Ouvrez le <b>Projet</b></li><li>2. Cliquez sur la tâche terminée</li><li>3. Cliquez sur <b>Ajouter une pièce jointe</b> dans le coin inférieur droit</li><li>4. Cliquez sur <b>Utiliser la caméra</b> pour prendre une photo</li> <li> 5. Cliquez sur <b>Charger depuis la bibliothèque</b> pour sélectionner l'image depuis votre téléphone</li><li>6. Vous verrez le message <b>Pièce jointe ajoutée avec succès</b> dans la fenêtre contextuelle en haut de votre écran</li></ul>"
+        },
+        {
+          "topic": "Je veux ajouter un fichier de preuve pour l'Observation ou le Sondage (Seulement quand une question a l'option fichiers)",
+          "description": "<ul><li>Démarrez le questionnaire d'observation/sondage</li><li>Cliquez sur l'option fichiers dans la question</li><li>Sélectionnez caméra/télécharger une image</li><li>Une icône d'image est ajoutée pour indiquer qu'une preuve a été ajoutée.</li></ul>"
+        },
+        {
+          "topic": "Je veux accéder à mes rapports de Projet sur {{APP_NAME}}",
+          "description": "<ul><li>Cliquez sur <b>Rapports</b> sur la page d'accueil</li><li>Sélectionnez le type de ressource comme Projet</li><li>Consultez le rapport de vue d'ensemble du projet, de la tâche et de la catégorie</li><li>Cliquez sur le filtre pour sélectionner un programme particulier</li><li>Cliquez sur 'Voir le rapport' pour les rapports détaillés</li></ul>"
+        },
+        {
+          "topic": "Je veux accéder à mes rapports d'Observation sur {{APP_NAME}}",
+          "description": "<ul><li>Cliquez sur <b>Rapports</b> sur la page d'accueil</li><li>Sélectionnez le type de ressource comme <b>Observation</b></li><li>Sélectionnez le formulaire d'observation</li><li>Sélectionnez l'Entité</li><li>Cliquez sur <b>Voir le rapport de l'entité</b></li></ul>"
+        }
+      ]
+    }
+  ],
+  "constants": {
+    "charactersLeft": "caractères restants",
+    "explainMsg": "Pouvez-vous expliquer le problème ?",
+    "faqMsg": "Questions fréquemment posées",
+    "faqTitle": "FAQ(s)",
+    "help": "Aide",
+    "helpMsg": "Cette réponse vous a-t-elle aidé ?",
+    "initiateEmailButton": "Initier un e-mail",
+    "knowMoreMsg": "Que voulez-vous savoir de plus ?",
+    "noMsg": "Non",
+    "reportIssue": "Signaler un problème",
+    "reportIssueMsg": "Signaler un autre problème",
+    "resolveMsg": "Obtenez de l'aide pour trouver du contenu, des problèmes techniques et plus encore. Parcourez les sujets pour trouver des FAQ, des vidéos d'aide et plus encore.",
+    "selectCategoryTitle": "Sélectionner une catégorie",
+    "sorryMsg": "Désolé pour ça !",
+    "submitButton": "Soumettre les commentaires",
+    "tellMoreMsg": "Parlez-nous davantage du problème que vous avez rencontré",
+    "thanksForFeedbackMsg": "Merci pour vos commentaires. Nous ne serons peut-être pas en mesure de répondre à chaque suggestion qui nous est envoyée, mais vos commentaires sont précieux. Cela aide à améliorer {{app_name}} pour tous.",
+    "thanksMsg": "Merci pour votre réponse !",
+    "triggerEmailMsg": "Après avoir ajouté des détails dans la zone de texte et appuyé sur le bouton Initier un e-mail, nous déclencherons un e-mail en votre nom. Vous pouvez ajouter d'autres détails et/ou joindre des fichiers là-bas.",
+    "typeHere": "Tapez ici...",
+    "videoTitle": "Vidéo(s)",
+    "yesMsg": "Oui"
+  },
+  "general": [
+    {
+      "title": "Comment puis-je découvrir des cours pertinents sur le portail Sunbird ?",
+      "description": "Naviguez vers la section <b>Explorer</b> dans l'en-tête. Vous pouvez utiliser la barre de recherche ou appliquer des filtres pour : <ul><li>Matière</li><li>Filière</li><li>Niveau de classe</li></ul>"
+    },
+    {
+      "title": "Que dois-je faire si j'oublie mon mot de passe de connexion ?",
+      "description": "Cliquez sur le lien <a href='/recover-password'>Mot de passe oublié</a>. Entrez votre <i>e-mail enregistré</i> ou <i>numéro de mobile</i> pour recevoir un OTP sécurisé pour la réinitialisation du mot de passe."
+    },
+    {
+      "title": "Comment puis-je suivre ma progression dans le cours ?",
+      "description": "Votre progression est affichée sous forme de <b>barre de pourcentage</b> sur le tableau de bord du cours. <br><br><b>Remarque :</b> Vous devez compléter tous les modules et évaluations obligatoires pour atteindre 100%."
+    },
+    {
+      "title": "Puis-je accéder au contenu hors ligne via le portail ?",
+      "description": "Le portail web nécessite une connexion active, mais vous pouvez utiliser l'<b>Application mobile Sunbird</b> pour télécharger des ressources. Cherchez l'icône de <u>Téléchargement</u> à côté du titre du contenu."
+    },
+    {
+      "title": "Où puis-je trouver les certificats que j'ai obtenus ?",
+      "description": "Allez sur votre page <b>Profil</b>. Dans la section <i>Passeport d'apprentissage</i>, vous verrez une liste de cours terminés avec un bouton <b>Télécharger le certificat</b> à côté de chacun."
+    }
+  ]
+}
