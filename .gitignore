@@ -21,4 +21,3 @@ terragrunt
 
 # Ignore built JARs for JanusGraph
 scripts/janusgraph/*.jar
-.history/
