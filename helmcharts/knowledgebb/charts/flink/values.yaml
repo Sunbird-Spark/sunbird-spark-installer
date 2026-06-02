@@ -180,6 +180,7 @@ base_config: |
   job {
     env = "{{ .Values.global.env }}"
     enable.distributed.checkpointing = true
+    state.checkpoints.num-retained = 3
 
     {{- if eq "oci" .Values.global.checkpoint_store_type }}
     statebackend {
