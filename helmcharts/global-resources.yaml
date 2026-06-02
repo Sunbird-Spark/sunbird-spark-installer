@@ -253,14 +253,14 @@ kube-prometheus-stack:
           memory: 50Mi
   prometheus:
     prometheusSpec:
-      retention: "30d"
+      retention: "7d"
       storageSpec:
         volumeClaimTemplate:
           spec:
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
-                storage: 25Gi
+                storage: 10Gi
       resources:
         requests:
           cpu: 500m
@@ -339,7 +339,7 @@ loki:
 redis:
   master:
     persistence:
-      size: 25Gi
+      size: 2Gi
     primary:
     resources:
       limits:
