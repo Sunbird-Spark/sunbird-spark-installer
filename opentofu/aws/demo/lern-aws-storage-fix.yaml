@@ -1,0 +1,7 @@
+global:
+  cloud_storage_provider: "aws"
+  sunbird_cloud_storage_provider: "aws"
+lern:
+  image:
+    repository: "ghcr.io/sunbird-lern/lern-service"
+    tag: "spark-v0.21_9d043d3_26"
