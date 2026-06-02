@@ -73,10 +73,10 @@ velero:
   schedules:
     edcluster-backup:
       disabled: false
-      schedule: "0 0 * * *"
+      schedule: "30 1 * * 5"
       useOwnerReferencesInBackup: false
       template:
-        ttl: "240h"
+        ttl: "336h"
         includedNamespaces:
           - "sunbird"
         snapshotVolumes: true  
@@ -84,10 +84,10 @@ velero:
 # This section is for the Velero configuration for database backup. To enable DB backup, set disabled to false
     database-backup:
       disabled: true
-      schedule: "0 0 * * *"
+      schedule: "30 1 * * 5"
       useOwnerReferencesInBackup: false
       template:
-        ttl: "240h"
+        ttl: "336h"
         includedNamespaces:
           - "sunbird"
         labelSelector:
