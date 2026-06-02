@@ -9,26 +9,19 @@ variable "storage_container_public" {
 }
 
 
-variable "sunbird_public_artifacts_account" {
+variable "public_artifacts_path" {
     type        = string
-    description = "The public account name where storage artifacts are published for this release."
-    default     = "downloadableartifacts"
+    description = "Absolute path to the public-artifacts directory. Pass get_repo_root()/public-artifacts from Terragrunt."
 }
 
-variable "sunbird_public_artifacts_account_sas_url" {
+variable "sunbird_player_editor_ref" {
     type        = string
-    description = "The readonly sas token url for the sunbird public account."
-    default     = "https://downloadableartifacts.blob.core.windows.net/?se=2030-12-31T23%3A59%3A00Z&sp=rxlft&spr=https&sv=2022-11-02&ss=fb&srt=sco&sig=9IDJq3H94oluxYUwB2M1SxwjdvpVvYzKMgAJHomrjuY%3D"
+    description = "Git tag for Sunbird-Knowlg repos: sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player."
+    default     = "master"
 }
 
-variable "sunbird_public_artifacts_container" {
+variable "knowledge_platform_ref" {
     type        = string
-    description = "The container name dedicated for this release which holds the storage artifatcs."
-    default     = "release700"
-}
-
-variable "sunbird_branch" {
-    type        = string
-    description = "Git branch/tag used to clone Sunbird-Knowlg editor/player/plugins repos and the upstream sunbird-content-plugins inside builds."
+    description = "Git branch or tag for the knowledge-platform repo (schemas/local upload)."
     default     = "master"
 }

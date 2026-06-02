@@ -1,0 +1,138 @@
+{
+    "categories": [
+        {
+            "id": "login",
+            "name": "Connexion",
+            "videos": [
+                {
+                    "id": "01",
+                    "name": "Vidéo d’exemple",
+                    "thumbnail": "https://obj.stage.sunbirded.org/sunbird-content-staging/content/do_21382892240155443211092/artifact/do_2133179581016637441328_1625727308036_1024px-flag_of_venezuela_state.thumb.svg.thumb.png",
+                    "url": "https://obj.stage.sunbirded.org/sunbird-content-staging/content/assets/do_21382892240155443211092/sunbird-learning-framework-take-2.mp4"
+                }
+            ],
+            "faqs": [
+                {
+                    "topic": "Je souhaite m’inscrire sur Sunbird",
+                    "description": "Pour vous inscrire sur Sunbird :\n<ul>\n  <li>Accédez à <a href=\"https://dev.sunbirded.org/explore\" target=\"_blank\">Explorer Sunbird</a></li>\n  <li>Sélectionnez si vous êtes enseignant ou étudiant</li>\n  <li>Mettez à jour les informations de votre localisation</li>\n  <li>Cliquez sur l’icône de profil</li>\n  <li>Cliquez sur <b>Connexion</b></li>\n  <li>Cliquez sur <b>S’inscrire ici</b> sur l’écran de connexion</li>\n  <li>Pour plus de détails, consultez https://dev.sunbirded.org/help/getting-started/sign-in/sign-up.html</li>\n</ul>"
+                },
+                {
+                    "topic": "Je souhaite me connecter à Sunbird avec Google",
+                    "description": "<p>Pour vous connecter à Sunbird via votre compte Gmail :</p>\n<ul>\n  <li>Cliquez sur l’icône <strong>Profil</strong></li>\n  <li>Cliquez sur <strong>Connexion</strong></li>\n  <li>Sélectionnez <strong>Se connecter avec Google</strong></li>\n  <li>Sélectionnez un compte Gmail</li>\n  <li>Cliquez sur Continuer pour accepter les politiques, conditions et termes</li>\n</ul>"
+                }
+            ]
+        },
+        {
+            "id": "profile",
+            "name": "Profil",
+            "videos": [],
+            "faqs": [
+                {
+                    "topic": "J’ai oublié mon mot de passe",
+                    "description": "<p>Pour réinitialiser votre mot de passe, suivez ces étapes :</p>\n<ul>\n  <li>Cliquez sur <strong>Mot de passe oublié</strong></li>\n  <li>Saisissez l’adresse e-mail ou le numéro de mobile ainsi que le nom d’utilisateur fournis lors de l’inscription</li>\n  <li>Vous recevrez un code OTP (code à usage unique) sur votre e-mail ou mobile enregistré</li>\n  <li>Saisissez le code OTP pour réinitialiser votre mot de passe et récupérer votre compte</li>\n  <li>Pour plus de détails, consultez <a href=\"https://dev.sunbirded.org/help/getting-started/recover-password/index.html\" target=\"_blank\">Récupérer le mot de passe</a></li>\n</ul>"
+                },
+                {
+                    "topic": "Je souhaite modifier les informations de mon profil",
+                    "description": "Vous pouvez modifier les informations suivantes dans votre profil :\n<ul>\n<li>Détails personnels tels que le nom, l’État et le district</li>\n<li>Coordonnées telles que le numéro de mobile et l’adresse e-mail</li>\n<li>Autres informations telles que le conseil, la langue d’enseignement, la matière et la classe</li>\n</ul>\nPour plus de détails, consultez \n<a href=\"https://dev.sunbirded.org/help/getting-started/user-profile/index.html\" target=\"_blank\">Profil utilisateur</a>"
+                }
+            ]
+        },
+        {
+            "id": "course_certificates",
+            "name": "Cours et certificats",
+            "videos": [],
+            "faqs": [
+                {
+                    "topic": "Je souhaite télécharger mon certificat",
+                    "description": "<p>Tous les cours n’offrent pas de certificat. Si vous avez terminé un cours qui en propose un, accédez à votre page de profil : vous verrez l’icône de téléchargement à côté du nom du cours.</p>\n<p>Si vous ne parvenez pas à télécharger le certificat sur l’application mobile :</p>\n<ul>\n  <li>Vérifiez que vous disposez de la dernière version de l’application Sunbird. Sinon, mettez-la à jour depuis le Play Store</li>\n  <li>Cliquez sur le bouton Actualiser dans l’onglet <strong>Profil</strong>, section <strong>Cours suivis</strong></li>\n  <li>Si le problème persiste, contactez-nous en fournissant :\n    <ul>\n      <li>Le nom du cours</li>\n      <li>Votre identifiant Sunbird</li>\n      <li>Une capture d’écran de votre page de profil affichant les détails du cours</li>\n    </ul>\n  </li>\n</ul>"
+                },
+                {
+                    "topic": "Je souhaite rejoindre un cours",
+                    "description": "<p>Pour vous inscrire à un cours, vous devez être connecté à Sunbird.</p>\n<p>Accédez à la section <strong>Cours</strong> et recherchez le cours souhaité. Pour plus de détails sur l’inscription et l’adhésion à un groupe :</p>\n<ul>\n  <li><a href=\"https://dev.sunbirded.org/help/getting-started/sunbird-mobile-app/course.html\" target=\"_blank\">Cours</a></li>\n  <li><a href=\"https://dev.sunbirded.org/help/getting-started/sunbird-mobile-app/enrolling-course.html\" target=\"_blank\">Rejoindre un cours</a></li>\n</ul>"
+                },
+                {
+                    "topic": "Je souhaite recevoir mon certificat dès la fin du cours",
+                    "description": "L’autorité de l’État décide du moment d’émission du certificat. Certains certificats sont délivrés dans les 7 jours suivant l’achèvement du cours, tandis que d’autres sont émis après la fin de la session. Contactez votre autorité d’État ou l’administrateur du cours pour plus d’informations. Vous recevrez une notification dès que votre certificat sera disponible."
+                },
+                {
+                    "topic": "Je souhaite vérifier ma progression dans le cours",
+                    "description": "Votre progression (en %) est affichée en haut à droite de la page du cours."
+                },
+                {
+                    "topic": "Je souhaite vérifier si un cours délivre un certificat",
+                    "description": "La page du cours indique si celui-ci délivre un certificat. Le message <b>Ce cours délivre un certificat</b> apparaît sur l’écran des détails."
+                },
+                {
+                    "topic": "Je souhaite être notifié lorsque mon certificat est émis",
+                    "description": "Vous recevrez une notification sur votre adresse e-mail ou votre numéro de téléphone enregistré dès que le certificat sera délivré."
+                },
+                {
+                    "topic": "Je souhaite modifier le nom figurant sur mon certificat",
+                    "description": "Le nom figurant sur votre certificat correspond à celui de votre profil. Corrigez votre nom dans votre profil puis contactez votre autorité d’État pour demander la réémission du certificat. Celle-ci prend généralement environ 24 heures après réception de la demande."
+                },
+                {
+                    "topic": "J’ai terminé mon cours mais la progression n’est pas affichée à 100 %",
+                    "description": "La synchronisation du système peut prendre quelques heures. Il peut donc y avoir un délai avant que la progression complète soit affichée. Veuillez vérifier à nouveau après un certain temps."
+                },
+                {
+                    "topic": "Je souhaite contribuer du contenu à Sunbird",
+                    "description": "Pour contribuer du contenu à Sunbird, accédez au <a href=\"https://dev.sunbirded.org/\" target=\"_blank\">portail Vidyadaan</a>."
+                },
+                {
+                    "topic": "Je ne trouve pas mon cours",
+                    "description": "Accédez à la section <b>Cours</b>. Utilisez les filtres pour affiner la recherche ou saisissez le nom du cours dans la barre de recherche."
+                },
+                {
+                    "topic": "Mon profil n’affiche pas correctement ma progression",
+                    "description": "Pour mettre à jour votre progression, accédez à <b>Mes apprentissages</b>, ouvrez le cours, puis dans le menu (trois points verticaux) cliquez sur <b>Synchroniser la progression</b>. Attendez quelques minutes pour que la mise à jour s’effectue."
+                }
+            ]
+        }
+    ],
+    "constants": {
+        "charactersLeft": "caractères restants",
+        "explainMsg": "Pouvez-vous expliquer le problème ?",
+        "faqMsg": "Questions fréquemment posées",
+        "faqTitle": "FAQ",
+        "help": "Aide",
+        "helpMsg": "Cette réponse vous a-t-elle aidé ?",
+        "initiateEmailButton": "Initier un e-mail",
+        "knowMoreMsg": "Que souhaitez-vous savoir de plus ?",
+        "noMsg": "Non",
+        "reportIssue": "Signaler un problème",
+        "reportIssueMsg": "Signaler un autre problème",
+        "resolveMsg": "Obtenez de l’aide pour trouver du contenu, résoudre des problèmes techniques et plus encore.",
+        "selectCategoryTitle": "Sélectionner une catégorie",
+        "sorryMsg": "Désolé pour cela !",
+        "submitButton": "Envoyer un commentaire",
+        "tellMoreMsg": "Parlez-nous davantage du problème rencontré",
+        "thanksForFeedbackMsg": "Merci pour votre retour. Nous ne pourrons peut-être pas répondre à toutes les suggestions, mais vos commentaires nous aident à améliorer {{app_name}} pour tous.",
+        "thanksMsg": "Merci pour votre réponse !",
+        "triggerEmailMsg": "Après avoir saisi les détails et cliqué sur le bouton « Initier un e-mail », un e-mail sera envoyé en votre nom. Vous pourrez y ajouter d’autres informations ou pièces jointes.",
+        "typeHere": "Saisissez ici...",
+        "videoTitle": "Vidéos",
+        "yesMsg": "Oui"
+    },
+    "general": [
+        {
+            "title": "Comment découvrir des cours pertinents sur le portail Sunbird ?",
+            "description": "Accédez à la section <b>Explorer</b> dans l’en-tête. Utilisez la barre de recherche ou appliquez des filtres : <ul><li>Matière</li><li>Langue</li><li>Niveau scolaire</li></ul>"
+        },
+        {
+            "title": "Que faire si j’oublie mon mot de passe ?",
+            "description": "Cliquez sur le lien <a href='/recover-password'>Mot de passe oublié</a>. Saisissez votre e-mail ou numéro de mobile enregistré pour recevoir un code OTP sécurisé."
+        },
+        {
+            "title": "Comment suivre ma progression dans un cours ?",
+            "description": "Votre progression est affichée sous forme de <b>barre de pourcentage</b> sur le tableau de bord du cours.<br><br><b>Remarque :</b> Vous devez terminer tous les modules et évaluations obligatoires pour atteindre 100 %."
+        },
+        {
+            "title": "Puis-je accéder au contenu hors ligne via le portail ?",
+            "description": "Le portail web nécessite une connexion Internet active, mais vous pouvez utiliser l’<b>application mobile Sunbird</b> pour télécharger les ressources."
+        },
+        {
+            "title": "Où puis-je trouver les certificats obtenus ?",
+            "description": "Accédez à votre page <b>Profil</b>. Dans la section <i>Carnet d’apprentissage</i>, vous verrez la liste des cours terminés avec un bouton <b>Télécharger le certificat</b>."
+        }
+    ]
+}
