@@ -8,7 +8,6 @@ locals {
 
   vm_size             = try(local.global_vars.global.vm_size, "Standard_B2s")
   vm_admin_username   = try(local.global_vars.global.vm_admin_username, "azureuser")
-  vm_ssh_public_key   = local.global_vars.global.vm_ssh_public_key
   github_runner_token = local.global_vars.global.github_runner_token
   github_org          = local.global_vars.global.github_org
   github_repo         = try(local.global_vars.global.github_repo, "")
@@ -29,7 +28,6 @@ inputs = {
   resource_group_name = local.resource_group_name
   vm_size             = local.vm_size
   vm_admin_username   = local.vm_admin_username
-  vm_ssh_public_key   = local.vm_ssh_public_key
   github_runner_token = local.github_runner_token
   github_org          = local.github_org
   github_repo         = local.github_repo

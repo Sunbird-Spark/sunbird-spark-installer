@@ -41,11 +41,6 @@ variable "vm_admin_username" {
   default     = "azureuser"
 }
 
-variable "vm_ssh_public_key" {
-  type        = string
-  description = "SSH public key for VM admin access."
-}
-
 variable "github_runner_token" {
   type        = string
   description = "GitHub Actions runner registration token."

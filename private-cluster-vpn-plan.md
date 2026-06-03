@@ -10,7 +10,20 @@
 
 ---
 
-## VPN Solution: Pritunl (open source, free tier)
+## VPN Solution: Pritunl + WireGuard (both free, open source)
+
+**WireGuard and Pritunl are two different tools working together:**
+
+| | Role |
+|--|--|
+| **WireGuard** | VPN protocol — the actual encryption + secure tunnel. No UI, runs at kernel level. 100% free, open source. |
+| **Pritunl** | Management layer on top of WireGuard — web UI to add users, download profiles, manage server. Free tier supports unlimited users + servers. |
+
+WireGuard = engine. Pritunl = dashboard + controls for that engine. Both installed on same VM. Developer only uses Pritunl web UI — WireGuard runs in background automatically.
+
+**Pritunl free tier is sufficient** — paid enterprise features (SSO, audit logs) not needed here.
+
+**Why Pritunl over Azure VPN Gateway:**
 
 | | Azure VPN Gateway | Pritunl on VM |
 |--|--|--|
@@ -103,78 +116,83 @@ GitHub Azure secrets can be deleted once self-hosted runner is active.
 
 ### Phase 1 — Code Changes (PR)
 
-Raise as PR before any deployment.
+> These changes are made **once in the installer repo** and apply to every new environment automatically.
 
-1. `opentofu/azure/modules/network/main.tf` — add runner subnet
-2. `opentofu/azure/modules/vm/` — new module (VM + NSG + public IP + cloud-init)
-3. `opentofu/azure/modules/aks/main.tf` — enable `private_cluster_enabled = true`
-4. `opentofu/azure/template/vm/terragrunt.hcl` — new template
-5. `opentofu/azure/_common/vm.hcl` — defaults
-6. `private-repo-setup/workflows/sunbird-spark-platform.yaml` — `runs-on: [self-hosted, azure]`, remove Azure login step, use `ARM_USE_MSI=true`
-7. `opentofu/azure/template/global-values.yaml` — add vm variables (size, ssh key, runner token)
+**Why each change is needed:**
+
+| What changes | Why |
+|---|---|
+| Add `runner-subnet` to network module | VM needs its own isolated subnet inside VNet |
+| New `vm` module | Automates VM creation + Pritunl VPN + GitHub runner setup via cloud-init |
+| Enable `private_cluster_enabled` in AKS module | Makes API server private — no public endpoint |
+| Update GitHub Actions workflow | Switch from github-hosted runner to self-hosted VM runner; use managed identity instead of OIDC |
+| Add vm variables to `global-values.yaml` template | Operator fills once: VM size, runner token, VPN users |
+
+Without these changes, every new environment would need manual VM setup, manual Pritunl config, and github-hosted runners that can't reach private clusters.
 
 ---
 
 ### Phase 2 — Manual First Run (owner's laptop, once per env)
 
-Requires: **Azure Owner role** + `az login` + SSH key + GitHub org admin access.
+> **Only two commands run manually. Everything else is automated via GitHub Actions after this.**
+
+Requires: **Azure Owner role** + `az login` + SSH key + GitHub org admin access — one time only.
 
 #### Step 1: Create state backend
 ```bash
 cd opentofu/azure/<env-name>
 ./install.sh create_tf_backend
 ```
+Creates Azure Storage for OpenTofu state. Needed once per environment.
 
-#### Step 2: Create VM + all infra
+#### Step 2: Create VM, managed identity + Pritunl + GitHub runner
 ```bash
-./install.sh create_tf_resources
+# Edit variables at top first: tenant, subscription, resource group,
+# github_org, github_runner_token, pritunl users
+bash private-repo-setup/scripts/setup-installer-vm.sh
 ```
 
-OpenTofu creates in order: network → keys → storage → vm → workload-identity → aks
+Script handles everything automatically:
+- Creates VM (Standard_B2s, Ubuntu 22.04) + public IP + NSG
+- Creates user-assigned managed identity with least-privilege custom role
+- cloud-init on VM boot: installs Pritunl, WireGuard, kubectl, helm, tofu, az CLI, Docker
+- Configures Pritunl VPN server + adds users
+- Registers GitHub Actions runner to your org/repo
 
 VM module creates:
 - Ubuntu 22.04 VM (Standard_B2s) in runner subnet
 - Public IP, NSG (allow UDP 1194, TCP 443, TCP 22)
-- User-assigned managed identity with required roles
+- User-assigned managed identity with Contributor + AKS Admin + Storage roles
 
 cloud-init runs automatically on first VM boot (~5 min):
 - Installs: Pritunl, WireGuard, kubectl, helm, opentofu, terragrunt, az CLI, jq, yq, rclone, Docker
-- Downloads + registers GitHub Actions runner to GitHub org/repo
+- Configures Pritunl VPN server + adds users from `global-values.yaml`
+- Registers GitHub Actions runner to GitHub org/repo
 - Runner appears as **Idle** in GitHub → Settings → Actions → Runners
 
-> Wait ~5 minutes after VM creation for cloud-init to complete before proceeding.
+> Wait ~5 minutes for cloud-init to complete. Once runner shows Idle — owner's job is done.
+
+**After this point, owner's laptop is never needed again.**
 
 ---
 
-### Phase 3 — Pritunl One-Time Setup (~10 min, admin only)
+### Phase 3 — All Infra + Deployments (GitHub Actions, automated)
 
-Never needs to be repeated after initial setup.
+Self-hosted runner on VM now handles everything:
 
-#### Step 1: Get setup key
-```bash
-ssh adminuser@<vm-public-ip>
-sudo pritunl setup-key
+```
+Trigger: GitHub Actions workflow (manual or on push)
+
+Job runs on: [self-hosted, azure]  ← VM inside VNet
+
+Steps:
+  create_tf_resources  → creates AKS + storage + network + Key Vault
+  install_helm         → deploys all services to private AKS
+  run_post_install     → Postman API tests
+  create_client_forms  → seed forms
 ```
 
-#### Step 2: Open Pritunl web UI
-```
-https://<vm-public-ip>
-```
-Paste setup key → login → change default password.
-
-#### Step 3: Create VPN server
-- Organizations → Add Organization (e.g. `sunbird-spark`)
-- Servers → Add Server:
-  - Protocol: WireGuard
-  - Port: 1194 (UDP)
-  - DNS: `168.63.129.16` (Azure internal DNS — needed for AKS private DNS)
-  - Network: `172.16.0.0/24` (VPN client IP pool)
-- Attach organization to server → Start server
-- Add route: `10.0.0.0/8` (routes VNet + AKS service CIDR through VPN)
-
-#### Step 4: Add developer users
-- Users → Add User (one per developer)
-- Each user downloads WireGuard profile from Pritunl portal
+VM managed identity authenticates to Azure — no credentials needed anywhere.
 
 ---
 
@@ -188,18 +206,6 @@ Paste setup key → login → change default password.
 Without VPN: kubectl fails — private cluster has no public endpoint.
 
 ---
-
-### Phase 5 — All Future Deployments (GitHub Actions, automated)
-
-```
-Developer pushes / triggers workflow
-  → GitHub sends job to self-hosted runner (VM)
-  → VM runs: tofu + helm + kubectl
-  → private AKS reachable (VM inside VNet)
-  → deployment complete
-```
-
-No manual steps needed after initial setup.
 
 ---
 
@@ -222,25 +228,37 @@ No manual steps needed after initial setup.
 | Contributor | Resource group | OpenTofu create/update/delete all resources |
 | AKS Cluster Admin | AKS resource | kubectl + helm against private cluster |
 | Storage Blob Data Contributor | Storage account | Read/write OpenTofu state |
-| Key Vault Secrets User | Key Vault | Read secrets |
 
 ---
 
 ## Access Required
 
-### Infra engineer (Phase 2 — one time)
-- Azure **Owner role** — Contributor not enough; OpenTofu assigns roles to managed identity which requires Owner
-- `az login` on laptop
-- SSH private key for VM admin access
-- GitHub org admin — to generate runner registration token
+> **These requirements apply ONE TIME ONLY** — the person who runs Phase 2 (`create_tf_backend` + `create_tf_resources`) from their laptop. After VM is created and runner is registered, none of these are needed again.
 
-### Developer (ongoing)
-- WireGuard client + Pritunl user account (created by admin)
-- No Azure access needed
+### Infra engineer — one time only, Phase 2
 
-### GitHub Actions (automated)
-- No credentials — VM managed identity handles all Azure auth
-- GitHub repo access via runner registration token (set once in cloud-init)
+| Requirement | Why | When needed |
+|-------------|-----|-------------|
+| Azure **Owner role** | OpenTofu assigns roles to VM managed identity — requires Owner, Contributor is not enough | Phase 2 only |
+| `az login` on laptop | OpenTofu authenticates to Azure to create resources | Phase 2 only |
+| GitHub org admin | Generate runner registration token (Settings → Actions → Runners → New runner) | Phase 2 only |
+
+SSH key is **auto-generated** by OpenTofu (no need to provide one). Retrieve private key after VM creation:
+```bash
+cd opentofu/azure/<env>/vm
+tofu output -raw runner_ssh_private_key > runner.pem && chmod 600 runner.pem
+ssh azureuser@<vm-public-ip> -i runner.pem
+```
+
+After Phase 2: VM exists, runner registered, managed identity has all roles. **Owner access no longer needed.**
+
+### Developer — ongoing
+- WireGuard client installed + Pritunl user account (created by admin, listed in `global-values.yaml`)
+- No Azure access needed at all
+
+### GitHub Actions — fully automated
+- No credentials needed — VM managed identity handles all Azure auth automatically
+- No OIDC, no service principal, no GitHub Azure secrets required
 
 ---
 
@@ -270,9 +288,9 @@ No manual steps needed after initial setup.
 flowchart TD
     A([START]) --> B
 
-    B["🔧 OWNER — One Time\nFill global-values.yaml:\nsubscription, resource group,\nssh_key, github_runner_token,\npritunl_users list\n\nRun on laptop:\ncreate_tf_backend\ncreate_tf_resources"]
+    B["🔧 OWNER — One Time Only\nFill variables at top of script:\ntenant, subscription, resource group,\ngithub_runner_token, pritunl_users\n\nRun on laptop:\nbash setup-installer-vm.sh\n\nOwner's job ends here forever."]
 
-    B --> C["☁️ Azure VM Created\ncloud-init runs automatically:\n• Installs Pritunl + WireGuard\n• Configures VPN server\n• Creates org + users\n• Registers GitHub runner\n• All automated — no manual SSH"]
+    B --> C["☁️ VM Created + cloud-init runs (~5 min):\n• Installs Pritunl + WireGuard\n• Configures VPN server + users\n• Registers GitHub Actions runner\n• Runner shows Idle in GitHub"]
 
     C --> D{"Who needs access?"}
 
@@ -286,9 +304,9 @@ flowchart TD
 
     F --> J["✅ kubectl from VM\nFull VM access\nfor debugging"]
 
-    C --> K["🤖 Self-Hosted Runner on VM\nAlways inside VNet\nNo VPN needed"]
-    K --> L["GitHub Actions triggered\ntofu apply\nAKS + storage + network"]
+    C --> K["🤖 Self-Hosted Runner on VM\nAlways inside VNet — no VPN needed\nManaged identity = no credentials"]
+    K --> L["GitHub Actions triggered\ncreate_tf_resources\nCreates AKS + storage + network\n+ Key Vault (all remaining infra)"]
     L --> M["helm upgrade\nDeploy all services\nto private AKS"]
-    M --> N["Postman tests\nAPI validation"]
-    N --> O([✅ Deployment Complete\nNo manual steps\nNo Azure secrets in GitHub])
+    M --> N["Postman tests + forms\nAPI validation"]
+    N --> O([✅ Done\nOwner never needed again\nNo Azure secrets in GitHub])
 ```

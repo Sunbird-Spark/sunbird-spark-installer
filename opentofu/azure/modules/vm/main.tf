@@ -4,7 +4,17 @@ terraform {
       version = "~> 4.0"
       source  = "hashicorp/azurerm"
     }
+    tls = {
+      version = "~> 4.0"
+      source  = "hashicorp/tls"
+    }
   }
+}
+
+# Auto-generate SSH key pair — no need to provide one manually
+resource "tls_private_key" "runner_ssh" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 provider "azurerm" {
@@ -145,7 +155,7 @@ resource "azurerm_linux_virtual_machine" "runner" {
 
   admin_ssh_key {
     username   = var.vm_admin_username
-    public_key = var.vm_ssh_public_key
+    public_key = tls_private_key.runner_ssh.public_key_openssh
   }
 
   os_disk {

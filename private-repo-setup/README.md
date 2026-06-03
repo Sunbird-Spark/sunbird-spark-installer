@@ -10,12 +10,34 @@ This guide walks through creating a **private GitHub repository** that holds you
 
 | Path | When to use |
 |------|-------------|
-| **GitHub Actions** | Automated CI/CD — requires encrypted config and Azure OIDC auth |
-| **Manual via Azure VM** | Quick start — SSH into a VM and run `install.sh` directly, no CI/CD setup needed |
+| **Self-hosted runner + Managed Identity** *(recommended)* | Private AKS cluster, no Azure credentials stored anywhere, VPN access for developers |
+| **GitHub Actions (OIDC)** | Public AKS cluster, Azure OIDC auth via service principals |
+| **Manual via Azure VM** | Quick start — SSH into a VM and run `install.sh` directly |
 
-For GitHub Actions, the workflow clones `sunbird-spark-installer` at runtime — your private repo only holds the encrypted config and workflow files.
+This guide covers the **Self-hosted runner** path. For the OIDC path, see [OIDC Setup](#github-actions-oidc-path).
 
-Skip to [Manual Deployment via Azure VM](#alternative-manual-deployment-via-azure-vm) if you prefer that path.
+---
+
+## Self-Hosted Runner Path (Recommended)
+
+### How it works
+
+```
+Owner (one time):
+  run setup-installer-vm.sh
+    → creates VM + managed identity + Pritunl VPN + GitHub runner
+
+GitHub Actions (all future deployments):
+  runs on self-hosted runner (VM inside VNet)
+    → VM managed identity handles Azure auth (no credentials needed)
+    → can reach private AKS cluster
+```
+
+**Benefits:**
+- AKS API server is private — not accessible from internet
+- No Azure credentials stored in GitHub secrets
+- Developers connect via Pritunl VPN to access cluster
+- One VM = VPN server + CI/CD runner
 
 ---
 
@@ -72,6 +94,19 @@ cp $INSTALLER_PATH/opentofu/azure/template/global-values.yaml configs/demo/globa
 
 Open the file and fill in all required fields — see the root [README.md](../README.md) for the full field reference.
 
+Also fill in the VM + VPN fields added at the bottom:
+```yaml
+vm_size: "Standard_B2s"
+vm_admin_username: "azureuser"
+github_runner_token: "REPLACE_WITH_GITHUB_RUNNER_TOKEN"  # GitHub → Settings → Actions → Runners → New runner
+github_org: "REPLACE_WITH_GITHUB_ORG"
+pritunl_vpn_network: "172.16.0.0/24"
+pritunl_org_name: "sunbird-spark"
+pritunl_users:
+  - name: "your-name"
+    email: "your@email.com"
+```
+
 > **Important:** `global.environment` must exactly match the `configs/` folder name and the GitHub Actions environment name set in Step 6.
 
 ---
@@ -93,47 +128,49 @@ git push
 
 ---
 
-## Step 5 — Set Up Azure OIDC Authentication
+## Step 5 — Create the Runner VM (One Time)
 
-The workflows authenticate to Azure using OIDC federated credentials — no client secrets stored in GitHub.
+This script creates the VM with managed identity, installs Pritunl VPN + WireGuard + GitHub Actions runner automatically via cloud-init.
 
-Two service principals are needed. They are set up with separate scripts so each can be run independently.
+**Requires:** `az` CLI installed + Azure **Owner role** on the subscription/resource group.
 
-### 5a — Infra SP
-
-Edit the variables at the top of `setup-infra-sp.sh` and run it (requires `az` CLI and Azure Owner access):
+Edit the variables at the top of the script:
 
 ```bash
-TENANT_ID=""           # Azure Portal → Azure Active Directory → Overview → Tenant ID
-SUBSCRIPTION_ID=""     # Azure Portal → Subscriptions → Subscription ID
-BUILDING_BLOCK=""      # Must match global.building_block in global-values.yaml
-ENVIRONMENT=""         # Must match your configs/ folder name (e.g. "demo")
-RESOURCE_GROUP=""      # Azure resource group (e.g. "myorg-demo")
-GITHUB_REPO=""         # "org-name/spark-devops"
-GITHUB_ENVIRONMENT=""  # Same as ENVIRONMENT
+TENANT_ID=""              # Azure Portal → Azure Active Directory → Overview
+SUBSCRIPTION_ID=""        # Azure Portal → Subscriptions
+BUILDING_BLOCK=""         # Must match global.building_block in global-values.yaml
+ENVIRONMENT=""            # Must match your configs/ folder name (e.g. "demo")
+RESOURCE_GROUP=""         # Azure resource group (e.g. "myorg-demo")
+LOCATION=""               # Azure region (e.g. "Central India")
+GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
+GITHUB_REPO=""            # Leave empty for org-level runner
+GITHUB_RUNNER_TOKEN=""    # GitHub → Settings → Actions → Runners → New runner → copy token
+PRITUNL_VPN_NETWORK=""    # VPN client IP pool (e.g. "172.16.0.0/24")
+PRITUNL_ORG_NAME=""       # Pritunl org name
+PRITUNL_USERS=("name:email@example.com")  # VPN users
 ```
+
+Then run:
 
 ```bash
-bash $INSTALLER_PATH/private-repo-setup/scripts/setup-infra-sp.sh
+bash $INSTALLER_PATH/private-repo-setup/scripts/setup-installer-vm.sh
 ```
 
-Creates `<building_block>-<env>-github-infra` — provisions AKS, storage, networking. Prints `AZURE_INFRA_CLIENT_ID`.
+**What it creates:**
+- Ubuntu 22.04 VM (`Standard_B2s`) with public IP
+- User-assigned managed identity with least-privilege custom role
+- AKS Cluster Admin role on resource group
+- NSG rules: UDP 1194 (VPN) + TCP 443 (Pritunl UI)
 
-### 5b — Deploy SP
+**cloud-init runs automatically on VM boot (~5 min):**
+- Installs: Pritunl, WireGuard, kubectl, helm, opentofu, terragrunt, az CLI, jq, yq, rclone, Docker
+- Configures Pritunl VPN server + creates users
+- Registers GitHub Actions runner → shows as **Idle** in GitHub
 
-> **Prerequisite:** the AKS cluster must already exist before running this script. The deploy SP is assigned the `Azure Kubernetes Service Cluster Admin Role` at cluster scope — this will fail if the cluster does not exist yet.
->
-> Run Phase 1 (infrastructure) first, then come back to run this script.
+> **Wait ~5 minutes** after VM creation. Once runner shows **Idle** in GitHub → Settings → Actions → Runners, the VM is ready.
 
-Edit the same variables at the top of `setup-deploy-sp.sh` and run it:
-
-```bash
-bash $INSTALLER_PATH/private-repo-setup/scripts/setup-deploy-sp.sh
-```
-
-Creates `<building_block>-<env>-github-deploy` — runs kubectl and helm. Assigned both `Azure Kubernetes Service Cluster Admin Role` and `Azure Kubernetes Service Cluster User Role` at cluster scope. Prints `AZURE_DEPLOY_CLIENT_ID`.
-
-Both scripts are idempotent — safe to re-run if anything needs to be recreated.
+**Owner's job is done. All subsequent steps run via GitHub Actions.**
 
 ---
 
@@ -141,13 +178,11 @@ Both scripts are idempotent — safe to re-run if anything needs to be recreated
 
 Go to **Settings → Secrets and variables → Actions → New repository secret** and add:
 
-| Secret | Source |
-|--------|--------|
-| `ANSIBLE_VAULT_PASSWORD` | Password from Step 4 |
-| `AZURE_INFRA_CLIENT_ID` | Printed by `setup-infra-sp.sh` (Step 5a) |
-| `AZURE_DEPLOY_CLIENT_ID` | Printed by `setup-deploy-sp.sh` (Step 5b) |
-| `AZURE_TENANT_ID` | Azure AD → Overview → Tenant ID |
-| `AZURE_SUBSCRIPTION_ID` | Azure Portal → Subscriptions |
+| Secret | Source | Required |
+|--------|--------|----------|
+| `ANSIBLE_VAULT_PASSWORD` | Password from Step 4 | Always |
+
+> With self-hosted runner + managed identity, **no Azure credentials are needed in GitHub secrets.** The VM managed identity handles all Azure auth automatically.
 
 ---
 
@@ -169,22 +204,32 @@ git push
 
 ---
 
-## Step 8 — Run the Deployment
+## Step 8 — Developer VPN Access
+
+Developers connect to the Pritunl VPN to access the private AKS cluster.
+
+1. Open `https://<vm-public-ip>` (printed by setup script)
+2. Log in with Pritunl credentials (admin set password after setup)
+3. Download WireGuard profile
+4. Install [WireGuard client](https://www.wireguard.com/install/) (Windows / Mac / Linux)
+5. Import profile → Connect VPN
+6. `kubectl get pods -n sunbird` → works ✓
+
+> Without VPN: `kubectl` fails — AKS API server has no public endpoint.
+
+---
+
+## Step 9 — Run the Deployment
 
 Go to **Actions → Spark Platform Infra And Deploy → Run workflow**.
 
-Fill in the inputs before enabling any steps:
-
-![Workflow dispatch — branch and environment inputs](assets/workflow-dispatch.png)
+Fill in the inputs:
 
 | Input | Description |
 |-------|-------------|
-| **Use workflow from** | Branch of your private repo the workflow itself runs from (usually `main`) |
-| **environment** | Your environment name (e.g. `demo`) — must match your `configs/` folder name |
-| **config_branch** | Branch of **your private repo** to read config and encrypted secrets from (default: `main`) |
-| **source_branch** | Branch of **sunbird-spark-installer** (public repo) to clone at runtime (default: `main`) |
-
-> `config_branch` and `source_branch` let you test config changes or a new installer release independently — change one without touching the other.
+| **environment** | Your environment name (e.g. `demo`) |
+| **config_branch** | Branch of your private repo (default: `main`) |
+| **source_branch** | Branch of sunbird-spark-installer (default: `main`) |
 
 Run in three phases:
 
@@ -194,24 +239,21 @@ Enable and run:
 - `1️⃣ Create Terraform backend`
 - `3️⃣ Create infrastructure resources`
 
-Provisions AKS, VNet, storage, Key Vault, and managed identities. The workflow auto-commits `global-cloud-values.yaml` and `tf.sh` back to `configs/demo/`.
+Creates AKS (private), VNet, storage, Key Vault. Workflow auto-commits `global-cloud-values.yaml` and `tf.sh` back to `configs/demo/`.
 
-> **After Phase 1 completes**, go back and run `setup-deploy-sp.sh` (Step 5b) if you haven't done so yet — the AKS cluster now exists and the role assignment will succeed.
-
-After this phase, **add a DNS A record** for your domain pointing to the load balancer public IP shown in the workflow output.
+After Phase 1, **add a DNS A record** for your domain pointing to the load balancer public IP shown in the workflow output.
 
 ### Phase 2 — Deploy Helm Bundles
 
 Enable `5️⃣ Install Helm components`, mode: `all`.
 
-Deploys all 7 building blocks in order: monitoring → edbb → learnbb → knowledgebb → obsrvbb → inquirybb → additional.
+Deploys all 7 building blocks: monitoring → edbb → learnbb → knowledgebb → obsrvbb → inquirybb → additional.
 
 > First run takes 25–40 minutes as container images are pulled.
 
 ### Phase 3 — Finalise the Platform
 
 Run in order:
-
 - `7️⃣ Restart workloads using keycloak keys`
 - `8️⃣ Configure certificate keys`
 - `9️⃣ DNS mapping`
@@ -223,33 +265,20 @@ Run in order:
 
 ## Deploying Specific Helm Charts
 
-Use this when you need to deploy or upgrade one or more specific services within a bundle without running the full bundle install. Typical time: 3–5 minutes.
+Use when upgrading one or more services without running the full bundle.
+
 ### Via GitHub Actions
 
 1. Enable `5️⃣ Install Helm components`
 2. Set `helm_mode` to `selective`
-3. Enter chart names in the `specific_charts` field (space-separated, e.g. `lern keycloak`)
-4. Check **exactly one** bundle checkbox that contains those charts
+3. Enter chart names in `specific_charts` (space-separated, e.g. `lern keycloak`)
+4. Check **exactly one** bundle checkbox
 
-### Via Manual Deployment (Azure VM)
+### Via Manual Command
 
 ```bash
 cd opentofu/azure/<env-name>
-
-# Single chart
-./install.sh install_service <bundle> <chart>
-
-# Multiple charts within the same bundle
-./install.sh install_service <bundle> <chart1> <chart2> <chart3>
-```
-
-Examples:
-
-```bash
-./install.sh install_service learnbb lern
-./install.sh install_service learnbb lern keycloak
-./install.sh install_service edbb player
-./install.sh install_service knowledgebb knowlg search
+./install.sh install_service <bundle> <chart1> <chart2>
 ```
 
 ### Available Charts per Bundle
@@ -262,25 +291,15 @@ Examples:
 | `obsrvbb` | `yugabyte` `superset` |
 | `additional` | `volume-autoscaler` `nlweb` `nlwebflink` `kafka` |
 
-> `monitoring` and `inquirybb` do not use per-chart conditions — use `install_component` to redeploy them.
-
-### Limitations
-
-- **One bundle per call** — charts from two different bundles cannot be targeted in a single call. Run two separate `install_service` calls if needed.
-- **No job-completion wait** — `install_service` returns as soon as Helm submits the resources, without `--wait-for-jobs`. This is intentional for fast iteration; monitor Job-based charts (e.g. `keycloak-kids-keys`, migrations) manually if needed.
-- **GitHub Actions: one bundle checkbox only** — checking multiple bundle checkboxes alongside `specific_charts` is not supported; only one bundle will be used.
-
 ---
 
-## Step 9 (Optional) — Deploy Addons
+## Step 10 (Optional) — Deploy Addons
 
 Go to **Actions → Spark Platform Addons → Run workflow**.
 
-The dispatch panel has the same three branch/environment inputs as Step 8.
-
 | Addon | Steps |
 |-------|-------|
-| DIAL | Run `1️⃣ Run DIAL addon OpenTofu` first, then `2️⃣ → DIAL`. Set `deployed_dial_addon: "true"` in `global-values.yaml` before Phase 2. |
+| DIAL | Run `1️⃣ Run DIAL addon OpenTofu` first, then `2️⃣ → DIAL`. Set `deployed_dial_addon: "true"` in `global-values.yaml`. |
 | Discussion Forum | Enable `2️⃣ → Discussion Forum` |
 | Video Stream Generator | Enable `2️⃣ → Video Stream Generator` |
 
@@ -294,122 +313,66 @@ The dispatch panel has the same three branch/environment inputs as Step 8.
 | `configs/demo/tf.sh` | `create_tf_backend` |
 | `configs/demo/env.json` | `generate_postman_env` |
 | `configs/demo/addons/global-cloud-values.yaml` | DIAL infra step |
-| `configs/demo/**/.terraform.lock.hcl` | `tofu init` |
 
 ---
 
-## Alternative: Manual Deployment via Azure VM
+## GitHub Actions (OIDC Path)
 
-SSH into a dedicated Azure VM and run `install.sh` directly. No private GitHub repo or encrypted config needed.
+Use this path if you prefer public AKS cluster with Azure OIDC authentication.
 
-### Step 1 — Create the Installer VM
+### OIDC Setup
 
-Edit variables at the top of `setup-installer-vm.sh`:
+Two service principals are needed:
 
-```bash
-TENANT_ID=""        # Azure Portal → Azure Active Directory → Overview → Tenant ID
-SUBSCRIPTION_ID=""  # Azure Portal → Subscriptions → Subscription ID
-BUILDING_BLOCK=""   # Must match global.building_block in global-values.yaml
-ENVIRONMENT=""      # Environment name (e.g. "demo")
-RESOURCE_GROUP=""   # Azure resource group (e.g. "myorg-demo")
-LOCATION=""         # Azure region (e.g. "Central India", "East US")
-```
-
-Run it (requires `az` CLI and Azure Owner access):
+#### Infra SP
 
 ```bash
-bash $INSTALLER_PATH/private-repo-setup/scripts/setup-installer-vm.sh
+bash $INSTALLER_PATH/private-repo-setup/scripts/setup-infra-sp.sh
 ```
 
-Creates an Ubuntu 22.04 VM (`Standard_B2s`) with a system-assigned managed identity and least-privilege RBAC for OpenTofu. Prints the SSH command when done.
+Edit variables at top first. Creates `<building_block>-<env>-github-infra`. Prints `AZURE_INFRA_CLIENT_ID`.
 
-### Step 2 — SSH into the VM
+#### Deploy SP
+
+> Run after AKS cluster exists (after Phase 1 infra).
 
 ```bash
-ssh -i ~/.ssh/<building_block>-<env>-installer-vm azureuser@<vm-public-ip>
+bash $INSTALLER_PATH/private-repo-setup/scripts/setup-deploy-sp.sh
 ```
 
-### Step 3 — Install Required CLI Tools
+Creates `<building_block>-<env>-github-deploy`. Prints `AZURE_DEPLOY_CLIENT_ID`.
 
-```bash
-# Azure CLI
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+#### GitHub Secrets for OIDC
 
-# OpenTofu
-curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
-
-# Terragrunt
-sudo wget -qO /usr/local/bin/terragrunt \
-  https://github.com/gruntwork-io/terragrunt/releases/download/v0.77.5/terragrunt_linux_amd64
-sudo chmod +x /usr/local/bin/terragrunt
-
-# kubectl
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-
-# Helm
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-# yq, jq, rclone
-sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-sudo chmod +x /usr/local/bin/yq
-sudo apt-get install -y jq rclone
-
-# Postman CLI
-curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
-```
-
-### Step 4 — Clone and Configure the Installer
-
-```bash
-git clone https://github.com/Sunbird-Spark/sunbird-spark-installer.git
-cd sunbird-spark-installer/opentofu/azure
-
-cp -r template demo
-cd demo
-# Open global-values.yaml and fill in all required fields
-```
-
-### Step 5 — Run the Installer
-
-Full installation:
-
-```bash
-time ./install.sh
-```
-
-Or phase by phase:
-
-```bash
-./install.sh create_tf_backend
-./install.sh create_tf_resources
-./install.sh install_helm_components
-./install.sh restart_workloads_using_keys
-./install.sh certificate_config
-./install.sh dns_mapping
-./install.sh generate_postman_env
-./install.sh run_post_install
-./install.sh create_client_forms
-```
+| Secret | Source |
+|--------|--------|
+| `ANSIBLE_VAULT_PASSWORD` | Vault password |
+| `AZURE_INFRA_CLIENT_ID` | From setup-infra-sp.sh |
+| `AZURE_DEPLOY_CLIENT_ID` | From setup-deploy-sp.sh |
+| `AZURE_TENANT_ID` | Azure AD → Tenant ID |
+| `AZURE_SUBSCRIPTION_ID` | Azure Portal → Subscriptions |
 
 ---
 
 ## Troubleshooting
 
-**`ansible-vault: command not found`**
-Run `pip install ansible` or `pip3 install ansible`.
+**Runner not showing in GitHub**
+Wait 5 minutes after VM creation — cloud-init takes time. Check logs: `ssh azureuser@<vm-ip>` → `cat /var/log/runner-setup.log`
 
-**Azure login fails — OIDC token exchange failed**
-Check that the GitHub repo name in `setup-infra-sp.sh` / `setup-deploy-sp.sh` exactly matches your private repo (case-sensitive) and the GitHub environment name matches. Both scripts are idempotent — safe to re-run.
+**`ansible-vault: command not found`**
+Run `pip install ansible`.
 
 **`global-cloud-values.yaml not found` warning during deploy**
-Expected on the first run before Phase 1 completes. Finish `create_tf_resources` first.
+Expected on first run before Phase 1 completes. Finish `create_tf_resources` first.
+
+**kubectl fails after VPN connect**
+Ensure route `10.0.0.0/8` is added in Pritunl server settings. Reconnect VPN after adding route.
 
 **AKS credentials step fails — cluster not found**
-Ensure `global.building_block` matches what was used during infra creation. Cluster name is `{building_block}-{environment}`.
+Ensure `global.building_block` matches what was used during infra. Cluster name is `{building_block}-{environment}`.
 
 **Helm install times out**
-Re-run the same bundle. `helm upgrade --install` is idempotent.
+Re-run the same bundle — `helm upgrade --install` is idempotent.
 
 **DNS mapping times out**
-Add the A record manually and re-run Phase 3 from `9️⃣ dns_mapping`.
+Add A record manually and re-run from `9️⃣ dns_mapping`.

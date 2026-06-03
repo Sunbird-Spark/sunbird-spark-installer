@@ -17,3 +17,9 @@ output "runner_identity_id" {
   value       = azurerm_user_assigned_identity.runner_identity.id
   description = "Resource ID of VM managed identity."
 }
+
+output "runner_ssh_private_key" {
+  value       = tls_private_key.runner_ssh.private_key_pem
+  sensitive   = true
+  description = "SSH private key for VM admin access. Retrieve with: tofu output -raw runner_ssh_private_key > runner.pem && chmod 600 runner.pem"
+}
