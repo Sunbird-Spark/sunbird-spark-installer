@@ -31,6 +31,13 @@ resource "azurerm_subnet" "aks_subnet" {
   service_endpoints    = var.aks_subnet_service_endpoints
 }
 
+resource "azurerm_subnet" "runner_subnet" {
+  name                 = "${local.environment_name}-runner"
+  resource_group_name  = local.resource_group_name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = var.runner_subnet_cidr
+}
+
 resource "azurerm_virtual_network" "vnet" {
   name                = "${local.environment_name}"
   location            = var.location

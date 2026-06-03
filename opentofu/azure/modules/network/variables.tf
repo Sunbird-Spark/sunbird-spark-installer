@@ -46,3 +46,9 @@ variable "resource_group_name" {
   description = "Existing Azure resource group name."
   type        = string
 }
+
+variable "runner_subnet_cidr" {
+  type        = list(string)
+  description = "CIDR range for the runner VM subnet."
+  default     = ["10.0.16.0/28"]
+}

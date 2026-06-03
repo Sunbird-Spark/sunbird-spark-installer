@@ -1,0 +1,172 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - jq
+  - unzip
+  - git
+  - openssl
+  - wireguard
+
+write_files:
+  - path: /opt/setup/setup.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set -e
+      LOG=/var/log/cloud-init-setup.log
+      exec > >(tee -a $LOG) 2>&1
+
+      echo "=== Starting setup $(date) ==="
+
+      # --- Azure CLI ---
+      echo "Installing Azure CLI..."
+      curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+      # --- kubectl ---
+      echo "Installing kubectl..."
+      KUBECTL_VERSION=$(curl -sL https://dl.k8s.io/release/stable.txt)
+      curl -sLO "https://dl.k8s.io/release/$${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
+      install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+      rm kubectl
+
+      # --- Helm ---
+      echo "Installing Helm..."
+      curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      # --- OpenTofu ---
+      echo "Installing OpenTofu..."
+      TOFU_VERSION="1.11.4"
+      curl -sLO "https://github.com/opentofu/opentofu/releases/download/v$${TOFU_VERSION}/tofu_$${TOFU_VERSION}_linux_amd64.zip"
+      unzip -q tofu_$${TOFU_VERSION}_linux_amd64.zip -d /usr/local/bin/
+      rm tofu_$${TOFU_VERSION}_linux_amd64.zip
+
+      # --- Terragrunt ---
+      echo "Installing Terragrunt..."
+      TG_VERSION="0.77.5"
+      curl -sLo /usr/local/bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v$${TG_VERSION}/terragrunt_linux_amd64"
+      chmod +x /usr/local/bin/terragrunt
+
+      # --- yq ---
+      echo "Installing yq..."
+      YQ_VERSION="v4.44.1"
+      curl -sLo /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/$${YQ_VERSION}/yq_linux_amd64"
+      chmod +x /usr/local/bin/yq
+
+      # --- rclone ---
+      echo "Installing rclone..."
+      curl https://rclone.org/install.sh | bash
+
+      # --- Docker ---
+      echo "Installing Docker..."
+      curl -fsSL https://get.docker.com | bash
+      usermod -aG docker azureuser
+
+      # --- Pritunl ---
+      echo "Installing Pritunl..."
+      echo "deb https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
+      apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+      apt-get update -qq
+      apt-get install -y pritunl mongodb
+
+      systemctl enable mongod pritunl
+      systemctl start mongod
+      sleep 5
+      systemctl start pritunl
+      sleep 10
+
+      # --- Configure Pritunl via API ---
+      echo "Configuring Pritunl..."
+      SETUP_KEY=$(pritunl setup-key)
+      DEFAULT_PASS=$(pritunl default-password | grep "Password:" | awk '{print $2}')
+
+      # Get auth token
+      RESPONSE=$(curl -s -k -X PUT "https://localhost/auth/session" \
+        -H "Content-Type: application/json" \
+        -d "{\"username\":\"pritunl\",\"password\":\"$${DEFAULT_PASS}\"}")
+      TOKEN=$(echo $RESPONSE | jq -r '.token // empty')
+
+      if [ -z "$TOKEN" ]; then
+        echo "WARNING: Pritunl API auth failed — manual setup required at https://$(curl -s ifconfig.me)"
+      else
+        # Create organization
+        ORG_RESPONSE=$(curl -s -k -X POST "https://localhost/organization" \
+          -H "Auth-Token: $TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{\"name\":\"${pritunl_org_name}\"}")
+        ORG_ID=$(echo $ORG_RESPONSE | jq -r '.id')
+
+        # Create VPN server
+        SERVER_RESPONSE=$(curl -s -k -X POST "https://localhost/server" \
+          -H "Auth-Token: $TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{\"name\":\"${environment_name}-vpn\",\"protocol\":\"udp\",\"port\":1194,\"network\":\"${pritunl_vpn_network}\",\"protocol\":\"wireguard\",\"dns_servers\":[\"168.63.129.16\"]}")
+        SERVER_ID=$(echo $SERVER_RESPONSE | jq -r '.id')
+
+        # Add route for VNet
+        curl -s -k -X POST "https://localhost/server/$${SERVER_ID}/route" \
+          -H "Auth-Token: $TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"network":"10.0.0.0/8","comment":"VNet + AKS"}'
+
+        # Attach org to server
+        curl -s -k -X PUT "https://localhost/server/$${SERVER_ID}/organization/$${ORG_ID}" \
+          -H "Auth-Token: $TOKEN"
+
+        # Start server
+        curl -s -k -X PUT "https://localhost/server/$${SERVER_ID}/operation/start" \
+          -H "Auth-Token: $TOKEN"
+
+        # Add users
+        USERS='${pritunl_users_json}'
+        echo $USERS | jq -c '.[]' | while read user; do
+          NAME=$(echo $user | jq -r '.name')
+          EMAIL=$(echo $user | jq -r '.email')
+          curl -s -k -X POST "https://localhost/user/$${ORG_ID}" \
+            -H "Auth-Token: $TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"name\":\"$${NAME}\",\"email\":\"$${EMAIL}\"}"
+        done
+
+        echo "Pritunl configured. VPN ready."
+      fi
+
+      # --- GitHub Actions Runner ---
+      echo "Installing GitHub Actions runner..."
+      RUNNER_VERSION=$(curl -s https://api.github.com/repos/actions/runner/releases/latest | jq -r '.tag_name' | sed 's/v//')
+      mkdir -p /home/azureuser/actions-runner
+      cd /home/azureuser/actions-runner
+      curl -sLO "https://github.com/actions/runner/releases/download/v$${RUNNER_VERSION}/actions-runner-linux-x64-$${RUNNER_VERSION}.tar.gz"
+      tar xzf "actions-runner-linux-x64-$${RUNNER_VERSION}.tar.gz"
+      rm "actions-runner-linux-x64-$${RUNNER_VERSION}.tar.gz"
+      chown -R azureuser:azureuser /home/azureuser/actions-runner
+
+      # Register runner
+      GITHUB_URL="https://github.com/${github_org}"
+      if [ -n "${github_repo}" ]; then
+        GITHUB_URL="https://github.com/${github_org}/${github_repo}"
+      fi
+
+      sudo -u azureuser ./config.sh \
+        --url "$${GITHUB_URL}" \
+        --token "${github_runner_token}" \
+        --name "$(hostname)" \
+        --labels "self-hosted,azure,linux" \
+        --unattended \
+        --replace
+
+      # Install as systemd service
+      ./svc.sh install azureuser
+      ./svc.sh start
+
+      echo "=== Setup complete $(date) ==="
+
+runcmd:
+  - bash /opt/setup/setup.sh

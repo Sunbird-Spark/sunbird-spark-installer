@@ -26,8 +26,8 @@ provider "azurerm" {
     dns_prefix          = "${local.environment_name}"
     kubernetes_version  = var.aks_version
 
-    #Uncomment the below line to create a private cluster
-    # private_cluster_enabled = true
+    private_cluster_enabled   = true
+    private_dns_zone_id       = "System"
     oidc_issuer_enabled       = true
     workload_identity_enabled = true
     default_node_pool {
@@ -84,19 +84,8 @@ provider "azurerm" {
   #       )
   #   depends_on = [ azurerm_kubernetes_cluster.aks ]
   # }
-  resource "null_resource" "kubeconfig" {
-    triggers = {
-      cluster_id      = azurerm_kubernetes_cluster.aks.id
-      cluster_version = azurerm_kubernetes_cluster.aks.kubernetes_version
-      always_run      = timestamp()
-    }
-
-    provisioner "local-exec" {
-      command = "az aks get-credentials --resource-group ${var.resource_group_name} --name ${azurerm_kubernetes_cluster.aks.name} --overwrite-existing"
-    }
-
-    depends_on = [azurerm_kubernetes_cluster.aks]
-  }
+  # kubeconfig is fetched by the self-hosted runner VM via install.sh
+  # az aks get-credentials cannot run from laptop against a private cluster
 
   # Pre-create private LB in future if ever there is an instance of private ip
   # taken by node or some other service.

@@ -31,6 +31,18 @@ global:
   subscription_id: ""
   cloud_storage_region: ""
   aks_version: "1.35.1" # required — always specify the exact Kubernetes version e.g. "1.35.1". Run: az aks get-versions --location <region> --output table
+  # Runner VM + VPN configuration
+  vm_size: "Standard_B2s"
+  vm_admin_username: "azureuser"
+  vm_ssh_public_key: "REPLACE_WITH_SSH_PUBLIC_KEY"  # ssh-rsa AAAA...
+  github_runner_token: "REPLACE_WITH_GITHUB_RUNNER_TOKEN"  # from GitHub → Settings → Actions → Runners → New runner
+  github_org: "REPLACE_WITH_GITHUB_ORG"  # e.g. Sunbird-Spark
+  github_repo: ""  # leave empty for org-level runner
+  pritunl_vpn_network: "172.16.0.0/24"
+  pritunl_org_name: "sunbird-spark"
+  pritunl_users:
+    - name: "REPLACE_WITH_USER_NAME"
+      email: "REPLACE_WITH_USER_EMAIL"
   sunbird_cloud_storage_provider: "azure" # Provide the cloud storage provider
   checkpoint_store_type: "azure"
   cloud_service_provider: "azure"
