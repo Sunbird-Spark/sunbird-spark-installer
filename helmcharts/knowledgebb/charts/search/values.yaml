@@ -132,7 +132,7 @@ search:
     vector_path: "chunks"
     default_k: 50
     max_k: 1000
-    min_score: 0.0
+    min_score: 0.7
     schema_versions: '["1.0"]'
     rrf_k: 60
     embedding_cache:
