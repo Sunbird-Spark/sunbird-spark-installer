@@ -135,6 +135,7 @@ search:
     min_score: 0.75
     schema_versions: '["1.0"]'
     rrf_k: 60
+    embedding_pool_size: 8
     embedding_cache:
       enabled: true
       size: 1024
