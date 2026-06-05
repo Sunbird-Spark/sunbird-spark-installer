@@ -31,7 +31,7 @@ spec:
       labels:
         app: secor
         release: {{ $jobName }}
-        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.serviceAccount.name }}
+        {{- if .Values.global.serviceAccount.name }}
         azure.workload.identity/use: "true"
         {{- end }}
     spec:

@@ -27,7 +27,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
         app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
-        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.serviceAccount.name }}
+        {{- if .Values.global.serviceAccount.name }}
         azure.workload.identity/use: "true"
         {{- end }}
       annotations:
@@ -141,7 +141,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
         app.kubernetes.io/component: {{ printf "%s-%s" $jobName $component }}
-        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.serviceAccount.name }}
+        {{- if .Values.global.serviceAccount.name }}
         azure.workload.identity/use: "true"
         {{- end }}
       annotations:
