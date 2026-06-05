@@ -1,6 +1,10 @@
 global:
+  env: ${env}
+  environment: ${environment}
+  building_block: ${building_block}
   cloud_storage_access_key: ${service_account_email}  # SA email (non-secret) — kept for helm compat
   cloud_storage_secret_key: ""                        # blank — auth via Workload Identity (ADC)
+  sunbird_encryption_key: "${sunbird_encryption_key}"
   workload_identity_service_account_name: ${k8s_service_account_name}
   public_container_name: ${gcp_public_container_name}
   private_container_name: ${gcp_private_container_name}

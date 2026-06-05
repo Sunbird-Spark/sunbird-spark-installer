@@ -87,3 +87,9 @@ variable "velero_storage_container_private" {
   description = "Private bucket for Velero backups."
   default     = ""
 }
+
+variable "sunbird_encryption_key" {
+  type        = string
+  description = "Encryption key from previous cluster (migration only). Leave empty for fresh install."
+  default     = ""
+}

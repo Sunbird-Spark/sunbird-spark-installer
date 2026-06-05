@@ -19,6 +19,7 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
     storage_class                    = var.storage_class,
     cloud_storage_provider           = var.cloud_storage_provider,
     cloud_storage_region             = var.cloud_storage_region,
+    sunbird_encryption_key           = var.sunbird_encryption_key,
   })
   filename = local.global_values_cloud_file
 }
