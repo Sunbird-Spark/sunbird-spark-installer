@@ -1,3 +1,6 @@
+# NOTE: openai-secret (containing openai_api_key) is provisioned by the
+# parent knowledgebb umbrella chart. Deploying this chart standalone
+# requires creating the secret manually first.
 nameOverride: ""
 fullnameOverride: ""
 
