@@ -6,6 +6,7 @@ locals {
       private_container_name       = "dummy-private"
       velero_container_name        = "dummy-velero"
       dial_state_container_public  = "dummy-dial"
+      sunbird_encryption_key       = ""
     }
   })
 
@@ -16,6 +17,7 @@ locals {
   region                 = local.global_vars.global.cloud_storage_region
   project                = local.global_vars.global.cloud_storage_project
   cloud_storage_provider = local.global_vars.global.cloud_storage_provider
+  sunbird_encryption_key = local.cloud_vars.global.sunbird_encryption_key
 }
 
 terraform {
@@ -75,4 +77,5 @@ inputs = {
   storage_container_private        = local.skip_storage_module ? local.cloud_vars.global.private_container_name       : dependency.storage.outputs.gcp_private_container_name
   dial_state_container_public      = local.skip_storage_module ? local.cloud_vars.global.dial_state_container_public  : dependency.storage.outputs.gcp_dial_state_container_public
   velero_storage_container_private = local.skip_storage_module ? local.cloud_vars.global.velero_container_name        : dependency.storage.outputs.gcp_velero_storage_container_private
+  sunbird_encryption_key           = local.sunbird_encryption_key
 }
