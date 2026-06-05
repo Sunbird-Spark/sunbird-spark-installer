@@ -6,8 +6,9 @@ locals {
     }
   })
 
-  skip_storage_module = local.global_vars.global.skip_storage_module
-  project             = local.global_vars.global.cloud_storage_project
+  skip_storage_module       = local.global_vars.global.skip_storage_module
+  sunbird_player_editor_ref = try(local.global_vars.global.sunbird_player_editor_ref, "master")
+  knowledge_platform_ref    = try(local.global_vars.global.knowledge_platform_ref, "master")
 }
 
 terraform {
@@ -24,7 +25,9 @@ dependency "storage" {
 }
 
 inputs = {
-  storage_account_name     = "storage.googleapis.com"
-  project_number           = local.project
-  storage_container_public = local.skip_storage_module ? local.cloud_vars.global.public_container_name : dependency.storage.outputs.gcp_public_container_name
+  storage_account_name      = "storage.googleapis.com"
+  storage_container_public  = local.skip_storage_module ? local.cloud_vars.global.public_container_name : dependency.storage.outputs.gcp_public_container_name
+  public_artifacts_path     = "${get_repo_root()}/public-artifacts"
+  sunbird_player_editor_ref = local.sunbird_player_editor_ref
+  knowledge_platform_ref    = local.knowledge_platform_ref
 }

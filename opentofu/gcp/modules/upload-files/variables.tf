@@ -8,25 +8,19 @@ variable "storage_container_public" {
   description = "Public bucket name."
 }
 
-variable "project_number" {
+variable "public_artifacts_path" {
   type        = string
-  description = "GCP project number used by rclone gcs backend."
+  description = "Absolute path to the public-artifacts directory. Pass get_repo_root()/public-artifacts from Terragrunt."
 }
 
-variable "sunbird_public_artifacts_account" {
+variable "sunbird_player_editor_ref" {
   type        = string
-  description = "Public account holding sunbird release artifacts."
-  default     = "downloadableartifacts"
+  description = "Git tag for Sunbird-Knowlg repos: sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player."
+  default     = "master"
 }
 
-variable "sunbird_public_artifacts_account_sas_url" {
+variable "knowledge_platform_ref" {
   type        = string
-  description = "Read-only SAS URL for the sunbird public account."
-  default     = "https://downloadableartifacts.blob.core.windows.net/?sv=2022-11-02&ss=bf&srt=co&sp=rlitfx&se=2026-08-30T20:37:29Z&st=2024-07-10T12:37:29Z&spr=https&sig=hcXksbrbR%2BJgCB0EKxiwHCSsQ6r2eSlyOVnqnjxFOH0%3D"
-}
-
-variable "sunbird_public_artifacts_container" {
-  type        = string
-  description = "Release-specific container holding artifacts."
-  default     = "release700"
+  description = "Git branch or tag for the knowledge-platform repo (schemas/local upload)."
+  default     = "master"
 }
