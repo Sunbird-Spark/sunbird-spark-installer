@@ -213,3 +213,6 @@ global:
   schema: *schema
   yugabyte: *yugabyte
   dialservice: *dialservice
+  openai_api_key: ""
+  openai_azure_endpoint: ""
+  openai_azure_deployment: "text-embedding-3-small"
