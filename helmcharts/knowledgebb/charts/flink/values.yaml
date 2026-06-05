@@ -369,7 +369,7 @@ flink_jobs:
           collection {
             enabled = true
             includeFields = []
-            includeHierarchy = true
+            includeHierarchy = false
           }
 
           question {
@@ -380,7 +380,7 @@ flink_jobs:
           questionset {
             enabled = false
             includeFields = []
-            includeHierarchy = true
+            includeHierarchy = false
           }
         }
       }
