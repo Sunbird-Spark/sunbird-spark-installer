@@ -140,6 +140,8 @@ search:
       enabled: true
       size: 1024
       ttl_seconds: 300
+  enrich:
+    max_identifiers: 100
   language:
     map:
       Hindi: hi
