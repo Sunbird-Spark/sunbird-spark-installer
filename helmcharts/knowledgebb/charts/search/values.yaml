@@ -122,7 +122,7 @@ search:
       model: "text-embedding-3-small"
       dimensions: 1536
       timeout: 5
-      azure_endpoint: ""
+      azure_endpoint: "https://coss-semanticsearch.openai.azure.com/"
       azure_deployment: "text-embedding-3-small"
       azure_api_version: "2023-05-15"
     e5:
