@@ -1,0 +1,85 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-opensearch-migration-job
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}-opensearch-migration
+    scope: provisioning
+  annotations:
+    {{.Values.global.opensearch.provisioning.annotations | toYaml }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-opensearch-migration
+    spec:
+      restartPolicy: Never
+      initContainers:
+      - name: wait-for-opensearch
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "-c"]
+        args:
+        - "timeout {{ .Values.migration.opensearch.waitTime }} sh -c 'until nc -z {{ .Values.global.opensearch.host }} {{ .Values.global.opensearch.port }}; do echo waiting for opensearch; sleep 10; done'"
+      containers:
+      - name: migration
+        image: curlimages/curl:latest
+        imagePullPolicy: IfNotPresent
+        command: ['sh', '-c']
+        args:
+        - |
+          set -x
+
+          #### Creating the new indices:
+          cd /opensearch-migration/indices
+          for file in *.json; do
+            [ -e "$file" ] || continue
+            index_name="${file%.json}"
+            echo "Applying index: ${index_name}"
+            curl -X PUT http://{{.Values.global.opensearch.host}}:{{.Values.global.opensearch.port}}/${index_name} \
+              -H 'Content-Type: application/json' \
+              -d @${file} || true
+          done
+
+          #### Updating the mapping for indices:
+          cd /opensearch-migration/mappings
+          for file in *-mapping.json; do
+            [ -e "$file" ] || continue
+            index_name="${file%-mapping.json}"
+            echo "Applying mapping: ${index_name}"
+            curl -X PUT http://{{.Values.global.opensearch.host}}:{{.Values.global.opensearch.port}}/${index_name}/_mapping \
+              -H 'Content-Type: application/json' \
+              -d @${file} || true
+          done
+
+          #### Adding ingest pipelines:
+          cd /opensearch-migration/pipelines
+          for file in *-ingest-pipeline.json; do
+            [ -e "$file" ] || continue
+            pipeline_name="${file%-ingest-pipeline.json}"
+            echo "Applying pipeline: ${pipeline_name}-ingest-pipeline"
+            curl -X PUT http://{{.Values.global.opensearch.host}}:{{.Values.global.opensearch.port}}/_ingest/pipeline/${pipeline_name}-ingest-pipeline \
+              -H 'Content-Type: application/json' \
+              -d @${file} || true
+          done
+
+          echo "OpenSearch migration completed"
+        volumeMounts:
+        - name: indices
+          mountPath: /opensearch-migration/indices
+        - name: mappings
+          mountPath: /opensearch-migration/mappings
+        - name: pipelines
+          mountPath: /opensearch-migration/pipelines
+      volumes:
+      - name: indices
+        configMap:
+          name: opensearch-migration-indices
+      - name: mappings
+        configMap:
+          name: opensearch-migration-mappings
+      - name: pipelines
+        configMap:
+          name: opensearch-migration-pipelines
+  backoffLimit: 4

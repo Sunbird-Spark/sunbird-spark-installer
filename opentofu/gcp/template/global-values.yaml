@@ -52,6 +52,7 @@ global:
   youtube_apikey: ""
   mail_from_certbot_notifications: ""  #The "from" email address used by the Certbot renewal job for sending SSL renewal status notifications via SendGrid SMTP
   youtube_apikey: ""
+  openai_api_key: "REPLACE_WITH_OPENAI_API_KEY"
   superset:
       init:
         adminUser:

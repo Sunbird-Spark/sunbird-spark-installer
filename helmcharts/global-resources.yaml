@@ -34,6 +34,14 @@ flink: &flink
         limits:
           cpu: 1
           memory: 3Gi
+    content-embedding:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 1024Mi
+        limits:
+          cpu: 1
+          memory: 3Gi
   
 knowledgebb:
   flink: *flink

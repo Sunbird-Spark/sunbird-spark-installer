@@ -1,3 +1,6 @@
+# NOTE: openai-secret (containing openai_api_key) is provisioned by the
+# parent knowledgebb umbrella chart. Deploying this chart standalone
+# requires creating the secret manually first.
 nameOverride: ""
 fullnameOverride: ""
 
@@ -342,7 +345,48 @@ flink_jobs:
         error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
         groupId = "{{ .Values.global.env }}-knowlg-publish-group"
         content_metadata.topic = "dv.telemetry.coss"
+        enriched_metadata.topic = "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
         zookeeper = ""
+      }
+
+      enriched {
+        metadata {
+          enabled = true
+          include_hierarchy = false
+
+          global {
+            includeFields = [
+              "identifier", "name", "status", "mimeType", "primaryCategory",
+              "description", "keywords", "author", "creator", "license",
+              "visibility", "audience", "language",
+              "createdBy"
+            ]
+            # Auto-include all framework enrichment fields (se_subjects, se_boards, se_mediums, se_gradeLevels, etc.)
+            autoIncludeSearchEnrichmentFields = true
+          }
+
+          content {
+            enabled = true
+            includeFields = []
+          }
+
+          collection {
+            enabled = true
+            includeFields = []
+            includeHierarchy = false
+          }
+
+          question {
+            enabled = false
+            includeFields = []
+          }
+
+          questionset {
+            enabled = false
+            includeFields = []
+            includeHierarchy = false
+          }
+        }
       }
 
       task {
@@ -558,6 +602,113 @@ flink_jobs:
       # classloader.resolve-order: "parent-first"
       # state.savepoints.dir: file:///tmp
     job_classname: org.sunbird.job.knowlg.task.KnowlgPublishStreamTask
+
+  content-embedding:
+    enabled: true
+    serviceMonitor: *serviceMonitor
+    config: |+
+      include file("/data/flink/conf/base-config.conf")
+
+      job {
+        env = "{{ .Values.global.env }}"
+      }
+
+      kafka {
+        input.topic = "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
+        output.topic = "{{ .Values.global.env }}.knowlg.embedding.chunks"
+        error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
+        groupId = "{{ .Values.global.env }}-content-embedding-group"
+      }
+
+      task {
+        consumer.parallelism = 1
+        extract.parallelism = 2
+        chunking.parallelism = 2
+        embedding.parallelism = 2
+        quantization.parallelism = 2
+        sink.parallelism = 1
+      }
+
+      schema {
+        # Events with _schema_version outside this list are routed to the DLQ.
+        supported_versions = ["1.0"]
+      }
+
+      chunking {
+        strategy = "sliding-window"
+
+        semantic {
+          max_chunk_size = 1000
+          excluded_fields = [
+            "hierarchy",
+            "children",
+            "id",
+            "identifier",
+            "contentType",
+            "_schema_version",
+            "timestamp"
+          ]
+        }
+
+        sliding-window {
+          max_words    = 512
+          overlap_words = 102
+        }
+      }
+
+      embedding {
+        service = "openai"
+        batch_size = 32
+        # Warn + counter when an embed API call exceeds this many millis.
+        slow_call_threshold_ms = 5000
+
+        openai {
+          api_key = ""
+          api_key = ${?OPENAI_API_KEY}
+          model = "text-embedding-3-small"
+          dimensions = 1536
+          timeout = 30
+          azure_endpoint = "{{ .Values.global.openai_azure_endpoint | default "" }}"
+          azure_deployment = "{{ .Values.global.openai_azure_deployment | default "text-embedding-3-small" }}"
+          azure_api_version = "{{ .Values.global.openai_azure_api_version | default "2023-05-15" }}"
+        }
+      }
+
+      quantization {
+        strategy = "int8"
+      }
+
+      opensearch {
+        host = "{{ .Values.global.opensearch.host }}"
+        port = {{ .Values.global.opensearch.port }}
+        index.name = "compositesearch"
+        user = ""
+        password = ""
+      }
+
+    flink-conf: |+
+      jobmanager.memory.flink.size: 1024m
+      taskmanager.memory.flink.size: 2048m
+      taskmanager.numberOfTaskSlots: 1
+      jobManager.numberOfTaskSlots: 1
+      parallelism.default: 1
+      jobmanager.execution.failover-strategy: region
+      taskmanager.memory.network.fraction: 0.1
+      scheduler-mode: reactive
+      heartbeat.timeout: 8000
+      heartbeat.interval: 5000
+      taskmanager.memory.process.size: 2800m
+      jobmanager.memory.process.size: 1600m
+
+    job_classname: org.sunbird.job.contentembedding.task.ContentEmbeddingStreamTask
+
+    extraEnv:
+      - name: OPENAI_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: openai-secret
+            key: OPENAI_API_KEY
+            optional: true
 
 commonAnnotations:
   reloader.stakater.com/auto: "true"
