@@ -50,7 +50,7 @@ images:
 
   player: &player
     repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "spark-v1.0.13_afdf6db"
+    tag: "spark-v1.0.17_50d677d"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -111,7 +111,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v0.21_9d043d3_26"
+    tag: "spark-v1.0.2_d25f276_27"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -119,11 +119,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-emd-v9_f781eab"
+    tag: "spark-v1.0.2_e234cae"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-emd-v9_f781eab"
+    tag: "spark-v1.0.2_e234cae"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
@@ -343,9 +343,9 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-emd-v15_927bff6"
+    tag: "spark-v1.0.2_e57f56c"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v0.7_e13f0eb"
+    tag: "spark-v1.0.2_cbe9e07"
