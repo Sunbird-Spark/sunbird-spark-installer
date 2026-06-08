@@ -8268,6 +8268,46 @@
             ],
             "analyzer": "cs_index_analyzer",
             "search_analyzer": "cs_search_analyzer"
+          },
+          "chunks": {
+            "type": "nested",
+            "properties": {
+              "text": {
+                "type": "text",
+                "analyzer": "cs_index_analyzer",
+                "search_analyzer": "cs_search_analyzer",
+                "fields": {
+                  "raw": {
+                    "type": "text",
+                    "analyzer": "keylower",
+                    "fielddata": true
+                  }
+                }
+              },
+              "embedding": {
+                "type": "knn_vector",
+                "dimension": 1536,
+                "data_type": "BYTE",
+                "method": {
+                  "name": "hnsw",
+                  "space_type": "cosinesimil",
+                  "engine": "lucene",
+                  "parameters": {
+                    "ef_construction": 128,
+                    "m": 16
+                  }
+                }
+              },
+              "word_count": {
+                "type": "integer"
+              },
+              "chunk_index": {
+                "type": "integer"
+              },
+              "schema_version": {
+                "type": "keyword"
+              }
+            }
           }
         }
       }

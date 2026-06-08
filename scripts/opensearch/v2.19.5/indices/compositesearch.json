@@ -1,6 +1,7 @@
 {
     "settings": {
         "index": {
+            "knn": true,
             "max_ngram_diff": "29",
             "mapping": {
                 "total_fields": {
