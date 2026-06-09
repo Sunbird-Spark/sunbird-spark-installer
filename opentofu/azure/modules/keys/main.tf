@@ -16,10 +16,8 @@ resource "random_password" "generated_string" {
 }
 
 resource "null_resource" "generate_jwt_keys" {
-  # Regenerates when jwt-keys.py script changes (e.g. payload format update).
-  # Avoids unnecessary regeneration on every apply while auto-updating when script evolves.
   triggers = {
-    script_hash = filemd5(local.jwt_script_location)
+    command = timestamp()
   }
   provisioner "local-exec" {
     command = <<EOT
