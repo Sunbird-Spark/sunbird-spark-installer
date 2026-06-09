@@ -16,10 +16,9 @@ resource "random_password" "generated_string" {
 }
 
 resource "null_resource" "generate_jwt_keys" {
-  # Run ONCE at create. Do NOT use timestamp() triggers — that regenerates
-  # keys on every `terragrunt apply` and breaks existing services that
-  # validate JWTs against the prior keys. To force regeneration: `terraform taint`
-  # this resource explicitly.
+  triggers = {
+    script_hash = filemd5(local.jwt_script_location)
+  }
   provisioner "local-exec" {
     command = <<EOT
       python3 ${local.jwt_script_location} ${random_password.generated_string.result} && \

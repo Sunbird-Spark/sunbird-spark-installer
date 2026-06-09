@@ -1,6 +1,7 @@
 import os
 import jwt
 import sys
+import time
 
 # Predefined map of keys and secrets
 consumer_list = ["api_admin", "mobile_admin", "mobile_device", "mobile_devicev2", "portal_anonymous_register", "portal_loggedin_register", "portal_anonymous", "portal_loggedin", "portal_anonymous_fallback_token", "portal_loggedin_fallback_token", "adminutil_learner_api_token"]
@@ -11,7 +12,9 @@ def generate_jwt_token(key, secret, random_string):
 
     # Create the token payload
     payload = {
-        "iss": key
+        "iss": key,
+        "kid": key,
+        "iat": int(time.time())
     }
 
     # Stamp kid in the JOSE header so Kong's kid-default lookup can resolve

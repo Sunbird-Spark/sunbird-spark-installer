@@ -503,4 +503,16 @@ if (enabledFailed) {
     throw new RuntimeException("One or more indexes did not reach ENABLED status. Check errors above.")
 }
 
+// 13. Reindex byGraphId to populate existing data into the index
+println "Reindexing byGraphId..."
+try {
+    mgmt4 = jg.openManagement()
+    idx = mgmt4.getGraphIndex("byGraphId")
+    mgmt4.updateIndex(idx, SchemaAction.REINDEX).get()
+    mgmt4.commit()
+    println "Reindex for byGraphId complete."
+} catch (Exception e) {
+    println "Warning: Reindex for byGraphId failed (non-fatal): ${e.message}"
+}
+
 println "--- SCHEMA INITIALIZATION COMPLETE ---"
