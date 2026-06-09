@@ -149,7 +149,7 @@ images:
   janusgraph: &janusgraph
     registry: ghcr.io
     repository: sunbird-spark/janusgraph
-    tag: develop_f780e7f
+    tag: develop_8f2245e
 
   secor: &secor
     repository: "sunbirded.azurecr.io/secor"
