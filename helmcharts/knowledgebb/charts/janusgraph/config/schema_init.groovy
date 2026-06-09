@@ -169,7 +169,7 @@ makeCompositeIndex('byVisibility', 'visibility', false)
 makeCompositeIndex('byObjectTypeAndStatus', 'IL_FUNC_OBJECT_TYPE', false)
 makeCompositeIndex('byNodeType', 'IL_SYS_NODE_TYPE', false)
 
-// 7. Commit Changes
+// 7. Commit Transaction
 println "Committing Transaction..."
 mgmt.commit()
 
