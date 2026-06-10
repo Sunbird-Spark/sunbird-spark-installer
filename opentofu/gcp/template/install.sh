@@ -159,14 +159,34 @@ function install_service() {
     fi
 
     if helm status "$bundle" --namespace sunbird &>/dev/null; then
-        # Phase B: Release exists — reuse previous values, enable all target charts
+        # Phase B: Release exists — upgrade ONLY target charts, leave all others untouched
         echo -e "\nRelease '$bundle' exists — upgrading '${target_charts[*]}' (Phase B)"
 
-        # Build --set enabled flags for every target chart
         local set_flags=""
         for chart in "${target_charts[@]}"; do
             set_flags="$set_flags --set ${chart}.enabled=true"
         done
+
+        # Filter global-resources.yaml to only the target charts' entries.
+        # Passing it in full would apply resource changes to ALL charts, causing
+        # non-target pods to restart.
+        # global-values.yaml and global-cloud-values.yaml are global config (no per-chart keys)
+        # so they are passed as-is.
+        local pick_filter="with_entries(select("
+        local first=true
+        for chart in "${target_charts[@]}"; do
+            if $first; then
+                pick_filter="${pick_filter}.key == \"$chart\""
+                first=false
+            else
+                pick_filter="${pick_filter} or .key == \"$chart\""
+            fi
+        done
+        pick_filter="${pick_filter}))"
+
+        local target_resources_yaml
+        target_resources_yaml=$(mktemp /tmp/target-resources-XXXXXX.yaml)
+        yq "$pick_filter" global-resources.yaml > "$target_resources_yaml"
 
         helm upgrade "$bundle" "$bundle" \
             --namespace sunbird \
@@ -174,11 +194,14 @@ function install_service() {
             $set_flags \
             $ed_values_flag \
             $addon_values_flag \
-            -f "global-resources.yaml" \
+            -f "$target_resources_yaml" \
             -f "../opentofu/gcp/$environment/global-values.yaml" \
             -f "../opentofu/gcp/$environment/global-cloud-values.yaml" \
             --timeout 30m \
-            --debug
+            --debug \
+            || { rm -f "$target_resources_yaml"; return 1; }
+
+        rm -f "$target_resources_yaml"
     else
         # Phase A: No release yet — enable all target charts, disable every other conditional chart
         echo -e "\nNo existing release for '$bundle' — deploying '${target_charts[*]}' (Phase A)"
