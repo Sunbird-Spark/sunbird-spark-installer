@@ -131,7 +131,7 @@ images:
 
   superset: &superset
     repository: sanketikahub/superset
-    tag: 4.1.2
+    tag: 4.1.1
 
   nlweb: &nlweb
     repository: "sanketikahub/nlweb"
