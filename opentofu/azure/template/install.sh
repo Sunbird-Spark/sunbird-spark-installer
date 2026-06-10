@@ -201,7 +201,8 @@ function install_service() {
             -f "../opentofu/azure/$environment/global-values.yaml" \
             -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
             --timeout 30m \
-            --debug
+            --debug \
+            || { rm -f "$target_images_yaml" "$target_resources_yaml"; return 1; }
 
         rm -f "$target_images_yaml" "$target_resources_yaml"
     else
