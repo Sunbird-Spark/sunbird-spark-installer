@@ -214,7 +214,7 @@ registry:
 superset:
   resources:
     limits:
-      cpu: 515m
+      cpu: 512m
       memory: 1024Mi
     requests:
       cpu: 250m
