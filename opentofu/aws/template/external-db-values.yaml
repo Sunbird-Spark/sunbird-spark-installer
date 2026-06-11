@@ -1,0 +1,45 @@
+# External DB configuration for KnowledgeBB
+# Override these with actual VM IP/hostname in your private repo.
+# Pass this file to helm: -f external-db-values.yaml
+
+global:
+  kafka:
+    enabled: false          # disable in-cluster Kafka subchart
+    host: "REPLACE_WITH_KAFKA_VM_IP"
+    port: 9092
+
+  redis:
+    enabled: false          # disable in-cluster Redis subchart
+    host: "REPLACE_WITH_REDIS_VM_IP"
+    port: 6379
+
+  opensearch:
+    enabled: false          # disable in-cluster OpenSearch subchart
+    host: "REPLACE_WITH_OPENSEARCH_VM_IP"
+    port: 9200
+
+  yugabyte:
+    enabled: false          # disable in-cluster YugabyteDB subchart
+    host: "REPLACE_WITH_YUGABYTE_VM_IP"
+    port: 9042
+    postgresql_port: 5433
+
+  janusgraph:
+    enabled: false          # disable in-cluster JanusGraph subchart
+    host: "REPLACE_WITH_JANUSGRAPH_VM_IP"
+    port: 8182
+
+kafka:
+  enabled: false
+
+redis:
+  enabled: false
+
+opensearch:
+  enabled: false
+
+yugabyte:
+  enabled: false
+
+janusgraph:
+  enabled: false
