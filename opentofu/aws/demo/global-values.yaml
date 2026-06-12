@@ -24,7 +24,7 @@ global:
   gke_node_default_disk_size_gb: 100
   object_storage_endpoint: s3.amazonaws.com
   sunbird_cloud_storage_provider: "aws"
-  checkpoint_store_type: "oci"
+  checkpoint_store_type: "s3"
   cloud_service_provider: "aws"
   cloud_storage_provider: "aws"
   cloud_storage_region: "us-east-1"
