@@ -43,7 +43,7 @@ variable "node_instance_type" {
 variable "node_disk_size_gb" {
   description = "Disk size in GB for worker nodes"
   type        = number
-  default     = 100
+  default     = 150 
 }
 
 variable "desired_node_count" {

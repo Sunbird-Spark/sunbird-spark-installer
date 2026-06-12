@@ -14,23 +14,18 @@ keycloak:
 keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
 global:
-  skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
-  sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
-  knowledge_platform_ref: "spark-v19"  # git branch or tag for knowledge-platform (schemas/local upload)
-  resource_group_name: ""    # Azure resource group name
   building_block: "" # building block name
-  env: ""
+  env: "" 
   environment: "" # use lowercase alphanumeric string between 1-9 characters
   release_version: release-7.0.0
-  domain: ""
-  lets_encrypt_ssl: false  #enable this if you are using  let's encrypt ssl certificate
+  domain: "sunbird-spark.dpxdemo.com"
+  lets_encrypt_ssl: true  #enable this if you are using  let's encrypt ssl certificate
   cert_notifications:
-    email: "" # provide the email address for certificate renewal notifications/alerts
+    email: "smishra40@deloitte.com" # provide the email address for certificate renewal notifications/alerts
   play_http:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
   subscription_id: ""
   cloud_storage_region: ""
-  aks_version: "1.35.1" # required — always specify the exact Kubernetes version e.g. "1.35.1". Run: az aks get-versions --location <region> --output table
   sunbird_cloud_storage_provider: "azure" # Provide the cloud storage provider
   checkpoint_store_type: "azure"
   cloud_service_provider: "azure"
@@ -49,10 +44,6 @@ global:
   sunbird_msg_sender: ""
   mail_from_certbot_notifications: ""  #The "from" email address used by the Certbot renewal job for sending SSL renewal status notifications via SendGrid SMTP
   youtube_apikey: ""
-  openai_api_key: "REPLACE_WITH_OPENAI_API_KEY"
-  openai_azure_endpoint: "REPLACE_WITH_OPENAI_AZURE_ENDPOINT"  # e.g. https://<resource>.openai.azure.com/
-  openai_azure_deployment: "text-embedding-3-small"
-  openai_azure_api_version: "2023-05-15"
   superset:
       init:
         adminUser:
@@ -65,7 +56,7 @@ global:
   keycloak:
    keycloak_user: admin
    keycloak_password: *keycloak-password  
-  deployed_dial_addon: *deployed_dial_addon
+  deployed_dial_addon: *deployed_dial_addon   
   enable_asset_enrichment: *enable_asset_enrichment
   # The merge domain is optional and is required  `only if user merge workflow is required.
   # For most audience, this workflow is not required. If you need this workflow, then
@@ -131,3 +122,7 @@ global:
   proxy_certificate: |
     REPLACE_ME
   # CERTIFICATE-KEYS 
+  CERTIFICATE_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDEAX1kDjW/AsSDFLdwaIz2V+A2/iDApHsHs3i8oqu8UfcOBwm9FQ0IoxnZKLS3+hRVL2LNfbFQcdyYf+jD/pW3HQ0Pl7394z8vctJ3wToFkww2tiOh0t0ppavcNyLDYZ5apaWjBldbv11ZdnhtFqXlUJTeGTKW5EvPL8ln+it6jjY0JbgPUw8Fcu61DzJ85R23a92xapRI6f3hZOX+ocDgs6HuPUOdZmh4fmI12rE2l7WwvjIS9as3V62k0wxeeWZWtklm3yHQtOfBAt1GUdJz0F6SBmTKPIAP7ID9BFzbxVek0wLkSDAJiQvTeQPkArp9YYtjacBnervyQLjRqwiJAgMBAAECggEAAki7R8jacptFczgpQ5G40JF03sJjdK5zc01nbpaFQ9Cqyiqyv+otAYwpMEWT7OqwdeOXMlNcXu/6gQpdgj1wGR/7Gjk3EOdaMowdZj/xXBKM5GgWZ+SjxfNkVVr9sK1tYt4UWBoLan1z4m9ePEwBjG17XqHFvVmc6+hVp1tMsLrJZ3/+hE+LpxaYN3LPxDFste1TZPNxKUSCsq3/DqomUvehkKrLH65+W1j+umfHp+Ak0WffLDlAfvUi0Y8S0gkeA5Q/Dg8z8UYlOso6Dysv7SGYX/bBSTi/U5bezwYUwUVO0os2wj75MbZL5C5UAITqd1/uoIqpV8WSrubQfkR3xQKBgQD19jonfaGsL0FGEj6fFOP43NFHBSFgYQ/DeqkYywq9Je761vbmPY97SQga1puW3aCvOJasBd7OqazlzWfUphkiDxMwzg3kYD3Vh905F2vNh4QhPjOQdExJOOwWV3utag9mqLpKtUJY7g9x9sxwDhRCp+t2HcOlc5BJqfs9QvMfTwKBgQDMAVRljDcF5OZx0qUurvMSKnakH1QKAkvAlDjre7kPt6VM7dS/eCfs0q5W27Q99EHWcfhSMm+VMUnO4524JW5lRYZ1X0Ammz9hLZjhZ+hLJ6sNdgLCiaDsRaVc9zZoQAojt4dsFhfY44UGBpFZ9sucrPS/lVEOdXBjSz350g2kpwKBgQCl76YwOku2VHMfCPQCcx+SJ7dwyH9J/HGcGca3GVR3Y34k8J3Fm0aPkCfNo3d4grEDRZQxHgzBNCuXJcqk5iISnkT+KiWpK1zMEEspVym9kW2M1+AF1tAYnjR4pjCkP+eABNkZycunH4SACFbISldU2OC74Ty7BIoViH4dSGupdQKBgQCVtIAXiP6zz5cgfgEDshTkBs9Lf0XvlmG6r8rZW9ChbRXbz0fpPiamTrDrQo0RTdampLoir6pcpG/SaAxMnwNVQ+D47u4nppOrH4fqGZNI25JV7Xz2/4JdAHrqLuv5Ms1+CmdRdSEI42Wx104A4+/lSLLOiKeT4bCY3RVc571lTwKBgQCipaVPCeZ7nSDhotukws8H13Q+Lr3EwDR5dszuOBVfmYythug6/knPGAgudkD1By+15Up8NoHpUuCfGOY0uyQZt5x61fITlSN64MVFWgge/Yi/uHkEe28nhU3Qwygrlaw1BcAj0Zhb+6VoyyyQ4yvVs9g561G1n/do8d3X2337og==\n-----END PRIVATE KEY-----\n"
+  CERTIFICATE_PUBLIC_KEY: "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxAF9ZA41vwLEgxS3cGiM9lfgNv4gwKR7B7N4vKKrvFH3DgcJvRUNCKMZ2Si0t/oUVS9izX2xUHHcmH/ow/6Vtx0ND5e9/eM/L3LSd8E6BZMMNrYjodLdKaWr3Dciw2GeWqWlowZXW79dWXZ4bRal5VCU3hkyluRLzy/JZ/oreo42NCW4D1MPBXLutQ8yfOUdt2vdsWqUSOn94WTl/qHA4LOh7j1DnWZoeH5iNdqxNpe1sL4yEvWrN1etpNMMXnlmVrZJZt8h0LTnwQLdRlHSc9BekgZkyjyAD+yA/QRc28VXpNMC5EgwCYkL03kD5AK6fWGLY2nAZ3q78kC40asIiQIDAQAB\n-----END PUBLIC KEY-----\n"
+  CERTIFICATESIGN_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDEAX1kDjW/AsSDFLdwaIz2V+A2/iDApHsHs3i8oqu8UfcOBwm9FQ0IoxnZKLS3+hRVL2LNfbFQcdyYf+jD/pW3HQ0Pl7394z8vctJ3wToFkww2tiOh0t0ppavcNyLDYZ5apaWjBldbv11ZdnhtFqXlUJTeGTKW5EvPL8ln+it6jjY0JbgPUw8Fcu61DzJ85R23a92xapRI6f3hZOX+ocDgs6HuPUOdZmh4fmI12rE2l7WwvjIS9as3V62k0wxeeWZWtklm3yHQtOfBAt1GUdJz0F6SBmTKPIAP7ID9BFzbxVek0wLkSDAJiQvTeQPkArp9YYtjacBnervyQLjRqwiJAgMBAAECggEAAki7R8jacptFczgpQ5G40JF03sJjdK5zc01nbpaFQ9Cqyiqyv+otAYwpMEWT7OqwdeOXMlNcXu/6gQpdgj1wGR/7Gjk3EOdaMowdZj/xXBKM5GgWZ+SjxfNkVVr9sK1tYt4UWBoLan1z4m9ePEwBjG17XqHFvVmc6+hVp1tMsLrJZ3/+hE+LpxaYN3LPxDFste1TZPNxKUSCsq3/DqomUvehkKrLH65+W1j+umfHp+Ak0WffLDlAfvUi0Y8S0gkeA5Q/Dg8z8UYlOso6Dysv7SGYX/bBSTi/U5bezwYUwUVO0os2wj75MbZL5C5UAITqd1/uoIqpV8WSrubQfkR3xQKBgQD19jonfaGsL0FGEj6fFOP43NFHBSFgYQ/DeqkYywq9Je761vbmPY97SQga1puW3aCvOJasBd7OqazlzWfUphkiDxMwzg3kYD3Vh905F2vNh4QhPjOQdExJOOwWV3utag9mqLpKtUJY7g9x9sxwDhRCp+t2HcOlc5BJqfs9QvMfTwKBgQDMAVRljDcF5OZx0qUurvMSKnakH1QKAkvAlDjre7kPt6VM7dS/eCfs0q5W27Q99EHWcfhSMm+VMUnO4524JW5lRYZ1X0Ammz9hLZjhZ+hLJ6sNdgLCiaDsRaVc9zZoQAojt4dsFhfY44UGBpFZ9sucrPS/lVEOdXBjSz350g2kpwKBgQCl76YwOku2VHMfCPQCcx+SJ7dwyH9J/HGcGca3GVR3Y34k8J3Fm0aPkCfNo3d4grEDRZQxHgzBNCuXJcqk5iISnkT+KiWpK1zMEEspVym9kW2M1+AF1tAYnjR4pjCkP+eABNkZycunH4SACFbISldU2OC74Ty7BIoViH4dSGupdQKBgQCVtIAXiP6zz5cgfgEDshTkBs9Lf0XvlmG6r8rZW9ChbRXbz0fpPiamTrDrQo0RTdampLoir6pcpG/SaAxMnwNVQ+D47u4nppOrH4fqGZNI25JV7Xz2/4JdAHrqLuv5Ms1+CmdRdSEI42Wx104A4+/lSLLOiKeT4bCY3RVc571lTwKBgQCipaVPCeZ7nSDhotukws8H13Q+Lr3EwDR5dszuOBVfmYythug6/knPGAgudkD1By+15Up8NoHpUuCfGOY0uyQZt5x61fITlSN64MVFWgge/Yi/uHkEe28nhU3Qwygrlaw1BcAj0Zhb+6VoyyyQ4yvVs9g561G1n/do8d3X2337og==\\n-----END PRIVATE KEY-----"
+  CERTIFICATESIGN_PUBLIC_KEY: "-----BEGIN PUBLIC KEY-----\\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxAF9ZA41vwLEgxS3cGiM9lfgNv4gwKR7B7N4vKKrvFH3DgcJvRUNCKMZ2Si0t/oUVS9izX2xUHHcmH/ow/6Vtx0ND5e9/eM/L3LSd8E6BZMMNrYjodLdKaWr3Dciw2GeWqWlowZXW79dWXZ4bRal5VCU3hkyluRLzy/JZ/oreo42NCW4D1MPBXLutQ8yfOUdt2vdsWqUSOn94WTl/qHA4LOh7j1DnWZoeH5iNdqxNpe1sL4yEvWrN1etpNMMXnlmVrZJZt8h0LTnwQLdRlHSc9BekgZkyjyAD+yA/QRc28VXpNMC5EgwCYkL03kD5AK6fWGLY2nAZ3q78kC40asIiQIDAQAB\\n-----END PUBLIC KEY-----"

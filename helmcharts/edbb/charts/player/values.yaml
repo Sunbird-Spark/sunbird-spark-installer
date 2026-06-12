@@ -101,10 +101,13 @@ sunbird_default_device_token: ""
 sunbird_external_content_whitelisted_domains: ""
 
 # Example values.yaml structure
-initContainers: {}
-  # - name: init-myservice
-  #   image: busybox:1.28
-  #   command: ['sh', '-c', "until nslookup kubernetes.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+initContainers:
+  - name: wait-for-yugabyte
+    image: nicolaka/netshoot
+    command:
+      - sh
+      - -c
+      - "until nc -z ${SUNBIRD_YUGABYTE_HOST:-yb-tserver-service} ${SUNBIRD_YUGABYTE_PORT:-5433}; do echo waiting for yugabyte; sleep 5; done"
 
 sidecars: {}
   # - name: log-reader # Sidecar container

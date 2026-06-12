@@ -86,6 +86,15 @@ configmap:
   enabled: true
   mountPath: /home/sunbird/lern-service-impl-1.0-SNAPSHOT/conf
 
+# Spark lern images ship Azure CSP only; on AWS inject cloud-storage-sdk-aws at runtime.
+lib_mount_path: /home/sunbird/lern-service-impl-1.0-SNAPSHOT/lib
+aws_csp:
+  enabled: true
+  maven_image: maven:3.9-eclipse-temurin-17
+  artifact_version: "2.0.1"
+
+initContainers: []
+
 commonAnnotations:
   reloader.stakater.com/auto: "true"
 
@@ -116,6 +125,10 @@ sunbird_encryption_mode: local
 sunbird_remote_req_router_path: pekko.tcp://SunbirdMWSystem@actor-service:8088/user/RequestRouter
 sunbird_remote_bg_req_router_path: kka.tcp://SunbirdMWSystem@actor-service:8088/user/BackgroundRequestRouter
 sunbird_default_channel: "sunbird"
+# Channel registration in knowlg during tenant org create (LR-422 / release 5.3.0)
+sunbird_channel_create_api_url: "/channel/v3/create"
+sunbird_channel_update_api_url: "/channel/v3/update"
+content_read_url: "/content/v3/read/"
 sunbird_user_bulk_upload_size: "1001"
 sunbird_otp_allowed_attempt: "5"
 feed_limit: "30"

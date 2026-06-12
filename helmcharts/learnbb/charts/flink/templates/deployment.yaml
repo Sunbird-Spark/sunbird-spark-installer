@@ -43,9 +43,23 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.initContainers }}
+      {{- if or (or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3")) .Values.initContainers }}
       initContainers:
-        {{- toYaml . | nindent 8 }}
+      {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+      - name: flink-s3-plugin-setup
+        image: "{{ .Values.global.learnflink.registry }}/{{ .Values.global.learnflink.repository }}:{{ .Values.global.learnflink.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - /bin/sh
+          - -c
+          - mkdir -p /tmp/flink-plugins/flink-s3-fs-hadoop /tmp/flink-plugins/flink-s3-fs-presto && cp -R /opt/flink/plugins/* /tmp/flink-plugins/ && cp /opt/flink/opt/flink-s3-fs-hadoop-*.jar /tmp/flink-plugins/flink-s3-fs-hadoop/ && cp /opt/flink/opt/flink-s3-fs-presto-*.jar /tmp/flink-plugins/flink-s3-fs-presto/ || true
+        volumeMounts:
+        - name: flink-s3-plugin-volume
+          mountPath: /tmp/flink-plugins
+      {{- end }}
+      {{- with .Values.initContainers }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -66,11 +80,14 @@ spec:
             "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
             "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
-  {{- if eq .Values.global.checkpoint_store_type "s3" }}
+  {{- if and (or (eq .Values.global.checkpoint_store_type "s3") (eq .Values.global.checkpoint_store_type "oci")) (or .Values.s3_endpoint .Values.s3_access_key) }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
             "-Ds3.secret-key={{ .Values.s3_secret_key }}",
             "-Ds3.endpoint={{ .Values.s3_endpoint }}",
             "-Ds3.path.style.access={{ .Values.s3_path_style_access }}",
+  {{- end }}
+  {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+            "-Dplugins.dir=/opt/flink/plugins",
   {{- end }}
             "-Dweb.submit.enable=false",
             "-Dmetrics.reporter.prom.class=org.apache.flink.metrics.prometheus.PrometheusReporter",
@@ -99,6 +116,10 @@ spec:
           - name: flink-config-volume
             mountPath: /opt/flink/conf/log4j-console.properties
             subPath: log4j-console.properties
+          {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+          - name: flink-s3-plugin-volume
+            mountPath: /opt/flink/plugins
+          {{- end }}
       volumes:
       - name: flink-config-volume
         configMap:
@@ -108,6 +129,10 @@ spec:
             path: flink-conf.yaml
           - key: log4j_console_properties
             path: log4j-console.properties
+      {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+      - name: flink-s3-plugin-volume
+        emptyDir: {}
+      {{- end }}
 {{ $component := "jobmanager" }}
 ---
 apiVersion: apps/v1
@@ -149,9 +174,23 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.initContainers }}
+      {{- if or (or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3")) .Values.initContainers }}
       initContainers:
-        {{- toYaml . | nindent 8 }}
+      {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+      - name: flink-s3-plugin-setup
+        image: "{{ .Values.global.learnflink.registry }}/{{ .Values.global.learnflink.repository }}:{{ .Values.global.learnflink.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - /bin/sh
+          - -c
+          - mkdir -p /tmp/flink-plugins/flink-s3-fs-hadoop /tmp/flink-plugins/flink-s3-fs-presto && cp -R /opt/flink/plugins/* /tmp/flink-plugins/ && cp /opt/flink/opt/flink-s3-fs-hadoop-*.jar /tmp/flink-plugins/flink-s3-fs-hadoop/ && cp /opt/flink/opt/flink-s3-fs-presto-*.jar /tmp/flink-plugins/flink-s3-fs-presto/ || true
+        volumeMounts:
+        - name: flink-s3-plugin-volume
+          mountPath: /tmp/flink-plugins
+      {{- end }}
+      {{- with .Values.initContainers }}
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -172,11 +211,14 @@ spec:
             "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
             "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
-  {{- if eq .Values.global.checkpoint_store_type "s3" }}
+  {{- if and (or (eq .Values.global.checkpoint_store_type "s3") (eq .Values.global.checkpoint_store_type "oci")) (or .Values.s3_endpoint .Values.s3_access_key) }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
             "-Ds3.secret-key={{ .Values.s3_secret_key }}",
             "-Ds3.endpoint={{ .Values.s3_endpoint }}",
             "-Ds3.path.style.access={{ .Values.s3_path_style_access }}",
+  {{- end }}
+  {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+            "-Dplugins.dir=/opt/flink/plugins",
   {{- end }}
                 "--job-classname={{ $jobData.job_classname }}",
                 "-Dweb.submit.enable=false",
@@ -216,6 +258,10 @@ spec:
           - name: flink-config-volume
             mountPath: /opt/flink/conf/log4j-console.properties
             subPath: log4j-console.properties
+          {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+          - name: flink-s3-plugin-volume
+            mountPath: /opt/flink/plugins
+          {{- end }}
       volumes:
       - name: flink-config-volume
         configMap:
@@ -229,6 +275,10 @@ spec:
             path: {{ $jobName }}.conf
           - key: log4j_console_properties
             path: log4j-console.properties
+      {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+      - name: flink-s3-plugin-volume
+        emptyDir: {}
+      {{- end }}
 {{- end }}
 {{- end}}
 {{- end}}

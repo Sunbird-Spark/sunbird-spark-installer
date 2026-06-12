@@ -63,22 +63,23 @@ function certificate_keys() {
 
 
 function certificate_config() {
-    # Check if jq is available in the nodebb container, install only if missing
-    echo "Configuring Certificate keys"
-    if ! kubectl -n sunbird exec deploy/nodebb -- which jq >/dev/null 2>&1; then
-        echo "jq not found in nodebb container, attempting to install..."
-        # Try to install jq using available package manager, fallback if apt fails
-        kubectl -n sunbird exec deploy/nodebb -- bash -c "apt-get update || true"
-        kubectl -n sunbird exec deploy/nodebb -- bash -c "apt-get install -y jq || true"
+    local script_dir exec_deploy
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    exec_deploy="knowledge-mw"
+    if kubectl -n sunbird get deploy nodebb >/dev/null 2>&1; then
+        exec_deploy="nodebb"
     fi
 
-    CERTKEY=$(kubectl -n sunbird exec deploy/nodebb -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
-    # Inject cert keys to the service if its not available 
+    echo "Configuring Certificate keys (via ${exec_deploy})"
+    CERTKEY=$(kubectl -n sunbird exec "deploy/${exec_deploy}" -- curl -s --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq -r '.[] | .value // empty')
+    # Inject cert keys to the service if its not available
     if [ -z "$CERTKEY" ]; then
         echo "Certificate RSA public key not available"
-        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
+        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' "$script_dir/global-values.yaml")
         curl_data="curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw '{\"value\":\"$CERTPUBKEY\"}'"
-        echo "kubectl -n sunbird exec deploy/nodebb -- $curl_data" | sh -
+        echo "kubectl -n sunbird exec deploy/${exec_deploy} -- $curl_data" | sh -
+    else
+        echo "Certificate public key already configured in registry"
     fi
 }
 function install_component() {
@@ -103,6 +104,10 @@ function install_component() {
         cd ../../../helmcharts 2>/dev/null || true
     fi
     local component="$1"
+    if [ ! -d "$component" ] || [ ! -f "$component/Chart.yaml" ]; then
+        echo "Error: Helm chart not found at helmcharts/$component (missing directory or Chart.yaml)"
+        exit 1
+    fi
     kubectl create namespace sunbird 2>/dev/null || true
     kubectl create namespace velero 2>/dev/null || true
     kubectl create namespace volume-autoscaler 2>/dev/null || true
@@ -130,8 +135,8 @@ function install_component() {
         $ed_values_flag \
         -f images.yaml \
         -f "global-resources.yaml" \
-        -f "../opentofu/aws/template/global-values.yaml" \
-        -f "../opentofu/aws/template/global-cloud-values.yaml" --timeout 30m --debug
+        -f "$script_dir/global-values.yaml" \
+        -f "$script_dir/global-cloud-values.yaml" --timeout 30m --debug
 }
 
 function install_helm_components() {
@@ -159,23 +164,98 @@ function post_install_nodebb_plugins() {
     echo "NodeBB plugins are activated, built, and NodeBB has been restarted."
 }
 
+function get_domain_name() {
+    local script_dir domain
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if kubectl -n sunbird get cm lms-env >/dev/null 2>&1; then
+        domain=$(kubectl get cm -n sunbird lms-env -ojsonpath='{.data.sunbird_web_url}')
+    elif kubectl -n sunbird get cm cert-env >/dev/null 2>&1; then
+        domain=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
+    elif kubectl -n sunbird get cm player-env >/dev/null 2>&1; then
+        domain=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.DOMAIN_URL}')
+    else
+        domain=$(grep '^  domain:' "$script_dir/global-values.yaml" | awk '{print $2}' | tr -d '"')
+    fi
+    domain="${domain#https://}"
+    domain="${domain#http://}"
+    domain="${domain%/}"
+    echo "$domain"
+}
+
+function get_load_balancer_hostname() {
+    kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].hostname}'
+}
+
+function get_load_balancer_ips() {
+    local lb_ip lb_host
+    lb_ip=$(kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].ip}')
+    if [ -n "$lb_ip" ]; then
+        echo "$lb_ip"
+        return
+    fi
+    lb_host=$(get_load_balancer_hostname)
+    if [ -n "$lb_host" ]; then
+        dig +short "$lb_host" 2>/dev/null | grep -E '^[0-9.]+$' | sort -u
+    fi
+}
+
+function dns_mapping_propagated() {
+    local domain="$1" lb_host="$2"
+    local domain_cname domain_ip lb_ip
+
+    domain_cname=$(dig +short CNAME "$domain" 2>/dev/null | head -1 | sed 's/\.$//')
+    if [ -n "$lb_host" ] && [ "$domain_cname" = "$lb_host" ]; then
+        return 0
+    fi
+
+    while IFS= read -r domain_ip; do
+        [ -z "$domain_ip" ] && continue
+        while IFS= read -r lb_ip; do
+            [ -z "$lb_ip" ] && continue
+            if [ "$domain_ip" = "$lb_ip" ]; then
+                return 0
+            fi
+        done < <(get_load_balancer_ips)
+    done < <(dig +short "$domain" 2>/dev/null | grep -E '^[0-9.]+$')
+
+    return 1
+}
+
 function dns_mapping() {
-    domain_name=$(kubectl get cm -n sunbird lms-env -ojsonpath='{.data.sunbird_web_url}')
-    PUBLIC_IP=$(kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].ip}')
+    domain_name=$(get_domain_name)
+    LB_HOST=$(get_load_balancer_hostname)
+    mapfile -t LB_IPS < <(get_load_balancer_ips)
+    PUBLIC_IP="${LB_IPS[0]:-}"
 
     local timeout=$((SECONDS + 1200))
     local check_interval=10
 
-    echo -e "\nAdd/update your DNS mapping for your domain by adding an A record to this IP: ${PUBLIC_IP}. The script will wait for 20 minutes"
+    if [ -z "$domain_name" ] || { [ -z "$PUBLIC_IP" ] && [ -z "$LB_HOST" ]; }; then
+        echo "Could not resolve domain name or load balancer address."
+        echo "  domain: ${domain_name:-<empty>}"
+        echo "  load balancer: ${LB_HOST:-<empty>}"
+        echo "  load balancer IP: ${PUBLIC_IP:-<empty>}"
+        exit 1
+    fi
+
+    echo ""
+    echo "Add/update DNS for ${domain_name}:"
+    if [ -n "$LB_HOST" ]; then
+        echo "  Recommended: CNAME -> ${LB_HOST}"
+        echo "  Load balancer IP(s): ${LB_IPS[*]}"
+    else
+        echo "  A record -> ${PUBLIC_IP}"
+    fi
+    echo "Waiting up to 20 minutes for propagation."
 
     while [ $SECONDS -lt $timeout ]; do
-        current_ip=$(nslookup $domain_name | grep -E -o 'Address: [0-9.]+' | awk '{print $2}')
-
-        if [ "$current_ip" == "$PUBLIC_IP" ]; then
-            echo -e "\nDNS mapping has propagated successfully."
+        if dns_mapping_propagated "$domain_name" "$LB_HOST"; then
+            echo ""
+            echo "DNS mapping has propagated successfully."
             return
         fi
-        echo "DNS mapping is still propagating. Retrying in $check_interval seconds..."
+        current_ip=$(dig +short "$domain_name" 2>/dev/null | grep -E '^[0-9.]+$' | head -1)
+        echo "DNS mapping is still propagating (${domain_name} -> ${current_ip:-unknown}; expected CNAME ${LB_HOST:-n/a} or IP ${LB_IPS[*]}). Retrying in ${check_interval}s..."
         sleep $check_interval
     done
 
@@ -185,18 +265,65 @@ function dns_mapping() {
     echo "./install.sh run_post_install"
 }
 
+function kubectl_cm_value() {
+    local val cm key
+    while [ $# -ge 2 ]; do
+        cm="$1"
+        key="$2"
+        shift 2
+        if kubectl -n sunbird get cm "$cm" >/dev/null 2>&1; then
+            val=$(kubectl get cm -n sunbird "$cm" -ojsonpath="{.data.${key}}" 2>/dev/null)
+            if [ -n "$val" ]; then
+                echo "$val"
+                return 0
+            fi
+        fi
+    done
+    return 1
+}
+
 function generate_postman_env() {
-    local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../opentofu/aws/template 2>/dev/null || true
+    local script_dir
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ "$(basename "$(pwd)")" != "$environment" ]; then
+        cd "$script_dir" 2>/dev/null || true
     fi
-    domain_name=$(kubectl get cm -n sunbird lms-env -ojsonpath='{.data.sunbird_web_url}')
-    blob_store_path=$(kubectl get cm -n sunbird player-env -o jsonpath='{.data.sunbird_public_storage_account_name}' | sed 's|/$||')
-    public_container_name=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.cloud_storage_resourceBundle_bucketname}') 
-    api_key=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_api_auth_token}')
-    keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.sunbird_portal_session_secret}')
-    keycloak_admin=$(kubectl get cm -n sunbird userorg-env -ojsonpath='{.data.sunbird_sso_username}')
-    keycloak_password=$(kubectl get cm -n sunbird userorg-env -ojsonpath='{.data.sunbird_sso_password}')
+
+    domain_name=$(kubectl_cm_value \
+        lms-env sunbird_web_url \
+        lern-env sunbird_web_url \
+        player-env DOMAIN_URL \
+        cert-env sunbird_cert_domain_url) || domain_name=$(get_domain_name)
+    domain_name="${domain_name#https://}"
+    domain_name="${domain_name#http://}"
+    domain_name="${domain_name%/}"
+
+    blob_store_path=$(kubectl_cm_value \
+        player-env sunbird_public_storage_account_name \
+        lern-env cloud_storage_base_url) || blob_store_path=""
+    blob_store_path=$(echo "$blob_store_path" | sed 's|/*$||')
+
+    public_container_name=$(kubectl_cm_value \
+        player-env cloud_storage_resourceBundle_bucketname \
+        lern-env sunbird_content_cloud_storage_container \
+        cert-env PUBLIC_CONTAINER_NAME) || public_container_name=""
+
+    api_key=$(kubectl_cm_value \
+        player-env sunbird_api_auth_token \
+        lern-env sunbird_authorization) || api_key=""
+
+    keycloak_secret=$(kubectl_cm_value \
+        player-env sunbird_portal_session_secret \
+        player-env SUNBIRD_SESSION_SECRET) || keycloak_secret=""
+
+    keycloak_admin=$(kubectl_cm_value \
+        userorg-env sunbird_sso_username \
+        lern-env sunbird_sso_username) || keycloak_admin=""
+
+    keycloak_password=$(kubectl_cm_value \
+        userorg-env sunbird_sso_password \
+        lern-env sunbird_sso_password) || keycloak_password=""
+
     generated_uuid=$(uuidgen)
     temp_file=$(mktemp)
     cp postman.env.json "${temp_file}"
@@ -210,7 +337,7 @@ function generate_postman_env() {
         -e "s|PUBLIC_CONTAINER_NAME|${public_container_name}|g" \
         "${temp_file}" >"env.json"
 
-    echo -e "A env.json file is created in this directory: opentofu/aws/template"
+    echo -e "A env.json file is created in this directory: ${script_dir}"
     echo "Import the env.json file into postman to invoke other APIs"
 }
 
@@ -221,30 +348,123 @@ function restart_workloads_using_keys() {
     echo -e "\nWaiting for all pods to start"
 }
 
+function get_postman_collection_file() {
+    local script_dir repo_root candidates f
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    repo_root="$(cd "$script_dir/../../.." && pwd)"
+    candidates=(
+        "$repo_root/postman-collection/collection${RELEASE}.json"
+        "$repo_root/postman-collection/sunbird-spark-collection-v1.json"
+    )
+    for f in "${candidates[@]}"; do
+        if [ -f "$f" ]; then
+            echo "$f"
+            return 0
+        fi
+    done
+    f=$(find "$repo_root/postman-collection" -maxdepth 1 -name '*.json' -type f 2>/dev/null | head -1)
+    if [ -n "$f" ]; then
+        echo "$f"
+        return 0
+    fi
+    echo "No Postman collection found under $repo_root/postman-collection" >&2
+    return 1
+}
+
+function run_postman_collection() {
+    local collection_name="$1"
+    if command -v newman >/dev/null 2>&1; then
+        newman run "$collection_name" \
+            --environment env.json \
+            --delay-request 500 \
+            --timeout-request 30000 \
+            --insecure \
+            --bail
+        return $?
+    fi
+    if command -v npx >/dev/null 2>&1; then
+        npx --yes newman run "$collection_name" \
+            --environment env.json \
+            --delay-request 500 \
+            --timeout-request 30000 \
+            --insecure \
+            --bail
+        return $?
+    fi
+    if command -v xvfb-run >/dev/null 2>&1; then
+        ELECTRON_DISABLE_GPU=1 xvfb-run -a postman collection run "$collection_name" \
+            --environment env.json \
+            --delay-request 500 \
+            --bail \
+            --insecure
+        return $?
+    fi
+    echo "No headless Postman runner found. Install Newman (recommended on servers without a display):" >&2
+    echo "  sudo apt install -y npm && sudo npm install -g newman" >&2
+    echo "Or install xvfb for the Postman snap: sudo apt install -y xvfb" >&2
+    return 1
+}
+
 function run_post_install() {
-    local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../opentofu/aws/template 2>/dev/null || true
+    local script_dir collection_file collection_name
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    if [ "$(basename "$(pwd)")" != "$environment" ]; then
+        cd "$script_dir" 2>/dev/null || true
     fi
     check_pod_status
     echo "Starting post install..."
-    cp ../../../postman-collection/collection${RELEASE}.json .
-    postman collection run collection${RELEASE}.json --environment env.json --delay-request 500 --bail --insecure
+    collection_file=$(get_postman_collection_file) || exit 1
+    collection_name=$(basename "$collection_file")
+    cp "$collection_file" .
+    run_postman_collection "$collection_name"
+}
+
+function ensure_ed_client_forms_collections() {
+    local repo_root="$1"
+    local ed_dir="$repo_root/postman-collection/ED-${RELEASE}"
+    local base_url="https://raw.githubusercontent.com/project-sunbird/sunbird-ed-installer/main/postman-collection/ED-${RELEASE}"
+    local files=(
+        Easy-Installer-7.0-Question-Set-Editor.postman_collection.json
+        Easy-Installer-7.0-editor-forms.postman_collection.json
+        Easy-Installer-7.0-mobile.postman_collection.json
+        Easy-Installer-7.0-portal.postman_collection.json
+        Easy-Installer-7.0.postman_collection.json
+    )
+    if [ -d "$ed_dir" ] && find "$ed_dir" -maxdepth 1 -name '*.json' -print -quit | grep -q .; then
+        return 0
+    fi
+    echo "ED-${RELEASE} collections not found locally; downloading from project-sunbird/sunbird-ed-installer..."
+    mkdir -p "$ed_dir"
+    local f
+    for f in "${files[@]}"; do
+        curl -fsSL -o "$ed_dir/$f" "$base_url/$f"
+    done
 }
 
 function create_client_forms() {
-    local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../opentofu/aws/template 2>/dev/null || true
+    local script_dir repo_root ed_dir collection_file
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    repo_root="$(cd "$script_dir/../../.." && pwd)"
+    if [ "$(basename "$(pwd)")" != "$environment" ]; then
+        cd "$script_dir" 2>/dev/null || true
     fi
-    cp -rf ../../../postman-collection/ED-${RELEASE}  .
+    if [ ! -f env.json ]; then
+        echo "env.json not found. Run ./install.sh generate_postman_env first." >&2
+        return 1
+    fi
+    ensure_ed_client_forms_collections "$repo_root" || {
+        echo "Failed to obtain ED-${RELEASE} client form collections." >&2
+        return 1
+    }
+    ed_dir="$repo_root/postman-collection/ED-${RELEASE}"
+    cp -rf "$ed_dir" .
     check_pod_status
-    #loop through files inside collection folder
-    for FILES in ED-${RELEASE}/*.json; do
-     echo "Creating client forms in.. $FILES"
-      postman collection run $FILES --environment env.json --delay-request 500 --bail --insecure
-    done 
-   }
+    echo "Starting client forms (ED-${RELEASE})..."
+    for collection_file in "ED-${RELEASE}"/*.json; do
+        echo "Creating client forms in.. $collection_file"
+        run_postman_collection "$collection_file" || return 1
+    done
+}
 
 function cleanworkspace() {
         rm  certkey.pem certpubkey.pem
@@ -278,7 +498,7 @@ function invoke_functions() {
 
 function check_pod_status() {
     echo -e "\nRemove any orphaned pods if they exist."
-    kubectl get pod -n sunbird --no-headers | grep -v Completed | grep -v Running | awk '{print $1}' | xargs -I {} kubectl delete -n sunbird pod {} || true
+    kubectl get pod -n sunbird --no-headers 2>/dev/null | grep -v Completed | grep -v Running | awk '{print $1}' | xargs -r -I {} kubectl delete -n sunbird pod {} 2>/dev/null || true
     local timeout=$((SECONDS + 600))
     consecutive_runs=0
     echo "Ensure the post are stable for 100 seconds"

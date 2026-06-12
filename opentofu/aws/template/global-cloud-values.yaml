@@ -2,7 +2,7 @@ global:
   env: dev
   environment: dev
   building_block: sunbird-spark
-  cloud_storage_access_key:       
+  cloud_storage_access_key:   
   cloud_storage_secret_key: 
   public_container_name: sunbird-spark-dev-public-8eedcadf58
   private_container_name: sunbird-spark-dev-private-8eedcadf58

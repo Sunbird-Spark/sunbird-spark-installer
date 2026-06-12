@@ -18,7 +18,7 @@ resource "null_resource" "copy_from_sunbird_bucket" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "rclone copy sunbird:${var.sunbird_public_artifacts_container} ownaccount:${var.storage_container_public} --transfers 600 --checkers 600 --exclude .terragrunt-source-manifest"
+    command = "rclone copy sunbird:${var.sunbird_public_artifacts_container} ownaccount:${var.storage_container_public} --transfers 600 --checkers 600 --s3-storage-class STANDARD --exclude .terragrunt-source-manifest"
   }
   depends_on = [local_sensitive_file.rclone_config]
 }
@@ -42,7 +42,7 @@ resource "null_resource" "upload_rc_schemas_to_public_bucket" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "rclone copy ${path.module}/sunbird-rc/schemas ownaccount:${var.storage_container_public}/schemas --transfers 25 --checkers 25 --exclude .terragrunt-source-manifest"
+    command = "rclone copy ${path.module}/sunbird-rc/schemas ownaccount:${var.storage_container_public}/schemas --transfers 25 --checkers 25 --exclude .terragrunt-source-manifest --s3-storage-class STANDARD"
   }
   depends_on = [local_sensitive_file.rclone_config]
 }

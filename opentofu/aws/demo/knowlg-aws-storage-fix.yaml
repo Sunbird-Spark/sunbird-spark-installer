@@ -1,0 +1,12 @@
+# AWS knowlg + Flink publish: inject cloud-storage-sdk-aws JARs at runtime (images ship Azure CSP only).
+global:
+  cloud_storage_provider: "aws"
+  sunbird_cloud_storage_provider: "aws"
+  cloud_storage_access_key: 
+  cloud_storage_secret_key: 
+knowlg:
+  aws_csp:
+    enabled: true
+flink:
+  aws_csp:
+    enabled: true
