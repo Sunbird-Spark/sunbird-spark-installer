@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "database-export.scriptsConfigMap" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "database-export.labels" . | nindent 4 }}
+data:
+  postgres-export.sh: |
+{{ tpl (.Files.Get "files/postgres-export.sh") . | indent 4 }}
+  cassandra-export.sh: |
+{{ tpl (.Files.Get "files/cassandra-export.sh") . | indent 4 }}
+  neo4j-export.sh: |
+{{ tpl (.Files.Get "files/neo4j-export.sh") . | indent 4 }}
+  elasticsearch-snapshot.py: |
+{{ .Files.Get "files/elasticsearch-snapshot.py" | indent 4 }}
+  import_data.groovy: |
+{{ .Files.Get "files/import_data.groovy" | indent 4 }}
+  set_graphid.groovy: |
+{{ .Files.Get "files/set_graphid.groovy" | indent 4 }}
+  verify_migration.groovy: |
+{{ .Files.Get "files/verify_migration.groovy" | indent 4 }}

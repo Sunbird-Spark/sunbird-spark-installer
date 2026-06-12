@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opensearch-migration-indices
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: opensearch-migration
+data:
+  {{- $files := .Files }}
+  {{- range $path, $_ := $files.Glob "files/opensearch/v2.19.5/indices/*.json" }}
+  {{ base $path }}: |
+{{ $files.Get $path | indent 4 }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opensearch-migration-mappings
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: opensearch-migration
+data:
+  {{- $files := .Files }}
+  {{- range $path, $_ := $files.Glob "files/opensearch/v2.19.5/mappings/*.json" }}
+  {{ base $path }}: |
+{{ $files.Get $path | indent 4 }}
+  {{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opensearch-migration-pipelines
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: opensearch-migration
+data:
+  {{- $files := .Files }}
+  {{- range $path, $_ := $files.Glob "files/opensearch/v2.19.5/pipelines/*.json" }}
+  {{ base $path }}: |
+{{ $files.Get $path | indent 4 }}
+  {{- end }}

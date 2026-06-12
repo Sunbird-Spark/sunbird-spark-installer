@@ -194,7 +194,9 @@ yugabyte: &yugabyte
   # Force single replica for Yugabyte masters and tservers (override subchart defaults)
   replicas:
     master: 3
-    tserver: 3   
+    tserver: 3
+  preflight:
+    skipUlimit: true
   username: yugabyte
   password: "yugabyte"    
 

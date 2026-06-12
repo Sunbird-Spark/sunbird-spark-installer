@@ -1,0 +1,138 @@
+{
+    "categories": [
+        {
+            "id": "login",
+            "name": "Login",
+            "videos": [
+                {
+                    "id": "01",
+                    "name": "Vídeo de exemplo",
+                    "thumbnail": "https://obj.stage.sunbirded.org/sunbird-content-staging/content/do_21382892240155443211092/artifact/do_2133179581016637441328_1625727308036_1024px-flag_of_venezuela_state.thumb.svg.thumb.png",
+                    "url": "https://obj.stage.sunbirded.org/sunbird-content-staging/content/assets/do_21382892240155443211092/sunbird-learning-framework-take-2.mp4"
+                }
+            ],
+            "faqs": [
+                {
+                    "topic": "Quero me registrar no Sunbird",
+                    "description": "Para se cadastrar no Sunbird:\n<ul>\n  <li>Acesse <a href=\"https://dev.sunbirded.org/explore\" target=\"_blank\">Explorar Sunbird</a></li>\n  <li>Selecione se você é professor ou estudante</li>\n  <li>Atualize os detalhes da sua localização</li>\n  <li>Clique no ícone do perfil</li>\n  <li>Clique em <b>Login</b></li>\n  <li>Clique em <b>Registrar-se aqui</b> na tela de login</li>\n  <li>Para detalhes sobre como se registrar, consulte https://dev.sunbirded.org/help/getting-started/sign-in/sign-up.html</li>\n</ul>"
+                },
+                {
+                    "topic": "Quero fazer login no Sunbird usando o Google",
+                    "description": "<p>Para fazer login no Sunbird através da sua conta Gmail:</p>\n<ul>\n    <li>Clique no ícone <strong>Perfil</strong></li>\n    <li>Clique em <strong>Login</strong></li>\n    <li>Selecione <strong>Entrar com o Google</strong></li>\n    <li>Escolha uma conta Gmail</li>\n    <li>Clique em Continuar para concordar com as políticas, termos e condições</li>\n</ul>"
+                }
+            ]
+        },
+        {
+            "id": "profile",
+            "name": "Perfil",
+            "videos": [],
+            "faqs": [
+                {
+                    "topic": "Esqueci minha senha",
+                    "description": "<p>Para redefinir sua senha, siga estes passos para recuperar sua conta:</p>\n<ul>\n    <li>Clique em <strong>Esqueci a senha</strong></li>\n    <li>Digite o e-mail ou número de celular e o nome de usuário fornecidos no cadastro</li>\n    <li><br></li>\n    <li>Você receberá um OTP no e-mail ou celular registrado</li>\n    <li><br></li>\n    <li>Digite o OTP para redefinir sua senha e recuperar sua conta</li>\n    <li>Para mais detalhes, consulte <a href=\"https://dev.sunbirded.org/help/getting-started/recover-password/index.html\" target=\"_blank\">Recuperar senha</a></li>\n</ul>"
+                },
+                {
+                    "topic": "Quero editar os detalhes do meu perfil",
+                    "description": "Você pode editar os seguintes dados no seu perfil:\n<ul>\n<li>Dados pessoais como nome, estado e distrito</li>\n<li>Dados de contato como número de celular e e-mail</li>\n<li>Outros dados como conselho, idioma, disciplina e série</li>\n</ul>\nPara detalhes sobre como editar o perfil, consulte \n<a href=\"https://dev.sunbirded.org/help/getting-started/user-profile/index.html\" target=\"_blank\">Perfil do usuário</a>\n"
+                }
+            ]
+        },
+        {
+            "id": "course_certificates",
+            "name": "Cursos e certificados",
+            "videos": [],
+            "faqs": [
+                {
+                    "topic": "Quero baixar meu certificado",
+                    "description": "<p>Nem todos os cursos oferecem certificado. Se você concluiu um curso que oferece certificado, vá até sua página de perfil e verá o ícone de download ao lado do nome do curso.</p>\n<p>Se não conseguir baixar o certificado no aplicativo móvel:</p>\n<ul>\n    <li>Verifique se possui a versão mais recente do app Sunbird. Caso contrário, atualize na Play Store</li>\n    <li>Clique no botão de atualizar na aba <strong>Perfil</strong> na seção <strong>Cursos realizados</strong></li>\n    <li>Se ainda não conseguir, envie-nos:<ul>\n            <li style=\"margin-left: 20px;\">Nome do curso</li>\n            <li style=\"margin-left: 20px;\">Seu ID Sunbird</li>\n            <li style=\"margin-left: 20px;\">Captura de tela da página de perfil com os detalhes do curso</li>\n        </ul>\n    </li>\n</ul>"
+                },
+                {
+                    "topic": "Quero participar de um curso",
+                    "description": "<p>Para se inscrever em um curso, é necessário estar logado no Sunbird.</p>\n<p>Vá até a seção <strong>Cursos</strong> e procure o curso. Para detalhes sobre inscrição e matrícula em turmas, consulte:</p>\n<ul>\n    <li><a href=\"https://dev.sunbirded.org/help/getting-started/sunbird-mobile-app/course.html\" target=\"_blank\">Cursos</a></li>\n    <li><a href=\"https://dev.sunbirded.org/help/getting-started/sunbird-mobile-app/enrolling-course.html\" target=\"_blank\">Participar de cursos</a></li>\n</ul>"
+                },
+                {
+                    "topic": "Quero meu certificado logo após concluir o curso",
+                    "description": "Uma autoridade estadual decide quando emitir o certificado. Alguns certificados são emitidos em até 7 dias após a conclusão, enquanto outros apenas após o término do lote. Entre em contato com a autoridade estadual ou administrador do curso para mais informações. Você receberá uma notificação quando o certificado for emitido."
+                },
+                {
+                    "topic": "Quero verificar meu progresso no curso",
+                    "description": "A porcentagem de conclusão do curso é exibida no canto superior direito da página do curso."
+                },
+                {
+                    "topic": "Quero saber se um curso oferece certificado",
+                    "description": "A página do curso indica se há certificado. A mensagem <b>Este é um curso com certificado</b> será exibida."
+                },
+                {
+                    "topic": "Quero receber notificação quando o certificado for emitido",
+                    "description": "Você receberá uma notificação no e-mail ou telefone registrados."
+                },
+                {
+                    "topic": "Quero alterar meu nome no certificado",
+                    "description": "O nome no certificado é o mesmo do perfil. Corrija o nome no perfil e contate a autoridade estadual para solicitar a reemissão. O processo leva cerca de 24 horas após o pedido."
+                },
+                {
+                    "topic": "Concluí o curso, mas não aparece 100%",
+                    "description": "O sistema pode levar algumas horas para sincronizar. Verifique novamente após um dia."
+                },
+                {
+                    "topic": "Quero contribuir com conteúdo para o Sunbird",
+                    "description": "Para contribuir, acesse o <a href=\"https://dev.sunbirded.org/\" target=\"_blank\">portal Vidyadaan</a>"
+                },
+                {
+                    "topic": "Não consigo encontrar meu curso",
+                    "description": "Vá até a seção <b>Cursos</b>, use filtros ou pesquise pelo nome do curso."
+                },
+                {
+                    "topic": "Meu perfil não mostra o progresso corretamente",
+                    "description": "Vá em <b>Minhas aprendizagens</b>, abra o curso, clique no menu (três pontos) e selecione <b>Sincronizar progresso agora</b>. Aguarde alguns minutos."
+                }
+            ]
+        }
+    ],
+    "constants": {
+        "charactersLeft": "caracteres restantes",
+        "explainMsg": "Você poderia explicar o problema?",
+        "faqMsg": "Perguntas frequentes",
+        "faqTitle": "FAQ(s)",
+        "help": "Ajuda",
+        "helpMsg": "Esta resposta ajudou você?",
+        "initiateEmailButton": "Iniciar e-mail",
+        "knowMoreMsg": "O que mais você gostaria de saber?",
+        "noMsg": "Não",
+        "reportIssue": "Relatar um problema",
+        "reportIssueMsg": "Relatar outro problema",
+        "resolveMsg": "Obtenha ajuda para encontrar conteúdo, problemas técnicos e mais. Navegue pelos tópicos para ver FAQs, vídeos de ajuda e muito mais.",
+        "selectCategoryTitle": "Selecionar categoria",
+        "sorryMsg": "Lamentamos por isso!",
+        "submitButton": "Enviar feedback",
+        "tellMoreMsg": "Conte-nos mais sobre o problema",
+        "thanksForFeedbackMsg": "Obrigado pelo seu feedback. Talvez não possamos responder a todas as sugestões, mas sua opinião ajuda a melhorar {{app_name}} para todos.",
+        "thanksMsg": "Obrigado pela sua resposta!",
+        "triggerEmailMsg": "Após adicionar detalhes e clicar em Iniciar e-mail, enviaremos um e-mail em seu nome. Você poderá adicionar mais informações e anexos lá.",
+        "typeHere": "Digite aqui...",
+        "videoTitle": "Vídeo(s)",
+        "yesMsg": "Sim"
+    },
+    "general": [
+        {
+            "title": "Como encontrar cursos relevantes no portal Sunbird?",
+            "description": "Vá para a seção <b>Explorar</b>. Use a busca ou filtros por:<ul><li>Disciplina</li><li>Idioma</li><li>Série</li></ul>"
+        },
+        {
+            "title": "O que fazer se eu esquecer minha senha?",
+            "description": "Clique em <a href='/recover-password'>Esqueci a senha</a>. Digite seu e-mail ou celular para receber um OTP seguro."
+        },
+        {
+            "title": "Como acompanhar meu progresso no curso?",
+            "description": "Seu progresso aparece como uma <b>barra percentual</b> no painel do curso.<br><br><b>Observação:</b> É necessário concluir todos os módulos obrigatórios."
+        },
+        {
+            "title": "Posso acessar conteúdo offline?",
+            "description": "O portal web requer internet, mas o <b>App Sunbird</b> permite downloads para acesso offline."
+        },
+        {
+            "title": "Onde encontro meus certificados?",
+            "description": "Vá ao <b>Perfil</b>. Na seção <i>Learning Passbook</i>, você verá os cursos concluídos com o botão <b>Baixar certificado</b>."
+        }
+    ]
+}

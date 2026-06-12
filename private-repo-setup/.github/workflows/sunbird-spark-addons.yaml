@@ -44,6 +44,32 @@ on:
         description: '   ↳ Video Stream Generator'
         type: boolean
         default: false
+      addon_asset_enrichment:
+        description: '   ↳ Asset Enrichment'
+        type: boolean
+        default: false
+
+      # ── UNINSTALL ADDONS ─────────────────────────────────────────────
+      run_addon_uninstall:
+        description: '3️⃣ Uninstall addon components'
+        type: boolean
+        default: false
+      uninstall_dial:
+        description: '   ↳ DIAL'
+        type: boolean
+        default: false
+      uninstall_discussion_forum:
+        description: '   ↳ Discussion Forum'
+        type: boolean
+        default: false
+      uninstall_video_stream_generator:
+        description: '   ↳ Video Stream Generator'
+        type: boolean
+        default: false
+      uninstall_asset_enrichment:
+        description: '   ↳ Asset Enrichment'
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -104,7 +130,7 @@ jobs:
         run: |
           curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
           sudo wget -qO /usr/local/bin/terragrunt \
-            https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.21/terragrunt_linux_amd64
+            https://github.com/gruntwork-io/terragrunt/releases/download/v1.0.3/terragrunt_linux_amd64
           sudo chmod +x /usr/local/bin/terragrunt
           sudo wget -qO /usr/local/bin/yq \
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
@@ -292,6 +318,13 @@ jobs:
           bash sunbird-spark-installer/addons/video-stream-generator/script/addon.sh install azure
           echo "✅ Video Stream Generator installed"
 
+      - name: 2️⃣ addon — Asset Enrichment
+        if: ${{ inputs.addon_asset_enrichment }}
+        run: |
+          export ENV_NAME="${{ inputs.environment }}"
+          bash sunbird-spark-installer/addons/asset-enrichment/script/addon.sh install azure
+          echo "✅ Asset Enrichment installed"
+
       - name: Deploy Addons Summary
         if: always()
         run: |
@@ -302,4 +335,125 @@ jobs:
           [ "${{ inputs.addon_dial }}"                   == "true" ] && echo "  ✅ DIAL"                   || echo "  ⏭️  DIAL (skipped)"
           [ "${{ inputs.addon_discussion_forum }}"       == "true" ] && echo "  ✅ Discussion Forum"       || echo "  ⏭️  Discussion Forum (skipped)"
           [ "${{ inputs.addon_video_stream_generator }}" == "true" ] && echo "  ✅ Video Stream Generator" || echo "  ⏭️  Video Stream Generator (skipped)"
+          [ "${{ inputs.addon_asset_enrichment }}"       == "true" ] && echo "  ✅ Asset Enrichment"       || echo "  ⏭️  Asset Enrichment (skipped)"
+          echo "================================================"
+
+# ════════════════════════════════════════════════════════════════════════════
+# JOB 3 — UNINSTALL ADDONS
+# ════════════════════════════════════════════════════════════════════════════
+  uninstall-addons:
+    name: "3 — Uninstall Addons"
+    if: ${{ always() && inputs.run_addon_uninstall }}
+    needs: [deploy-addons]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout Configuration Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.config_branch }}
+
+      - name: Clone Source Repository
+        run: |
+          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+            https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
+          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+
+      - name: Azure Login (Uninstall)
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Decrypt Config Files
+        run: |
+          pip install ansible
+
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+
+          ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
+            --vault-password-file=/tmp/vault_pass.txt
+          echo "✅ global-values.yaml decrypted"
+
+          if [ -f "$CONFIG_PATH/global-cloud-values.yaml" ]; then
+            ansible-vault decrypt $CONFIG_PATH/global-cloud-values.yaml \
+              --vault-password-file=/tmp/vault_pass.txt
+            echo "✅ global-cloud-values.yaml decrypted"
+          fi
+
+          rm /tmp/vault_pass.txt
+
+      - name: Setup Environment Folder
+        run: |
+          cp -r sunbird-spark-installer/opentofu/azure/template $ENV_FOLDER
+          cp $CONFIG_PATH/global-values.yaml $ENV_FOLDER/global-values.yaml
+          if [ -f "$CONFIG_PATH/global-cloud-values.yaml" ]; then
+            cp $CONFIG_PATH/global-cloud-values.yaml $ENV_FOLDER/global-cloud-values.yaml
+          else
+            echo "{}" > $ENV_FOLDER/global-cloud-values.yaml
+          fi
+          echo "✅ Environment folder ready: $ENV_FOLDER"
+
+      - name: Install Deploy Tools
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          kubectl version --client && helm version && yq --version
+
+      - name: Get AKS Credentials
+        run: |
+          BUILDING_BLOCK=$(yq '.global.building_block' $CONFIG_PATH/global-values.yaml)
+          CLUSTER_NAME="${BUILDING_BLOCK}-${{ inputs.environment }}"
+          az aks get-credentials \
+            --name "$CLUSTER_NAME" \
+            --resource-group "$CLUSTER_NAME" \
+            --overwrite-existing
+          kubectl get nodes
+          echo "✅ AKS credentials configured (cluster: $CLUSTER_NAME)"
+
+      - name: 3️⃣ uninstall — DIAL
+        if: ${{ inputs.uninstall_dial }}
+        run: |
+          export ENV_NAME="${{ inputs.environment }}"
+          bash sunbird-spark-installer/addons/dial/script/addon.sh uninstall azure
+          echo "✅ DIAL uninstalled"
+
+      - name: 3️⃣ uninstall — Discussion Forum
+        if: ${{ inputs.uninstall_discussion_forum }}
+        run: |
+          export ENV_NAME="${{ inputs.environment }}"
+          bash sunbird-spark-installer/addons/discussion-forum/script/addon.sh uninstall azure
+          echo "✅ Discussion Forum uninstalled"
+
+      - name: 3️⃣ uninstall — Video Stream Generator
+        if: ${{ inputs.uninstall_video_stream_generator }}
+        run: |
+          export ENV_NAME="${{ inputs.environment }}"
+          bash sunbird-spark-installer/addons/video-stream-generator/script/addon.sh uninstall azure
+          echo "✅ Video Stream Generator uninstalled"
+
+      - name: 3️⃣ uninstall — Asset Enrichment
+        if: ${{ inputs.uninstall_asset_enrichment }}
+        run: |
+          export ENV_NAME="${{ inputs.environment }}"
+          bash sunbird-spark-installer/addons/asset-enrichment/script/addon.sh uninstall azure
+          echo "✅ Asset Enrichment uninstalled"
+
+      - name: Uninstall Addons Summary
+        if: always()
+        run: |
+          echo "================================================"
+          echo "     UNINSTALL ADDONS SUMMARY"
+          echo "================================================"
+          echo "Environment : ${{ inputs.environment }}"
+          [ "${{ inputs.uninstall_dial }}"                   == "true" ] && echo "  ✅ DIAL"                   || echo "  ⏭️  DIAL (skipped)"
+          [ "${{ inputs.uninstall_discussion_forum }}"       == "true" ] && echo "  ✅ Discussion Forum"       || echo "  ⏭️  Discussion Forum (skipped)"
+          [ "${{ inputs.uninstall_video_stream_generator }}" == "true" ] && echo "  ✅ Video Stream Generator" || echo "  ⏭️  Video Stream Generator (skipped)"
+          [ "${{ inputs.uninstall_asset_enrichment }}"       == "true" ] && echo "  ✅ Asset Enrichment"       || echo "  ⏭️  Asset Enrichment (skipped)"
           echo "================================================"

@@ -17,16 +17,30 @@ function backup_configs() {
     export KUBECONFIG=~/.kube/config
 }
 
+function deploy_tf_module() {
+    local module=$1
+    echo -e "\nDeploying module: $module"
+    cd $module
+    terragrunt init --reconfigure
+    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    cd ..
+}
+
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    export TG_TF_PATH=tofu
-    tofu init -reconfigure
-    terragrunt init --all --reconfigure --non-interactive
-    # terragrunt plan --all --non-interactive
-    terragrunt run --all apply --non-interactive
-    chmod 600 ~/.kube/config
+    deploy_tf_module network
+    deploy_tf_module storage
+    deploy_tf_module aks
+    deploy_tf_module workload-identity
+    deploy_tf_module random_passwords
+    deploy_tf_module keys
+    deploy_tf_module output-file
+    deploy_tf_module upload-files
+    [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
 }
+
+
 function certificate_keys() {
     #  # If keys already present in global-values.yaml → skip writing
     if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/azure/$environment/global-values.yaml 2>/dev/null; then
@@ -113,11 +127,105 @@ function install_component() {
         -f "../opentofu/azure/$environment/global-cloud-values.yaml" --timeout 30m --debug
 }
 
+function install_service() {
+    if [ $# -lt 2 ]; then
+        echo "Usage: ./install.sh install_service <bundle> <chart> [chart2] [chart3] ..."
+        return 1
+    fi
+
+    local bundle="$1"
+    shift
+    local target_charts=("$@")   # one or more chart names
+
+    local current_directory="$(pwd)"
+    if [ "$(basename "$current_directory")" != "helmcharts" ]; then
+        cd ../../../helmcharts 2>/dev/null || true
+    fi
+
+    if [ ! -d "$bundle" ]; then
+        echo "Error: bundle '$bundle' not found in helmcharts/"
+        return 1
+    fi
+
+    local ed_values_flag=""
+    if [ -f "$bundle/ed-values.yaml" ]; then
+        ed_values_flag="-f $bundle/ed-values.yaml"
+    fi
+
+    local addon_values_flag=""
+    if [ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]; then
+        if [ -f "../addons/global-cloud-values.yaml" ]; then
+            addon_values_flag="-f ../addons/global-cloud-values.yaml"
+        fi
+    fi
+
+    if helm status "$bundle" --namespace sunbird &>/dev/null; then
+        # Phase B: Release exists — reuse previous values, enable all target charts
+        echo -e "\nRelease '$bundle' exists — upgrading '${target_charts[*]}' (Phase B)"
+
+        # Build --set enabled flags for every target chart
+        local set_flags=""
+        for chart in "${target_charts[@]}"; do
+            set_flags="$set_flags --set ${chart}.enabled=true"
+        done
+
+        helm upgrade "$bundle" "$bundle" \
+            --namespace sunbird \
+            --reuse-values \
+            $set_flags \
+            $ed_values_flag \
+            $addon_values_flag \
+            -f images.yaml \
+            -f "global-resources.yaml" \
+            -f "../opentofu/azure/$environment/global-values.yaml" \
+            -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
+            --timeout 30m \
+            --debug
+    else
+        # Phase A: No release yet — enable all target charts, disable every other conditional chart
+        echo -e "\nNo existing release for '$bundle' — deploying '${target_charts[*]}' (Phase A)"
+
+        local set_flags=""
+        while IFS= read -r chart_name; do
+            local is_target=false
+            for chart in "${target_charts[@]}"; do
+                [ "$chart_name" = "$chart" ] && is_target=true && break
+            done
+            if $is_target; then
+                set_flags="$set_flags --set ${chart_name}.enabled=true"
+            else
+                set_flags="$set_flags --set ${chart_name}.enabled=false"
+            fi
+        done < <(yq '.dependencies[] | select(has("condition")) | .name' "$bundle/Chart.yaml")
+
+        helm upgrade --install "$bundle" "$bundle" \
+            --namespace sunbird \
+            $ed_values_flag \
+            $addon_values_flag \
+            -f images.yaml \
+            -f "global-resources.yaml" \
+            -f "../opentofu/azure/$environment/global-values.yaml" \
+            -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
+            $set_flags \
+            --timeout 30m \
+            --debug
+    fi
+}
+
 function install_helm_components() {
-    components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "inquirybb" "additional")
-    for component in "${components[@]}"; do
-        install_component "$component"
-    done
+    if [ $# -ge 2 ]; then
+        # Two or more args: deploy one or more services within a bundle
+        install_service "$@"
+    elif [ $# -eq 1 ]; then
+        # One arg: deploy the entire bundle
+        install_component "$1"
+    else
+        # No args: deploy all bundles in order (original behavior)
+        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "inquirybb" "additional")
+        for component in "${components[@]}"; do
+            install_component "$component"
+        done
+    fi
 }
 
 function dns_mapping() {
@@ -159,6 +267,7 @@ function generate_postman_env() {
     keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
     keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
     google_oauth_client_id=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.GOOGLE_OAUTH_CLIENT_ID}')
+    google_captcha_site_key=$(yq '.global.sunbird_google_captcha_site_key' global-values.yaml)
     generated_uuid=$(uuidgen)
     temp_file=$(mktemp)
     cp postman.env.json "${temp_file}"
@@ -171,6 +280,7 @@ function generate_postman_env() {
         -e "s|BLOB_STORE_PATH|${blob_store_path}|g" \
         -e "s|PUBLIC_CONTAINER_NAME|${public_container_name}|g" \
         -e "s|REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID|${google_oauth_client_id}|g" \
+        -e "s|REPLACE_WITH_CAPTCHA_SITE_KEY|${google_captcha_site_key}|g" \
         "${temp_file}" >"env.json"
 
     echo -e "A env.json file is created in this directory: opentofu/azure/$environment"
@@ -193,6 +303,18 @@ function run_post_install() {
     echo "Starting post install..."
     cp ../../../postman-collection/sunbird-spark-collection-v1.json .
     postman collection run sunbird-spark-collection-v1.json --environment env.json --delay-request 500 --bail --insecure
+}
+
+function migrate_forms() {
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "$environment" ]; then
+        cd ../opentofu/azure/$environment 2>/dev/null || true
+    fi
+    echo "Migrating missing forms..."
+    cp ../../../postman-collection/sunbird-spark-collection-v1.json .
+    python3 ../../../migration/migrate_forms.py \
+        --collection sunbird-spark-collection-v1.json \
+        --env env.json
 }
 
 function create_client_forms() {
@@ -294,10 +416,18 @@ else
         install_component "$1"
         ;;
     "install_helm_components")
-        install_helm_components
+        shift
+        install_helm_components "$@"
+        ;;
+    "install_service")
+        shift
+        install_service "$@"
         ;;
     "run_post_install")
         run_post_install
+        ;;
+    "migrate_forms")
+        migrate_forms
         ;;
     "destroy_tf_resources")
         destroy_tf_resources

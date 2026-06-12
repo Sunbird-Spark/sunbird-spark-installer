@@ -16,11 +16,14 @@ resource "random_password" "generated_string" {
 }
 
 resource "null_resource" "generate_jwt_keys" {
-  triggers = {
-    command = "${timestamp()}"
-  }
-
-  #working 
+  # Run ONCE at create. Do NOT use timestamp() triggers — that regenerates
+  # keys on every `terragrunt apply` and breaks existing services that
+  # validate JWTs against the prior keys.
+  # To force key regeneration: uncomment the triggers block below, run terragrunt apply,
+  # then re-comment to prevent regeneration on future runs.
+  # triggers = {
+  #   script_hash = filemd5(local.jwt_script_location)
+  # }
   provisioner "local-exec" {
     command = <<EOT
       python3 ${local.jwt_script_location} ${random_password.generated_string.result} && \
@@ -32,16 +35,13 @@ resource "null_resource" "generate_jwt_keys" {
 
 
 resource "null_resource" "generate_rsa_keys" {
-   triggers = {
-    command = "${timestamp()}"
+  # Run ONCE at create. See note on generate_jwt_keys above.
+  provisioner "local-exec" {
+    command = <<EOT
+      python3 ${local.rsa_script_location} ${var.rsa_keys_count} && \
+      yq eval-all 'select(fileIndex == 0) *+ {"global": (select(fileIndex == 0).global * load("${local.global_values_rsa_file_location}"))}' -i ${var.base_location}/../global-values.yaml
+    EOT
   }
-
- provisioner "local-exec" {
-  command = <<EOT
-    python3 ${local.rsa_script_location} ${var.rsa_keys_count} && \
-    yq eval-all 'select(fileIndex == 0) *+ {"global": (select(fileIndex == 0).global * load("${local.global_values_rsa_file_location}"))}' -i ${var.base_location}/../global-values.yaml
-  EOT
-}
 }
 
 resource "null_resource" "upload_global_jwt_values_yaml" {
@@ -49,7 +49,10 @@ resource "null_resource" "upload_global_jwt_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-jwt-tokens.yaml --file ${local.global_values_jwt_file_location} --auth-mode login --overwrite"
+    command = <<EOT
+      [ -f ${local.global_values_jwt_file_location} ] || python3 ${local.jwt_script_location} ${random_password.generated_string.result}
+      az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-jwt-tokens.yaml --file ${local.global_values_jwt_file_location} --auth-mode login --overwrite
+    EOT
   }
   depends_on = [ null_resource.generate_jwt_keys ]
 }
@@ -59,7 +62,10 @@ resource "null_resource" "upload_global_rsa_values_yaml" {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-rsa-keys.yaml --file ${local.global_values_rsa_file_location} --auth-mode login --overwrite"
+    command = <<EOT
+      [ -f ${local.global_values_rsa_file_location} ] || python3 ${local.rsa_script_location} ${var.rsa_keys_count}
+      az storage blob upload --account-name ${var.storage_account_name} --container-name ${var.storage_container_private} --name ${var.environment}-global-values-rsa-keys.yaml --file ${local.global_values_rsa_file_location} --auth-mode login --overwrite
+    EOT
   }
   depends_on = [ null_resource.generate_rsa_keys ]
 }

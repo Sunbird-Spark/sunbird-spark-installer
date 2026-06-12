@@ -35,11 +35,41 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     version: 32.2.15
     condition: kafka.enabled
-  - name: elasticsearch
-    repository: https://charts.bitnami.com/bitnami
-    version: 19.5.4
-    condition: elasticsearch.enabled
   - name: yugabyte
     repository: https://charts.yugabyte.com
     version: 2025.2.0   # Chart version
     condition: yugabyte.enabled
+  - name: opensearch
+    repository: https://opensearch-project.github.io/helm-charts
+    version: 2.37.0
+    condition: opensearch.enabled
+  - name: lern
+    version: 0.1.0
+    condition: lern.enabled
+  - name: keycloak
+    version: 0.1.0
+    condition: keycloak.enabled
+  - name: keycloak-kids-keys
+    version: 0.1.0
+    condition: keycloak-kids-keys.enabled
+  - name: flink
+    version: 0.1.0
+    condition: flink.enabled
+  - name: adminutil
+    version: 0.1.0
+    condition: adminutil.enabled
+  - name: cert
+    version: 0.1.0
+    condition: cert.enabled
+  - name: certificateapi
+    version: 0.1.0
+    condition: certificateapi.enabled
+  - name: certificatesign
+    version: 0.1.0
+    condition: certificatesign.enabled
+  - name: certregistry
+    version: 0.1.0
+    condition: certregistry.enabled
+  - name: registry
+    version: 0.1.0
+    condition: registry.enabled

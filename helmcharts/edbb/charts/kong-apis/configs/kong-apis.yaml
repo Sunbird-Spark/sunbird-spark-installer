@@ -207,6 +207,8 @@ kong_apis:
     config.allow:
     - contentAdmin
     - contentTempAccess
+    - portal_anonymous
+    - appAccess
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -1734,6 +1736,20 @@ kong_apis:
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
     config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: mobileKeycloakLogin
+  uris: "/mobile/keycloak/login"
+  url: "{{ .Values.player_service_url }}/mobile/keycloak/login"
+  strip_path: true
+  plugins:
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: ip
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
@@ -7969,6 +7985,24 @@ kong_apis:
 - name: activityAggregationSync
   uris: "{{ .Values.user_service_prefix }}/v1/activity/agg"
   url: "{{ .Values.lms_service_url }}/v1/activity/agg"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: lernDeviceRegister
+  uris: "{{ .Values.user_service_prefix }}/device/v1/register"
+  url: "{{ .Values.lms_service_url }}/v1/device/register"
   strip_path: true
   plugins:
   - name: jwt

@@ -70,3 +70,10 @@ variable "k8s_service_account_name" {
   default     = "azure-managed-identity-sa"
 }
 
+variable "sunbird_encryption_key" {
+  type        = string
+  description = "Migration-only: OLD cluster's sunbird_encryption_key, used by learn-service to decrypt migrated PII. Empty for fresh installs (learn-service falls back to random_string)."
+  default     = ""
+  sensitive   = true
+}
+
