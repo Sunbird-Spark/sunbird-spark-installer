@@ -87,6 +87,7 @@ neo4j:
   pvc:
     claimName: neo4j-claim
     accessModes: ReadWriteOnce
+    storageClass: "gp2"
     annotations: "keep"
     resources:
       requests:

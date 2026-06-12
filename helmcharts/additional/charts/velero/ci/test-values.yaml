@@ -9,8 +9,8 @@ configuration:
       name: test-credential
       key: test-key
     config:
-      region: us-east-1
-      profile: us-east-1-profile
+      region: ap-south-1
+      profile: ap-south-1-profile
   - name: backups-secondary
     bucket: velero-backups
     provider: aws
@@ -18,10 +18,10 @@ configuration:
       region: us-west-1
       profile: us-west-1-profile
   volumeSnapshotLocation:
-  - name: ebs-us-east-1
+  - name: ebs-ap-south-1
     provider: aws
     config:
-      region: us-east-1
+      region: ap-south-1
   - name: portworx-cloud
     provider: portworx
     config:

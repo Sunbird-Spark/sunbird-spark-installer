@@ -43,7 +43,7 @@ spec:
       name: storage
     spec:
       accessModes: {{ .Values.persistence.accessModes }}
-      storageClassName: {{ .Values.persistence.storageClassName }}
+      storageClassName: gp2
       resources:
         requests:
           storage: {{ .Values.persistence.size }}

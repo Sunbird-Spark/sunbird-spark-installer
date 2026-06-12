@@ -212,24 +212,27 @@ base_config: |
 
   job {
     env = "{{ .Values.global.env }}"
-    enable.distributed.checkpointing = true
 
-    {{- if eq "oci" .Values.global.checkpoint_store_type }}
+    {{- if or (eq "s3" .Values.global.checkpoint_store_type) (eq "oci" .Values.global.checkpoint_store_type) }}
+    enable.distributed.checkpointing = true
     statebackend {
       base.url = "s3://{{ .Values.global.private_container_name }}/checkpoint"
     }
 
     {{- else if eq "azure" .Values.global.checkpoint_store_type }}
+    enable.distributed.checkpointing = true
     statebackend {
       base.url = "wasbs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
     }
 
     {{- else if eq "gcs" .Values.global.checkpoint_store_type }}
+    enable.distributed.checkpointing = true
     statebackend {
       base.url = "gs://{{ .Values.global.private_container_name }}/checkpoint"
     }
     {{- else }}
     # No valid checkpoint_store_type configured, skipping statebackend.
+    enable.distributed.checkpointing = false
     {{- end }}
   }
   

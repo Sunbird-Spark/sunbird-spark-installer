@@ -360,6 +360,14 @@ function get_postman_collection_file() {
         echo "$f"
         return 0
     fi
+    local download_url="https://raw.githubusercontent.com/Sunbird-Spark/sunbird-spark-installer/main/postman-collection/sunbird-spark-collection-v1.json"
+    local dest="$repo_root/postman-collection/sunbird-spark-collection-v1.json"
+    echo "Postman collection not found locally; downloading from Sunbird-Spark/sunbird-spark-installer..."
+    mkdir -p "$repo_root/postman-collection"
+    if curl -fsSL -o "$dest" "$download_url"; then
+        echo "$dest"
+        return 0
+    fi
     echo "No Postman collection found under $repo_root/postman-collection" >&2
     return 1
 }

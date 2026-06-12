@@ -34,14 +34,6 @@ flink: &flink
         limits:
           cpu: 1
           memory: 3Gi
-    content-embedding:
-      resources:
-        requests:
-          cpu: 100m
-          memory: 1024Mi
-        limits:
-          cpu: 1
-          memory: 3Gi
   
 knowledgebb:
   flink: *flink
@@ -159,16 +151,18 @@ certregistry:
       cpu: 1
       memory: 1024Mi 
 
-opensearch:
-  resources:
-    requests:
-      cpu: "1"
-      memory: "2Gi"
-    limits:
-      cpu: "2"
-      memory: "4Gi"
-  persistence:
-    size: 25Gi
+elasticsearch:
+  master:
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+    persistence:
+      size: 25Gi
+      storageClass: "gp2"
 
 kafka:
   broker:
@@ -181,6 +175,7 @@ kafka:
         memory: 1024Mi
     persistence:
       size: 8Gi
+      storageClass: "gp2"
   controller:
     replicaCount: 3
     resources:
@@ -192,6 +187,7 @@ kafka:
         memory: 1024Mi
     persistence:
       size: 8Gi
+      storageClass: "gp2"
 
 # keycloak:
 #   resources:
@@ -261,14 +257,14 @@ kube-prometheus-stack:
           memory: 50Mi
   prometheus:
     prometheusSpec:
-      retention: "7d"
+      retention: "30d"
       storageSpec:
         volumeClaimTemplate:
           spec:
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
-                storage: 10Gi
+                storage: 25Gi
       resources:
         requests:
           cpu: 500m
@@ -347,7 +343,8 @@ loki:
 redis:
   master:
     persistence:
-      size: 2Gi
+      size: 25Gi
+      storageClass: "gp2"
     primary:
     resources:
       limits:
@@ -405,28 +402,6 @@ velero:
         memory: 1024Mi
     
 yugabyte:
-  serviceEndpoints:
-    - name: "yb-master-ui"
-      app: "yb-master"
-      loadBalancerIP: ""
-      type: "ClusterIP"
-      ports:
-        http: 7000
-    - name: "yb-tserver-service"
-      app: "yb-tserver"
-      loadBalancerIP: ""
-      type: "ClusterIP"
-      ports:
-        tcp-yql-port: 9042
-        tcp-yedis-port: 6379
-        tcp-rpc-port: 9100
-        http-ysql: 5433
-    - name: "yugabyted-ui-service"
-      app: "yb-tserver"
-      loadBalancerIP: ""
-      type: "ClusterIP"
-      ports:
-        http: 15433
   resource:
     master:
       requests:
@@ -446,6 +421,8 @@ yugabyte:
     master:
       count: 2
       size: 50Gi
+      storageClass: "gp2"
     tserver:
       count: 2
       size: 50Gi
+      storageClass: "gp2"

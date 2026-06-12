@@ -6,7 +6,6 @@ channel: &channel
   default: "in.ekstep"
 
 knowlg:
-  enabled: true
   opa_enabled: true
 
 provisioningAnnotations: &provisioningAnnotations
@@ -16,23 +15,43 @@ migration:
   yugabyte:
     waitTime: 120
 
-opensearch: &opensearch
+elasticsearch: &es
   enabled: true
-  fullnameOverride: "opensearch"
-  host: "opensearch-cluster-master"
+  fullnameOverride: "elasticsearch"
+  host: "elasticsearch"
   port: 9200
-  singleNode: true
-  extraEnvs:
-    - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-      value: "Lern@Migr8#2026!"
-  config:
-    opensearch.yml: |
-      plugins.security.disabled: true
-      search.insights.top_queries.latency.enabled: false
-      search.insights.top_queries.cpu.enabled: false
-      search.insights.top_queries.memory.enabled: false
+  image:
+    registry: docker.io
+    repository: bitnami/elasticsearch
+    tag: 7.10.2
+  master:
+    masterOnly: false
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+    heapSize: 2G
+    persistence:
+      size: 25Gi
+      storageClass: "gp2"
+  data:
+    replicaCount: 0
+  coordinating:
+    replicaCount: 0
+  ingest:
+    enabled: false
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
+  provisioning:
+    annotations: *provisioningAnnotations
+  sysctlImage:
+    registry: sunbirded.azurecr.io
+    repository: bitnami-shell-archived
+    tag: 11-debian-11-r54
 
 graph_passport: &graph_passport
   key_base: "secretKey"
@@ -70,6 +89,7 @@ kafka: &kafka
     "helm.sh/hook-weight": "-5"
   persistence:
     size: 25Gi
+    storageClass: "gp2"
   provisioning:
     annotations: *provisioningAnnotations
     replicationFactor: 1
@@ -109,12 +129,6 @@ kafka: &kafka
       partitions: 1
       replicationFactor: 1
     - name: "{{ .Values.global.env }}.knowlg.dialcode.context.job.request.failed"
-      partitions: 1
-      replicationFactor: 1
-    - name: "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
-      partitions: 1
-      replicationFactor: 1
-    - name: "{{ .Values.global.env }}.knowlg.embedding.chunks"
       partitions: 1
       replicationFactor: 1
     parallel: 1
@@ -157,6 +171,7 @@ redis: &redis
   master:
     persistence:
       size: 25Gi
+      storageClass: "gp2"
 
 schema: &schema
   base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
@@ -193,15 +208,9 @@ yugabytecql:
 dialservice: &dialservice
   base_url: "http://dial-service:9000"
 
-search:
-  enabled: true
-
-flink:
-  enabled: true
-
 global:
   channel: *channel
-  opensearch: *opensearch
+  elasticsearch: *es
   graph_passport: *graph_passport
   installation: *installation
   janusgraph: *janusgraph

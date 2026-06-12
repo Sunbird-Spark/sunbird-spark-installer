@@ -1,3 +1,4 @@
 persistence:
   type: pvc
   enabled: true
+  storageClass: "gp2"

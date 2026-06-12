@@ -22,6 +22,7 @@ kafka: &kafka
     tag: 3.3.1-debian-11-r25
   persistence:
     size: 25Gi
+    storageClass: "gp2"
   livenessProbe:
     enabled: true
     initialDelaySeconds: 30
@@ -94,6 +95,7 @@ redis: &redis
   master:
     persistence:
       size: 25Gi
+      storageClass: "gp2"
     primary:
     resources:
       limits:

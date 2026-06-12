@@ -191,6 +191,7 @@ persistence:
   accessModes:
     - ReadWriteOnce
   size: 10Gi
+  storageClass: "gp2"
   # annotations: {}
   finalizers:
     - kubernetes.io/pvc-protection

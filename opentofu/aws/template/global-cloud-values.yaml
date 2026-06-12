@@ -1,8 +1,8 @@
 global:
-  env: dev
-  environment: dev
+  env: test
+  environment: test
   building_block: sunbird-spark
-  cloud_storage_access_key:   
+  cloud_storage_access_key:       
   cloud_storage_secret_key: 
   public_container_name: sunbird-spark-dev-public-8eedcadf58
   private_container_name: sunbird-spark-dev-private-8eedcadf58
@@ -15,7 +15,7 @@ global:
   object_storage_endpoint: s3.amazonaws.com
   storage_class: gp2
   cloud_storage_provider: aws
-  cloud_storage_region: us-east-1
+  cloud_storage_region: ap-south-1
   service_account_role_arn: 
   
   serviceAccount: 
@@ -40,19 +40,19 @@ velero:
         provider: aws
         bucket: "sunbird-spark-dev-velero-private-8eedcadf58"
         config:
-          region: us-east-1
+          region: ap-south-1
     dbbackupbackupStorageLocation:
       - name: dbbackup
         provider: aws
         bucket: "sunbird-spark-dev-velero-private-8eedcadf58"
         config:
-          region: us-east-1
+          region: ap-south-1
     backupSyncPeriod: 15m
     volumeSnapshotLocation:
     - name: default
       provider: aws
       config:
-        region: us-east-1
+        region: ap-south-1
   initContainers:
     - image: velero/velero-plugin-for-aws:v1.8.0
       name: velero-plugin-for-aws
