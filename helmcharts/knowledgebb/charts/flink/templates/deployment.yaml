@@ -45,9 +45,49 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.initContainers }}
+      {{- if or (or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3")) (and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled) .Values.initContainers }}
       initContainers:
+      {{- if and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled }}
+      - name: flink-lib-merge
+        image: "{{ .Values.global.knowledgeflink.registry }}/{{ .Values.global.knowledgeflink.repository }}:{{ .Values.global.knowledgeflink.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c"]
+        args:
+          - cp -r {{ .Values.lib_mount_path }}/. /merged-lib/
+        volumeMounts:
+        - name: flink-merged-lib
+          mountPath: /merged-lib
+      - name: flink-csp-aws-deps
+        image: {{ .Values.aws_csp.maven_image }}
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c"]
+        args:
+          - |
+            cat > /tmp/pom.xml <<'POM'
+            <project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><groupId>tmp</groupId><artifactId>tmp</artifactId><version>1</version>
+            <dependencies><dependency><groupId>org.sunbird</groupId><artifactId>cloud-storage-sdk-aws</artifactId><version>{{ .Values.aws_csp.artifact_version }}</version></dependency></dependencies></project>
+            POM
+            mvn -f /tmp/pom.xml -q dependency:copy-dependencies -DoutputDirectory=/tmp/deps
+            cp /tmp/deps/*.jar /merged-lib/
+        volumeMounts:
+        - name: flink-merged-lib
+          mountPath: /merged-lib
+      {{- end }}
+      {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+      - name: flink-s3-plugin-setup
+        image: "{{ .Values.global.knowledgeflink.registry }}/{{ .Values.global.knowledgeflink.repository }}:{{ .Values.global.knowledgeflink.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - /bin/sh
+          - -c
+          - mkdir -p /tmp/flink-plugins/flink-s3-fs-hadoop /tmp/flink-plugins/flink-s3-fs-presto; cp -R /opt/flink/plugins/. /tmp/flink-plugins/ 2>/dev/null || true; cp /opt/flink/opt/flink-s3-fs-hadoop-*.jar /tmp/flink-plugins/flink-s3-fs-hadoop/; cp /opt/flink/opt/flink-s3-fs-presto-*.jar /tmp/flink-plugins/flink-s3-fs-presto/
+        volumeMounts:
+        - name: flink-s3-plugin-volume
+          mountPath: /tmp/flink-plugins
+      {{- end }}
+      {{- with .Values.initContainers }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -68,11 +108,14 @@ spec:
             "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
             "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
-  {{- if eq .Values.global.checkpoint_store_type "s3" }}
+  {{- if and (or (eq .Values.global.checkpoint_store_type "s3") (eq .Values.global.checkpoint_store_type "oci")) (or .Values.s3_endpoint .Values.s3_access_key) }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
             "-Ds3.secret-key={{ .Values.s3_secret_key }}",
             "-Ds3.endpoint={{ .Values.s3_endpoint }}",
             "-Ds3.path.style.access={{ .Values.s3_path_style_access }}",
+  {{- end }}
+  {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+            "-Dplugins.dir=/opt/flink/plugins",
   {{- end }}
             "-Dweb.submit.enable=false",
             "-Dmetrics.reporters=prom",
@@ -89,8 +132,13 @@ spec:
           - name: AZURE_CLIENT_ID
             value: "{{ .Values.global.azure_client_id }}"
           {{- end }}
-          {{- if $jobData.extraEnv }}
-          {{- toYaml $jobData.extraEnv | nindent 10 }}
+          {{- if eq .Values.global.cloud_storage_provider "aws" }}
+          - name: AWS_ACCESS_KEY_ID
+            value: "{{ .Values.global.cloud_storage_access_key }}"
+          - name: AWS_SECRET_ACCESS_KEY
+            value: "{{ .Values.global.cloud_storage_secret_key }}"
+          - name: AWS_DEFAULT_REGION
+            value: "{{ .Values.global.cloud_storage_region }}"
           {{- end }}
           resources:
             {{- if $jobData.resources }}
@@ -107,6 +155,14 @@ spec:
           - name: flink-config-volume
             mountPath: /opt/flink/conf/log4j-console.properties
             subPath: log4j-console.properties
+          {{- if and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled }}
+          - name: flink-merged-lib
+            mountPath: {{ .Values.lib_mount_path }}
+          {{- end }}
+          {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+          - name: flink-s3-plugin-volume
+            mountPath: /opt/flink/plugins
+          {{- end }}
       volumes:
       - name: flink-config-volume
         configMap:
@@ -116,6 +172,14 @@ spec:
             path: flink-conf.yaml
           - key: log4j_console_properties
             path: log4j-console.properties
+      {{- if and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled }}
+      - name: flink-merged-lib
+        emptyDir: {}
+      {{- end }}
+      {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+      - name: flink-s3-plugin-volume
+        emptyDir: {}
+      {{- end }}
 {{ $component := "jobmanager" }}
 ---
 apiVersion: apps/v1
@@ -157,9 +221,49 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.initContainers }}
+      {{- if or (or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3")) (and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled) .Values.initContainers }}
       initContainers:
+      {{- if and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled }}
+      - name: flink-lib-merge
+        image: "{{ .Values.global.knowledgeflink.registry }}/{{ .Values.global.knowledgeflink.repository }}:{{ .Values.global.knowledgeflink.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c"]
+        args:
+          - cp -r {{ .Values.lib_mount_path }}/. /merged-lib/
+        volumeMounts:
+        - name: flink-merged-lib
+          mountPath: /merged-lib
+      - name: flink-csp-aws-deps
+        image: {{ .Values.aws_csp.maven_image }}
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c"]
+        args:
+          - |
+            cat > /tmp/pom.xml <<'POM'
+            <project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><groupId>tmp</groupId><artifactId>tmp</artifactId><version>1</version>
+            <dependencies><dependency><groupId>org.sunbird</groupId><artifactId>cloud-storage-sdk-aws</artifactId><version>{{ .Values.aws_csp.artifact_version }}</version></dependency></dependencies></project>
+            POM
+            mvn -f /tmp/pom.xml -q dependency:copy-dependencies -DoutputDirectory=/tmp/deps
+            cp /tmp/deps/*.jar /merged-lib/
+        volumeMounts:
+        - name: flink-merged-lib
+          mountPath: /merged-lib
+      {{- end }}
+      {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+      - name: flink-s3-plugin-setup
+        image: "{{ .Values.global.knowledgeflink.registry }}/{{ .Values.global.knowledgeflink.repository }}:{{ .Values.global.knowledgeflink.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - /bin/sh
+          - -c
+          - mkdir -p /tmp/flink-plugins/flink-s3-fs-hadoop /tmp/flink-plugins/flink-s3-fs-presto; cp -R /opt/flink/plugins/. /tmp/flink-plugins/ 2>/dev/null || true; cp /opt/flink/opt/flink-s3-fs-hadoop-*.jar /tmp/flink-plugins/flink-s3-fs-hadoop/; cp /opt/flink/opt/flink-s3-fs-presto-*.jar /tmp/flink-plugins/flink-s3-fs-presto/
+        volumeMounts:
+        - name: flink-s3-plugin-volume
+          mountPath: /tmp/flink-plugins
+      {{- end }}
+      {{- with .Values.initContainers }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -180,11 +284,14 @@ spec:
             "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
             "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
-  {{- if eq .Values.global.checkpoint_store_type "s3" }}
+  {{- if and (or (eq .Values.global.checkpoint_store_type "s3") (eq .Values.global.checkpoint_store_type "oci")) (or .Values.s3_endpoint .Values.s3_access_key) }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
             "-Ds3.secret-key={{ .Values.s3_secret_key }}",
             "-Ds3.endpoint={{ .Values.s3_endpoint }}",
             "-Ds3.path.style.access={{ .Values.s3_path_style_access }}",
+  {{- end }}
+  {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+            "-Dplugins.dir=/opt/flink/plugins",
   {{- end }}
                 "--job-classname={{ $jobData.job_classname }}",
                 "-Dweb.submit.enable=false",
@@ -208,8 +315,13 @@ spec:
           - name: AZURE_CLIENT_ID
             value: "{{ .Values.global.azure_client_id }}"
           {{- end }}
-          {{- if $jobData.extraEnv }}
-          {{- toYaml $jobData.extraEnv | nindent 10 }}
+          {{- if eq .Values.global.cloud_storage_provider "aws" }}
+          - name: AWS_ACCESS_KEY_ID
+            value: "{{ .Values.global.cloud_storage_access_key }}"
+          - name: AWS_SECRET_ACCESS_KEY
+            value: "{{ .Values.global.cloud_storage_secret_key }}"
+          - name: AWS_DEFAULT_REGION
+            value: "{{ .Values.global.cloud_storage_region }}"
           {{- end }}
           resources:
             {{- if $jobData.resources }}
@@ -232,6 +344,14 @@ spec:
           - name: flink-config-volume
             mountPath: /opt/flink/conf/log4j-console.properties
             subPath: log4j-console.properties
+          {{- if and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled }}
+          - name: flink-merged-lib
+            mountPath: {{ .Values.lib_mount_path }}
+          {{- end }}
+          {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+          - name: flink-s3-plugin-volume
+            mountPath: /opt/flink/plugins
+          {{- end }}
       volumes:
       - name: flink-config-volume
         configMap:
@@ -245,6 +365,14 @@ spec:
             path: {{ $jobName }}.conf
           - key: log4j_console_properties
             path: log4j-console.properties
+      {{- if and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled }}
+      - name: flink-merged-lib
+        emptyDir: {}
+      {{- end }}
+      {{- if or (eq .Values.global.checkpoint_store_type "oci") (eq .Values.global.checkpoint_store_type "s3") }}
+      - name: flink-s3-plugin-volume
+        emptyDir: {}
+      {{- end }}
 {{- end }}
 {{- end}}
 {{- end}}

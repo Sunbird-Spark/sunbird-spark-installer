@@ -1,0 +1,8 @@
+# Scoped overlay: render/upgrade only knowlg-publish Flink job (AWS S3 checkpoints via IRSA).
+flink_jobs:
+  transaction-event-processor:
+    enabled: false
+  asset-enrichment:
+    enabled: false
+  knowlg-publish:
+    enabled: true

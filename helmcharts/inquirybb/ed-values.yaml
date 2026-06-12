@@ -1,0 +1,19 @@
+elasticsearch:
+  enabled: false
+kafka:
+  enabled: false
+redis:
+  enabled: false
+neo4j:
+  enabled: true
+  configmap:
+    enabled: false
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "4Gi"
+    limits:
+      cpu: "2"
+      memory: "8Gi"
+yugabyte:
+  enabled: false  

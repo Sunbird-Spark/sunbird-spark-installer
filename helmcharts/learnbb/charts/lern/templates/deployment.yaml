@@ -33,9 +33,55 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.initContainers }}
       initContainers:
-        {{- toYaml . | nindent 8 }}
+      {{- if and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled }}
+      - name: lern-lib-merge
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c"]
+        args:
+          - cp -r {{ .Values.lib_mount_path }}/. /merged-lib/
+        volumeMounts:
+        - name: lern-merged-lib
+          mountPath: /merged-lib
+      - name: lern-csp-aws-deps
+        image: {{ .Values.aws_csp.maven_image }}
+        imagePullPolicy: IfNotPresent
+        command: ["sh", "-c"]
+        args:
+          - |
+            cat > /tmp/pom.xml <<'POM'
+            <project xmlns="http://maven.apache.org/POM/4.0.0"><modelVersion>4.0.0</modelVersion><groupId>tmp</groupId><artifactId>tmp</artifactId><version>1</version>
+            <dependencies><dependency><groupId>org.sunbird</groupId><artifactId>cloud-storage-sdk-aws</artifactId><version>{{ .Values.aws_csp.artifact_version }}</version></dependency></dependencies></project>
+            POM
+            mvn -f /tmp/pom.xml -q dependency:copy-dependencies -DoutputDirectory=/tmp/deps
+            cp /tmp/deps/*.jar /merged-lib/
+        volumeMounts:
+        - name: lern-merged-lib
+          mountPath: /merged-lib
+      {{- end }}
+      {{- if .Values.opa_enabled }}
+      - name: proxy-init
+        args:
+          - -p
+          - "9999"
+          - -u
+          - "1111"
+          - -w
+          - "8282,10000"
+        image: openpolicyagent/proxy_init:v5
+        imagePullPolicy: IfNotPresent
+        resources:
+          {{- toYaml .Values.init_container_resources | nindent 10 }}
+        securityContext:
+          capabilities:
+            add:
+            - NET_ADMIN
+          runAsNonRoot: false
+          runAsUser: 0
+      {{- end }}
+      {{- with .Values.initContainers }}
+        {{- toYaml . | nindent 6 }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -71,6 +117,10 @@ spec:
           {{- if .Values.configmap.enabled }}
           - name: config
             mountPath: {{ .Values.configmap.mountPath }}
+          {{- end }}
+          {{- if and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled }}
+          - name: lern-merged-lib
+            mountPath: {{ .Values.lib_mount_path }}
           {{- end }}
           - name: keys
             mountPath: /keys/
@@ -127,25 +177,6 @@ spec:
               readOnly: true
             - name: keycloak-key
               mountPath: /keys/
-      initContainers:
-        - args:
-          - -p
-          - "9999"
-          - -u
-          - "1111"
-          - -w
-          - "8282,10000"
-          image: openpolicyagent/proxy_init:v5
-          imagePullPolicy: IfNotPresent
-          name: proxy-init
-          resources:
-            {{ toYaml .Values.init_container_resources | nindent 12 }}
-          securityContext:
-            capabilities:
-              add:
-              - NET_ADMIN
-            runAsNonRoot: false
-            runAsUser: 0
 {{- end }}
         {{- with .Values.sidecars }}
         {{- toYaml . | nindent 8 }}
@@ -159,7 +190,11 @@ spec:
         configMap:
           name: {{ include "common.names.fullname" . }}
       {{- end }}
-{{- if .Values.opa_enabled }}
+      {{- if and (eq .Values.global.cloud_storage_provider "aws") .Values.aws_csp.enabled }}
+      - name: lern-merged-lib
+        emptyDir: {}
+      {{- end }}
+      {{- if .Values.opa_enabled }}
       - name: envoy-config
         configMap:
           name: {{ include "common.names.fullname" . }}-envoy
@@ -169,7 +204,7 @@ spec:
       - name: keycloak-key
         configMap:
           name: {{ .Values.global.keycloak_kid_keys_configmap }}
-{{- end }}
+      {{- end }}
       - name: keys
         projected:
           sources:

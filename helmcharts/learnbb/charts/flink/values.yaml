@@ -94,7 +94,7 @@ serviceMonitor: &serviceMonitor
     port: prom
 
 # Example values.yaml structure
-initContainers: {}
+initContainers: []
   # - name: init-myservice
   #   image: busybox:1.28
   #   command: ['sh', '-c', "until nslookup kubernetes.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
@@ -123,8 +123,6 @@ taskmanager:
   replicas: 1
   cpu_requests: 0.3
 
-# Azure Container Details
-checkpoint_store_type: "azure"
 cloud_storage_flink_bucketname: "{{ .Values.global.public_container_name }}"
 
 # AWS S3 Details
@@ -156,7 +154,7 @@ core_vault_sunbird_fcm_account_key: "your-fcm-account-key"
 sunbird_msg_91_auth: "your-msg-91-auth-key"
 
 cassandra_isMultiDCEnabled: false
-kp_schema_base_path: "https://{{ .Values.global.object_storage_endpoint }}./{{ .Values.global.public_container_name }}/schemas/local"
+kp_schema_base_path: "https://{{ .Values.global.object_storage_endpoint }}/schemas/local"
 lms_service_base_url: "http://lern-service:9000"
 kp_search_service_base_url: "http://search-service:9000"
 content_read_api_host: "http://knowlg-service:9000"
@@ -320,15 +318,15 @@ base_config: |
     }
     job {
       env = "{{ .Values.global.env }}"
-      enable.distributed.checkpointing = true
-      state.checkpoints.num-retained = 3
 
-      {{- if eq "oci" .Values.global.checkpoint_store_type }}
+      {{- if or (eq "s3" .Values.global.checkpoint_store_type) (eq "oci" .Values.global.checkpoint_store_type) }}
+      enable.distributed.checkpointing = true
       statebackend {
         base.url = "s3://{{ .Values.global.private_container_name }}/checkpoint"
       }
 
       {{- else if eq "azure" .Values.global.checkpoint_store_type }}
+      enable.distributed.checkpointing = true
       statebackend {
         {{- if eq .Values.global.cloud_storage_provider "azure" }}
         base.url = "abfs://{{ .Values.global.private_container_name }}@{{ .Values.global.object_storage_endpoint }}/checkpoint"
@@ -338,11 +336,13 @@ base_config: |
       }
 
       {{- else if eq "gcs" .Values.global.checkpoint_store_type }}
+      enable.distributed.checkpointing = true
       statebackend {
         base.url = "gs://{{ .Values.global.private_container_name }}/checkpoint"
       }
       {{- else }}
       # No valid checkpoint_store_type configured, skipping statebackend.
+      enable.distributed.checkpointing = false
       {{- end }}
     }
     
@@ -366,7 +366,7 @@ base_config: |
         isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
     }
     es {
-        basePath = "{{.Values.global.opensearch.host}}:{{.Values.global.opensearch.port}}"
+        basePath = "{{.Values.global.elasticsearch.host}}:{{.Values.global.elasticsearch.port}}"
     }
     schema {
       basePath = "{{ include "common.tplvalues.render" (dict "value" .Values.kp_schema_base_path "context" $) }}"
@@ -444,6 +444,10 @@ flink_jobs:
       parallelism.default: 1
       jobmanager.execution.failover-strategy: region
       taskmanager.memory.network.fraction: 0.1
+      fs.allowed-fallback-filesystems: s3
+      fs.s3.impl: org.apache.flink.fs.s3hadoop.S3FileSystemFactory
+      fs.s3n.impl: org.apache.flink.fs.s3hadoop.S3FileSystemFactory
+      fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
     job_classname: org.sunbird.job.certgen.task.CertificateGeneratorStreamTask
 
   notification-job:
@@ -477,6 +481,10 @@ flink_jobs:
       parallelism.default: 1
       jobmanager.execution.failover-strategy: region
       taskmanager.memory.network.fraction: 0.1
+      fs.allowed-fallback-filesystems: s3
+      fs.s3.impl: org.apache.flink.fs.s3hadoop.S3FileSystemFactory
+      fs.s3n.impl: org.apache.flink.fs.s3hadoop.S3FileSystemFactory
+      fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
     job_classname: org.sunbird.job.notification.task.NotificationStreamTask
   
   user-deletion-cleanup:
@@ -527,6 +535,10 @@ flink_jobs:
       parallelism.default: 1
       jobmanager.execution.failover-strategy: region
       taskmanager.memory.network.fraction: 0.1
+      fs.allowed-fallback-filesystems: s3
+      fs.s3.impl: org.apache.flink.fs.s3hadoop.S3FileSystemFactory
+      fs.s3n.impl: org.apache.flink.fs.s3hadoop.S3FileSystemFactory
+      fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
     job_classname: org.sunbird.job.deletioncleanup.task.UserDeletionCleanupStreamTask
 commonAnnotations:
   reloader.stakater.com/auto: "true"

@@ -1,6 +1,3 @@
-# NOTE: openai-secret (containing openai_api_key) is provisioned by the
-# parent knowledgebb umbrella chart. Deploying this chart standalone
-# requires creating the secret manually first.
 nameOverride: ""
 fullnameOverride: ""
 
@@ -11,6 +8,13 @@ image:
   tag: "release-8.1.0_rc1_e7ac747"
   pullPolicy: IfNotPresent
   pullSecrets: []
+
+# Flink job images ship Azure CSP only; on AWS inject cloud-storage-sdk-aws at runtime.
+lib_mount_path: /opt/flink/lib
+aws_csp:
+  enabled: false
+  maven_image: maven:3.9-eclipse-temurin-17
+  artifact_version: "2.0.1"
 
 podAnnotations: {}
 
@@ -183,7 +187,6 @@ base_config: |
   job {
     env = "{{ .Values.global.env }}"
     enable.distributed.checkpointing = true
-    state.checkpoints.num-retained = 3
 
     {{- if eq "oci" .Values.global.checkpoint_store_type }}
     statebackend {
@@ -205,6 +208,7 @@ base_config: |
     }
     {{- else }}
     # No valid checkpoint_store_type configured, skipping statebackend.
+    enable.distributed.checkpointing = false
     {{- end }}
   }
     
@@ -240,7 +244,7 @@ base_config: |
   }
 
   es {
-  basePath = "{{ .Values.global.opensearch.host }}:{{ .Values.global.opensearch.port }}"
+  basePath = "{{ .Values.global.elasticsearch.host }}:{{ .Values.global.elasticsearch.port }}"
   }
 
 flink_jobs:
@@ -326,6 +330,92 @@ flink_jobs:
 
     job_classname: org.sunbird.job.transaction.task.TransactionEventProcessorStreamTask
 
+  asset-enrichment:
+    enabled: false
+    serviceMonitor: *serviceMonitor
+    config: |+
+      include file("/data/flink/conf/base-config.conf")
+      job {
+        env = "{{ .Values.global.env }}"
+      }
+
+      kafka {
+        input.topic = "{{ .Values.global.env }}.knowlg.learning.job.request"
+        groupId = "{{ .Values.global.env }}-asset-enrichment-group"
+        video_stream.topic = "{{ .Values.global.env }}.knowlg.content.postpublish.request"
+        zookeeper = ""
+      }
+
+      task {
+        consumer.parallelism = 1
+        router.parallelism = 1
+        videoEnrichment.parallelism = 1
+        imageEnrichment.parallelism = 1
+      }
+
+      content {
+        stream {
+          enabled = false
+          mimeType = ["video/mp4", "video/webm"]
+        }
+        youtube {
+          applicationName = "fetch-youtube-license"
+          regexPattern = ["\\?vi?=([^&]*)", "watch\\?.*v=([^&]*)", "(?:embed|vi?)/([^/?]*)", "^([A-Za-z0-9\\-\\_]*)"]
+        }
+        upload.context.driven = true
+        max.iteration.count = 2
+      }
+
+      thumbnail.max {
+        sample = 5
+        size.pixel = 150
+      }
+
+      cloudstorage.metadata.replace_absolute_path=true
+      cloudstorage.relative_path_prefix= "CONTENT_STORAGE_BASE_PATH"
+      cloudstorage.read_base_path="{{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_read_base_path "context" $) }}"
+      cloudstorage.write_base_path={{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_write_base_path "context" $) }}
+      cloudstorage.metadata.list={{ .Values.cloudstorage_metadatalist }}
+
+      {{- if eq .Values.global.cloud_storage_provider "aws" }}
+      cloud_storage_type="{{ .Values.global.sunbird_cloud_storage_provider }}"
+      cloud_storage_key="{{ .Values.global.cloud_storage_access_key }}"
+      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
+      cloud_storage_endpoint="https://{{ .Values.global.object_storage_endpoint }}"
+      cloud_storage_region="{{ .Values.global.cloud_storage_region }}"
+      {{- else }}
+      cloud_storage_type="{{ .Values.global.sunbird_cloud_storage_provider }}"
+      cloud_storage_key="{{ .Values.global.cloud_storage_access_key }}"
+      {{- if eq .Values.global.cloud_storage_provider "azure" }}
+      cloud_storage_secret=""
+      cloud_storage_auth_type="{{ .Values.global.cloud_storage_auth_type }}"
+      {{- else }}
+      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
+      {{- end }}
+      cloud_storage_endpoint=""
+      {{- end }}
+      cloud_storage_container="{{ .Values.global.public_container_name }}"
+      schema.base_path="https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
+
+
+    flink-conf: |+
+      jobmanager.memory.flink.size: 1024m
+      taskmanager.memory.flink.size: 1024m
+      taskmanager.numberOfTaskSlots: 1
+      jobManager.numberOfTaskSlots: 1
+      parallelism.default: 1
+      jobmanager.execution.failover-strategy: region
+      taskmanager.memory.network.fraction: 0.1
+      scheduler-mode: reactive
+      heartbeat.timeout: 8000
+      heartbeat.interval: 5000
+      taskmanager.memory.process.size: 1700m
+      jobmanager.memory.process.size: 1600m
+      # classloader.resolve-order: "parent-first"
+      # state.savepoints.dir: file:///tmp
+
+    job_classname: org.sunbird.job.assetenricment.task.AssetEnrichmentStreamTask
+
   knowlg-publish:
     enabled: true
     serviceMonitor: *serviceMonitor
@@ -345,48 +435,7 @@ flink_jobs:
         error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
         groupId = "{{ .Values.global.env }}-knowlg-publish-group"
         content_metadata.topic = "dv.telemetry.coss"
-        enriched_metadata.topic = "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
         zookeeper = ""
-      }
-
-      enriched {
-        metadata {
-          enabled = true
-          include_hierarchy = false
-
-          global {
-            includeFields = [
-              "identifier", "name", "status", "mimeType", "primaryCategory",
-              "description", "keywords", "author", "creator", "license",
-              "visibility", "audience", "language",
-              "createdBy"
-            ]
-            # Auto-include all framework enrichment fields (se_subjects, se_boards, se_mediums, se_gradeLevels, etc.)
-            autoIncludeSearchEnrichmentFields = true
-          }
-
-          content {
-            enabled = true
-            includeFields = []
-          }
-
-          collection {
-            enabled = true
-            includeFields = []
-            includeHierarchy = false
-          }
-
-          question {
-            enabled = false
-            includeFields = []
-          }
-
-          questionset {
-            enabled = false
-            includeFields = []
-            includeHierarchy = false
-          }
-        }
       }
 
       task {
@@ -437,7 +486,6 @@ flink_jobs:
                                     "application/vnd.ekstep.ecml-archive",
                                     "application/vnd.ekstep.html-archive",
                                     "application/vnd.android.package-archive",
-                                    "application/vnd.ekstep.scorm-archive",
                                     "application/vnd.ekstep.content-archive",
                                     "application/epub",
                                     "application/msword",
@@ -569,6 +617,13 @@ flink_jobs:
       cloudstorage.write_base_path={{ include "common.tplvalues.render" (dict "value" .Values.cloudstorage_write_base_path "context" $) }}
       cloudstorage.metadata.list={{ .Values.cloudstorage_metadatalist }}
 
+      {{- if eq .Values.global.cloud_storage_provider "aws" }}
+      cloud_storage_type="{{ .Values.global.sunbird_cloud_storage_provider }}"
+      cloud_storage_key="{{ .Values.global.cloud_storage_access_key }}"
+      cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
+      cloud_storage_endpoint="https://{{ .Values.global.object_storage_endpoint }}"
+      cloud_storage_region="{{ .Values.global.cloud_storage_region }}"
+      {{- else }}
       cloud_storage_type="{{ .Values.global.sunbird_cloud_storage_provider }}"
       cloud_storage_key="{{ .Values.global.cloud_storage_access_key }}"
       {{- if eq .Values.global.cloud_storage_provider "azure" }}
@@ -577,8 +632,9 @@ flink_jobs:
       {{- else }}
       cloud_storage_secret="{{ .Values.global.cloud_storage_secret_key }}"
       {{- end }}
-      cloud_storage_container="{{ .Values.global.public_container_name }}"
       cloud_storage_endpoint=""
+      {{- end }}
+      cloud_storage_container="{{ .Values.global.public_container_name }}"
       schema {
         basePath="https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
         supportedVersion = {
@@ -600,116 +656,14 @@ flink_jobs:
       heartbeat.interval: 5000
       taskmanager.memory.process.size: 2800m
       jobmanager.memory.process.size: 1600m
+      plugins.dir: /opt/flink/plugins
+      fs.allowed-fallback-filesystems: s3
+      fs.s3.impl: org.apache.flink.fs.s3hadoop.S3FileSystemFactory
+      fs.s3n.impl: org.apache.flink.fs.s3hadoop.S3FileSystemFactory
+      fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
       # classloader.resolve-order: "parent-first"
       # state.savepoints.dir: file:///tmp
     job_classname: org.sunbird.job.knowlg.task.KnowlgPublishStreamTask
-
-  content-embedding:
-    enabled: true
-    serviceMonitor: *serviceMonitor
-    config: |+
-      include file("/data/flink/conf/base-config.conf")
-
-      job {
-        env = "{{ .Values.global.env }}"
-      }
-
-      kafka {
-        input.topic = "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
-        output.topic = "{{ .Values.global.env }}.knowlg.embedding.chunks"
-        error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
-        groupId = "{{ .Values.global.env }}-content-embedding-group"
-      }
-
-      task {
-        consumer.parallelism = 1
-        extract.parallelism = 2
-        chunking.parallelism = 2
-        embedding.parallelism = 2
-        quantization.parallelism = 2
-        sink.parallelism = 1
-      }
-
-      schema {
-        # Events with _schema_version outside this list are routed to the DLQ.
-        supported_versions = ["1.0"]
-      }
-
-      chunking {
-        strategy = "sliding-window"
-
-        semantic {
-          max_chunk_size = 1000
-          excluded_fields = [
-            "hierarchy",
-            "children",
-            "id",
-            "identifier",
-            "contentType",
-            "_schema_version",
-            "timestamp"
-          ]
-        }
-
-        sliding-window {
-          max_words    = 512
-          overlap_words = 102
-        }
-      }
-
-      embedding {
-        service = "openai"
-        batch_size = 32
-        # Warn + counter when an embed API call exceeds this many millis.
-        slow_call_threshold_ms = 5000
-
-        openai {
-          api_key = ""
-          api_key = ${?OPENAI_API_KEY}
-          model = "text-embedding-3-small"
-          dimensions = 1536
-          timeout = 30
-          azure_endpoint = "{{ .Values.global.openai_azure_endpoint | default "" }}"
-          azure_deployment = "{{ .Values.global.openai_azure_deployment | default "text-embedding-3-small" }}"
-          azure_api_version = "{{ .Values.global.openai_azure_api_version | default "2023-05-15" }}"
-        }
-      }
-
-      quantization {
-        strategy = "int8"
-      }
-
-      opensearch {
-        host = "{{ .Values.global.opensearch.host }}"
-        port = {{ .Values.global.opensearch.port }}
-        index.name = "compositesearch"
-        user = ""
-        password = ""
-      }
-
-    flink-conf: |+
-      jobmanager.memory.flink.size: 1024m
-      taskmanager.memory.flink.size: 2048m
-      taskmanager.numberOfTaskSlots: 1
-      jobManager.numberOfTaskSlots: 1
-      parallelism.default: 1
-      jobmanager.execution.failover-strategy: region
-      taskmanager.memory.network.fraction: 0.1
-      scheduler-mode: reactive
-      heartbeat.timeout: 8000
-      heartbeat.interval: 5000
-      taskmanager.memory.process.size: 2800m
-      jobmanager.memory.process.size: 1600m
-
-    job_classname: org.sunbird.job.contentembedding.task.ContentEmbeddingStreamTask
-
-    extraEnv:
-      - name: OPENAI_API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: openai-secret
-            key: OPENAI_API_KEY
-            optional: true
 
 commonAnnotations:
   reloader.stakater.com/auto: "true"

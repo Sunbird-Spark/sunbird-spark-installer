@@ -1,0 +1,4 @@
+elasticsearch:
+  master:
+    persistence:
+      storageClass: "gp2"

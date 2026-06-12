@@ -1,0 +1,53 @@
+{{- if .Values.yugabyte.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Chart.Name }}-yugabyte-migration-job
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}-yugabyte-migration
+    scope: provisioning
+  annotations:
+    {{.Values.global.yugabyte.provisioning.annotations | toYaml }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-yugabyte-migration
+    spec:
+      restartPolicy: Never
+      volumes:
+      - name: shared-volume
+        emptyDir: {}
+      initContainers:
+      - name: wait-for-yugabyte
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "-c"]
+        args:
+        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte; sleep 10; done'"
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /opt/shared-volume
+      containers:
+      - name: migration
+        image: sunbirded.azurecr.io/yugabytecql:v1.0.0
+        imagePullPolicy: IfNotPresent
+        command: ['bash', '-c']
+        args:
+        - |
+          set -ex
+          export ENV={{ .Values.global.env | default "dev" }}
+          export YCQLSH_HOST={{ .Values.global.yugabyte.host }}
+          export YCQLSH_PORT={{ .Values.global.yugabyte.port }}
+          export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
+          export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
+          # run migrations directly from embedded scripts
+          cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-inquiry
+          chmod +x execute_migrations.sh || true
+          ./execute_migrations.sh $ENV
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /opt/shared-volume
+  backoffLimit: 30
+{{- end }}

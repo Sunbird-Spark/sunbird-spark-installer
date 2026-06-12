@@ -1,0 +1,21 @@
+dependencies:
+- name: common
+  repository: https://nimbushubin.github.io/helmcharts
+  version: 0.1.0
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 17.8.3
+- name: kafka
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 32.2.15
+- name: elasticsearch
+  repository: https://charts.bitnami.com/bitnami
+  version: 19.5.4
+- name: neo4j
+  repository: ""
+  version: 0.1.0
+- name: yugabyte
+  repository: https://charts.yugabyte.com
+  version: 2025.2.0
+digest: sha256:750b338fc8fd3768082ed96a45a044ede4b178a3e7c97ae420bac5bf57bd5523
+generated: "2026-06-02T20:51:08.682153262Z"

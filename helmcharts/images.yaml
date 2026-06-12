@@ -28,10 +28,10 @@ images:
     repository: "redis"
     tag: "7.0.9-debian-11-r1"
 
-  opensearch: &opensearch
-    registry: "docker.io"
-    repository: "opensearchproject/opensearch"
-    tag: "2.19.5"
+  elasticsearch: &elasticsearch
+    registry: "sunbirded.azurecr.io"
+    repository: "elasticsearch"
+    tag: "7.10.2"
 
   grafana: &grafana
     registry: "docker.io"
@@ -49,8 +49,8 @@ images:
     tag: "release-7.7.0_rc1_50b5b2d_2"
 
   player: &player
-    repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "spark-v1.0.1_71c2d11"
+    repository: "sunbirded.azurecr.io/sunbird-portal"
+    tag: "spark-v1.0.2_1b538d6"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -63,15 +63,15 @@ images:
 
   kong_apis: &kong_apis
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_b599482"
+    tag: "develop_5c87617"
 
   kong_consumers: &kong_consumers
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_b599482"
+    tag: "develop_5c87617"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "spark-v1.0.3_61d7904_16"
+    tag: "spark-v1.0.0_b75e555_13"
     
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -111,7 +111,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v1.0.2_d25f276_27"
+    tag: "spark-v1.0.0_a66d3e7_25"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -119,11 +119,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.1_b23d1ee"
+    tag: "spark-v1.0.1_d80ed5e"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.0.2_e234cae"
+    tag: "spark-v1.0.1_d80ed5e"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
@@ -149,7 +149,7 @@ images:
   janusgraph: &janusgraph
     registry: ghcr.io
     repository: sunbird-spark/janusgraph
-    tag: develop_8f2245e
+    tag: develop_cb093d4
 
   secor: &secor
     repository: "sunbirded.azurecr.io/secor"
@@ -181,8 +181,8 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
-  opensearch:
-    image: *opensearch
+  elasticsearch:
+    image: *elasticsearch
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -343,9 +343,14 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.0.1_57a34d3"
+    tag: "spark-v1.0.1_4c96414"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v1.0.2_cbe9e07"
+    tag: "spark-v1.0.0_c3b332f"
+
+  inquiryflink:
+    registry: "sunbirded.azurecr.io"
+    repository: "data-pipeline"
+    tag: "release-8.0.0_RC1_b4f909c"

@@ -86,6 +86,13 @@ configmap:
   enabled: true
   mountPath: /home/sunbird/knowlg-service-1.0-SNAPSHOT/config
 
+# Spark knowlg images ship Azure CSP only; on AWS inject cloud-storage-sdk-aws at runtime.
+lib_mount_path: /home/sunbird/knowlg-service-1.0-SNAPSHOT/lib
+aws_csp:
+  enabled: true
+  maven_image: maven:3.9-eclipse-temurin-17
+  artifact_version: "2.0.1"
+
 commonAnnotations:
   reloader.stakater.com/auto: "true"
 
@@ -189,7 +196,7 @@ javaenv:
   javaoptions: -Xms500m -Xmx500m
   _javaoptions: -Dlog4j2.formatMsgNoLookups=true
 # Example values.yaml structure
-initContainers: {}
+initContainers: []
   # - name: init-myservice
   #   image: busybox:1.28
   #   command: ['sh', '-c', "until nslookup kubernetes.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
