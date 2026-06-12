@@ -37,6 +37,7 @@ elasticsearch: &es
     heapSize: 2G
     persistence:
       size: 25Gi
+      storageClass: "gp2"
   data:
     replicaCount: 0
   coordinating:
@@ -88,6 +89,7 @@ kafka: &kafka
     "helm.sh/hook-weight": "-5"
   persistence:
     size: 25Gi
+    storageClass: "gp2"
   provisioning:
     annotations: *provisioningAnnotations
     replicationFactor: 1
@@ -169,6 +171,7 @@ redis: &redis
   master:
     persistence:
       size: 25Gi
+      storageClass: "gp2"
 
 schema: &schema
   base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"

@@ -12,6 +12,7 @@
 ##
 global:
   imageRegistry: ""
+  storageClass: "gp2"
   ## E.g.
   ## imagePullSecrets:
   ##   - myRegistryKeySecretName
@@ -1075,7 +1076,7 @@ controller:
     ## If undefined (the default) or set to null, no storageClassName spec is
     ## set, choosing the default provisioner.
     ##
-    storageClass: ""
+    storageClass: "gp2"
     ## @param controller.persistence.accessModes Persistent Volume Access Modes
     ##
     accessModes:
@@ -1115,7 +1116,7 @@ controller:
     ## If undefined (the default) or set to null, no storageClassName spec is
     ## set, choosing the default provisioner.
     ##
-    storageClass: ""
+    storageClass: "gp2"
     ## @param controller.logPersistence.accessModes Persistent Volume Access Modes
     ##
     accessModes:
@@ -1541,7 +1542,7 @@ broker:
     ## If undefined (the default) or set to null, no storageClassName spec is
     ## set, choosing the default provisioner.
     ##
-    storageClass: ""
+    storageClass: "gp2"
     ## @param broker.persistence.accessModes Persistent Volume Access Modes
     ##
     accessModes:
