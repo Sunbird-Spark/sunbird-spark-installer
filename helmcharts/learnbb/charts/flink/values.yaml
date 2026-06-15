@@ -174,7 +174,7 @@ enable_suppress_exception: false
 enable_rc_certificate: true
 rc_bad_char_list: "char_list"
 
-cert_cloud_storage_type: "azure"
+cert_cloud_storage_type: "{{ .Values.global.cloud_storage_provider }}"
 cert_cloud_storage_secret: ""
 cert_cloud_storage_provider: "{{ .Values.global.cloud_storage_provider }}"
 cert_cloud_storage_key: "{{ .Values.global.cloud_storage_access_key }}"
