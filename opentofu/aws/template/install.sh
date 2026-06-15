@@ -7,6 +7,7 @@ echo "Press Enter to continue..."
 read -r
 
 environment=$(basename "$(pwd)")
+INSTALL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function create_tf_backend() {
     echo -e "Creating terraform state backend"
@@ -82,6 +83,64 @@ function certificate_config() {
         echo "Certificate public key already configured in registry"
     fi
 }
+
+function yq_read_global() {
+    local file="$1" key="$2" value
+    value=$(yq eval ".global.${key} // \"\"" "$file" 2>/dev/null || true)
+    if [ -z "$value" ] || [ "$value" = "null" ]; then
+        echo ""
+    else
+        echo "$value"
+    fi
+}
+
+function ensure_eks_kubeconfig() {
+    local script_dir="$1"
+    local building_block="" env_name="" region="" cluster_name values_file
+
+    for values_file in "$script_dir/global-values.yaml" "$script_dir/global-cloud-values.yaml"; do
+        [ -f "$values_file" ] || continue
+        if [ -z "$building_block" ]; then
+            building_block=$(yq_read_global "$values_file" building_block)
+        fi
+        if [ -z "$env_name" ]; then
+            env_name=$(yq_read_global "$values_file" env)
+        fi
+        if [ -z "$env_name" ]; then
+            env_name=$(yq_read_global "$values_file" environment)
+        fi
+        if [ -z "$region" ]; then
+            region=$(yq_read_global "$values_file" cloud_storage_region)
+        fi
+    done
+
+    region="${region:-${AWS_REGION:-}}"
+
+    if [ -z "$building_block" ] || [ -z "$env_name" ]; then
+        if kubectl cluster-info >/dev/null 2>&1; then
+            echo "Using existing kubeconfig (global.building_block/global.env not set in values files)"
+            return 0
+        fi
+        echo "ERROR: Set global.building_block and global.env in global-values.yaml." >&2
+        echo "Copy the template first: cp -r opentofu/aws/template opentofu/aws/<env-name>" >&2
+        exit 1
+    fi
+
+    cluster_name="${building_block}-${env_name}"
+    if ! [[ "$cluster_name" =~ ^[0-9A-Za-z][A-Za-z0-9_-]*$ ]]; then
+        echo "ERROR: Invalid EKS cluster name '${cluster_name}'." >&2
+        exit 1
+    fi
+
+    if [ -z "$region" ]; then
+        echo "ERROR: AWS region not set (tf.sh AWS_REGION or global.cloud_storage_region)." >&2
+        exit 1
+    fi
+
+    echo "Fetching kubeconfig for EKS cluster: ${cluster_name}"
+    aws eks update-kubeconfig --region "${region}" --name "${cluster_name}"
+}
+
 function install_component() {
     export KUBECONFIG="${HOME}/.kube/config"
     # Source AWS credentials so EKS auth works when called standalone
@@ -90,6 +149,7 @@ function install_component() {
     if [ -f "$script_dir/tf.sh" ]; then
         source "$script_dir/tf.sh"
     fi
+    ensure_eks_kubeconfig "$script_dir"
     # We need a dummy cm for configmap to start. Later Lernbb will create real one
     kubectl create configmap keycloak-key -n sunbird 2>/dev/null || true
     local current_directory="$(pwd)"
@@ -463,7 +523,7 @@ function create_client_forms() {
     echo "Starting client forms (ED-${RELEASE})..."
     for collection_file in "ED-${RELEASE}"/*.json; do
         echo "Creating client forms in.. $collection_file"
-        run_postman_collection "$(basename "$collection_file")" || return 1
+        run_postman_collection "$collection_file" || return 1
     done
 }
 
@@ -535,7 +595,7 @@ if [ $# -eq 0 ]; then
     create_tf_resources
     cd ../../../helmcharts
     install_helm_components
-    cd ../opentofu/aws/template
+    cd "$INSTALL_DIR"
     post_install_nodebb_plugins
     restart_workloads_using_keys
     certificate_config

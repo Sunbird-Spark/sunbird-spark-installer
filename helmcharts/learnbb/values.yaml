@@ -43,7 +43,7 @@ elasticsearch: &es
     heapSize: 2G
     persistence:
       size: 25Gi
-      storageClass: "gp2"
+      storageClass: ""
   data:
     replicaCount: 0
   coordinating:
@@ -73,7 +73,7 @@ kafka: &kafka
     "helm.sh/hook-weight": "-5"
   persistence:
     size: 25Gi
-    storageClass: "gp2"
+    storageClass: ""
   listeners:
     client:
       protocol: PLAINTEXT
@@ -106,7 +106,7 @@ redis: &redis
   master:
     persistence:
       size: 25Gi
-      storageClass: "gp2"
+      storageClass: ""
 
 yugabyte: &yugabyte
   enabled: true
