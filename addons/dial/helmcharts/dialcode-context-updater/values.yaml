@@ -155,6 +155,7 @@ base_config: |
     checkpointing.compressed = true
     checkpointing.interval = 60000
     checkpointing.pause.between.seconds = 3000
+    state.checkpoints.num-retained = 3
     restart-strategy.attempts = 3
     restart-strategy.delay = 30000
   }

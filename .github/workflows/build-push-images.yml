@@ -2,43 +2,20 @@ name: Docker Build and Push
 
 on:
   push:
-    paths:
-      - 'scripts/keycloak-21.1.2/**'
-      - 'scripts/keycloak-postgres-query/**'
-      - 'scripts/kong-api-scripts/**'
-      - 'scripts/sunbird-yugabyte-migrations/**'
-      - 'scripts/janusgraph/**'
+    tags:
+      - 'spark-v*'
 
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
-    outputs:
-      directories: ${{ steps.filter.outputs.changes }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Check changed directories
-        id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          base: ${{ github.event.before }}
-          filters: |
-            keycloak-21.1.2: 'scripts/keycloak-21.1.2/**'
-            keycloak-postgres-query: 'scripts/keycloak-postgres-query/**'
-            kong-api-scripts: 'scripts/kong-api-scripts/**'
-            sunbird-yugabyte-migrations: 'scripts/sunbird-yugabyte-migrations/**'
-            janusgraph: 'scripts/janusgraph/**'
-
   docker-build-push:
-    needs: prepare
-    if: needs.prepare.outputs.directories != '[]'
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        directory: ${{ fromJson(needs.prepare.outputs.directories) }}
+        directory:
+          - keycloak-21.1.2
+          - keycloak-postgres-query
+          - kong-api-scripts
+          - sunbird-yugabyte-migrations
+          - janusgraph
     permissions:
       contents: read
       packages: write
@@ -61,8 +38,9 @@ jobs:
         id: prep
         run: |
           echo "OWNER_LOWERCASE=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
-          # Format: develop_<short-sha>, lowercased
-          RAW_TAG="develop_${GITHUB_SHA::7}"
+          # Format: spark-v<tag>_<short-sha> e.g. spark-v1.0.2_abc1234
+          GIT_TAG="${GITHUB_REF_NAME}"
+          RAW_TAG="${GIT_TAG}_${GITHUB_SHA::7}"
           echo "IMAGE_TAG=$(echo $RAW_TAG | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Build and Push
