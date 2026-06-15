@@ -162,7 +162,7 @@ elasticsearch:
         memory: "4Gi"
     persistence:
       size: 25Gi
-      storageClass: "gp2"
+      storageClass: ""
 
 kafka:
   broker:
@@ -175,7 +175,7 @@ kafka:
         memory: 1024Mi
     persistence:
       size: 8Gi
-      storageClass: "gp2"
+      storageClass: ""
   controller:
     replicaCount: 3
     resources:
@@ -187,7 +187,7 @@ kafka:
         memory: 1024Mi
     persistence:
       size: 8Gi
-      storageClass: "gp2"
+      storageClass: ""
 
 # keycloak:
 #   resources:
@@ -344,7 +344,7 @@ redis:
   master:
     persistence:
       size: 25Gi
-      storageClass: "gp2"
+      storageClass: ""
     primary:
     resources:
       limits:
@@ -421,8 +421,8 @@ yugabyte:
     master:
       count: 2
       size: 50Gi
-      storageClass: "gp2"
+      storageClass: ""
     tserver:
       count: 2
       size: 50Gi
-      storageClass: "gp2"
+      storageClass: ""

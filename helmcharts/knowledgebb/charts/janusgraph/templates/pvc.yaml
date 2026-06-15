@@ -25,7 +25,6 @@ spec:
   {{- range .Values.persistence.accessModes }}
     - {{ . | quote }}
   {{- end }}
-  storageClass: "gp2"
   resources:
     requests:
       storage: {{ .Values.persistence.size | quote }}

@@ -14,6 +14,7 @@ global:
   aws_account_id: ${aws_account_id}
   object_storage_endpoint: s3.amazonaws.com
   storage_class: ${storage_class}
+  storageClass: ${storage_class}
   cloud_storage_provider: ${cloud_storage_provider}
   cloud_storage_region: ${cloud_storage_region}
   service_account_role_arn: ${service_account_role_arn}
@@ -69,3 +70,32 @@ nginx-public-ingress:
   commonAnnotations:
     reloader.stakater.com/auto: "true"
     service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+
+# Per-service storageClass overrides derived from global.storage_class
+kafka:
+  persistence:
+    storageClass: ${storage_class}
+  broker:
+    persistence:
+      storageClass: ${storage_class}
+  controller:
+    persistence:
+      storageClass: ${storage_class}
+redis:
+  master:
+    persistence:
+      storageClass: ${storage_class}
+elasticsearch:
+  persistence:
+    storageClass: ${storage_class}
+  master:
+    persistence:
+      storageClass: ${storage_class}
+yugabyte:
+  persistence:
+    storageClass: ${storage_class}
+  storage:
+    master:
+      storageClass: ${storage_class}
+    tserver:
+      storageClass: ${storage_class}

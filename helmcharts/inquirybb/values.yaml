@@ -32,7 +32,7 @@ redis: &redis
   master:
     persistence:
       size: 25Gi
-      storageClass: "gp2"
+      storageClass: ""
 
 elasticsearch: &es
   enabled: true
@@ -66,7 +66,7 @@ elasticsearch: &es
     annotations: *provisioningAnnotations
   persistence:
     size: 25Gi
-    storageClass: "gp2"
+    storageClass: ""
   sysctlImage:
     registry: sunbirded.azurecr.io
     repository: bitnami-shell-archived
@@ -96,7 +96,7 @@ yugabyte: &yugabyte
     annotations: *provisioningAnnotations  
   persistence:
     size: 25Gi
-    storageClass: "gp2"
+    storageClass: ""
   # Force single replica for Yugabyte masters and tservers (override subchart defaults)
   replicas:
     master: 3
@@ -135,7 +135,7 @@ kafka: &kafka
     parallel: 1
   persistence:
     size: 25Gi
-    storageClass: "gp2"
+    storageClass: ""
   listeners:
     client:
       protocol: PLAINTEXT
