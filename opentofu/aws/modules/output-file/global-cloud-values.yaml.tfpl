@@ -2,10 +2,8 @@ global:
   env: ${env}
   environment: ${environment}
   building_block: ${building_block}
-  # NOTE: Despite the name, this is NOT an AWS access key.
-  # It holds the public S3 bucket name, used by Sunbird services as a storage identifier.
-  # AWS authentication is handled via IRSA (IAM Role for Service Accounts) — see aws_iam_role_arn below.
-  cloud_storage_access_key: ${aws_s3_bucket_public}
+  # Empty for AWS — auth via IRSA (no static access key). Bucket name is in public_container_name below.
+  cloud_storage_access_key: ""
   public_container_name: ${aws_s3_bucket_public}
   private_container_name: ${aws_s3_bucket_private}
   velero_storage_container_private: ${aws_s3_bucket_velero}
@@ -18,7 +16,7 @@ global:
   object_storage_endpoint: s3.${aws_region}.amazonaws.com
   storage_class: gp3
   cloud_storage_provider: ${cloud_storage_provider}
-  %{ if cloud_storage_provider == "aws" }cloud_storage_auth_type: "IRSA"%{ endif }
+  cloud_storage_auth_type: "IRSA"
   aws_iam_role_arn: ${aws_iam_role_arn}
   workload_identity_service_account_name: ${k8s_service_account_name}
   serviceAccount:
