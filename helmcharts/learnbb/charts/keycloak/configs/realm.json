@@ -534,6 +534,9 @@
         "uma_authorization"
       ],
       "clientRoles": {
+        "realm-management": [
+          "manage-realm"
+        ],
         "lms": [
           "manage-users",
           "uma_protection"
@@ -2024,8 +2027,7 @@
             ]
           }
         ],
-        "policies": [
-        ],
+        "policies": [],
         "scopes": [],
         "decisionStrategy": "UNANIMOUS"
       }
@@ -3957,7 +3959,12 @@
     ]
   },
   "internationalizationEnabled": true,
-  "supportedLocales": ["en", "fr", "ar", "pt_BR"],
+  "supportedLocales": [
+    "en",
+    "fr",
+    "ar",
+    "pt_BR"
+  ],
   "defaultLocale": "en",
   "authenticationFlows": [
     {

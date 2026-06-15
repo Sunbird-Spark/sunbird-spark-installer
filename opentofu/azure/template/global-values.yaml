@@ -49,6 +49,10 @@ global:
   sunbird_msg_sender: ""
   mail_from_certbot_notifications: ""  #The "from" email address used by the Certbot renewal job for sending SSL renewal status notifications via SendGrid SMTP
   youtube_apikey: ""
+  openai_api_key: "REPLACE_WITH_OPENAI_API_KEY"
+  openai_azure_endpoint: "REPLACE_WITH_OPENAI_AZURE_ENDPOINT"  # e.g. https://<resource>.openai.azure.com/
+  openai_azure_deployment: "text-embedding-3-small"
+  openai_azure_api_version: "2023-05-15"
   superset:
       init:
         adminUser:
