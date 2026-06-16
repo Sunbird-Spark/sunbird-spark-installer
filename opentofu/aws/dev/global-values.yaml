@@ -1,0 +1,86 @@
+deployed_dial_addon:  &deployed_dial_addon  "false"
+enable_asset_enrichment: &enable_asset_enrichment "false"
+default_passwords:
+  grafana_admin_password: &grafana-admin-password "prom-operator"
+  keycloak_password: &keycloak-password "admin"
+  superset_admin_password: &superset-admin-password "admin"
+kube-prometheus-stack:
+  grafana:
+    adminUser: admin
+    adminPassword: *grafana-admin-password
+keycloak:
+  keycloak_user: admin
+  keycloak_password: *keycloak-password
+keycloak-kids-keys:
+  KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
+global:
+  skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
+  sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
+  knowledge_platform_ref: "master"  # git branch or tag for knowledge-platform (schemas/local upload)
+  building_block: "knowlg"  # building block name
+  env: "knowlg"  # use lowercase alphanumeric string between 1-9 characters
+  environment: "dev"  # use lowercase alphanumeric string between 1-9 characters
+  domain: ""
+  lets_encrypt_ssl: false  # enable this if you are using let's encrypt ssl certificate
+  cert_notifications:
+    email: ""  # provide the email address for certificate renewal notifications/alerts
+  play_http:
+     secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms"
+  cloud_storage_region: "ap-south-1"  # AWS region e.g. ap-south-1
+  eks_version: "1.36"  # required — always specify the exact Kubernetes version e.g. "1.35". Check: aws eks describe-addon-versions --query 'addons[0].addonVersions[].compatibilities[].clusterVersion' | sort -u
+  sunbird_cloud_storage_provider: "aws"  # Provide the cloud storage provider
+  checkpoint_store_type: "aws"
+  cloud_service_provider: "aws"
+  cloud_storage_provider: "aws"
+  sunbird_cloud_storage_provider: "aws"
+  sunbird_google_captcha_site_key:
+  google_captcha_private_key:
+  sunbird_google_oauth_clientId:
+  sunbird_google_oauth_clientSecret:
+  mail_server_from_email: ""
+  mail_server_password: ""
+  mail_server_host: smtp.sendgrid.net
+  mail_server_port: "587"
+  mail_server_username: apikey
+  sunbird_msg_91_auth: ""
+  sunbird_msg_sender: ""
+  mail_from_certbot_notifications: ""  # The "from" email address used by the Certbot renewal job for sending SSL renewal status notifications via SendGrid SMTP
+  youtube_apikey: ""
+  openai_api_key: "REPLACE_WITH_OPENAI_API_KEY"
+  openai_azure_endpoint: "REPLACE_WITH_OPENAI_AZURE_ENDPOINT"  # e.g. https://<resource>.openai.azure.com/
+  openai_azure_deployment: "text-embedding-3-small"
+  openai_azure_api_version: "2023-05-15"
+  superset:
+      init:
+        adminUser:
+          username: admin
+          password: *superset-admin-password
+  yugabyte:
+    ysql:
+      user: "yugabyte"
+      password: "yugabyte"
+  keycloak:
+   keycloak_user: admin
+   keycloak_password: *keycloak-password
+  deployed_dial_addon: *deployed_dial_addon
+  enable_asset_enrichment: *enable_asset_enrichment
+  # The merge domain is optional and is required only if user merge workflow is required.
+  # For most audience, this workflow is not required. If you need this workflow, then
+  # set the value of merge_domain_status to "true" and provide a subdomain / another domain
+  merge_domain_status: "false"
+  merge_domain: ""
+  # Add the domain SSL key and certificate
+  # Example below:
+  # proxy_private_key: |
+  #   -----BEGIN PRIVATE KEY-----
+  #   ...
+  #   -----END PRIVATE KEY-----
+  # proxy_certificate: |
+  #   -----BEGIN CERTIFICATE-----
+  #   ...
+  #   -----END CERTIFICATE-----
+  proxy_private_key: |
+    REPLACE_ME
+  proxy_certificate: |
+    REPLACE_ME
+  # CERTIFICATE-KEYS

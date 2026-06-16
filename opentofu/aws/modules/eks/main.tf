@@ -63,6 +63,7 @@ resource "aws_eks_cluster" "eks" {
     subnet_ids              = var.subnet_ids
     endpoint_public_access  = true
     endpoint_private_access = true
+    public_access_cidrs     = var.eks_public_access_cidrs
   }
 
   access_config {
@@ -113,6 +114,19 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry_read" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
+# Launch template enforcing IMDSv2 on all nodes
+resource "aws_launch_template" "big_nodepool" {
+  name_prefix = "${local.environment_name}-big-nodepool-"
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = var.imdsv2_http_hop_limit
+  }
+
+  tags = merge(local.common_tags, var.additional_tags)
+}
+
 # EKS Node Group (equivalent to AKS default node pool)
 resource "aws_eks_node_group" "big_nodepool" {
   cluster_name    = aws_eks_cluster.eks.name
@@ -120,6 +134,11 @@ resource "aws_eks_node_group" "big_nodepool" {
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = var.subnet_ids
   instance_types  = [var.big_node_size]
+
+  launch_template {
+    id      = aws_launch_template.big_nodepool.id
+    version = aws_launch_template.big_nodepool.latest_version
+  }
 
   scaling_config {
     desired_size = var.big_node_count

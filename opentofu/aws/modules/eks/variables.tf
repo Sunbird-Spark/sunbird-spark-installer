@@ -34,13 +34,13 @@ variable "big_nodepool_name" {
 variable "big_node_count" {
   type        = number
   description = "Big node pool node count."
-  default     = 2
+  default     = 1
 }
 
 variable "big_node_size" {
   type        = string
   description = "Big node pool EC2 instance type."
-  default     = "m5.4xlarge"
+  default     = "t3.xlarge"
 }
 
 variable "additional_tags" {
@@ -53,4 +53,16 @@ variable "private_ingressgateway_ip" {
   type        = string
   description = "Nginx private ingress IP (reserved for reference, not pre-created on AWS)."
   default     = "10.0.0.10"
+}
+
+variable "eks_public_access_cidrs" {
+  type        = list(string)
+  description = "CIDRs allowed to reach EKS API server. Restrict to office/VPN IPs in production."
+  default     = ["0.0.0.0/0"]
+}
+
+variable "imdsv2_http_hop_limit" {
+  type        = number
+  description = "IMDSv2 hop limit. 1 for EC2 instances, 2 for containerized workloads."
+  default     = 2
 }

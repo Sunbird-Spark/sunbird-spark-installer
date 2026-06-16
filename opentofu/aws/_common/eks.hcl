@@ -11,17 +11,9 @@ terraform {
   source = "../../modules//eks/"
 }
 
-dependency "network" {
-  config_path = "../network"
-  mock_outputs = {
-    eks_subnet_ids = ["dummy-subnet-1", "dummy-subnet-2"]
-  }
-}
-
 inputs = {
   environment    = local.environment
   building_block = local.building_block
   region         = local.region
   eks_version    = local.eks_version
-  subnet_ids     = dependency.network.outputs.eks_subnet_ids
 }
