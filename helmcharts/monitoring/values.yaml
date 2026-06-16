@@ -9,10 +9,13 @@ kube-prometheus-stack:
         volumeClaimTemplate:
           spec:
             accessModes: ["ReadWriteOnce"]
+            storageClassName: gp2
             resources:
               requests:
                 storage: 25Gi
   grafana:
+    persistence:
+      storageClassName: gp2
     env:
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
       GF_SERVER_ROOT_URL: http://example.com/grafana/
@@ -46,3 +49,4 @@ loki:
     replicas: 1
     persistence:
       size: 25Gi
+      storageClass: gp2

@@ -1,0 +1,7 @@
+# AWS lern: inject cloud-storage-sdk-aws JARs at runtime (spark image ships Azure CSP only).
+global:
+  cloud_storage_provider: "aws"
+  sunbird_cloud_storage_provider: "aws"
+lern:
+  aws_csp:
+    enabled: true

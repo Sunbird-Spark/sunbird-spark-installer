@@ -22,6 +22,7 @@ kafka: &kafka
     tag: 3.3.1-debian-11-r25
   persistence:
     size: 25Gi
+    storageClass: ""
   livenessProbe:
     enabled: true
     initialDelaySeconds: 30
@@ -94,6 +95,7 @@ redis: &redis
   master:
     persistence:
       size: 25Gi
+      storageClass: ""
     primary:
     resources:
       limits:
@@ -140,6 +142,8 @@ yugabyte: &yugabyte
   replicas:
     master: 3
     tserver: 3
+  preflight:
+    skipUlimit: true
   username: "yugabyte"
   password: "yugabyte"  
 

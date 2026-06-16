@@ -12,6 +12,7 @@ kafka: &kafka
     "helm.sh/hook-weight": "-5"
   persistence:
     size: 25Gi
+    storageClass: "gp2"
   listeners:
     client:
       protocol: PLAINTEXT
