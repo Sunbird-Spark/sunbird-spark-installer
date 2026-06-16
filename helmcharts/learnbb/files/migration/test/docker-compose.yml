@@ -1,0 +1,83 @@
+# ============================================================================
+# Local test harness for the ES 6.8.23 -> ES 7.10.2 -> OpenSearch 2.19.5
+# migration script.
+#
+#   es7  : Elasticsearch 7.10.2   on http://localhost:9200
+#   os   : OpenSearch   2.19.5    on http://localhost:9201
+#
+# The example snapshot (taken on ES 7.10.2, containing v6.8.23 indices) is
+# mounted read-write into the ES7 snapshot repo path so it can be restored.
+# OpenSearch is started with reindex.remote.whitelist so the migration script
+# can remote-reindex documents from ES7 into the pre-created v2.19.5 indices.
+#
+# Usage:
+#   SNAPSHOT_SRC=/Users/chethan/test/es-backup-08-06-2026 docker compose up -d
+#   ES_HOST=localhost:9200 OS_HOST=localhost:9201 \
+#     SNAPSHOT_NAME=snapshot_08_06_2026 \
+#     REMOTE_ES_HOST=http://es7:9200 \
+#     ../migrate-es-to-opensearch.sh
+#
+# Note: REMOTE_ES_HOST must be the address OpenSearch uses to reach ES7. When
+# the script runs on the host (not in a container), OpenSearch still reaches
+# ES7 over the compose network as http://es7:9200 (that is whitelisted below).
+# ============================================================================
+
+# Dedicated project name so this stack never collides with other compose
+# projects that happen to live in a directory also named "test".
+name: sunbird-es-os-migration-test
+
+services:
+  es7:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.2
+    container_name: mig-es7
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      # snapshot repo location (must match SNAPSHOT_LOCATION in the script)
+      - path.repo=/usr/share/elasticsearch/snapshots
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile:  { soft: 65536, hard: 65536 }
+    ports:
+      - "9200:9200"
+    volumes:
+      # mount the example snapshot as the ES7 fs repo
+      - ${SNAPSHOT_SRC:-./snapshot}:/usr/share/elasticsearch/snapshots
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    networks: [mig]
+
+  os:
+    image: opensearchproject/opensearch:2.19.0
+    container_name: mig-os
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      # allow remote reindex FROM the ES7 container
+      - "reindex.remote.whitelist=es7:9200,localhost:9200,127.0.0.1:9200"
+      - path.repo=/usr/share/opensearch/snapshots
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile:  { soft: 65536, hard: 65536 }
+    ports:
+      - "9201:9200"
+    volumes:
+      - ${SNAPSHOT_SRC:-./snapshot}:/usr/share/opensearch/snapshots
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    networks: [mig]
+
+networks:
+  mig:
+    driver: bridge

@@ -109,6 +109,6 @@ cloud_public_storage_endpoint: ""
 itext_license_enabled: false
 itext_license_path: "/home/sunbird/itext_trail_license.xml"
 cloud_service_provider: "azure"
-java_options: -Xmx600m
+java_options: -Xmx600m -Dplay.server.netty.transport=jdk 
 sunbird_cert_enc_service_url: "http://enc-service:8013"
 download_link_expiry_timeout: "600"
