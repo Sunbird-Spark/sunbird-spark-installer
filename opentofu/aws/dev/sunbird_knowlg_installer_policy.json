@@ -36,10 +36,28 @@
         "ec2:RevokeSecurityGroupEgress",
         "ec2:CreateLaunchTemplate",
         "ec2:DeleteLaunchTemplate",
+        "ec2:CreateLaunchTemplateVersion",
+        "ec2:DeleteLaunchTemplateVersions",
         "ec2:CreateTags",
-        "ec2:DeleteTags"
+        "ec2:DeleteTags",
+        "ec2:TerminateInstances",
+        "ec2:ModifyLaunchTemplate"
       ],
       "Resource": "*"
+    },
+    {
+      "Sid": "EC2RunInstances",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": [
+        "arn:aws:ec2:ap-south-1:277894851354:launch-template/*",
+        "arn:aws:ec2:ap-south-1:277894851354:instance/*",
+        "arn:aws:ec2:ap-south-1:277894851354:network-interface/*",
+        "arn:aws:ec2:ap-south-1:277894851354:volume/*",
+        "arn:aws:ec2:ap-south-1:277894851354:security-group/*",
+        "arn:aws:ec2:ap-south-1:277894851354:subnet/*",
+        "arn:aws:ec2:ap-south-1::image/*"
+      ]
     },
     {
       "Sid": "S3BucketList",
@@ -84,7 +102,9 @@
         "eks:DeleteAddon",
         "eks:DescribeAddon",
         "eks:ListAddons",
-        "eks:UpdateAddon"
+        "eks:UpdateAddon",
+        "eks:DescribeUpdate",
+        "eks:ListUpdates"
       ],
       "Resource": [
         "arn:aws:eks:ap-south-1:277894851354:cluster/knowlg-dev",
@@ -128,6 +148,12 @@
       "Effect": "Allow",
       "Action": "iam:PassRole",
       "Resource": "arn:aws:iam::277894851354:role/knowlg-dev-*"
+    },
+    {
+      "Sid": "STS",
+      "Effect": "Allow",
+      "Action": "sts:DecodeAuthorizationMessage",
+      "Resource": "*"
     },
     {
       "Sid": "DynamoDB",

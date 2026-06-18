@@ -20,7 +20,7 @@ securityContext: {}
   #   - ALL
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - name: http
       port: 8000

@@ -116,7 +116,7 @@ search:
   search_payload_log_enable: true
   ekstepPlatformApiUserId: "search-service"
   semantic:
-    enabled: true
+    enabled: false
     embedding_service: "openai"
     openai:
       model: "text-embedding-3-small"

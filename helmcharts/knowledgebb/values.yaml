@@ -7,7 +7,7 @@ channel: &channel
 
 knowlg:
   enabled: true
-  opa_enabled: true
+  opa_enabled: false
 
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
@@ -17,7 +17,7 @@ migration:
     waitTime: 120
 
 opensearch: &opensearch
-  enabled: true
+  enabled: false
   fullnameOverride: "opensearch"
   host: "opensearch-cluster-master"
   port: 9200

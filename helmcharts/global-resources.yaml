@@ -98,13 +98,15 @@ player:
 janusgraph:
   resources:
     requests:
-      cpu: 1
+      cpu: 300m
       memory: 3Gi
     limits:
-      cpu: 3
+      cpu: "2"
       memory: 6Gi
 
 knowlg:
+  serviceMonitor:
+    enabled: false
   resources:
     requests:
       cpu: 100m
@@ -112,15 +114,17 @@ knowlg:
     limits:
       cpu: 1
       memory: 1024Mi
- 
+
 search:
+  serviceMonitor:
+    enabled: false
   resources:
     requests:
       cpu: 100m
       memory: 100Mi
     limits:
       cpu: 1
-      memory: 1024Mi 
+      memory: 1024Mi
 
 #learnbb     
 cert:
@@ -162,7 +166,7 @@ certregistry:
 opensearch:
   resources:
     requests:
-      cpu: "1"
+      cpu: "500m"
       memory: "2Gi"
     limits:
       cpu: "2"
@@ -174,22 +178,22 @@ kafka:
   broker:
     resources:
       limits:
-        cpu: 1
-        memory: 2048Mi
-      requests:
-        cpu: 750m
+        cpu: 500m
         memory: 1024Mi
+      requests:
+        cpu: 200m
+        memory: 512Mi
     persistence:
-      size: 8Gi
+      size: 6Gi
   controller:
     replicaCount: 3
     resources:
       limits:
-        cpu: 1
-        memory: 2048Mi
-      requests:
-        cpu: 750m
+        cpu: 500m
         memory: 1024Mi
+      requests:
+        cpu: 200m
+        memory: 512Mi
     persistence:
       size: 8Gi
 
@@ -377,16 +381,6 @@ secor:
       cpu: 512m
       memory: 1Gi
 
-search:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
-
-
 velero:
   resources: 
     limits:
@@ -430,22 +424,22 @@ yugabyte:
   resource:
     master:
       requests:
-        cpu: "2"
-        memory: 2Gi
+        cpu: "400m"
+        memory: 762Mi
       limits:
-        cpu: "2"
-        memory: 2Gi
+        cpu: "700m"
+        memory: 1274Mi
     tserver:
       requests:
-        cpu: "2"
-        memory: 4Gi
+        cpu: "750m"
+        memory: 1274Mi
       limits:
-        cpu: "2"
-        memory: 4Gi
+        cpu: "1250m"
+        memory: 2298Mi
   storage:
     master:
       count: 2
-      size: 10Gi
+      size: 8Gi
     tserver:
       count: 2
-      size: 10Gi
+      size: 8Gi

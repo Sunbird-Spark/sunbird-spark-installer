@@ -7,7 +7,8 @@ include "environment" {
 }
 
 inputs = {
-  subnet_ids = ["subnet-0bd6d2daa3e836679", "subnet-0bbeb8df17d354df1"]  # private subnets ap-south-1a, ap-south-1b
+  big_node_count          = 2
+  eks_public_access_cidrs = []
   additional_tags = {
     project     = "knowledge engine"
     country     = "india"

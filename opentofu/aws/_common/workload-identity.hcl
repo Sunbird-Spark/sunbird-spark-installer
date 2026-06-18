@@ -11,21 +11,16 @@ terraform {
   source = "../../modules//workload-identity/"
 }
 
-dependency "network" {
-  config_path = "../network"
-  mock_outputs = {
-    vpc_id = "dummy-vpc"
-  }
-}
-
 dependency "eks" {
   config_path = "../eks"
   mock_outputs = {
-    oidc_issuer_url    = "https://oidc.eks.ap-south-1.amazonaws.com/id/DUMMY"
-    cluster_name       = "dummy-cluster"
-    kubernetes_host    = "https://dummy.gr7.ap-south-1.eks.amazonaws.com"
+    oidc_issuer_url        = "https://oidc.eks.ap-south-1.amazonaws.com/id/DUMMY"
+    cluster_name           = "dummy-cluster"
+    kubernetes_host        = "https://dummy.gr7.ap-south-1.eks.amazonaws.com"
     cluster_ca_certificate = "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0t..."
   }
+  mock_outputs_allowed_terraform_commands = ["validate", "plan", "apply", "destroy", "init"]
+  mock_outputs_merge_strategy_with_state  = "shallow"
 }
 
 dependency "storage" {

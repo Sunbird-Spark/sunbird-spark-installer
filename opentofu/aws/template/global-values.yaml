@@ -14,6 +14,8 @@ keycloak:
 keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
 global:
+  skip_network_module: true   # set to true to skip VPC/subnet creation (use existing network)
+  subnet_ids: []              # required when skip_network_module is true — list your existing subnet IDs
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
   sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
   knowledge_platform_ref: "spark-v19"  # git branch or tag for knowledge-platform (schemas/local upload)

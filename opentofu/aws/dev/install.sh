@@ -1,0 +1,445 @@
+#!/bin/bash
+set -euo pipefail
+environment=$(basename "$(pwd)")
+
+function create_tf_backend() {
+    echo -e "Creating opentofu state backend"
+    bash create_tf_backend.sh
+}
+
+function backup_configs() {
+    timestamp=$(date +%d%m%y_%H%M%S)
+    echo -e "\nBackup existing config files if they exist"
+    mkdir -p ~/.kube
+    mv ~/.kube/config ~/.kube/config.$timestamp || true
+    mkdir -p ~/.config/rclone
+    mv ~/.config/rclone/rclone.conf ~/.config/rclone/rclone.conf.$timestamp || true
+    export KUBECONFIG=~/.kube/config
+}
+
+function deploy_tf_module() {
+    local module=$1
+    echo -e "\nDeploying module: $module"
+    cd $module
+    terragrunt init --reconfigure
+    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    cd ..
+}
+
+function create_tf_resources() {
+    source tf.sh
+    echo -e "\nCreating resources on aws cloud"
+    deploy_tf_module network
+    deploy_tf_module storage
+    deploy_tf_module eks
+    deploy_tf_module workload-identity
+    deploy_tf_module random_passwords
+    deploy_tf_module keys
+    deploy_tf_module output-file
+    deploy_tf_module upload-files
+    [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
+}
+
+
+function certificate_keys() {
+    #  # If keys already present in global-values.yaml → skip writing
+    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/aws/$environment/global-values.yaml 2>/dev/null; then
+        echo "Certificate keys already present — skipping generation and write."
+        return
+    fi
+    # Generate private and public keys using openssl
+    echo "Creation of RSA keys for certificate signing"
+    openssl genrsa -out ../opentofu/aws/$environment/certkey.pem;
+    openssl rsa -in ../opentofu/aws/$environment/certkey.pem -pubout -out ../opentofu/aws/$environment/certpubkey.pem;
+    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/aws/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/aws/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../opentofu/aws/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../opentofu/aws/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
+    printf "\n" >> ../opentofu/aws/$environment/global-values.yaml
+    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> ../opentofu/aws/$environment/global-values.yaml
+    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> ../opentofu/aws/$environment/global-values.yaml
+    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> ../opentofu/aws/$environment/global-values.yaml
+    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> ../opentofu/aws/$environment/global-values.yaml
+}
+
+
+function certificate_config() {
+    echo "Configuring Certificate keys"
+    if ! kubectl -n sunbird exec deploy/knowledge-mw -- which jq >/dev/null 2>&1; then
+        echo "jq not found in knowledge-mw container, attempting to install..."
+        # Try to install jq using available package manager, fallback if apt fails
+        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get update || true"
+        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get install -y jq || true"
+    fi
+
+    CERTKEY=$(kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
+    # Inject cert keys to the service if its not available
+    if [ -z "$CERTKEY" ]; then
+        echo "Certificate RSA public key not available"
+        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
+        curl_data="curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw '{\"value\":\"$CERTPUBKEY\"}'"
+        echo "kubectl -n sunbird exec deploy/knowledge-mw -- $curl_data" | sh -
+    fi
+}
+function install_component() {
+    # We need a dummy cm for configmap to start. Later Lernbb will create real one
+    kubectl create configmap keycloak-key -n sunbird 2>/dev/null || true
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "helmcharts" ]; then
+        cd ../../../helmcharts 2>/dev/null || true
+    fi
+    local component="$1"
+    # namespaces sunbird and velero are created by workload-identity Terraform module
+    kubectl create namespace volume-autoscaler 2>/dev/null || true
+    kubectl create namespace nlweb 2>/dev/null || true
+
+    echo -e "\nInstalling $component"
+    local ed_values_flag=""
+    if [ -f "$component/ed-values.yaml" ]; then
+        ed_values_flag="-f $component/ed-values.yaml --wait --wait-for-jobs"
+    fi
+    ### Generate the key pair required for certificate template
+      if [ $component = "learnbb" ]; then
+        if kubectl get job keycloak-kids-keys -n sunbird >/dev/null 2>&1; then
+            echo "Deleting existing job keycloak-kids-keys..."
+            kubectl delete job keycloak-kids-keys -n sunbird
+        fi
+
+        if [ -f "certkey.pem" ] && [ -f "certpubkey.pem" ]; then
+            echo "Certificate keys are already created. Skipping the keys creation..."
+        else
+            certificate_keys
+        fi
+      fi
+    local addon_values_flag=""
+    if [ "$(yq '.deployed_dial_addon' "../opentofu/aws/$environment/global-values.yaml")" = "true" ]; then
+        if [ -f "../addons/global-cloud-values.yaml" ]; then
+            addon_values_flag="-f ../addons/global-cloud-values.yaml"
+        fi
+    fi
+
+    helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
+        $ed_values_flag \
+        $addon_values_flag \
+        -f images.yaml \
+        -f "global-resources.yaml" \
+        -f "../opentofu/aws/$environment/global-values.yaml" \
+        -f "../opentofu/aws/$environment/global-cloud-values.yaml" --timeout 30m --debug
+}
+
+function install_service() {
+    if [ $# -lt 2 ]; then
+        echo "Usage: ./install.sh install_service <bundle> <chart> [chart2] [chart3] ..."
+        return 1
+    fi
+
+    local bundle="$1"
+    shift
+    local target_charts=("$@")   # one or more chart names
+
+    local current_directory="$(pwd)"
+    if [ "$(basename "$current_directory")" != "helmcharts" ]; then
+        cd ../../../helmcharts 2>/dev/null || true
+    fi
+
+    if [ ! -d "$bundle" ]; then
+        echo "Error: bundle '$bundle' not found in helmcharts/"
+        return 1
+    fi
+
+    local ed_values_flag=""
+    if [ -f "$bundle/ed-values.yaml" ]; then
+        ed_values_flag="-f $bundle/ed-values.yaml"
+    fi
+
+    local addon_values_flag=""
+    if [ "$(yq '.deployed_dial_addon' "../opentofu/aws/$environment/global-values.yaml")" = "true" ]; then
+        if [ -f "../addons/global-cloud-values.yaml" ]; then
+            addon_values_flag="-f ../addons/global-cloud-values.yaml"
+        fi
+    fi
+
+    if helm status "$bundle" --namespace sunbird &>/dev/null; then
+        # Phase B: Release exists — reuse previous values, enable all target charts
+        echo -e "\nRelease '$bundle' exists — upgrading '${target_charts[*]}' (Phase B)"
+
+        # Build --set enabled flags for every target chart
+        local set_flags=""
+        for chart in "${target_charts[@]}"; do
+            set_flags="$set_flags --set ${chart}.enabled=true"
+        done
+
+        helm upgrade "$bundle" "$bundle" \
+            --namespace sunbird \
+            --reuse-values \
+            $set_flags \
+            $ed_values_flag \
+            $addon_values_flag \
+            -f images.yaml \
+            -f "global-resources.yaml" \
+            -f "../opentofu/aws/$environment/global-values.yaml" \
+            -f "../opentofu/aws/$environment/global-cloud-values.yaml" \
+            --timeout 30m \
+            --debug
+    else
+        # Phase A: No release yet — enable all target charts, disable every other conditional chart
+        echo -e "\nNo existing release for '$bundle' — deploying '${target_charts[*]}' (Phase A)"
+
+        local set_flags=""
+        while IFS= read -r chart_name; do
+            local is_target=false
+            for chart in "${target_charts[@]}"; do
+                [ "$chart_name" = "$chart" ] && is_target=true && break
+            done
+            if $is_target; then
+                set_flags="$set_flags --set ${chart_name}.enabled=true"
+            else
+                set_flags="$set_flags --set ${chart_name}.enabled=false"
+            fi
+        done < <(yq '.dependencies[] | select(has("condition")) | .name' "$bundle/Chart.yaml")
+
+        helm upgrade --install "$bundle" "$bundle" \
+            --namespace sunbird \
+            $ed_values_flag \
+            $addon_values_flag \
+            -f images.yaml \
+            -f "global-resources.yaml" \
+            -f "../opentofu/aws/$environment/global-values.yaml" \
+            -f "../opentofu/aws/$environment/global-cloud-values.yaml" \
+            $set_flags \
+            --timeout 30m \
+            --debug
+    fi
+}
+
+function install_helm_components() {
+    if [ $# -ge 2 ]; then
+        # Two or more args: deploy one or more services within a bundle
+        install_service "$@"
+    elif [ $# -eq 1 ]; then
+        # One arg: deploy the entire bundle
+        install_component "$1"
+    else
+        # No args: deploy all bundles in order (original behavior)
+        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "inquirybb" "additional")
+        for component in "${components[@]}"; do
+            install_component "$component"
+        done
+    fi
+}
+
+function dns_mapping() {
+    domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
+    PUBLIC_IP=$(kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+    local timeout=$((SECONDS + 1200))
+    local check_interval=10
+
+    echo -e "\nAdd/update your DNS mapping for your domain by adding an A record to this IP: ${PUBLIC_IP}. The script will wait for 20 minutes"
+
+    while [ $SECONDS -lt $timeout ]; do
+        current_ip=$(nslookup $domain_name | grep -E -o 'Address: [0-9.]+' | awk '{print $2}')
+
+        if [ "$current_ip" == "$PUBLIC_IP" ]; then
+            echo -e "\nDNS mapping has propagated successfully."
+            return
+        fi
+        echo "DNS mapping is still propagating. Retrying in $check_interval seconds..."
+        sleep $check_interval
+    done
+
+    echo "Timed out after 20 minutes. DNS mapping may not have propagated successfully. Rerun the following staging post DNS mapping propagation."
+    echo "./install.sh dns_mapping"
+    echo "./install.sh generate_postman_env"
+    echo "./install.sh run_post_install"
+}
+
+function generate_postman_env() {
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "$environment" ]; then
+        cd ../opentofu/aws/$environment 2>/dev/null || true
+    fi
+    domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
+    blob_store_path=$(kubectl get cm -n sunbird lern-env -o jsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
+    public_container_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_content_cloud_storage_container}')
+    api_key=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_authorization}')
+    keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
+    keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
+    keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
+    google_oauth_client_id=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.GOOGLE_OAUTH_CLIENT_ID}')
+    google_captcha_site_key=$(yq '.global.sunbird_google_captcha_site_key' global-values.yaml)
+    generated_uuid=$(uuidgen)
+    temp_file=$(mktemp)
+    cp postman.env.json "${temp_file}"
+    sed -e "s|REPLACE_WITH_DOMAIN|${domain_name}|g" \
+        -e "s|REPLACE_WITH_APIKEY|${api_key}|g" \
+        -e "s|REPLACE_WITH_SECRET|${keycloak_secret}|g" \
+        -e "s|REPLACE_WITH_KEYCLOAK_ADMIN|${keycloak_admin}|g" \
+        -e "s|REPLACE_WITH_KEYCLOAK_PASSWORD|${keycloak_password}|g" \
+        -e "s|GENERATE_UUID|${generated_uuid}|g" \
+        -e "s|BLOB_STORE_PATH|${blob_store_path}|g" \
+        -e "s|PUBLIC_CONTAINER_NAME|${public_container_name}|g" \
+        -e "s|REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID|${google_oauth_client_id}|g" \
+        -e "s|REPLACE_WITH_CAPTCHA_SITE_KEY|${google_captcha_site_key}|g" \
+        "${temp_file}" >"env.json"
+
+    echo -e "A env.json file is created in this directory: opentofu/aws/$environment"
+    echo "Import the env.json file into postman to invoke other APIs"
+}
+
+function restart_workloads_using_keys() {
+    echo -e "\nRestart workloads using keycloak keys and wait for them to start..."
+    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
+    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
+    echo -e "\nWaiting for all pods to start"
+}
+
+function run_post_install() {
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "$environment" ]; then
+        cd ../opentofu/aws/$environment 2>/dev/null || true
+    fi
+    check_pod_status
+    echo "Starting post install..."
+    cp ../../../postman-collection/sunbird-spark-collection-v1.json .
+    postman collection run sunbird-spark-collection-v1.json --environment env.json --delay-request 500 --bail --insecure
+}
+
+function migrate_forms() {
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "$environment" ]; then
+        cd ../opentofu/aws/$environment 2>/dev/null || true
+    fi
+    echo "Migrating missing forms..."
+    cp ../../../postman-collection/sunbird-spark-collection-v1.json .
+    python3 ../../../migration/migrate_forms.py \
+        --collection sunbird-spark-collection-v1.json \
+        --env env.json
+}
+
+function create_client_forms() {
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "$environment" ]; then
+        cd ../opentofu/aws/$environment 2>/dev/null || true
+    fi
+    cp -rf ../../../postman-collection/ED-${RELEASE}  .
+    check_pod_status
+    #loop through files inside collection folder
+    for FILES in ED-${RELEASE}/*.json; do
+     echo "Creating client forms in.. $FILES"
+      postman collection run $FILES --environment env.json --delay-request 500 --bail --insecure
+    done
+   }
+
+function cleanworkspace() {
+        rm  certkey.pem certpubkey.pem
+        sed -i '/CERTIFICATE_PRIVATE_KEY:/d' global-values.yaml
+        sed -i '/CERTIFICATE_PUBLIC_KEY:/d' global-values.yaml
+        sed -i '/CERTIFICATESIGN_PRIVATE_KEY:/d' global-values.yaml
+        sed -i '/CERTIFICATESIGN_PUBLIC_KEY:/d' global-values.yaml
+        echo "cleanup completed"
+}
+function destroy_tf_resources() {
+    source tf.sh
+    cleanworkspace
+    echo -e "Destroying resources on aws cloud"
+    terragrunt run-all destroy
+}
+
+function invoke_functions() {
+    for func in "$@"; do
+        $func
+    done
+}
+
+function check_pod_status() {
+    echo -e "\nRemove any orphaned pods if they exist."
+    kubectl get pod -n sunbird --no-headers | grep -v Completed | grep -v Running | awk '{print $1}' | xargs -I {} kubectl delete -n sunbird pod {} || true
+    local timeout=$((SECONDS + 600))
+    consecutive_runs=0
+    echo "Ensure the post are stable for 100 seconds"
+    while [ $SECONDS -lt $timeout ]; do
+        if ! kubectl get pods --no-headers -n sunbird | grep -v Running | grep -v Completed; then
+            echo "All pods are running successfully."
+            break
+        else
+            ((consecutive_runs++))
+        fi
+
+        if [ $consecutive_runs -ge 10 ]; then
+            echo "Timed out after 10 tries. Some pods are still not running successfully. Check the crashing pod logs and resolve the issues. Once pods are running successfully, re-reun this script as below:"
+            echo "./install.sh run_post_install"
+            exit
+        fi
+
+        echo "Number of crashing pods found. Countdown to 10"
+        sleep 10
+    done
+    echo "All pods are running successfully."
+}
+
+RELEASE="release700"
+POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/5338608-e28d5510-20d5-466e-a9ad-3fcf59ea9f96?access_key=PMAT-01HMV5SB2ZPXCGNKD74J7ARKRQ"
+CERTPUBLICKEY=""
+CERTPRIVATEKEY=""
+
+
+if [ $# -eq 0 ]; then
+    create_tf_backend
+    backup_configs
+    create_tf_resources
+    cd ../../../helmcharts
+    install_helm_components
+    cd ../opentofu/aws/$environment
+    restart_workloads_using_keys
+    certificate_config
+    dns_mapping
+    generate_postman_env
+    run_post_install
+    create_client_forms
+else
+    case "$1" in
+    "create_tf_backend")
+        create_tf_backend
+        ;;
+    "create_tf_resources")
+        create_tf_resources
+        ;;
+    "generate_postman_env")
+        generate_postman_env
+        ;;
+    "dns_mapping")
+        dns_mapping
+        ;;
+    "install_component")
+        shift
+        install_component "$1"
+        ;;
+    "install_helm_components")
+        shift
+        install_helm_components "$@"
+        ;;
+    "install_service")
+        shift
+        install_service "$@"
+        ;;
+    "run_post_install")
+        run_post_install
+        ;;
+    "migrate_forms")
+        migrate_forms
+        ;;
+    "destroy_tf_resources")
+        destroy_tf_resources
+        ;;
+    "certificate_config")
+        certificate_config
+        ;;
+    "create_client_forms")
+        create_client_forms
+        ;;
+    *)
+        invoke_functions "$@"
+        ;;
+    esac
+fi

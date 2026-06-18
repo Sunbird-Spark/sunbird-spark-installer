@@ -14,6 +14,10 @@ keycloak:
 keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
 global:
+  skip_network_module: true   # set to true to skip VPC/subnet creation (use existing network)
+  subnet_ids:                 # required when skip_network_module is true
+    - "subnet-0bd6d2daa3e836679"
+    - "subnet-0bbeb8df17d354df1"
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
   sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
   knowledge_platform_ref: "master"  # git branch or tag for knowledge-platform (schemas/local upload)
@@ -27,7 +31,7 @@ global:
   play_http:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms"
   cloud_storage_region: "ap-south-1"  # AWS region e.g. ap-south-1
-  eks_version: "1.36"  # required — always specify the exact Kubernetes version e.g. "1.35". Check: aws eks describe-addon-versions --query 'addons[0].addonVersions[].compatibilities[].clusterVersion' | sort -u
+  eks_version: "1.35"  # required — always specify the exact Kubernetes version e.g. "1.35". Check: aws eks describe-addon-versions --query 'addons[0].addonVersions[].compatibilities[].clusterVersion' | sort -u
   sunbird_cloud_storage_provider: "aws"  # Provide the cloud storage provider
   checkpoint_store_type: "aws"
   cloud_service_provider: "aws"

@@ -61,7 +61,7 @@ resource "aws_eks_cluster" "eks" {
 
   vpc_config {
     subnet_ids              = var.subnet_ids
-    endpoint_public_access  = true
+    endpoint_public_access  = false
     endpoint_private_access = true
     public_access_cidrs     = var.eks_public_access_cidrs
   }
@@ -114,14 +114,45 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry_read" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-# Launch template enforcing IMDSv2 on all nodes
+resource "aws_iam_role_policy_attachment" "eks_ebs_csi_policy" {
+  role       = aws_iam_role.eks_node_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+}
+
+resource "aws_eks_addon" "ebs_csi_driver" {
+  cluster_name = aws_eks_cluster.eks.name
+  addon_name   = "aws-ebs-csi-driver"
+  tags         = merge(local.common_tags, var.additional_tags)
+  depends_on   = [aws_eks_node_group.big_nodepool, aws_iam_role_policy_attachment.eks_ebs_csi_policy]
+}
+
+# Launch template enforcing IMDSv2 on all nodes and setting required ulimits
 resource "aws_launch_template" "big_nodepool" {
   name_prefix = "${local.environment_name}-big-nodepool-"
+
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    echo "* soft nofile 1048576" >> /etc/security/limits.conf
+    echo "* hard nofile 1048576" >> /etc/security/limits.conf
+    echo "fs.file-max = 1048576" >> /etc/sysctl.conf
+    sysctl -p
+  EOF
+  )
 
   metadata_options {
     http_endpoint               = "enabled"
     http_tokens                 = "required"
     http_put_response_hop_limit = var.imdsv2_http_hop_limit
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags          = merge(local.common_tags, var.additional_tags)
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+    tags          = merge(local.common_tags, var.additional_tags)
   }
 
   tags = merge(local.common_tags, var.additional_tags)

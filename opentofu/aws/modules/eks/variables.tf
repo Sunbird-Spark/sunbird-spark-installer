@@ -34,7 +34,7 @@ variable "big_nodepool_name" {
 variable "big_node_count" {
   type        = number
   description = "Big node pool node count."
-  default     = 1
+  default     = 2
 }
 
 variable "big_node_size" {
@@ -66,3 +66,4 @@ variable "imdsv2_http_hop_limit" {
   description = "IMDSv2 hop limit. 1 for EC2 instances, 2 for containerized workloads."
   default     = 2
 }
+

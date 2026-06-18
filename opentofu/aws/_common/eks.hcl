@@ -4,6 +4,7 @@ locals {
   building_block = local.global_vars.global.building_block
   region         = local.global_vars.global.cloud_storage_region
   eks_version    = try(local.global_vars.global.eks_version, null)
+  subnet_ids     = try(local.global_vars.global.subnet_ids, [])
 }
 
 # For local development
@@ -16,4 +17,5 @@ inputs = {
   building_block = local.building_block
   region         = local.region
   eks_version    = local.eks_version
+  subnet_ids     = local.subnet_ids
 }
