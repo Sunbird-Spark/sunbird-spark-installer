@@ -610,7 +610,7 @@ flink_jobs:
     job_classname: org.sunbird.job.knowlg.task.KnowlgPublishStreamTask
 
   content-embedding:
-    enabled: false
+    enabled: true
     serviceMonitor: *serviceMonitor
     config: |+
       include file("/data/flink/conf/base-config.conf")
