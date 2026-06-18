@@ -119,7 +119,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-aws-v3_c0cff18"
+    tag: "spark-aws-v4_f095d1a"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
