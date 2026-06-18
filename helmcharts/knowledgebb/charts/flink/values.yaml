@@ -663,7 +663,7 @@ flink_jobs:
         # batch_events controls how many Kafka events to buffer before flushing to the API.
         # batch_size controls how many chunk texts go into one API call. They are independent.
         batch_events   = 50     # max Kafka events to buffer before flushing to embedding API
-        window_size_ms = 5000   # max ms to wait before flushing a partial batch
+        window_size_ms = 60000  # max ms to wait before flushing a partial batch
         # Warn + counter when an embed API call exceeds this many millis.
         slow_call_threshold_ms = 5000
 
@@ -691,7 +691,7 @@ flink_jobs:
         password = ""
         bulk {
           size              = 50    # flush after N documents
-          flush_interval_ms = 5000  # flush after N ms regardless of count
+          flush_interval_ms = 60000 # flush after N ms regardless of count
         }
       }
 
