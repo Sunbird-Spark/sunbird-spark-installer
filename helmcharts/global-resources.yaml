@@ -105,6 +105,8 @@ janusgraph:
       memory: 6Gi
 
 knowlg:
+  serviceMonitor:
+    enabled: false
   resources:
     requests:
       cpu: 100m
@@ -114,6 +116,8 @@ knowlg:
       memory: 1024Mi
 
 search:
+  serviceMonitor:
+    enabled: false
   resources:
     requests:
       cpu: 100m
