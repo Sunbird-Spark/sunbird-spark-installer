@@ -48,7 +48,7 @@ global:
   private_ingressgateway_ip: ""
   storage_class: gp3
   cloud_storage_provider: aws
-  cloud_storage_auth_type: "IRSA"
+  cloud_storage_auth_type: "IAM_ROLE"
 ```
 
 ### Step 2 — Run `keys` module
@@ -137,7 +137,7 @@ global:
   private_ingressgateway_ip: ""
   storage_class: gp3
   cloud_storage_provider: aws
-  cloud_storage_auth_type: "IRSA"
+  cloud_storage_auth_type: "IAM_ROLE"
 ```
 
 ### `external-db-values.yaml` (only if DBs are on external VM)

@@ -68,7 +68,7 @@ spec:
             "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
             "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
-  {{- if and (eq .Values.global.checkpoint_store_type "s3") (ne .Values.global.cloud_storage_auth_type "IRSA") }}
+  {{- if and (eq .Values.global.checkpoint_store_type "s3") (ne .Values.global.cloud_storage_auth_type "IAM_ROLE") }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
             "-Ds3.secret-key={{ .Values.s3_secret_key }}",
             "-Ds3.endpoint={{ .Values.s3_endpoint }}",
@@ -180,7 +180,7 @@ spec:
             "-Dfs.azure.account.oauth2.msi.tenant.{{ .Values.global.object_storage_endpoint }}=$(AZURE_TENANT_ID)",
             "-Dfs.azure.account.oauth2.client.id.{{ .Values.global.object_storage_endpoint }}=$(AZURE_CLIENT_ID)",
   {{- end }}
-  {{- if and (eq .Values.global.checkpoint_store_type "s3") (ne .Values.global.cloud_storage_auth_type "IRSA") }}
+  {{- if and (eq .Values.global.checkpoint_store_type "s3") (ne .Values.global.cloud_storage_auth_type "IAM_ROLE") }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
             "-Ds3.secret-key={{ .Values.s3_secret_key }}",
             "-Ds3.endpoint={{ .Values.s3_endpoint }}",

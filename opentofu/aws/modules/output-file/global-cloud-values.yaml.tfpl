@@ -16,7 +16,7 @@ global:
   object_storage_endpoint: s3.${aws_region}.amazonaws.com
   storage_class: gp3
   cloud_storage_provider: ${cloud_storage_provider}
-  cloud_storage_auth_type: "IRSA"
+  cloud_storage_auth_type: "IAM_ROLE"
   aws_iam_role_arn: ${aws_iam_role_arn}
   workload_identity_service_account_name: ${k8s_service_account_name}
   serviceAccount:

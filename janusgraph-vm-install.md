@@ -20,10 +20,13 @@ java -version  # verify
 
 ## Step 1 — Download JanusGraph
 
+Use the **full** distribution — it includes the CQL storage backend JARs required to connect to YugabyteDB.
+
 ```bash
-wget https://github.com/JanusGraph/janusgraph/releases/download/v1.0.0/janusgraph-1.0.0.zip
-unzip janusgraph-1.0.0.zip
-cd janusgraph-1.0.0
+wget https://github.com/JanusGraph/janusgraph/releases/download/v1.0.0/janusgraph-full-1.0.0.zip
+unzip janusgraph-full-1.0.0.zip
+cd janusgraph-full-1.0.0
+chmod +x bin/*.sh
 ```
 
 ---
@@ -57,31 +60,20 @@ All other settings remain the same.
 
 ## Step 4 — Edit gremlin-server.yaml
 
-Update the config and script paths from Bitnami paths to your local JanusGraph paths:
+`gremlin-server.yaml` uses single-line YAML with Bitnami paths hardcoded throughout (`/opt/bitnami/janusgraph`). Replace all occurrences with the actual extraction path using `sed`:
 
-Change:
-```yaml
-graphs: {graph: /opt/bitnami/janusgraph/conf/janusgraph.properties}
-scriptEngines:
-  gremlin-groovy:
-    plugins:
-      org.apache.tinkerpop.gremlin.jsr223.ScriptFileGremlinPlugin:
-        files:
-          - /opt/bitnami/janusgraph/scripts/empty-sample.groovy
-          - /opt/bitnami/janusgraph/scripts/schema_init.groovy
+```bash
+# Run from inside the janusgraph-full-1.0.0 directory
+JANUS_HOME=$(pwd)
+sed -i "s|/opt/bitnami/janusgraph|$JANUS_HOME|g" conf/gremlin-server.yaml
 ```
 
-To (replace `/path/to/janusgraph-1.0.0` with actual path):
-```yaml
-graphs: {graph: /path/to/janusgraph-1.0.0/conf/janusgraph.properties}
-scriptEngines:
-  gremlin-groovy:
-    plugins:
-      org.apache.tinkerpop.gremlin.jsr223.ScriptFileGremlinPlugin:
-        files:
-          - /path/to/janusgraph-1.0.0/scripts/empty-sample.groovy
-          - /path/to/janusgraph-1.0.0/scripts/schema_init.groovy
+Verify the replacement:
+```bash
+grep "janusgraph" conf/gremlin-server.yaml | head -5
 ```
+
+The `graphs:` and `ScriptFileGremlinPlugin.files` entries should now point to `$JANUS_HOME/conf/` and `$JANUS_HOME/scripts/` respectively.
 
 ---
 
@@ -106,6 +98,7 @@ Follow the build and deployment instructions in the above repository to enable C
 ## Step 7 — Start Gremlin Server
 
 ```bash
+# Run from inside the janusgraph-full-1.0.0 directory
 bin/gremlin-server.sh conf/gremlin-server.yaml
 ```
 
@@ -164,3 +157,5 @@ sudo ufw allow from <EKS_NODE_CIDR> to any port 8182
 | `empty-sample.groovy` | https://github.com/Sunbird-Spark/sunbird-spark-installer/blob/main/helmcharts/knowledgebb/charts/janusgraph/config/empty-sample.groovy | `scripts/empty-sample.groovy` |
 
 When deploying knowledgebb Helm chart, set `janusgraph.enabled: false` and point `global.janusgraph.host` to this VM IP.
+
+> **Note:** Always use `janusgraph-full-1.0.0.zip` (not the slim `janusgraph-1.0.0.zip`). The slim distribution is missing CQL storage backend JARs and `bin/gremlin-server.sh` may not function correctly with YugabyteDB.
