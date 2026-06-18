@@ -16,6 +16,7 @@ Steps:
 ./install.sh install_component edbb        # Kong, kong-apis, kong-consumers
 ./install.sh install_service learnbb opensearch  # OpenSearch (required by knowledgebb Flink)
 ./install.sh install_component knowledgebb # knowlg, search, janusgraph, flink, kafka, yugabyte
+./install.sh install_service additional velero   # Velero backup
 ```
 6. Patch Kong routes after deploy (see section 5)
 
