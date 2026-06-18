@@ -226,3 +226,128 @@ cd opentofu/aws/<env-name>
 ./install.sh create_tf_resources    # step 2: provision EKS, VPC, S3, IAM
 ./install.sh install_helm_components # step 3: deploy all building blocks
 ```
+
+---
+
+## 5. Testing APIs via Kong
+
+### Get Kong LoadBalancer URL
+```bash
+kubectl get svc -n sunbird | grep kong | grep LoadBalancer
+```
+
+### Generate JWT token for API testing
+```bash
+# Get consumer key/secret from Kong
+KONG_ADMIN="http://<KONG-LB-IP>:8001"
+curl -s $KONG_ADMIN/consumers/api_admin/jwt | python3 -c \
+  "import json,sys; d=json.load(sys.stdin)['data'][0]; print('key:', d['key']); print('secret:', d['secret'])"
+
+# Generate token (valid 1 hour) — replace <secret> with value from above
+python3 -c "
+import jwt, time
+payload = {'iss': 'api_admin', 'kid': 'api_admin', 'sub': 'api_admin', 'iat': int(time.time()), 'exp': int(time.time()) + 3600}
+token = jwt.encode(payload, '<secret>', algorithm='HS256')
+print(token)
+"
+```
+
+### Test API calls
+```bash
+KONG="http://<KONG-LB-IP>:8000"
+TOKEN="<generated-token>"
+
+# Read content (no auth needed)
+curl $KONG/content/v2/read/<content-id>
+
+# Create content (auth required)
+curl -X POST $KONG/content/v2/create \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"request":{"content":{"name":"Test","mimeType":"application/pdf","primaryCategory":"Learning Resource"}}}'
+```
+
+> Token uses `api_admin` consumer which has broad ACL access. For production use Keycloak-issued tokens.
+
+---
+
+## 6. Kong routing — knowlg-service direct (no knowledge-mw)
+
+In this AWS deployment, Kong routes directly to `knowlg-service:9000` instead of going through `knowledge-mw-service`. The `kong-apis/values.yaml` sets:
+
+```yaml
+knowledge_mw_service_url: "http://knowlg-service:9000"
+```
+
+After deploying Kong, run the following script to patch Kong service upstream paths from v1 → v3/v4 (knowlg-service API versions):
+
+```bash
+KONG_ADMIN="http://<KONG-LB-IP>:8001"
+
+patch_service() {
+  local name=$1 new_path=$2
+  ID=$(curl -s $KONG_ADMIN/services/$name | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('id',''))" 2>/dev/null)
+  [ -z "$ID" ] && echo "SKIP $name (not found)" && return
+  RESULT=$(curl -s -X PATCH $KONG_ADMIN/services/$ID -d "path=$new_path" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('path','error'))")
+  echo "$name -> $RESULT"
+}
+
+# Channel (knowledge_mw_service_url v1 → knowlg v3)
+patch_service createChannel /channel/v3/create
+patch_service readChannel /channel/v3/read
+patch_service updateChannel /channel/v3/update
+
+# Content (knowledge_mw_service_url v1 → knowlg v3)
+patch_service createContent /content/v3/create
+patch_service readContent /content/v3/read
+patch_service updateContent /content/v3/update
+patch_service uploadContent /content/v3/upload
+patch_service getContentUploadUrl /content/v3/upload/url
+patch_service submitContentForReview /content/v3/review
+patch_service publishContent /content/v3/publish
+patch_service rejectContent /content/v3/reject
+patch_service retireContent /content/v3/retire
+patch_service copyContent /content/v3/copy
+patch_service flagContent /content/v3/flag
+patch_service acceptContentFlag /content/v3/flag/accept
+patch_service rejectContentFlag /content/v3/flag/reject
+patch_service getCourseHierarchy /content/v3/hierarchy
+
+# Framework (knowledge_mw_service_url v1 → knowlg v3)
+patch_service createFramework /framework/v3/create
+patch_service readFramework /framework/v3/read
+patch_service updateFramework /framework/v3/update
+patch_service listFramework /framework/v3/list
+patch_service publishFramework /framework/v3/publish
+patch_service copyFramework /framework/v3/copy
+patch_service createFrameworkCategory /framework/v3/category/create
+patch_service readFrameworkCategory /framework/v3/category/read
+patch_service updateFrameworkCategory /framework/v3/category/update
+patch_service createFrameworkTerm /framework/v3/term/create
+patch_service readFrameworkTerm /framework/v3/term/read
+patch_service updateFrameworkTerm /framework/v3/term/update
+
+# Lock (stays v1)
+patch_service createLock /v1/lock/create
+patch_service refreshLock /v1/lock/refresh
+patch_service retireLock /v1/lock/retire
+patch_service listLock /v1/lock/list
+```
+
+> Save as `patch-kong.sh`, run once after Kong is deployed.
+
+---
+
+## 7. JWT token for content creators (long-lived)
+
+For content teams calling APIs (not just testing), generate a token with 24hr expiry:
+
+```bash
+python3 -c "
+import jwt, time
+payload = {'iss': 'api_admin', 'kid': 'api_admin', 'sub': 'api_admin', 'iat': int(time.time()), 'exp': int(time.time()) + 86400}
+print(jwt.encode(payload, '<secret-from-kong-consumer>', algorithm='HS256'))
+"
+```
+
+> For production: integrate with Keycloak to issue tokens. The `api_admin` HS256 token is for pre-Keycloak testing only.

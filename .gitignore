@@ -21,3 +21,11 @@ terragrunt
 
 # Ignore built JARs for JanusGraph
 scripts/janusgraph/*.jar
+
+# Ignore env-specific deployment folders (copy from template, never commit)
+opentofu/aws/*/
+!opentofu/aws/template/
+opentofu/gcp/*/
+!opentofu/gcp/template/
+opentofu/azure/*/
+!opentofu/azure/template/
