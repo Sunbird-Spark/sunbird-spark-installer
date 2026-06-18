@@ -98,10 +98,10 @@ player:
 janusgraph:
   resources:
     requests:
-      cpu: 300m
+      cpu: 1
       memory: 3Gi
     limits:
-      cpu: "2"
+      cpu: 3
       memory: 6Gi
 
 knowlg:
@@ -166,7 +166,7 @@ certregistry:
 opensearch:
   resources:
     requests:
-      cpu: "500m"
+      cpu: "1"
       memory: "2Gi"
     limits:
       cpu: "2"
@@ -424,18 +424,18 @@ yugabyte:
   resource:
     master:
       requests:
-        cpu: "400m"
-        memory: 762Mi
+        cpu: "2"
+        memory: 2Gi
       limits:
-        cpu: "700m"
-        memory: 1274Mi
+        cpu: "2"
+        memory: 2Gi
     tserver:
       requests:
-        cpu: "750m"
-        memory: 1274Mi
+        cpu: "2"
+        memory: 4Gi
       limits:
-        cpu: "1250m"
-        memory: 2298Mi
+        cpu: "2"
+        memory: 4Gi
   storage:
     master:
       count: 2

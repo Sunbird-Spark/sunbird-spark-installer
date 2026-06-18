@@ -1,79 +1,37 @@
 # Sunbird Spark — AWS Deployment Guide
 
-## 1. Pre-requisites: Infra you create manually
+## 1. Pre-requisites
 
-Create these before running anything from this repo:
+EC2 instance with the following tools installed (run `install-tools.sh`):
+- opentofu v1.11.4, terragrunt v0.77.5, helm, kubectl, AWS CLI, jq, yq, rclone
 
-### AWS resources
+Steps:
+1. Copy the template: `cp -r opentofu/aws/template opentofu/aws/<env-name>`
+2. Fill required details in `global-values.yaml`
+3. Run `./install.sh create_tf_backend` — creates S3 state backend
+4. Run `./install.sh create_tf_resources` — creates EKS, S3 buckets, IRSA role, uploads schemas → generates `global-cloud-values.yaml`
+   > **Note:** Keys module is not required for knowledgebb-only deployment. Network module is skipped by default (`skip_network_module: true` in `global-values.yaml`) — uses existing VPC/subnets from EC2 instance.
+5. Deploy Helm charts (in order):
+```bash
+./install.sh install_component edbb        # Kong, kong-apis, kong-consumers
+./install.sh install_service learnbb opensearch  # OpenSearch (required by knowledgebb Flink)
+./install.sh install_component knowledgebb # knowlg, search, janusgraph, flink, kafka, yugabyte
+```
+6. Patch Kong routes after deploy (see section 5)
+
+### AWS resources created by install.sh
 | Resource | Details |
 |---|---|
-| EKS cluster | With node group, kubeconfig configured locally |
+| EKS cluster | With node group (big_nodepool) |
 | S3 bucket — public | For content artifacts, schemas, editors |
 | S3 bucket — private | For JWT/RSA keys backup |
 | S3 bucket — velero | For cluster backups |
-| IAM role (IRSA) | Service account role with S3 read/write on above buckets |
+| IAM role (IRSA) | Service account role with S3 read/write |
 | AWS region | e.g. `ap-south-1` |
 
-Once created, note down: bucket names, region, IRSA role ARN, EKS cluster endpoint.
-
-### External DBs (if running on VM instead of in-cluster)
-| Service | Version | Default Port |
-|---|---|---|
-| Kafka | 4.0.0 | 9092 |
-| Redis | 7.0.9 | 6379 |
-| OpenSearch | 2.19.5 | 9200 |
-| YugabyteDB | 2025.2.0.0-b131 | 9042 (CQL), 5433 (YSQL) |
-| JanusGraph | custom | 8182 |
-
-VM firewall must allow inbound on above ports from EKS node CIDR.
-
 ---
 
-## 2. What to run from this repo (manual infra path)
-
-When infra is created manually, set `skip_storage_module: true` in `global-values.yaml`.
-Then only two tofu modules need to run:
-
-### Step 1 — Fill `global-cloud-values.yaml` with your bucket names
-```yaml
-global:
-  cloud_storage_access_key: "<public-bucket-name>"  # misleading name — for AWS this is the public bucket name, not an access key
-  public_container_name: "<public-bucket-name>"
-  private_container_name: "<private-bucket-name>"
-  velero_storage_container_private: "<velero-bucket-name>"
-  object_storage_endpoint: "s3.ap-south-1.amazonaws.com"
-  random_string: "<16-char-random-string>"
-  aws_iam_role_arn: "arn:aws:iam::<account-id>:role/<role-name>"
-  workload_identity_service_account_name: "aws-irsa-sa"
-  private_ingressgateway_ip: ""
-  storage_class: gp3
-  cloud_storage_provider: aws
-  cloud_storage_auth_type: "IAM_ROLE"
-```
-
-### Step 2 — Run `keys` module
-Generates JWT + RSA keys, merges into `global-values.yaml`, uploads to private bucket.
-```bash
-cd opentofu/aws/<env-name>/keys
-terragrunt init && terragrunt apply
-```
-
-### Step 3 — Run `upload-files` module
-Uploads static content assets (editors, schemas, plugins) to the public bucket.
-```bash
-cd opentofu/aws/<env-name>/upload-files
-terragrunt init && terragrunt apply
-```
-
-### Step 4 — Deploy Helm charts
-```bash
-cd opentofu/aws/<env-name>
-./install.sh install_helm_components
-```
-
----
-
-## 2. How it works — two config files
+## 2. Config files
 
 ### `global-values.yaml` (you edit this)
 Operator-owned file. Fill before running `install.sh`.
@@ -85,33 +43,7 @@ global:
   building_block: ""        # short prefix for all resources e.g. "sunbird"
   env: ""                   # helm env name e.g. "dev"
   environment: ""           # tofu env name (1-9 chars, lowercase alphanumeric)
-  domain: ""                # your domain e.g. "sunbird.example.com"
   cloud_storage_region: ""  # AWS region e.g. "ap-south-1"
-
-  # SSL — choose one:
-  lets_encrypt_ssl: false   # set true to use Let's Encrypt (auto cert)
-  cert_notifications:
-    email: ""               # email for Let's Encrypt renewal alerts
-
-  # OR provide your own cert (if lets_encrypt_ssl: false):
-  proxy_private_key: |
-    -----BEGIN PRIVATE KEY-----
-    ...
-    -----END PRIVATE KEY-----
-  proxy_certificate: |
-    -----BEGIN CERTIFICATE-----
-    ...
-    -----END CERTIFICATE-----
-
-  # Google OAuth
-  sunbird_google_oauth_clientId: ""
-  sunbird_google_oauth_clientSecret: ""
-  sunbird_google_captcha_site_key: ""
-  google_captcha_private_key: ""
-
-  # Email (SendGrid SMTP)
-  mail_server_from_email: ""
-  mail_server_password: ""  # SendGrid API key
 
   # Storage
   skip_storage_module: false  # set true if providing buckets manually
@@ -140,25 +72,10 @@ global:
   cloud_storage_auth_type: "IAM_ROLE"
 ```
 
-### `external-db-values.yaml` (only if DBs are on external VM)
-Override subchart hosts with VM IPs. Private repo provides this file with real values.
-
-```yaml
-global:
-  kafka:
-    enabled: false
-    host: "<VM_IP>"
-    port: 9092
-  redis:
-    enabled: false
-    host: "<VM_IP>"
-    port: 6379
-  # ... etc
-```
 
 ---
 
-## 3. `keys` and `upload-files` modules — why and how
+## 4. `keys` and `upload-files` modules — why and how
 
 ### `keys` module
 **Why:** Generates two sets of cryptographic keys required by Sunbird services:
@@ -189,7 +106,8 @@ Or it runs automatically as part of `./install.sh create_tf_resources`.
 - **content-editor** — built Angular app for creating content (requires Docker + Node build)
 - **generic-editor** — built Angular app for creating generic content
 - **content-player** — player for previewing content
-- **knowledge-platform schemas** — object definition schemas used by KnowledgeBB
+- **knowledge-platform schemas** — uploads to `s3://<public-bucket>/schemas/local/` — object definition schemas used by KnowledgeBB services at runtime
+- **installation folder** — uploads to `s3://<public-bucket>/installation/` — H5P library and other static assets
 - **Sunbird-RC schemas** — credential templates for the registry service
 
 **When to run:**
@@ -213,7 +131,7 @@ Or run a single step via install.sh:
 
 ---
 
-## 4. Testing APIs via Kong
+## 5. Testing APIs via Kong
 
 ### Get Kong LoadBalancer URL
 ```bash
@@ -255,7 +173,90 @@ curl -X POST $KONG/content/v2/create \
 
 ---
 
-## 5. Install flow
+## 6. Kong routing — knowlg-service direct (no knowledge-mw)
+
+In this AWS deployment, Kong routes directly to `knowlg-service:9000` instead of going through `knowledge-mw-service`. The `kong-apis/values.yaml` sets:
+
+```yaml
+knowledge_mw_service_url: "http://knowlg-service:9000"
+```
+
+After deploying Kong, run the following script to patch Kong service upstream paths from v1 → v3/v4 (knowlg-service API versions):
+
+```bash
+KONG_ADMIN="http://<KONG-LB-IP>:8001"
+
+patch_service() {
+  local name=$1 new_path=$2
+  ID=$(curl -s $KONG_ADMIN/services/$name | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('id',''))" 2>/dev/null)
+  [ -z "$ID" ] && echo "SKIP $name (not found)" && return
+  RESULT=$(curl -s -X PATCH $KONG_ADMIN/services/$ID -d "path=$new_path" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('path','error'))")
+  echo "$name -> $RESULT"
+}
+
+# Channel (knowledge_mw_service_url v1 → knowlg v3)
+patch_service createChannel /channel/v3/create
+patch_service readChannel /channel/v3/read
+patch_service updateChannel /channel/v3/update
+
+# Content (knowledge_mw_service_url v1 → knowlg v3)
+patch_service createContent /content/v3/create
+patch_service readContent /content/v3/read
+patch_service updateContent /content/v3/update
+patch_service uploadContent /content/v3/upload
+patch_service getContentUploadUrl /content/v3/upload/url
+patch_service submitContentForReview /content/v3/review
+patch_service publishContent /content/v3/publish
+patch_service rejectContent /content/v3/reject
+patch_service retireContent /content/v3/retire
+patch_service copyContent /content/v3/copy
+patch_service flagContent /content/v3/flag
+patch_service acceptContentFlag /content/v3/flag/accept
+patch_service rejectContentFlag /content/v3/flag/reject
+patch_service getCourseHierarchy /content/v3/hierarchy
+
+# Framework (knowledge_mw_service_url v1 → knowlg v3)
+patch_service createFramework /framework/v3/create
+patch_service readFramework /framework/v3/read
+patch_service updateFramework /framework/v3/update
+patch_service listFramework /framework/v3/list
+patch_service publishFramework /framework/v3/publish
+patch_service copyFramework /framework/v3/copy
+patch_service createFrameworkCategory /framework/v3/category/create
+patch_service readFrameworkCategory /framework/v3/category/read
+patch_service updateFrameworkCategory /framework/v3/category/update
+patch_service createFrameworkTerm /framework/v3/term/create
+patch_service readFrameworkTerm /framework/v3/term/read
+patch_service updateFrameworkTerm /framework/v3/term/update
+
+# Lock (stays v1)
+patch_service createLock /v1/lock/create
+patch_service refreshLock /v1/lock/refresh
+patch_service retireLock /v1/lock/retire
+patch_service listLock /v1/lock/list
+```
+
+> Save as `patch-kong.sh`, run once after Kong is deployed.
+
+---
+
+## 7. JWT token for content creators (long-lived)
+
+For content teams calling APIs (not just testing), generate a token with 24hr expiry:
+
+```bash
+python3 -c "
+import jwt, time
+payload = {'iss': 'api_admin', 'kid': 'api_admin', 'sub': 'api_admin', 'iat': int(time.time()), 'exp': int(time.time()) + 86400}
+print(jwt.encode(payload, '<secret-from-kong-consumer>', algorithm='HS256'))
+"
+```
+
+> For production: integrate with Keycloak to issue tokens. The `api_admin` HS256 token is for pre-Keycloak testing only.
+
+---
+
+## 8. Install flow (full automated)
 
 ```bash
 cp -r opentofu/aws/template opentofu/aws/<env-name>
