@@ -243,10 +243,10 @@ KONG_ADMIN="http://<KONG-LB-IP>:8001"
 curl -s $KONG_ADMIN/consumers/api_admin/jwt | python3 -c \
   "import json,sys; d=json.load(sys.stdin)['data'][0]; print('key:', d['key']); print('secret:', d['secret'])"
 
-# Generate token (valid 1 hour) — replace <secret> with value from above
+# Generate token (valid 24 hours) — replace <secret> with value from above
 python3 -c "
 import jwt, time
-payload = {'iss': 'api_admin', 'kid': 'api_admin', 'sub': 'api_admin', 'iat': int(time.time()), 'exp': int(time.time()) + 3600}
+payload = {'iss': 'api_admin', 'kid': 'api_admin', 'sub': 'api_admin', 'iat': int(time.time()), 'exp': int(time.time()) + 86400}
 token = jwt.encode(payload, '<secret>', algorithm='HS256')
 print(token)
 "
