@@ -152,7 +152,7 @@
     {
       "Sid": "STS",
       "Effect": "Allow",
-      "Action": "sts:DecodeAuthorizationMessage",
+      "Action": "sts:*",
       "Resource": "*"
     },
     {
