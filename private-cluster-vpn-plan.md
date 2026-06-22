@@ -271,9 +271,11 @@ Bastion SSH key is in `~/.ssh/` on the operator's laptop (generated during `setu
 
 | Resource | Purpose |
 |----------|---------|
-| `AzureBastionSubnet` (`/26`) | Required dedicated subnet for Azure Bastion (fixed name) |
-| Azure Bastion (Basic SKU) | Browser-based SSH into runner VM — no public IP on VM needed |
-| No VM public IP | VM stays fully private inside VNet |
+| `AzureBastionSubnet` (`/26`) | Required dedicated subnet for Azure Bastion (fixed name, cannot be changed) |
+| Azure Bastion (Basic SKU) | Separate Azure-managed PaaS service — **not on the runner VM**. Provides browser-based SSH proxy into the runner VM via Azure Portal. Created by OpenTofu during `create_tf_resources`. |
+| No VM public IP | VM stays fully private inside VNet — Bastion handles all inbound access |
+
+> **Azure Bastion is a standalone Azure PaaS service** that lives in `AzureBastionSubnet`, separate from the runner VM in `runner-subnet`. The runner VM has no public IP. Developers SSH into the runner VM through Bastion — once inside, they run `kubectl` commands against the private AKS cluster from within the VNet.
 
 ---
 
@@ -330,7 +332,8 @@ After Phase 2: VM exists, runner registered, managed identity has all roles. **O
 |----------|-------------|
 | Current (github-hosted + public cluster) | ₹0 extra |
 | Azure VPN Gateway + self-hosted runner VM | ~₹9,900/month |
-| **This plan (Pritunl on runner VM)** | **~₹1,600/month** |
+| **`vpn_enabled: true` — Pritunl VPN on runner VM** | **~₹1,600/month** (VM only) |
+| **`vpn_enabled: false` — Azure Bastion + runner VM** | **~₹3,100–8,100/month** (VM + Bastion Basic/Standard SKU) |
 
 ---
 
@@ -350,25 +353,30 @@ After Phase 2: VM exists, runner registered, managed identity has all roles. **O
 flowchart TD
     A([START]) --> B
 
-    B["🔧 OWNER — One Time Only\nFill variables at top of script:\ntenant, subscription, resource group,\ngithub_runner_token, pritunl_users\n\nRun on laptop:\nbash setup-installer-vm.sh\n\nOwner's job ends here forever."]
+    B["🔧 OWNER — One Time Only\nSet vpn_enabled in global-values.yaml\nFill variables at top of script:\ntenant, subscription, resource group,\ngithub_runner_token\n\nRun on laptop:\nbash setup-installer-vm.sh\n\nCreates: VNet + subnets + runner VM\n+ managed identity + GitHub runner"]
 
-    B --> C["☁️ VM Created + cloud-init runs (~5 min):\n• Installs Pritunl + WireGuard\n• Configures VPN server + users\n• Registers GitHub Actions runner\n• Runner shows Idle in GitHub"]
+    B --> ACCESS{"vpn_enabled?"}
 
-    C --> D{"Who needs access?"}
+    ACCESS -->|true| VPN_SETUP["☁️ cloud-init on VM (~5 min):\n• Installs Pritunl + WireGuard\n• Configures VPN server + users\n• VM gets public IP\n• Registers GitHub Actions runner\n• Runner shows Idle in GitHub"]
 
-    D -->|Developer| E["👨‍💻 Developer — One Time\nDownload WireGuard profile\nfrom https://vm-ip\nInstall WireGuard client\nConnect VPN"]
+    ACCESS -->|false| BASTION_SETUP["☁️ cloud-init on VM (~5 min):\n• No VPN installed\n• VM has no public IP\n• Registers GitHub Actions runner\n• Runner shows Idle in GitHub\n\nAzure Bastion created later\nduring create_tf_resources"]
 
-    D -->|Admin / Debug| F["🔑 Admin — SSH access\nConnect VPN first\nthen SSH into VM\nusing SSH key from\nglobal-values.yaml"]
+    VPN_SETUP --> RUNNER["🤖 Self-Hosted Runner on VM\nAlways inside VNet\nManaged identity = no credentials"]
+    BASTION_SETUP --> RUNNER
 
-    E --> G{"VPN Connected?"}
-    G -->|Yes| H["✅ kubectl from own laptop\nDirect access to private AKS\nNo VM login needed"]
-    G -->|No| I["❌ kubectl fails\nNo public endpoint"]
+    RUNNER --> INFRA["GitHub Actions: create_tf_resources\nCreates: AKS (private) + storage\n+ Key Vault + remaining infra\n\nvpn_enabled=false: also creates\nAzureBastionSubnet + Azure Bastion\n(separate PaaS service, not on VM)"]
 
-    F --> J["✅ kubectl from VM\nFull VM access\nfor debugging"]
+    INFRA --> DEPLOY["GitHub Actions: install_helm\nDeploys all services to private AKS"]
+    DEPLOY --> POST["Postman tests + forms\nAPI validation"]
+    POST --> DONE([✅ Infra + platform ready])
 
-    C --> K["🤖 Self-Hosted Runner on VM\nAlways inside VNet — no VPN needed\nManaged identity = no credentials"]
-    K --> L["GitHub Actions triggered\ncreate_tf_resources\nCreates AKS + storage + network\n+ Key Vault (all remaining infra)"]
-    L --> M["helm upgrade\nDeploy all services\nto private AKS"]
-    M --> N["Postman tests + forms\nAPI validation"]
-    N --> O([✅ Done\nOwner never needed again\nNo Azure secrets in GitHub])
+    DONE --> DEV{"Developer access?"}
+
+    DEV -->|vpn_enabled=true| VPN_DEV["👨‍💻 Developer — One Time\nInstall WireGuard client\nDownload profile from\nhttps://vm-public-ip\nConnect VPN"]
+
+    DEV -->|vpn_enabled=false| BASTION_DEV["👨‍💻 Developer\nAzure Portal →\nBastion → runner VM → SSH\n\nNo client install needed\nNo public IP on VM"]
+
+    VPN_DEV --> VPN_ACCESS["✅ kubectl from own laptop\nDirect access to private AKS"]
+
+    BASTION_DEV --> BASTION_ACCESS["✅ kubectl from inside runner VM\nvia SSH session\n\nNote: Azure Bastion is a separate\nPaaS service in AzureBastionSubnet\n— not installed on the runner VM"]
 ```
