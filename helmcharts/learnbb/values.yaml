@@ -19,6 +19,8 @@ migration:
     waitTime: 120
   postgresql:
     waitTime: 120
+  opensearch:
+    waitTime: 120
 
 postgres_migration_image: sunbirded.azurecr.io/postgresql:11.14.0
 
@@ -146,6 +148,8 @@ opensearch: &opensearch
       search.insights.top_queries.memory.enabled: false
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
+  provisioning:
+    annotations: *provisioningAnnotations
 
 keycloak:
   enabled: true
