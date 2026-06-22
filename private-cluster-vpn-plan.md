@@ -1,12 +1,30 @@
-# Private AKS Cluster + VPN Access + Self-Hosted Runner — Implementation Plan
+# Private AKS Cluster + Developer Access + Self-Hosted Runner — Implementation Plan
 
 ## Goal
 
 - AKS API server: **private** (not accessible from internet)
-- Developers: connect via **Pritunl VPN (WireGuard)** → then `kubectl` works
+- Developers: access cluster via **VPN** (Pritunl/WireGuard) **or Azure Bastion** — controlled by `vpn_enabled` flag
 - GitHub Actions: use **self-hosted runner VM** inside VNet (can reach private API)
 - Website/domain: **stays public** (nginx-public-ingress keeps public IP)
 - All provisioning: **OpenTofu + GitHub Actions**
+
+---
+
+## Developer Access Options
+
+Set `vpn_enabled` in `global-values.yaml` to choose:
+
+| | VPN (Pritunl + WireGuard) | Azure Bastion |
+|--|--|--|
+| **`vpn_enabled`** | `true` | `false` |
+| **How developer connects** | WireGuard client → `kubectl` from own laptop | Azure Portal → Bastion → SSH into runner VM → `kubectl` from VM |
+| **VM needs public IP** | Yes (VPN endpoint) | No |
+| **Extra infra** | None (VPN runs on same runner VM) | `AzureBastionSubnet` + `azurerm_bastion_host` resource |
+| **Extra cost** | ₹0 (same VM) | ~₹1,500–6,000/month (Basic/Standard Bastion SKU) |
+| **Client setup** | Install WireGuard, download profile | Azure Portal access only |
+| **Best for** | Teams wanting direct `kubectl` from laptops | Teams preferring no VPN client, portal-based access |
+
+> **VPN is recommended** for developer productivity — direct `kubectl`/`helm` from any machine. Bastion is simpler to set up but requires all cluster work to be done inside the VM via SSH.
 
 ---
 
@@ -48,12 +66,21 @@ Developer → kubectl → AKS API server (PUBLIC)
 GitHub Actions (github-hosted runner) → AKS API server (PUBLIC)
 ```
 
-**After:**
+**After (vpn_enabled: true):**
 ```
 Internet → nginx-public-ingress (public LB) → AKS pods   ← unchanged
-Developer → Pritunl VPN → VNet → AKS private API server
+Developer → Pritunl VPN (WireGuard) → VNet → AKS private API server
 GitHub Actions (self-hosted runner VM in VNet) → AKS private API server
 ```
+
+**After (vpn_enabled: false — Bastion):**
+```
+Internet → nginx-public-ingress (public LB) → AKS pods   ← unchanged
+Developer → Azure Portal → Azure Bastion → runner VM (SSH) → kubectl inside VNet
+GitHub Actions (self-hosted runner VM in VNet) → AKS private API server
+```
+
+> GitHub Actions path is identical in both cases — runner VM is always inside VNet.
 
 ---
 
@@ -123,12 +150,15 @@ GitHub Azure secrets can be deleted once self-hosted runner is active.
 | What changes | Why |
 |---|---|
 | Add `runner-subnet` to network module | VM needs its own isolated subnet inside VNet |
-| New `vm` module | Automates VM creation + Pritunl VPN + GitHub runner setup via cloud-init |
-| Enable `private_cluster_enabled` in AKS module | Makes API server private — no public endpoint |
+| `setup-installer-vm.sh` creates VNet + subnets + VM | VNet must exist before OpenTofu runs (runner VM needs to be inside it); script places VM in runner-subnet |
+| `skip_network_module` flag in network module | When VNet pre-created by script, OpenTofu uses data sources; when false, OpenTofu creates resources |
+| `private_cluster_enabled` flag in AKS module | Makes API server private — no public endpoint |
+| `vpn_enabled` flag controls access method | `true` = Pritunl VPN installed on VM; `false` = Azure Bastion created (no VPN) |
+| Network module: `AzureBastionSubnet` + Bastion resource when `vpn_enabled: false` | Bastion requires dedicated `/26` subnet with fixed name `AzureBastionSubnet` |
 | Update GitHub Actions workflow | Switch from github-hosted runner to self-hosted VM runner; use managed identity instead of OIDC |
-| Add vm variables to `global-values.yaml` template | Operator fills once: VM size, runner token, VPN users |
+| Add vm + access variables to `global-values.yaml` template | Operator fills once: VM size, runner token, `vpn_enabled`, VPN users (if VPN) |
 
-Without these changes, every new environment would need manual VM setup, manual Pritunl config, and github-hosted runners that can't reach private clusters.
+Without these changes, every new environment would need manual VM setup and github-hosted runners that can't reach private clusters.
 
 ---
 
@@ -145,32 +175,30 @@ cd opentofu/azure/<env-name>
 ```
 Creates Azure Storage for OpenTofu state. Needed once per environment.
 
-#### Step 2: Create VM, managed identity + Pritunl + GitHub runner
+#### Step 2: Create VNet + subnets + VM + managed identity + GitHub runner
 ```bash
 # Edit variables at top first: tenant, subscription, resource group,
-# github_org, github_runner_token, pritunl users
+# github_org, github_runner_token, vpn_enabled, pritunl users (if vpn_enabled=true)
 bash private-repo-setup/scripts/setup-installer-vm.sh
 ```
 
 Script handles everything automatically:
-- Creates VM (Standard_B2s, Ubuntu 22.04) + public IP + NSG
+- Creates VNet + AKS subnet + runner subnet (names match OpenTofu convention)
+- Creates VM (Standard_B2s, Ubuntu 22.04) in runner-subnet
 - Creates user-assigned managed identity with least-privilege custom role
-- cloud-init on VM boot: installs Pritunl, WireGuard, kubectl, helm, tofu, az CLI, Docker
-- Configures Pritunl VPN server + adds users
+- cloud-init on VM boot: installs kubectl, helm, tofu, az CLI, Docker
+- If `vpn_enabled=true`: installs Pritunl + WireGuard, configures VPN, opens UDP 1194 / TCP 443; VM gets public IP
+- If `vpn_enabled=false`: skips VPN entirely; VM has no public IP (Bastion provides access after infra step)
 - Registers GitHub Actions runner to your org/repo
 
-VM module creates:
-- Ubuntu 22.04 VM (Standard_B2s) in runner subnet
-- Public IP, NSG (allow UDP 1194, TCP 443, TCP 22)
-- User-assigned managed identity with Contributor + AKS Admin + Storage roles
-
 cloud-init runs automatically on first VM boot (~5 min):
-- Installs: Pritunl, WireGuard, kubectl, helm, opentofu, terragrunt, az CLI, jq, yq, rclone, Docker
-- Configures Pritunl VPN server + adds users from `global-values.yaml`
-- Registers GitHub Actions runner to GitHub org/repo
-- Runner appears as **Idle** in GitHub → Settings → Actions → Runners
+- Installs: kubectl, helm, opentofu, terragrunt, az CLI, jq, yq, rclone, Docker
+- If VPN: Pritunl + WireGuard, VPN server configured + users added
+- Registers GitHub Actions runner → appears as **Idle** in GitHub → Settings → Actions → Runners
 
 > Wait ~5 minutes for cloud-init to complete. Once runner shows Idle — owner's job is done.
+
+> **If `vpn_enabled: false`**: Azure Bastion is created in the next step (Phase 3 `create_tf_resources`). Developer access via Bastion is only available after that step completes.
 
 **After this point, owner's laptop is never needed again.**
 
@@ -196,14 +224,27 @@ VM managed identity authenticates to Azure — no credentials needed anywhere.
 
 ---
 
-### Phase 4 — Developer VPN Setup (~5 min, per developer)
+### Phase 4 — Developer Access Setup (per developer)
+
+#### Option A — VPN (`vpn_enabled: true`) — ~5 min
 
 1. Install WireGuard client (Windows / Mac / Linux)
-2. Open `https://<vm-public-ip>` → login → download `.conf` profile
+2. Open `https://<vm-public-ip>` → login to Pritunl UI → download `.conf` profile
 3. Import profile into WireGuard → Connect
-4. `kubectl get pods -n sunbird` → works ✓
+4. `kubectl get pods -n sunbird` → works directly from laptop ✓
 
-Without VPN: kubectl fails — private cluster has no public endpoint.
+#### Option B — Azure Bastion (`vpn_enabled: false`)
+
+> Bastion is created automatically during `create_tf_resources` (Phase 3). No client install needed.
+
+1. Go to Azure Portal → Resource Group → Bastion resource
+2. Click **Connect** → select runner VM → SSH
+3. Login with `azureuser`
+4. Run `kubectl get pods -n sunbird` → works from inside VM ✓
+
+Bastion SSH key is in `~/.ssh/` on the operator's laptop (generated during `setup-installer-vm.sh`). Share the private key with developers who need VM access, or use Azure Portal's browser-based SSH (no key needed).
+
+> **Limitation:** All `kubectl`/`helm` work must be done inside the VM via SSH session. Cannot run from developer's own laptop without VPN.
 
 ---
 
@@ -211,13 +252,28 @@ Without VPN: kubectl fails — private cluster has no public endpoint.
 
 ## Azure Resources Added
 
+### Always created
+
 | Resource | Purpose |
 |----------|---------|
-| runner-subnet (new subnet in VNet) | Isolates VM from AKS nodes |
-| Runner VM — Standard_B2s | Pritunl VPN server + GitHub Actions runner |
-| Public IP for VM | Developers connect VPN here |
-| NSG on VM | UDP 1194 (WireGuard) + TCP 443 (Pritunl UI) + TCP 22 (SSH) |
+| VNet + AKS subnet + runner-subnet | Created by `setup-installer-vm.sh` before OpenTofu runs |
+| Runner VM — Standard_B2s | GitHub Actions self-hosted runner (+ VPN server if `vpn_enabled: true`) |
 | User-assigned Managed Identity | VM authenticates to Azure without credentials |
+
+### When `vpn_enabled: true`
+
+| Resource | Purpose |
+|----------|---------|
+| Public IP for VM | Developers connect to Pritunl VPN here |
+| NSG rules: UDP 1194 + TCP 443 | WireGuard VPN traffic + Pritunl web UI |
+
+### When `vpn_enabled: false`
+
+| Resource | Purpose |
+|----------|---------|
+| `AzureBastionSubnet` (`/26`) | Required dedicated subnet for Azure Bastion (fixed name) |
+| Azure Bastion (Basic SKU) | Browser-based SSH into runner VM — no public IP on VM needed |
+| No VM public IP | VM stays fully private inside VNet |
 
 ---
 
@@ -253,8 +309,14 @@ ssh azureuser@<vm-public-ip> -i runner.pem
 After Phase 2: VM exists, runner registered, managed identity has all roles. **Owner access no longer needed.**
 
 ### Developer — ongoing
+
+**VPN path (`vpn_enabled: true`):**
 - WireGuard client installed + Pritunl user account (created by admin, listed in `global-values.yaml`)
-- No Azure access needed at all
+- No Azure access needed
+
+**Bastion path (`vpn_enabled: false`):**
+- Azure Portal access (Reader role on resource group is sufficient)
+- Or SSH private key from operator to connect via Bastion CLI
 
 ### GitHub Actions — fully automated
 - No credentials needed — VM managed identity handles all Azure auth automatically
