@@ -23,28 +23,51 @@ locals {
     resource_group_name = var.resource_group_name
 }
 
-resource "azurerm_subnet" "aks_subnet" {
-  name                 = "${local.environment_name}-aks"
-  resource_group_name  = local.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = var.aks_subnet_cidr
-  service_endpoints    = var.aks_subnet_service_endpoints
+# skip_network_module = true:  reuse existing VNet/subnets via data sources (names from var.vnet_name etc.)
+# skip_network_module = false: OpenTofu creates VNet/subnets via resource blocks
+
+data "azurerm_virtual_network" "vnet" {
+  count               = var.skip_network_module ? 1 : 0
+  name                = var.vnet_name
+  resource_group_name = local.resource_group_name
 }
 
-resource "azurerm_subnet" "runner_subnet" {
-  name                 = "${local.environment_name}-runner"
+data "azurerm_subnet" "aks_subnet" {
+  count                = var.skip_network_module ? 1 : 0
+  name                 = var.aks_subnet_name
   resource_group_name  = local.resource_group_name
-  virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = var.runner_subnet_cidr
+  virtual_network_name = data.azurerm_virtual_network.vnet[0].name
+}
+
+data "azurerm_subnet" "runner_subnet" {
+  count                = var.skip_network_module ? 1 : 0
+  name                 = var.runner_subnet_name
+  resource_group_name  = local.resource_group_name
+  virtual_network_name = data.azurerm_virtual_network.vnet[0].name
 }
 
 resource "azurerm_virtual_network" "vnet" {
+  count               = var.skip_network_module ? 0 : 1
   name                = "${local.environment_name}"
   location            = var.location
   resource_group_name = local.resource_group_name
-  address_space       = var.vnet_cidr
-  tags = merge(
-      local.common_tags,
-      var.additional_tags
-      )
+  address_space       = ["10.0.0.0/16"]
+  tags                = merge(local.common_tags, var.additional_tags)
+}
+
+resource "azurerm_subnet" "aks_subnet" {
+  count                = var.skip_network_module ? 0 : 1
+  name                 = "${local.environment_name}-aks"
+  resource_group_name  = local.resource_group_name
+  virtual_network_name = azurerm_virtual_network.vnet[0].name
+  address_prefixes     = ["10.0.0.0/20"]
+  service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
+}
+
+resource "azurerm_subnet" "runner_subnet" {
+  count                = var.skip_network_module ? 0 : 1
+  name                 = "${local.environment_name}-runner"
+  resource_group_name  = local.resource_group_name
+  virtual_network_name = azurerm_virtual_network.vnet[0].name
+  address_prefixes     = ["10.0.16.0/28"]
 }

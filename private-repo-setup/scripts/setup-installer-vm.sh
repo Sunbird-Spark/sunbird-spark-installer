@@ -61,6 +61,46 @@ else
   echo "✓ Resource group created: $RESOURCE_GROUP"
 fi
 
+# ── Step 2b: Create VNet and subnets ──────────────────────────────────────
+# Names must match OpenTofu network module: {building_block}-{environment}[-aks|-runner]
+VNET_NAME="${BUILDING_BLOCK}-${ENVIRONMENT}"
+AKS_SUBNET_NAME="${VNET_NAME}-aks"
+RUNNER_SUBNET_NAME="${VNET_NAME}-runner"
+
+if az network vnet show --name "$VNET_NAME" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
+  echo "✓ VNet already exists: $VNET_NAME"
+else
+  az network vnet create \
+    --name "$VNET_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --location "$LOCATION" \
+    --address-prefixes "10.0.0.0/16" >/dev/null
+  echo "✓ VNet created: $VNET_NAME (10.0.0.0/16)"
+fi
+
+if az network vnet subnet show --name "$AKS_SUBNET_NAME" --vnet-name "$VNET_NAME" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
+  echo "✓ AKS subnet already exists: $AKS_SUBNET_NAME"
+else
+  az network vnet subnet create \
+    --name "$AKS_SUBNET_NAME" \
+    --vnet-name "$VNET_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --address-prefixes "10.0.0.0/20" \
+    --service-endpoints "Microsoft.Sql" "Microsoft.Storage" >/dev/null
+  echo "✓ AKS subnet created: $AKS_SUBNET_NAME (10.0.0.0/20)"
+fi
+
+if az network vnet subnet show --name "$RUNNER_SUBNET_NAME" --vnet-name "$VNET_NAME" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
+  echo "✓ Runner subnet already exists: $RUNNER_SUBNET_NAME"
+else
+  az network vnet subnet create \
+    --name "$RUNNER_SUBNET_NAME" \
+    --vnet-name "$VNET_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --address-prefixes "10.0.16.0/28" >/dev/null
+  echo "✓ Runner subnet created: $RUNNER_SUBNET_NAME (10.0.16.0/28)"
+fi
+
 # ── Step 3: Create user-assigned managed identity ──────────────────────────
 az identity create \
   --name "$IDENTITY_NAME" \
@@ -292,6 +332,8 @@ az vm create \
   --generate-ssh-keys \
   --assign-identity "$IDENTITY_ID" \
   --custom-data "$CLOUD_INIT_FILE" \
+  --vnet-name "$VNET_NAME" \
+  --subnet "$RUNNER_SUBNET_NAME" \
   --public-ip-sku Standard >/dev/null
 
 rm -f "$CLOUD_INIT_FILE"

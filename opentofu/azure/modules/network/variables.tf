@@ -20,23 +20,6 @@ variable "additional_tags" {
     default     = {}
 }
 
-variable "vnet_cidr" {
-    type        = list(string)
-    description = "Azure vnet CIDR range."
-    default     = ["10.0.0.0/16"]
-}
-
-variable "aks_subnet_cidr" {
-  type        = list(string)
-  description = "Azure AKS subnet CIDR range."
-  default     = ["10.0.0.0/20"]
-}
-
-variable "aks_subnet_service_endpoints" {
-  type        = list(string)
-  description = "Azure AKS subnet service endpoints."
-  default     = ["Microsoft.Sql", "Microsoft.Storage"]
-}
 variable "subscription_id" {
   description = "Azure Subscription ID"
   type        = string
@@ -47,8 +30,26 @@ variable "resource_group_name" {
   type        = string
 }
 
-variable "runner_subnet_cidr" {
-  type        = list(string)
-  description = "CIDR range for the runner VM subnet."
-  default     = ["10.0.16.0/28"]
+variable "skip_network_module" {
+  type        = bool
+  description = "When true, reuse existing VNet/subnets via data sources (vnet_name, aks_subnet_name, runner_subnet_name required). When false, OpenTofu creates VNet and subnets."
+  default     = false
+}
+
+variable "vnet_name" {
+  type        = string
+  description = "Name of existing VNet to reuse. Required when network_module_enabled is false."
+  default     = ""
+}
+
+variable "aks_subnet_name" {
+  type        = string
+  description = "Name of existing AKS subnet to reuse. Required when network_module_enabled is false."
+  default     = ""
+}
+
+variable "runner_subnet_name" {
+  type        = string
+  description = "Name of existing runner subnet to reuse. Required when network_module_enabled is false."
+  default     = ""
 }

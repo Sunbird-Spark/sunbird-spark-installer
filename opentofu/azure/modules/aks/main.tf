@@ -26,8 +26,8 @@ provider "azurerm" {
     dns_prefix          = "${local.environment_name}"
     kubernetes_version  = var.aks_version
 
-    private_cluster_enabled   = true
-    private_dns_zone_id       = "System"
+    private_cluster_enabled   = var.private_cluster_enabled
+    private_dns_zone_id       = var.private_cluster_enabled ? "System" : null
     oidc_issuer_enabled       = true
     workload_identity_enabled = true
     default_node_pool {
