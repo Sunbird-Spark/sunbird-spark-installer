@@ -53,3 +53,9 @@ variable "runner_subnet_name" {
   description = "Name of existing runner subnet to reuse. Required when network_module_enabled is false."
   default     = ""
 }
+
+variable "vpn_enabled" {
+  type        = bool
+  description = "When true, Pritunl VPN is installed on the runner VM (VM has public IP). When false, Azure Bastion is created by OpenTofu for developer access (no public IP on VM)."
+  default     = true
+}

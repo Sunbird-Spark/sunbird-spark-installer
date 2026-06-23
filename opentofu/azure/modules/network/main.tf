@@ -71,3 +71,43 @@ resource "azurerm_subnet" "runner_subnet" {
   virtual_network_name = azurerm_virtual_network.vnet[0].name
   address_prefixes     = ["10.0.16.0/28"]
 }
+
+# Azure Bastion — only when vpn_enabled = false
+# AzureBastionSubnet is a fixed name required by Azure; /26 minimum
+locals {
+  active_vnet_name = var.skip_network_module ? data.azurerm_virtual_network.vnet[0].name : azurerm_virtual_network.vnet[0].name
+}
+
+resource "azurerm_subnet" "bastion_subnet" {
+  count                = var.vpn_enabled ? 0 : 1
+  name                 = "AzureBastionSubnet"
+  resource_group_name  = local.resource_group_name
+  virtual_network_name = local.active_vnet_name
+  address_prefixes     = ["10.0.17.0/26"]
+}
+
+resource "azurerm_public_ip" "bastion_pip" {
+  count               = var.vpn_enabled ? 0 : 1
+  name                = "${local.environment_name}-bastion-pip"
+  location            = var.location
+  resource_group_name = local.resource_group_name
+  allocation_method   = "Static"
+  sku                 = "Standard"
+  tags                = merge(local.common_tags, var.additional_tags)
+}
+
+resource "azurerm_bastion_host" "bastion" {
+  count               = var.vpn_enabled ? 0 : 1
+  name                = "${local.environment_name}-bastion"
+  location            = var.location
+  resource_group_name = local.resource_group_name
+  sku                 = "Basic"
+
+  ip_configuration {
+    name                 = "configuration"
+    subnet_id            = azurerm_subnet.bastion_subnet[0].id
+    public_ip_address_id = azurerm_public_ip.bastion_pip[0].id
+  }
+
+  tags = merge(local.common_tags, var.additional_tags)
+}

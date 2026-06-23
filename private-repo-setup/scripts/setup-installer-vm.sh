@@ -5,9 +5,10 @@ set -euo pipefail
 # Azure VM Setup — Sunbird Spark Installer VM
 #
 # This script:
-# 1. Creates a VM with UserAssigned managed identity
+# 1. Creates VNet + subnets + VM with UserAssigned managed identity
 # 2. Creates a custom least-privilege role and assigns it
-# 3. Installs Pritunl VPN + WireGuard via cloud-init
+# 3. If VPN_ENABLED=true: installs Pritunl VPN + WireGuard via cloud-init
+#    If VPN_ENABLED=false: skips VPN (Azure Bastion created by OpenTofu)
 # 4. Registers GitHub Actions self-hosted runner via cloud-init
 #
 # Run ONCE per environment from owner's laptop.
@@ -24,6 +25,8 @@ LOCATION=""               # Azure region (e.g. "Central India")
 GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # GitHub repo name for repo-level runner, or leave empty for org-level
 GITHUB_RUNNER_TOKEN=""    # GitHub → Settings → Actions → Runners → New runner → copy token
+VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "false" = Azure Bastion (no public IP on VM)
+# Required only when VPN_ENABLED=true:
 PRITUNL_VPN_NETWORK=""    # VPN client IP pool (e.g. "172.16.0.0/24")
 PRITUNL_ORG_NAME=""       # Pritunl org name (e.g. "sunbird-spark")
 # PRITUNL_USERS: space-separated "name:email" pairs
@@ -32,12 +35,21 @@ PRITUNL_USERS=()
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Validate inputs ────────────────────────────────────────────────────────
-for var in TENANT_ID SUBSCRIPTION_ID BUILDING_BLOCK ENVIRONMENT RESOURCE_GROUP LOCATION GITHUB_ORG GITHUB_RUNNER_TOKEN PRITUNL_VPN_NETWORK PRITUNL_ORG_NAME; do
+for var in TENANT_ID SUBSCRIPTION_ID BUILDING_BLOCK ENVIRONMENT RESOURCE_GROUP LOCATION GITHUB_ORG GITHUB_RUNNER_TOKEN; do
   if [ -z "${!var}" ]; then
     echo "❌ ERROR: $var is not set. Edit the variables at the top of this script."
     exit 1
   fi
 done
+
+if [ "$VPN_ENABLED" = "true" ]; then
+  for var in PRITUNL_VPN_NETWORK PRITUNL_ORG_NAME; do
+    if [ -z "${!var}" ]; then
+      echo "❌ ERROR: $var is required when VPN_ENABLED=true."
+      exit 1
+    fi
+  done
+fi
 
 # ── VM config ──────────────────────────────────────────────────────────────
 VM_NAME="${BUILDING_BLOCK}-${ENVIRONMENT}-runner"
@@ -207,7 +219,6 @@ cat > "$CLOUD_INIT_FILE" <<CLOUDINIT
 
 package_update: true
 packages:
-  - wireguard
   - jq
   - curl
   - git
@@ -223,6 +234,7 @@ write_files:
       LOG=/var/log/runner-setup.log
       exec > >(tee -a \$LOG) 2>&1
       echo "=== Setup start \$(date) ==="
+      VPN_ENABLED="${VPN_ENABLED}"
 
       # Azure CLI
       curl -sL https://aka.ms/InstallAzureCLIDeb | bash
@@ -255,48 +267,54 @@ write_files:
       curl -fsSL https://get.docker.com | bash
       usermod -aG docker azureuser
 
-      # Pritunl
-      echo "deb https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
-      apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7568D9BB55FF9E5287D586017AE645C0CF8E292A
-      apt-get update -qq && apt-get install -y pritunl mongodb
-      systemctl enable mongod pritunl && systemctl start mongod && sleep 5 && systemctl start pritunl && sleep 15
+      # VPN (Pritunl + WireGuard) — only when VPN_ENABLED=true
+      if [ "\$VPN_ENABLED" = "true" ]; then
+        apt-get install -y wireguard
+        echo "deb https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
+        apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+        curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
+        echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list
+        apt-get update -qq && apt-get install -y pritunl mongodb-org
+        systemctl enable mongod pritunl && systemctl start mongod && sleep 5 && systemctl start pritunl && sleep 15
 
-      # Configure Pritunl
-      DEFAULT_PASS=\$(pritunl default-password | grep "Password:" | awk '{print \$2}')
-      RESPONSE=\$(curl -s -k -X PUT "https://localhost/auth/session" \
-        -H "Content-Type: application/json" \
-        -d "{\"username\":\"pritunl\",\"password\":\"\${DEFAULT_PASS}\"}")
-      TOKEN=\$(echo \$RESPONSE | jq -r '.token // empty')
+        DEFAULT_PASS=\$(pritunl default-password | grep "Password:" | awk '{print \$2}')
+        RESPONSE=\$(curl -s -k -X PUT "https://localhost/auth/session" \
+          -H "Content-Type: application/json" \
+          -d "{\"username\":\"pritunl\",\"password\":\"\${DEFAULT_PASS}\"}")
+        TOKEN=\$(echo \$RESPONSE | jq -r '.token // empty')
 
-      if [ -n "\$TOKEN" ]; then
-        ORG_ID=\$(curl -s -k -X POST "https://localhost/organization" \
-          -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-          -d '{"name":"${PRITUNL_ORG_NAME}"}' | jq -r '.id')
-
-        SERVER_ID=\$(curl -s -k -X POST "https://localhost/server" \
-          -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-          -d '{"name":"runner-vpn","protocol":"wireguard","port":1194,"network":"${PRITUNL_VPN_NETWORK}","dns_servers":["168.63.129.16"]}' | jq -r '.id')
-
-        curl -s -k -X POST "https://localhost/server/\${SERVER_ID}/route" \
-          -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-          -d '{"network":"10.0.0.0/8","comment":"VNet + AKS"}'
-
-        curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/organization/\${ORG_ID}" \
-          -H "Auth-Token: \$TOKEN"
-
-        curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/operation/start" \
-          -H "Auth-Token: \$TOKEN"
-
-        echo '${USERS_JSON}' | jq -c '.[]' | while read user; do
-          NAME=\$(echo \$user | jq -r '.name')
-          EMAIL=\$(echo \$user | jq -r '.email')
-          curl -s -k -X POST "https://localhost/user/\${ORG_ID}" \
+        if [ -n "\$TOKEN" ]; then
+          ORG_ID=\$(curl -s -k -X POST "https://localhost/organization" \
             -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-            -d "{\"name\":\"\${NAME}\",\"email\":\"\${EMAIL}\"}"
-        done
-        echo "Pritunl configured."
+            -d '{"name":"${PRITUNL_ORG_NAME}"}' | jq -r '.id')
+
+          SERVER_ID=\$(curl -s -k -X POST "https://localhost/server" \
+            -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
+            -d '{"name":"runner-vpn","protocol":"wireguard","port":1194,"network":"${PRITUNL_VPN_NETWORK}","dns_servers":["168.63.129.16"]}' | jq -r '.id')
+
+          curl -s -k -X POST "https://localhost/server/\${SERVER_ID}/route" \
+            -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
+            -d '{"network":"10.0.0.0/8","comment":"VNet + AKS"}'
+
+          curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/organization/\${ORG_ID}" \
+            -H "Auth-Token: \$TOKEN"
+
+          curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/operation/start" \
+            -H "Auth-Token: \$TOKEN"
+
+          echo '${USERS_JSON}' | jq -c '.[]' | while read user; do
+            NAME=\$(echo \$user | jq -r '.name')
+            EMAIL=\$(echo \$user | jq -r '.email')
+            curl -s -k -X POST "https://localhost/user/\${ORG_ID}" \
+              -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
+              -d "{\"name\":\"\${NAME}\",\"email\":\"\${EMAIL}\"}"
+          done
+          echo "Pritunl configured."
+        else
+          echo "WARNING: Pritunl API auth failed. Manual setup needed at https://\$(curl -s ifconfig.me)"
+        fi
       else
-        echo "WARNING: Pritunl API auth failed. Manual setup needed at https://\$(curl -s ifconfig.me)"
+        echo "VPN_ENABLED=false — skipping Pritunl. Azure Bastion will be created by OpenTofu."
       fi
 
       # GitHub Actions Runner
@@ -323,6 +341,12 @@ CLOUDINIT
 
 # ── Step 8: Create VM with managed identity + cloud-init ──────────────────
 echo "Creating VM... (this takes ~2 minutes)"
+if [ "$VPN_ENABLED" = "true" ]; then
+  PUBLIC_IP_ARGS=(--public-ip-sku Standard)
+else
+  PUBLIC_IP_ARGS=(--no-public-ip-address)
+fi
+
 az vm create \
   --resource-group "$RESOURCE_GROUP" \
   --name "$VM_NAME" \
@@ -334,47 +358,62 @@ az vm create \
   --custom-data "$CLOUD_INIT_FILE" \
   --vnet-name "$VNET_NAME" \
   --subnet "$RUNNER_SUBNET_NAME" \
-  --public-ip-sku Standard >/dev/null
+  "${PUBLIC_IP_ARGS[@]}" >/dev/null
 
 rm -f "$CLOUD_INIT_FILE"
 echo "✓ VM created: $VM_NAME"
 
-# ── Open NSG ports ─────────────────────────────────────────────────────────
-VM_NSG=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
-  --query "networkProfile.networkInterfaces[0].id" -o tsv | xargs az network nic show --ids \
-  --query "networkSecurityGroup.id" -o tsv | xargs basename)
+# ── Open NSG ports (VPN only) ─────────────────────────────────────────────
+if [ "$VPN_ENABLED" = "true" ]; then
+  VM_NSG=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
+    --query "networkProfile.networkInterfaces[0].id" -o tsv | xargs az network nic show --ids \
+    --query "networkSecurityGroup.id" -o tsv | xargs basename)
 
-az network nsg rule create \
-  --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
-  --name "allow-wireguard" --priority 100 --protocol Udp \
-  --destination-port-range 1194 --access Allow 2>/dev/null || true
+  az network nsg rule create \
+    --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
+    --name "allow-wireguard" --priority 100 --protocol Udp \
+    --destination-port-range 1194 --access Allow 2>/dev/null || true
 
-az network nsg rule create \
-  --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
-  --name "allow-pritunl-ui" --priority 110 --protocol Tcp \
-  --destination-port-range 443 --access Allow 2>/dev/null || true
+  az network nsg rule create \
+    --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
+    --name "allow-pritunl-ui" --priority 110 --protocol Tcp \
+    --destination-port-range 443 --access Allow 2>/dev/null || true
 
-echo "✓ NSG rules added (UDP 1194, TCP 443)"
+  echo "✓ NSG rules added (UDP 1194, TCP 443)"
+else
+  echo "✓ VPN disabled — no NSG rules added (VM has no public IP; access via Azure Bastion)"
+fi
 
 # ── Done ───────────────────────────────────────────────────────────────────
-VM_IP=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
-  --show-details --query publicIps -o tsv)
-
 echo ""
 echo "=========================================="
 echo "  Runner VM Setup Complete"
 echo "=========================================="
 echo "  VM Name       : $VM_NAME"
-echo "  Public IP     : $VM_IP"
-echo "  SSH           : ssh azureuser@${VM_IP} (key in ~/.ssh/)"
+if [ "$VPN_ENABLED" = "true" ]; then
+  VM_IP=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
+    --show-details --query publicIps -o tsv)
+  echo "  Public IP     : $VM_IP"
+  echo "  SSH           : ssh azureuser@${VM_IP} (key in ~/.ssh/)"
+else
+  echo "  Public IP     : none (private VM — access via Azure Bastion after create_tf_resources)"
+  echo "  SSH           : Azure Portal → Bastion → $VM_NAME"
+fi
 echo ""
 echo "  cloud-init running in background (~5 min):"
-echo "  - Installs: Pritunl, WireGuard, kubectl, helm, tofu, az CLI"
-echo "  - Configures VPN server + users"
+if [ "$VPN_ENABLED" = "true" ]; then
+  echo "  - Installs: Pritunl, WireGuard, kubectl, helm, tofu, az CLI"
+  echo "  - Configures VPN server + users"
+else
+  echo "  - Installs: kubectl, helm, tofu, az CLI (no VPN)"
+  echo "  - Run create_tf_resources next to deploy Azure Bastion"
+fi
 echo "  - Registers GitHub Actions runner"
 echo ""
 echo "  Check runner: https://github.com/${GITHUB_ORG} → Settings → Actions → Runners"
-echo "  VPN portal:   https://${VM_IP}  (ready after ~5 min)"
+if [ "$VPN_ENABLED" = "true" ]; then
+  echo "  VPN portal:   https://${VM_IP}  (ready after ~5 min)"
+fi
 echo ""
 echo "  Next: Trigger GitHub Actions workflow to create AKS + deploy"
 echo "=========================================="

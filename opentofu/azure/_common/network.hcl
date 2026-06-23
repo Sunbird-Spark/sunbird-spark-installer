@@ -10,6 +10,7 @@ locals {
   vnet_name              = try(local.global_vars.global.vnet_name, "")
   aks_subnet_name        = try(local.global_vars.global.aks_subnet_name, "")
   runner_subnet_name     = try(local.global_vars.global.runner_subnet_name, "")
+  vpn_enabled            = try(local.global_vars.global.vpn_enabled, true)
 }
 
 # For local development
@@ -27,4 +28,5 @@ inputs = {
   vnet_name              = local.vnet_name
   aks_subnet_name        = local.aks_subnet_name
   runner_subnet_name     = local.runner_subnet_name
+  vpn_enabled            = local.vpn_enabled
 }
