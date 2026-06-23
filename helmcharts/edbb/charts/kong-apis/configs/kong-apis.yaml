@@ -1909,6 +1909,7 @@ kong_apis:
   - name: acl
     config.allow:
     - contentSuperAdmin
+    - contentCreate
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
