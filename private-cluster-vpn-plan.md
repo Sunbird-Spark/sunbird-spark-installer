@@ -151,7 +151,7 @@ GitHub Azure secrets can be deleted once self-hosted runner is active.
 |---|---|
 | Add `runner-subnet` to network module | VM needs its own isolated subnet inside VNet |
 | `setup-installer-vm.sh` creates VNet + subnets + VM | VNet must exist before OpenTofu runs (runner VM needs to be inside it); script places VM in runner-subnet |
-| `skip_network_module` flag in network module | When VNet pre-created by script, OpenTofu uses data sources; when false, OpenTofu creates resources |
+| `skip_network_module` flag in network module | `true` = reuse existing VNet/subnets (data sources, pre-created by script); `false` = OpenTofu creates VNet/subnets (resource blocks) |
 | `private_cluster_enabled` flag in AKS module | Makes API server private — no public endpoint |
 | `vpn_enabled` flag controls access method | `true` = Pritunl VPN installed on VM; `false` = Azure Bastion created (no VPN) |
 | Network module: `AzureBastionSubnet` + Bastion resource when `vpn_enabled: false` | Bastion requires dedicated `/26` subnet with fixed name `AzureBastionSubnet` |
