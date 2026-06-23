@@ -38,7 +38,7 @@ resource "azurerm_storage_account" "storage_account" {
   location                   = var.location
   account_tier               = var.azure_storage_tier
   account_replication_type   = var.azure_storage_replication
-  https_traffic_only_enabled = false
+  https_traffic_only_enabled = true
   blob_properties {
     cors_rule {
       max_age_in_seconds = 200
