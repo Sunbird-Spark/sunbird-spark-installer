@@ -316,44 +316,6 @@ Go to **Actions → Spark Platform Addons → Run workflow**.
 
 ---
 
-## GitHub Actions (OIDC Path)
-
-Use this path if you prefer public AKS cluster with Azure OIDC authentication.
-
-### OIDC Setup
-
-Two service principals are needed:
-
-#### Infra SP
-
-```bash
-bash $INSTALLER_PATH/private-repo-setup/scripts/setup-infra-sp.sh
-```
-
-Edit variables at top first. Creates `<building_block>-<env>-github-infra`. Prints `AZURE_INFRA_CLIENT_ID`.
-
-#### Deploy SP
-
-> Run after AKS cluster exists (after Phase 1 infra).
-
-```bash
-bash $INSTALLER_PATH/private-repo-setup/scripts/setup-deploy-sp.sh
-```
-
-Creates `<building_block>-<env>-github-deploy`. Prints `AZURE_DEPLOY_CLIENT_ID`.
-
-#### GitHub Secrets for OIDC
-
-| Secret | Source |
-|--------|--------|
-| `ANSIBLE_VAULT_PASSWORD` | Vault password |
-| `AZURE_INFRA_CLIENT_ID` | From setup-infra-sp.sh |
-| `AZURE_DEPLOY_CLIENT_ID` | From setup-deploy-sp.sh |
-| `AZURE_TENANT_ID` | Azure AD → Tenant ID |
-| `AZURE_SUBSCRIPTION_ID` | Azure Portal → Subscriptions |
-
----
-
 ## Troubleshooting
 
 **Runner not showing in GitHub**
