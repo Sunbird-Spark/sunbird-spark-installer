@@ -71,7 +71,7 @@ images:
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "spark-v1.0.3_61d7904_16"
+    tag: "v.1.0.2.beta11_70c74cb"
     
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -343,7 +343,7 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.0.1_57a34d3"
+    tag: "v.1.0.2-beta1_964957e"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
