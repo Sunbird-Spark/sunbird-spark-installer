@@ -39,7 +39,8 @@ dependency "storage" {
 dependency "workload_identity" {
     config_path = "../workload-identity"
     mock_outputs = {
-      client_id = "00000000-0000-0000-0000-000000000000"
+      client_id                    = "00000000-0000-0000-0000-000000000000"
+      managed_identity_principal_id = "00000000-0000-0000-0000-000000000000"
     }
     mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
     mock_outputs_merge_strategy_with_state  = "shallow"
@@ -67,6 +68,7 @@ inputs = {
   velero_container_name              = coalesce(local.velero_container_name, dependency.storage.outputs.azurerm_velero_container_name)
   cloud_storage_provider             = local.cloud_storage_provider
   azure_client_id                    = dependency.workload_identity.outputs.client_id
+  managed_identity_principal_id      = dependency.workload_identity.outputs.managed_identity_principal_id
   k8s_service_account_name           = "azure-managed-identity-sa"
   sunbird_encryption_key             = local.sunbird_encryption_key
 }
