@@ -26,12 +26,27 @@ function backup_configs() {
     export KUBECONFIG=~/.kube/config
 }
 
+function deploy_tf_module() {
+    local module=$1
+    echo -e "\nDeploying module: $module"
+    cd $module
+    terragrunt init --reconfigure
+    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    cd ..
+}
+
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on GCP"
-    terragrunt init -upgrade
-    terragrunt run-all apply --terragrunt-non-interactive 
-    chmod 600 ~/.kube/config
+    deploy_tf_module network
+    deploy_tf_module storage
+    deploy_tf_module gke
+    deploy_tf_module workload-identity
+    deploy_tf_module random_passwords
+    deploy_tf_module keys
+    deploy_tf_module output-file
+    deploy_tf_module upload-files
+    [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
 }
 
 function certificate_keys() {
