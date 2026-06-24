@@ -1,97 +1,95 @@
 variable "env" {
-    type        = string
-    description = "Env name. All resources will be prefixed with this value in helm charts."
+  type        = string
+  description = "Env name. All resources will be prefixed with this value in helm charts."
 }
 
 variable "environment" {
-    type        = string
-    description = "Envrionment name. All resources will be prefixed with this value in tofu."
+  type        = string
+  description = "Environment name. All resources will be prefixed with this value in tofu."
 }
 
 variable "building_block" {
-    type        = string
-    description = "Building block name. All resources will be prefixed with this value."
+  type        = string
+  description = "Building block name."
 }
 
 variable "storage_container_public" {
-    type        = string
-    description = "Public storage container name with blob access."
+  type        = string
+  description = "Public bucket name."
 }
 
 variable "storage_container_private" {
-    type        = string
-    description = "Private storage container name."
+  type        = string
+  description = "Private bucket name."
 }
 
 variable "base_location" {
-    type        = string
-    description = "Location of terrafrom execution folder."
+  type        = string
+  description = "Tofu execution folder location."
 }
 
- variable "random_string" {
-    type        = string
-    description = "This string will be used to encrypt / mask various values. Use a strong random string in order to secure the applications. The string should be between 12 and 24 characters in length. If you forget the string, the application will stop working and the string cannot be retrieved."
-    validation {
-      condition     = length(var.random_string) >= 12 || length(var.random_string) <= 24
-      error_message = "The string must have a length ranging from 12 to 24 characters."
+variable "random_string" {
+  type        = string
+  description = "Random string for encryption / masking. 12-24 chars."
+  validation {
+    condition     = length(var.random_string) >= 12 || length(var.random_string) <= 24
+    error_message = "The string must have a length ranging from 12 to 24 characters."
   }
 }
 
 variable "private_ingressgateway_ip" {
-    type        = string
-    description = "Private LB IP."
+  type        = string
+  description = "Private LB IP."
 }
 
 variable "dial_state_container_public" {
-    type        = string
-    description = "Public storage container name with blob access."
+  type        = string
+  description = "DIAL state public bucket name."
 }
 
-variable "gcp_storage_bucket_key" {
-  description = "The key for accessing the Google Cloud Storage bucket"
+variable "service_account_email" {
   type        = string
-  default     = ""
+  description = "GCP service account email used by Workload Identity."
 }
 
-variable "gcp_storage_account_mail" {
-  description = "The name of the GCP storage account"
+variable "k8s_service_account_name" {
   type        = string
-  default     = ""
+  description = "K8s service account name annotated for Workload Identity."
+  default     = "sunbird-sa"
 }
 
 variable "gcp_project_id" {
-  description = "The GCP project ID"
   type        = string
+  description = "GCP project ID."
   default     = ""
 }
 
 variable "storage_class" {
-  description = "The storage class for the GKE cluster."
   type        = string
-  default     = ""  
+  description = "GKE storage class."
+  default     = ""
 }
 
 variable "cloud_storage_provider" {
-  description = "The cloud storage provider to use."
   type        = string
+  description = "Cloud storage provider."
   default     = ""
 }
 
 variable "cloud_storage_region" {
-  description = "The region for the cloud storage provider."
   type        = string
-  default     = ""
-}
-
-variable "cloud_storage_private_key_id" {
-  description = "The private key ID for the cloud storage provider."
-  type        = string
+  description = "Cloud storage region."
   default     = ""
 }
 
 variable "velero_storage_container_private" {
-  description = "The name of the private storage container for Velero backups."
   type        = string
+  description = "Private bucket for Velero backups."
   default     = ""
-  
+}
+
+variable "sunbird_encryption_key" {
+  type        = string
+  description = "Encryption key from previous cluster (migration only). Leave empty for fresh install."
+  default     = ""
 }

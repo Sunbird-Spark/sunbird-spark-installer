@@ -1,11 +1,5 @@
 #!/bin/bash
 set -euo pipefail
-
-echo -e "\nPlease ensure you have updated all the mandatory variables as mentioned in the documentation."
-echo "The installation will fail if any of the mandatory variables are missing."
-echo "Press Enter to continue..."
-read -r
-
 environment=$(basename "$(pwd)")
 
 function create_tf_backend() {
@@ -32,12 +26,27 @@ function backup_configs() {
     export KUBECONFIG=~/.kube/config
 }
 
+function deploy_tf_module() {
+    local module=$1
+    echo -e "\nDeploying module: $module"
+    cd $module
+    terragrunt init --reconfigure
+    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    cd ..
+}
+
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on GCP"
-    terragrunt init -upgrade
-    terragrunt run-all apply --terragrunt-non-interactive 
-    chmod 600 ~/.kube/config
+    deploy_tf_module network
+    deploy_tf_module storage
+    deploy_tf_module gke
+    deploy_tf_module workload-identity
+    deploy_tf_module random_passwords
+    deploy_tf_module keys
+    deploy_tf_module output-file
+    deploy_tf_module upload-files
+    [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
 }
 
 function certificate_keys() {
@@ -89,9 +98,9 @@ function install_component() {
         cd ../../../helmcharts 2>/dev/null || true
     fi
     local component="$1"
-    kubectl create namespace sunbird 2>/dev/null || true
-    kubectl create namespace velero 2>/dev/null || true
+    # namespaces sunbird and velero are created by workload-identity Terraform module
     kubectl create namespace volume-autoscaler 2>/dev/null || true
+    kubectl create namespace nlweb 2>/dev/null || true
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
@@ -113,14 +122,15 @@ function install_component() {
       fi
     local addon_values_flag=""
     if [ "$(yq '.deployed_dial_addon' "../opentofu/gcp/$environment/global-values.yaml")" = "true" ]; then
-        if [ -f "../addons/global-values.yaml" ]; then
-            addon_values_flag="-f ../addons/global-values.yaml"
+        if [ -f "../addons/global-cloud-values.yaml" ]; then
+            addon_values_flag="-f ../addons/global-cloud-values.yaml"
         fi
     fi
 
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
         $ed_values_flag \
         $addon_values_flag \
+        -f images.yaml \
         -f "global-resources.yaml" \
         -f "../opentofu/gcp/$environment/global-values.yaml" \
         -f "../opentofu/gcp/$environment/global-cloud-values.yaml" --timeout 30m --debug
@@ -174,6 +184,7 @@ function install_service() {
             $set_flags \
             $ed_values_flag \
             $addon_values_flag \
+            -f images.yaml \
             -f "global-resources.yaml" \
             -f "../opentofu/gcp/$environment/global-values.yaml" \
             -f "../opentofu/gcp/$environment/global-cloud-values.yaml" \
@@ -200,6 +211,7 @@ function install_service() {
             --namespace sunbird \
             $ed_values_flag \
             $addon_values_flag \
+            -f images.yaml \
             -f "global-resources.yaml" \
             -f "../opentofu/gcp/$environment/global-values.yaml" \
             -f "../opentofu/gcp/$environment/global-cloud-values.yaml" \
@@ -226,7 +238,7 @@ function install_helm_components() {
 }
 
 function dns_mapping() {
-    domain_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_cert_domain_url}')
+    domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
     PUBLIC_IP=$(kubectl get svc -n sunbird nginx-public-ingress -ojsonpath='{.status.loadBalancer.ingress[0].ip}')
 
     local timeout=$((SECONDS + 1200))
@@ -258,10 +270,13 @@ function generate_postman_env() {
     fi
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
     blob_store_path=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
+    public_container_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_content_cloud_storage_container}')
     api_key=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_authorization}')
     keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
     keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
     keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
+    google_oauth_client_id=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.GOOGLE_OAUTH_CLIENT_ID}')
+    google_captcha_site_key=$(yq '.global.sunbird_google_captcha_site_key' global-values.yaml)
     generated_uuid=$(uuidgen)
     temp_file=$(mktemp)
     cp postman.env.json "${temp_file}"
@@ -272,6 +287,9 @@ function generate_postman_env() {
         -e "s|REPLACE_WITH_KEYCLOAK_PASSWORD|${keycloak_password}|g" \
         -e "s|GENERATE_UUID|${generated_uuid}|g" \
         -e "s|BLOB_STORE_PATH|${blob_store_path}|g" \
+        -e "s|PUBLIC_CONTAINER_NAME|${public_container_name}|g" \
+        -e "s|REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID|${google_oauth_client_id}|g" \
+        -e "s|REPLACE_WITH_CAPTCHA_SITE_KEY|${google_captcha_site_key}|g" \
         "${temp_file}" >"env.json"
 
     echo -e "A env.json file is created in this directory: opentofu/gcp/$environment"
