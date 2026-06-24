@@ -15,6 +15,11 @@ keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
 global:
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
+  skip_network_module: false  # false = reuse existing VNet/subnets (set vnet_name and subnet names below); true = network module creates VNet/subnets
+  vnet_name: ""                  # required when network_module_enabled: false — name of existing VNet (e.g. "ed-dev")
+  aks_subnet_name: ""            # required when network_module_enabled: false — name of existing AKS subnet (e.g. "ed-dev-aks")
+  runner_subnet_name: ""         # required when network_module_enabled: false — name of existing runner subnet (e.g. "ed-dev-runner")
+  private_cluster_enabled: true  # true = AKS API server private (requires VPN to access); false = AKS API server public
   sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
   knowledge_platform_ref: "spark-v19"  # git branch or tag for knowledge-platform (schemas/local upload)
   resource_group_name: ""    # Azure resource group name
@@ -30,7 +35,19 @@ global:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
   subscription_id: ""
   cloud_storage_region: ""
-  aks_version: "1.35.1" # required — always specify the exact Kubernetes version e.g. "1.35.1". Run: az aks get-versions --location <region> --output table
+  aks_version: "1.35.1" # required — always specify the exact Kubernetes version e.g. "1.35.1". Run: az aks get-versions --location <region> --output table  # Runner VM + developer access configuration
+  vm_size: "Standard_B2s"
+  vm_admin_username: "azureuser"
+  github_runner_token: "REPLACE_WITH_GITHUB_RUNNER_TOKEN"  # from GitHub → Settings → Actions → Runners → New runner
+  github_org: "REPLACE_WITH_GITHUB_ORG"  # e.g. Sunbird-Spark
+  github_repo: ""  # leave empty for org-level runner
+  vpn_enabled: true  # true = Pritunl VPN on runner VM (direct kubectl from laptop); false = Azure Bastion created by OpenTofu (kubectl inside VM only)
+  # Required only when vpn_enabled: true
+  pritunl_vpn_network: "172.16.0.0/24"
+  pritunl_org_name: "sunbird-spark"
+  pritunl_users:
+    - name: "REPLACE_WITH_USER_NAME"
+      email: "REPLACE_WITH_USER_EMAIL"
   sunbird_cloud_storage_provider: "azure" # Provide the cloud storage provider
   checkpoint_store_type: "azure"
   cloud_service_provider: "azure"

@@ -109,7 +109,6 @@ on:
         default: false
 
 permissions:
-  id-token: write
   contents: write
 
 env:
@@ -125,7 +124,7 @@ jobs:
   infra:
     name: "1 — Infrastructure (Core Terraform)"
     if: ${{ inputs.create_tf_backend || inputs.backup_configs || inputs.create_tf_resources }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
 
     steps:
@@ -140,12 +139,10 @@ jobs:
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
           echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
 
-      - name: Azure Login (Infra)
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_INFRA_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure Login (Managed Identity)
+        run: |
+          az login --identity
+          echo "✅ Logged in via VM managed identity"
 
       - name: Decrypt Config Files
         run: |
@@ -167,17 +164,11 @@ jobs:
 
           rm /tmp/vault_pass.txt
 
-      - name: Install Terraform Tools
+      - name: Verify Tools
         if: ${{ inputs.create_tf_backend || inputs.create_tf_resources }}
         run: |
-          curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
-          sudo wget -qO /usr/local/bin/terragrunt \
-            https://github.com/gruntwork-io/terragrunt/releases/download/v1.0.3/terragrunt_linux_amd64
-          sudo chmod +x /usr/local/bin/terragrunt
-          sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
           tofu --version && terragrunt --version && yq --version
+          echo "✅ Tools verified (pre-installed on runner VM)"
 
       - name: Setup Environment Folder
         run: |
@@ -267,7 +258,7 @@ jobs:
     name: "2 — Deploy (Helm Bundles)"
     if: ${{ always() && (inputs.install_helm || inputs.specific_charts != '') }}
     needs: [infra]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
 
     steps:
@@ -282,12 +273,10 @@ jobs:
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
           echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
 
-      - name: Azure Login (Deploy)
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure Login (Managed Identity)
+        run: |
+          az login --identity
+          echo "✅ Logged in via VM managed identity"
 
       - name: Decrypt Config Files
         run: |
@@ -340,16 +329,6 @@ jobs:
             echo "{}" > $ENV_FOLDER/global-cloud-values.yaml
           fi
           echo "✅ Environment folder ready: $ENV_FOLDER"
-
-      - name: Install Deploy Tools
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          kubectl version --client && helm version && yq --version
 
       - name: Get AKS Credentials
         run: |
@@ -466,7 +445,7 @@ jobs:
     name: "3 — Platform (Post-Install Config)"
     if: ${{ always() && (inputs.restart_workloads || inputs.certificate_config || inputs.dns_mapping || inputs.generate_postman_env || inputs.run_post_install || inputs.create_client_forms || inputs.setup_forms) }}
     needs: [deploy]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
 
     steps:
@@ -481,12 +460,10 @@ jobs:
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
           echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
 
-      - name: Azure Login (Deploy)
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure Login (Managed Identity)
+        run: |
+          az login --identity
+          echo "✅ Logged in via VM managed identity"
 
       - name: Decrypt Config Files
         run: |
@@ -522,18 +499,6 @@ jobs:
             echo "{}" > $ENV_FOLDER/global-cloud-values.yaml
           fi
           echo "✅ Environment folder ready: $ENV_FOLDER"
-
-      - name: Install Platform Tools
-        run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
-          sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          openssl version
-          echo "✅ Tools installed"
 
       - name: Get AKS Credentials
         run: |
