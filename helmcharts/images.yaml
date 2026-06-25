@@ -155,6 +155,10 @@ images:
     repository: "sunbirded.azurecr.io/secor"
     tag: "spark"
 
+  sync_tool: &sync_tool
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
+    tag: "latest"
+
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_eb2384f"
@@ -327,6 +331,11 @@ internal: &internal
 
   janusgraph:
     image: *janusgraph
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  sync-tool:
+    image: *sync_tool
     imagePullSecrets:
       - name: "registry-secret-name"
 

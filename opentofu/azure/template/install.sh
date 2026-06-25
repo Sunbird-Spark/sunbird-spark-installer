@@ -378,6 +378,85 @@ function check_pod_status() {
     echo "All pods are running successfully."
 }
 
+# ─── Sync Tool ────────────────────────────────────────────────────────────────
+# Runs JanusGraph-to-OpenSearch sync as a K8s Job via the sync-tool subchart.
+
+function sync() {
+    local mode="$1"
+    local value="$2"
+
+    if [ -z "$mode" ]; then
+        echo "Usage: ./install.sh sync <mode> [value]"
+        echo "  Modes: full, objecttype, identifiers, days, file"
+        exit 1
+    fi
+
+    local set_flags=()
+    case "$mode" in
+        full)
+            echo -e "\nStarting full sync"
+            set_flags=(--set sync-tool.syncMode=full)
+            ;;
+        objecttype)
+            [ -z "$value" ] && { echo "Error: objectType required. Usage: ./install.sh sync objecttype Content"; exit 1; }
+            echo -e "\nSyncing objectType: $value"
+            set_flags=(--set sync-tool.syncMode=objectType --set "sync-tool.objectType=$value")
+            ;;
+        identifiers)
+            [ -z "$value" ] && { echo "Error: identifiers required. Usage: ./install.sh sync identifiers do_123,do_456"; exit 1; }
+            echo -e "\nSyncing identifiers: $value"
+            set_flags=(--set sync-tool.syncMode=identifiers --set "sync-tool.identifiers=$value")
+            ;;
+        days)
+            [ -z "$value" ] && { echo "Error: days required. Usage: ./install.sh sync days 5"; exit 1; }
+            echo -e "\nSyncing last $value days"
+            set_flags=(--set sync-tool.syncMode=days --set "sync-tool.days=$value")
+            ;;
+        file)
+            [ -z "$value" ] || [ ! -f "$value" ] && { echo "Error: valid file path required. Usage: ./install.sh sync file identifiers.csv"; exit 1; }
+            local cm_name="sync-tool-identifiers"
+            echo -e "\nSyncing from file: $value"
+            kubectl delete configmap "$cm_name" -n sunbird 2>/dev/null || true
+            kubectl create configmap "$cm_name" -n sunbird --from-file=identifiers.csv="$value"
+            set_flags=(--set sync-tool.syncMode=file --set "sync-tool.identifiersConfigMap=$cm_name")
+            ;;
+        *)
+            echo "Error: unknown sync mode '$mode'. Use: full, objecttype, identifiers, days, file"
+            exit 1
+            ;;
+    esac
+
+    local current_directory="$(pwd)"
+    if [ "$(basename $current_directory)" != "helmcharts" ]; then
+        cd ../../../helmcharts 2>/dev/null || true
+    fi
+
+    kubectl delete job -l app=sync-tool -n sunbird 2>/dev/null || true
+
+    helm upgrade --install knowledgebb knowledgebb --namespace sunbird \
+        -f knowledgebb/values.yaml \
+        -f images.yaml \
+        -f global-resources.yaml \
+        -f "../opentofu/azure/$environment/global-values.yaml" \
+        -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
+        --set sync-tool.enabled=true \
+        "${set_flags[@]}" \
+        --timeout 30m
+
+    echo -e "\nSync job started. Streaming logs..."
+    kubectl wait --for=condition=Ready pod -l app=sync-tool -n sunbird --timeout=120s 2>/dev/null || true
+    kubectl logs -f -l app=sync-tool -n sunbird 2>/dev/null || \
+        echo "Pod not ready yet. Check manually: kubectl logs -f -l app=sync-tool -n sunbird"
+
+    # Cleanup file mode ConfigMap
+    if [ "$mode" = "file" ]; then
+        echo -e "\nCleaning up ConfigMap..."
+        kubectl delete configmap "sync-tool-identifiers" -n sunbird 2>/dev/null || true
+    fi
+}
+
+# ─── End Sync Tool ────────────────────────────────────────────────────────────
+
 RELEASE="release700"
 POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/5338608-e28d5510-20d5-466e-a9ad-3fcf59ea9f96?access_key=PMAT-01HMV5SB2ZPXCGNKD74J7ARKRQ"
 CERTPUBLICKEY=""
@@ -437,6 +516,10 @@ else
         ;;
     "create_client_forms")
         create_client_forms
+        ;;
+    "sync")
+        shift
+        sync "$1" "$2"
         ;;
     *)
         invoke_functions "$@"

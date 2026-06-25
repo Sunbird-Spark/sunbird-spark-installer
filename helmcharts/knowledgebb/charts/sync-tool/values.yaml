@@ -1,0 +1,60 @@
+nameOverride: "sync-tool"
+fullnameOverride: "sync-tool"
+
+enabled: false
+
+image:
+  repository: ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool
+  tag: "latest"
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+commonLabels: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2
+    memory: 4Gi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+configmap:
+  enabled: true
+  mountPath: /app/config
+
+commonAnnotations: {}
+
+serviceAccount:
+  create: false
+
+# Sync mode: one of identifiers, objectType, days, file, full
+syncMode: "full"
+
+# Used when syncMode is "identifiers"
+identifiers: ""
+
+# Used when syncMode is "objectType"
+objectType: ""
+
+# Used when syncMode is "days"
+days: ""
+
+# Used when syncMode is "file"
+# ConfigMap name containing identifiers.csv (created by install.sh sync_file)
+identifiersConfigMap: "sync-tool-identifiers"
+
+# Job configuration
+backoffLimit: 3
+ttlSecondsAfterFinished: 86400
+
+javaenv:
+  javaoptions: -Xms512m -Xmx2g
