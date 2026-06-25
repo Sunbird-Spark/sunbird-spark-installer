@@ -5,7 +5,7 @@ enabled: false
 
 image:
   repository: ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool
-  tag: "latest"
+  tag: "sparksynctool-v1.0.2_9cc3538"
   pullPolicy: IfNotPresent
   pullSecrets: []
 
