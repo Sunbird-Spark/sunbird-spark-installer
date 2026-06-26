@@ -2951,6 +2951,146 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "ObjectCategory - FTB Question",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"FTB Question\",\n            \"description\": \"FTB Question\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategory - Match The Following Question",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Match The Following Question\",\n            \"description\": \"Match The Following Question\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategory - Sequence Question",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Sequence Question\",\n            \"description\": \"Sequence Question \\u2014 order items in a sequence\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategory - Reorder Question",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Reorder Question\",\n            \"description\": \"Reorder Question \\u2014 rearrange items\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
 								}
 							],
 							"description": "[https://github.com/project-sunbird/knowledge-platform/blob/master/scripts/definition-scripts/master_category_create](https://github.com/project-sunbird/knowledge-platform/blob/master/scripts/definition-scripts/master_category_create)"
@@ -3604,6 +3744,146 @@
 										"body": {
 											"mode": "raw",
 											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:exam-question\",\n            \"targetObjectType\": \"Content\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"trackable\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"enabled\": {\n                                    \"type\": \"string\",\n                                    \"enum\": [\n                                        \"Yes\",\n                                        \"No\"\n                                    ],\n                                    \"default\": \"No\"\n                                }\n                            },\n                            \"additionalCategories\": {\n                                \"type\": \"array\",\n                                \"items\": {\n                                    \"type\": \"string\",\n                                    \"default\": \"Textbook\"\n                                }\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - FTB Question",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:ftb-question\",\n            \"targetObjectType\": \"Question\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.sunbird.question\"\n                            ]\n                        },\n                        \"interactionTypes\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"text\"\n                                ]\n                            }\n                        },\n                        \"primaryCategory\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"FTB Question\"\n                            ]\n                        },\n                        \"qType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"FTB\"\n                            ]\n                        }\n                    }\n                }\n            },\n            \"forms\": {}\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - Match The Following Question",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:match-the-following-question\",\n            \"targetObjectType\": \"Question\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.sunbird.question\"\n                            ]\n                        },\n                        \"interactionTypes\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"match\"\n                                ]\n                            }\n                        },\n                        \"primaryCategory\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"Match The Following Question\"\n                            ]\n                        },\n                        \"qType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"MTF\"\n                            ]\n                        }\n                    }\n                }\n            },\n            \"forms\": {}\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - Sequence Question",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:sequence-question\",\n            \"targetObjectType\": \"Question\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.sunbird.question\"\n                            ]\n                        },\n                        \"interactionTypes\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"order\"\n                                ]\n                            }\n                        },\n                        \"primaryCategory\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"Sequence Question\"\n                            ]\n                        },\n                        \"qType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"SEQ\"\n                            ]\n                        }\n                    }\n                }\n            },\n            \"forms\": {}\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - Reorder Question",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:reorder-question\",\n            \"targetObjectType\": \"Question\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.sunbird.question\"\n                            ]\n                        },\n                        \"interactionTypes\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"order\"\n                                ]\n                            }\n                        },\n                        \"primaryCategory\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"Reorder Question\"\n                            ]\n                        },\n                        \"qType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"REO\"\n                            ]\n                        }\n                    }\n                }\n            },\n            \"forms\": {}\n        }\n    }\n}"
 										},
 										"url": {
 											"raw": "{{host}}/api/object/category/definition/v1/create",
