@@ -118,6 +118,9 @@ volume-autoscaler:
 
 yugabyte-backup:
   enabled: false
+  schedule: "0 2 * * *"    # daily at 2 AM UTC
+  retentionDays: "7"
+  ttlSecondsAfterFinished: 86400
   image:
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
     tag: "1.0.0"
