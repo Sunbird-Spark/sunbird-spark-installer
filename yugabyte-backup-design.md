@@ -302,11 +302,3 @@ For environments without workload identity. Keys mounted from Kubernetes Secret.
 When `cloud_storage_auth_type: access_key` → Helm creates Secret from provided values, mounts as env vars.
 When `cloud_storage_auth_type: workload_identity` → Helm adds pod/SA annotations only, no Secret created.
 
----
-
-## Open Questions
-
-1. **YCQL keyspace list** — enumerate statically in `global-values.yaml` or discover dynamically at backup time?
-2. **Parallel backup** — run YSQL databases in parallel or sequential?
-3. **Alert on failure** — notify via email/Slack if CronJob fails?
-4. **Cross-cloud restore** — should backup format support restore to a different cloud provider?
