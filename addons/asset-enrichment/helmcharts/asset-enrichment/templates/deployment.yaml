@@ -68,7 +68,7 @@ spec:
             "-Dfs.AbstractFileSystem.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
             "-DHADOOP_CONF_DIR=/opt/flink/conf",
   {{- end }}
-  {{- if eq .Values.global.checkpoint_store_type "s3" }}
+  {{- if and (eq .Values.global.checkpoint_store_type "s3") (ne .Values.global.cloud_storage_auth_type "IRSA") }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
             "-Ds3.secret-key={{ .Values.s3_secret_key }}",
             "-Ds3.endpoint={{ .Values.s3_endpoint }}",
@@ -173,7 +173,7 @@ spec:
             "-Dfs.AbstractFileSystem.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
             "-DHADOOP_CONF_DIR=/opt/flink/conf",
   {{- end }}
-  {{- if eq .Values.global.checkpoint_store_type "s3" }}
+  {{- if and (eq .Values.global.checkpoint_store_type "s3") (ne .Values.global.cloud_storage_auth_type "IRSA") }}
             "-Ds3.access-key={{ .Values.s3_access_key }}",
             "-Ds3.secret-key={{ .Values.s3_secret_key }}",
             "-Ds3.endpoint={{ .Values.s3_endpoint }}",

@@ -112,7 +112,7 @@ knowlg:
     limits:
       cpu: 1
       memory: 1024Mi
- 
+
 search:
   resources:
     requests:
@@ -120,7 +120,7 @@ search:
       memory: 100Mi
     limits:
       cpu: 1
-      memory: 1024Mi 
+      memory: 1024Mi
 
 #learnbb     
 cert:
@@ -174,22 +174,22 @@ kafka:
   broker:
     resources:
       limits:
-        cpu: 1
-        memory: 2048Mi
-      requests:
-        cpu: 750m
+        cpu: 500m
         memory: 1024Mi
+      requests:
+        cpu: 200m
+        memory: 512Mi
     persistence:
-      size: 8Gi
+      size: 6Gi
   controller:
     replicaCount: 3
     resources:
       limits:
-        cpu: 1
-        memory: 2048Mi
-      requests:
-        cpu: 750m
+        cpu: 500m
         memory: 1024Mi
+      requests:
+        cpu: 200m
+        memory: 512Mi
     persistence:
       size: 8Gi
 
@@ -377,16 +377,6 @@ secor:
       cpu: 512m
       memory: 1Gi
 
-search:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
-
-
 velero:
   resources: 
     limits:
@@ -445,7 +435,7 @@ yugabyte:
   storage:
     master:
       count: 2
-      size: 10Gi
+      size: 8Gi
     tserver:
       count: 2
-      size: 10Gi
+      size: 8Gi

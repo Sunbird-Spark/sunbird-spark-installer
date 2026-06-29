@@ -1,0 +1,66 @@
+global:
+  env: ${env}
+  environment: ${environment}
+  building_block: ${building_block}
+  # Empty for AWS — auth via IRSA (no static access key). Bucket name is in public_container_name below.
+  cloud_storage_access_key: ""
+  public_container_name: ${aws_s3_bucket_public}
+  private_container_name: ${aws_s3_bucket_private}
+  velero_storage_container_private: ${aws_s3_bucket_velero}
+  private_ingressgateway_ip: ${private_ingressgateway_ip}
+  random_string: ${random_string}
+  # Set only during a migration FROM an older cluster: paste the OLD cluster's
+  # sunbird_encryption_key into global-cloud-values.yaml before tofu runs.
+  # When empty, learn-service falls back to `random_string` (fresh install default).
+  sunbird_encryption_key: "${sunbird_encryption_key}"
+  object_storage_endpoint: s3.${aws_region}.amazonaws.com
+  storage_class: gp3
+  cloud_storage_provider: ${cloud_storage_provider}
+  cloud_storage_auth_type: "IAM_ROLE"
+  aws_iam_role_arn: ${aws_iam_role_arn}
+  workload_identity_service_account_name: ${k8s_service_account_name}
+  serviceAccount:
+    create: false
+
+velero:
+  enabled: true
+  credentials:
+    useSecret: false
+  serviceAccount:
+    server:
+      annotations:
+        eks.amazonaws.com/role-arn: ${aws_iam_role_arn}
+  configuration:
+      backupStorageLocation:
+        - name: default
+          provider: "${cloud_storage_provider}"
+          bucket: "${aws_s3_bucket_velero}"
+          prefix:
+          config:
+            region: ${aws_region}
+      dbbackupStorageLocation:
+        - name: dbbackup
+          provider: "${cloud_storage_provider}"
+          bucket: "${aws_s3_bucket_velero}"
+          prefix:
+          config:
+            region: ${aws_region}
+      volumeSnapshotLocation:
+        - name: default
+          provider: "${cloud_storage_provider}"
+          config:
+            region: ${aws_region}
+  initContainers:
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.10.0
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+
+nginx-public-ingress:
+  commonAnnotations:
+    reloader.stakater.com/auto: "true"
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
