@@ -23,7 +23,8 @@ ysqlDatabases: "keycloak quartz enc-keys registry sunbird"
 # Comma-separated YCQL keyspaces. Empty = auto-discover all non-system keyspaces
 ycqlKeyspaces: ""
 
-retentionDays: "7"
+retentionDays: "7"   # days to keep backup files in cloud storage
+ttlSecondsAfterFinished: 86400   # seconds to keep completed Job pods (24h)
 
 serviceAccount:
   create: true
