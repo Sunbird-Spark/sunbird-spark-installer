@@ -1,0 +1,33 @@
+enabled: true
+
+image:
+  repository: "ghcr.io/sunbird-spark/yugabyte-backup"
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+  imagePullSecrets: "registry-secret-name"
+
+schedule: "0 2 * * *"    # daily at 2 AM UTC
+restartPolicy: OnFailure
+retryLimit: 3
+
+yugabyte:
+  host: "yb-tserver-service"
+  ysqlPort: "5433"
+  ycqlPort: "9042"
+  user: "yugabyte"
+  password: "yugabyte"
+
+# Space-separated list of YSQL databases to back up
+ysqlDatabases: "keycloak quartz enc-keys registry sunbird"
+
+# Comma-separated YCQL keyspaces. Empty = auto-discover all non-system keyspaces
+ycqlKeyspaces: ""
+
+retentionDays: "7"
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+podAnnotations: {}

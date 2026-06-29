@@ -116,5 +116,13 @@ volume-autoscaler:
   # The maximum size of disks to scale up to.  By default on AWS using EBS volumes this is set to 16TB as that is the EBS Max disk size.
   scale_up_max_size: ""     
 
+yugabyte-backup:
+  enabled: false
+  image:
+    repository: "ghcr.io/sunbird-spark/yugabyte-backup"
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+    imagePullSecrets: "registry-secret-name"
+
 global:
  kafka: *kafka    

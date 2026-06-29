@@ -1,0 +1,107 @@
+{{- if .Values.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "yugabyte-backup.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "yugabyte-backup.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: {{ .Values.retryLimit }}
+      template:
+        metadata:
+          labels:
+            {{- include "yugabyte-backup.labels" . | nindent 12 }}
+          {{- with .Values.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+        spec:
+          serviceAccountName: {{ include "yugabyte-backup.serviceAccountName" . }}
+          restartPolicy: {{ .Values.restartPolicy }}
+          {{- if .Values.image.imagePullSecrets }}
+          imagePullSecrets:
+            - name: {{ .Values.image.imagePullSecrets }}
+          {{- end }}
+          containers:
+            - name: yugabyte-backup
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              env:
+                - name: YB_HOST
+                  value: {{ .Values.yugabyte.host | quote }}
+                - name: YB_YSQL_PORT
+                  value: {{ .Values.yugabyte.ysqlPort | quote }}
+                - name: YB_YCQL_PORT
+                  value: {{ .Values.yugabyte.ycqlPort | quote }}
+                - name: YB_USER
+                  value: {{ .Values.yugabyte.user | quote }}
+                - name: YB_PASSWORD
+                  value: {{ .Values.yugabyte.password | quote }}
+                - name: YSQL_DATABASES
+                  value: {{ .Values.ysqlDatabases | quote }}
+                - name: YCQL_KEYSPACES
+                  value: {{ .Values.ycqlKeyspaces | quote }}
+                - name: RETENTION_DAYS
+                  value: {{ .Values.retentionDays | quote }}
+                - name: CLOUD_SERVICE
+                  value: {{ .Values.global.cloud_service_provider | quote }}
+                - name: CLOUD_STORAGE_AUTH_TYPE
+                  value: {{ .Values.global.cloud_storage_auth_type | default "workload_identity" | quote }}
+
+                {{- if eq .Values.global.cloud_service_provider "azure" }}
+                - name: AZURE_STORAGE_ACCOUNT
+                  value: {{ .Values.global.cloud_storage_access_key | quote }}
+                - name: AZURE_CONTAINER
+                  value: {{ .Values.global.private_container_name | quote }}
+                {{- if eq (.Values.global.cloud_storage_auth_type | default "workload_identity") "access_key" }}
+                - name: AZURE_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "yugabyte-backup.fullname" . }}-secret
+                      key: storage_key
+                {{- end }}
+                {{- end }}
+
+                {{- if eq .Values.global.cloud_service_provider "gcp" }}
+                - name: GCS_BUCKET
+                  value: {{ .Values.global.cloud_storage_access_key | quote }}
+                {{- end }}
+
+                {{- if eq .Values.global.cloud_service_provider "aws" }}
+                - name: S3_BUCKET
+                  value: {{ .Values.global.cloud_storage_access_key | quote }}
+                - name: AWS_DEFAULT_REGION
+                  value: {{ .Values.global.cloud_storage_region | quote }}
+                {{- if eq (.Values.global.cloud_storage_auth_type | default "workload_identity") "access_key" }}
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "yugabyte-backup.fullname" . }}-secret
+                      key: aws_access_key_id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "yugabyte-backup.fullname" . }}-secret
+                      key: aws_secret_access_key
+                {{- end }}
+                {{- end }}
+
+              {{- if and (eq (.Values.global.cloud_storage_auth_type | default "workload_identity") "access_key") (eq .Values.global.cloud_service_provider "gcp") }}
+              volumeMounts:
+                - name: gcp-sa
+                  mountPath: /secrets
+                  readOnly: true
+          volumes:
+            - name: gcp-sa
+              secret:
+                secretName: {{ include "yugabyte-backup.fullname" . }}-secret
+              {{- end }}
+{{- end }}
