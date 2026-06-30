@@ -28,11 +28,12 @@ locals {
 }
 
 inputs = {
-  environment              = local.global_vars.global.environment
-  storage_account_name     = local.cloud_vars.global.cloud_storage_access_key
-  resource_group_name      = "${local.global_vars.global.building_block}-${local.global_vars.global.environment}"
-  subscription_id          = local.global_vars.global.subscription_id
-  building_block           = local.global_vars.global.building_block
-  global_cloud_values_file = "${get_repo_root()}/addons/global-cloud-values.yaml"
+  environment                    = local.global_vars.global.environment
+  storage_account_name           = local.cloud_vars.global.cloud_storage_access_key
+  resource_group_name            = "${local.global_vars.global.building_block}-${local.global_vars.global.environment}"
+  subscription_id                = local.global_vars.global.subscription_id
+  building_block                 = local.global_vars.global.building_block
+  global_cloud_values_file       = "${get_repo_root()}/addons/global-cloud-values.yaml"
+  workload_identity_principal_id = try(local.cloud_vars.global.managed_identity_principal_id, "")
 }
 
