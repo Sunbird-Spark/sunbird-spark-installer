@@ -41,6 +41,12 @@ resource "azurerm_storage_container" "dial_state_container_public" {
   container_access_type = "blob"
 }
 
+resource "azurerm_role_assignment" "dial_container_access" {
+  principal_id         = var.workload_identity_principal_id
+  scope                = "${data.azurerm_storage_account.existing.id}/blobServices/default/containers/${azurerm_storage_container.dial_state_container_public.name}"
+  role_definition_name = "${local.environment_name}-blob-operator-least-privilege"
+}
+
 resource "null_resource" "update_global_values" {
   triggers = {
     container_name = azurerm_storage_container.dial_state_container_public.name
