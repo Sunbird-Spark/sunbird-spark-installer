@@ -2951,6 +2951,41 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "ObjectCategory - Scorm Content",
+									"request": {
+										"method": "POST",
+										"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Authorization",
+											"value": "Bearer {{apikey}}",
+											"type": "text"
+										}
+										],
+										"body": {
+										"mode": "raw",
+										"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"SCORM Content\",\n            \"description\": \"SCORM Content\"\n        }\n    }\n}"
+										},
+										"url": {
+										"raw": "{{host}}/api/object/category/v1/create",
+										"host": [
+											"{{host}}"
+										],
+										"path": [
+											"api",
+											"object",
+											"category",
+											"v1",
+											"create"
+										]
+										}
+									},
+									"response": []
 								}
 							],
 							"description": "[https://github.com/project-sunbird/knowledge-platform/blob/master/scripts/definition-scripts/master_category_create](https://github.com/project-sunbird/knowledge-platform/blob/master/scripts/definition-scripts/master_category_create)"
@@ -3664,6 +3699,41 @@
 													"value": "objectMetadata,forms"
 												}
 											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - Scorm Content",
+									"request": {
+										"method": "POST",
+										"header": [
+										{
+											"key": "Authorization",
+											"value": "Bearer {{apikey}}"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
+										],
+										"body": {
+										"mode": "raw",
+										"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+										},
+										"url": {
+										"raw": "{{host}}/api/object/category/definition/v1/create",
+										"host": [
+											"{{host}}"
+										],
+										"path": [
+											"api",
+											"object",
+											"category",
+											"definition",
+											"v1",
+											"create"
+										]
 										}
 									},
 									"response": []
