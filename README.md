@@ -386,7 +386,7 @@ cd opentofu/<cloud-provider>/<env>
 ./install.sh sync days 5
 
 # Sync from a CSV file (one identifier per line)
-./install.sh sync file /path/to/identifiers.csv
+./install.sh sync file ../../../scripts/sync-tool/identifiers.csv
 ```
 
 ### Monitor
@@ -399,10 +399,13 @@ kubectl logs -f -l app=sync-tool -n sunbird
 
 ### File Mode
 
-An `identifiers.csv` file is included in the environment directory (next to `install.sh`):
+An `identifiers.csv` template is at `scripts/sync-tool/identifiers.csv`:
 
-1. Open `identifiers.csv` and add one node identifier per line
-2. Run: `./install.sh sync file identifiers.csv`
+1. Open `scripts/sync-tool/identifiers.csv` and add one node identifier per line
+2. Run from your environment directory:
+   ```bash
+   ./install.sh sync file ../../../scripts/sync-tool/identifiers.csv
+   ```
 
 ### When to use
 

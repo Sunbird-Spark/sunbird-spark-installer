@@ -404,7 +404,7 @@ function sync() {
             set_flags=(--set sync-tool.syncMode=days --set "sync-tool.days=$value")
             ;;
         file)
-            [ -z "$value" ] || [ ! -f "$value" ] && { echo "Error: valid file path required. Usage: ./install.sh sync file identifiers.csv"; exit 1; }
+            [ -z "$value" ] || [ ! -f "$value" ] && { echo "Error: valid file path required. Usage: ./install.sh sync file ../../../scripts/sync-tool/identifiers.csv"; exit 1; }
             local cm_name="sync-tool-identifiers"
             echo -e "\nSyncing from file: $value"
             kubectl delete configmap "$cm_name" -n sunbird 2>/dev/null || true
