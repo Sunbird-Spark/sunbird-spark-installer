@@ -1,0 +1,110 @@
+{{- if .Values.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "common.names.fullname" . }}-{{ .Release.Revision }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 4 }}
+spec:
+  backoffLimit: {{ .Values.backoffLimit }}
+  ttlSecondsAfterFinished: {{ .Values.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 8 }}
+        app: sync-tool
+    spec:
+      {{- if .Values.podSecurityContext }}
+      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets: {{- toYaml .Values.image.pullSecrets | nindent 8 }}
+      {{- end }}
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-janusgraph
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Waiting for JanusGraph..."
+              for i in $(seq 1 120); do
+                if nc -z {{ .Values.global.janusgraph.host }} {{ .Values.global.janusgraph.port }}; then
+                  echo "JanusGraph is ready!"
+                  exit 0
+                fi
+                echo "Attempt $i: Waiting..."
+                sleep 2
+              done
+              echo "JanusGraph not ready after 4 minutes"
+              exit 1
+        - name: wait-for-elasticsearch
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Waiting for Elasticsearch/OpenSearch..."
+              for i in $(seq 1 60); do
+                if nc -z {{ .Values.global.elasticsearch.host }} {{ .Values.global.elasticsearch.port }}; then
+                  echo "Elasticsearch is ready!"
+                  exit 0
+                fi
+                echo "Attempt $i: Waiting..."
+                sleep 2
+              done
+              echo "Elasticsearch not ready after 2 minutes"
+              exit 1
+      containers:
+        - name: sync-tool
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- if eq .Values.syncMode "full" }}
+            - "--type"
+            - "full"
+            {{- else if eq .Values.syncMode "identifiers" }}
+            - "--identifiers"
+            - {{ .Values.identifiers | quote }}
+            {{- else if eq .Values.syncMode "objectType" }}
+            - "--objectType"
+            - {{ .Values.objectType | quote }}
+            {{- else if eq .Values.syncMode "days" }}
+            - "--days"
+            - {{ .Values.days | quote }}
+            {{- else if eq .Values.syncMode "file" }}
+            - "--file"
+            - "/data/identifiers.csv"
+            {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "common.names.fullname" . }}-env
+          volumeMounts:
+            - name: config
+              mountPath: {{ .Values.configmap.mountPath }}
+            {{- if eq .Values.syncMode "file" }}
+            - name: identifiers
+              mountPath: /data
+              readOnly: true
+            {{- end }}
+          {{- if .Values.securityContext }}
+          securityContext: {{- toYaml .Values.securityContext | nindent 12 }}
+          {{- end }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "common.names.fullname" . }}
+        {{- if eq .Values.syncMode "file" }}
+        - name: identifiers
+          configMap:
+            name: {{ .Values.identifiersConfigMap | default "sync-tool-identifiers" }}
+        {{- end }}
+{{- end }}

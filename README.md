@@ -361,3 +361,60 @@ if saved_credential.get('key') == credential_iss:
 - [Kong Migration Guide](https://docs.konghq.com/gateway/latest/upgrade/)
 - [Kong 3.9.x Release Notes](https://docs.konghq.com/gateway/changelog/)
 - [YugabyteDB PostgreSQL Compatibility](https://docs.yugabyte.com/preview/explore/ysql-language-features/)
+
+---
+
+## Sync Tool — JanusGraph to OpenSearch
+
+Bulk sync/repair tool for syncing JanusGraph graph data to the OpenSearch composite search index. Runs as a K8s Job — starts, syncs, exits. Zero cost when idle.
+
+### Usage
+
+```bash
+cd opentofu/<cloud-provider>/<env>
+
+# Sync all nodes
+./install.sh sync full
+
+# Sync all nodes of a specific type
+./install.sh sync objecttype Content
+
+# Sync specific node IDs
+./install.sh sync identifiers do_123,do_456,do_789
+
+# Sync nodes updated in last N days
+./install.sh sync days 5
+
+# Sync from a CSV file (one identifier per line)
+./install.sh sync file ../../../scripts/sync-tool/identifiers.csv
+```
+
+### Monitor
+
+Logs stream automatically after the job starts. If disconnected:
+
+```bash
+kubectl logs -f -l app=sync-tool -n sunbird
+```
+
+### File Mode
+
+An `identifiers.csv` template is at `scripts/sync-tool/identifiers.csv`:
+
+1. Open `scripts/sync-tool/identifiers.csv` and add one node identifier per line
+2. Run from your environment directory:
+   ```bash
+   ./install.sh sync file ../../../scripts/sync-tool/identifiers.csv
+   ```
+
+### When to use
+
+| Scenario | Command |
+|----------|---------|
+| Empty index after environment setup | `./install.sh sync full` |
+| Missed CDC events for specific nodes | `./install.sh sync identifiers do_123,do_456` |
+| Backfill after adding new searchable fields | `./install.sh sync full` |
+| Repair a specific content type | `./install.sh sync objecttype Content` |
+| Catch up after pipeline downtime | `./install.sh sync days 3` |
+
+---
