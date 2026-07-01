@@ -79,6 +79,11 @@ on:
         description: '   ↳ specific charts (space-separated, e.g. "kafka yugabyte") — also check one bundle above'
         type: string
         default: ''
+      sync_command:
+        description: '6️⃣ Sync Tool (e.g. "full", "objecttype Content", "identifiers do_123,do_456", "days 5")'
+        type: string
+        default: ''
+
       restart_workloads:
         description: '7️⃣ Restart workloads using keycloak keys'
         type: boolean
@@ -265,7 +270,7 @@ jobs:
 # ════════════════════════════════════════════════════════════════════════════
   deploy:
     name: "2 — Deploy (Helm Bundles)"
-    if: ${{ always() && (inputs.install_helm || inputs.specific_charts != '') }}
+    if: ${{ always() && (inputs.install_helm || inputs.specific_charts != '' || inputs.sync_command != '') }}
     needs: [infra]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
@@ -426,6 +431,13 @@ jobs:
           bash install.sh install_service "$bundle" ${{ inputs.specific_charts }}
           echo "✅ specific charts (${{ inputs.specific_charts }}) installed in bundle: $bundle"
 
+      - name: 6️⃣ sync — JanusGraph to OpenSearch
+        if: ${{ inputs.sync_command != '' }}
+        run: |
+          cd $ENV_FOLDER
+          bash install.sh sync ${{ inputs.sync_command }}
+          echo "✅ sync done (${{ inputs.sync_command }})"
+
       - name: Deploy Summary
         if: always()
         run: |
@@ -455,6 +467,9 @@ jobs:
             [ "${{ inputs.obsrvbb }}"     == "true" ] && bundle="obsrvbb"
             [ "${{ inputs.additional }}"  == "true" ] && bundle="additional"
             echo "  ✅ 5️⃣  specific charts in ${bundle:-<no bundle>}: ${{ inputs.specific_charts }}"
+          fi
+          if [ -n "${{ inputs.sync_command }}" ]; then
+            echo "  ✅ 6️⃣  sync (${{ inputs.sync_command }})"
           fi
           echo "================================================"
 
