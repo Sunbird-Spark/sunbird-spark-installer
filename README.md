@@ -368,53 +368,53 @@ if saved_credential.get('key') == credential_iss:
 
 Bulk sync/repair tool for syncing JanusGraph graph data to the OpenSearch composite search index. Runs as a K8s Job — starts, syncs, exits. Zero cost when idle.
 
+Sync tool is a subchart of `knowledgebb`, disabled by default. Controlled via `global-values.yaml`.
+
 ### Usage
 
-```bash
-cd opentofu/<cloud-provider>/<env>
+1. Edit `global-values.yaml` — set sync-tool config:
+   ```yaml
+   sync-tool:
+     enabled: true
+     syncMode: full              # full | objectType | identifiers | days | file
+     objectType: ""              # e.g. "Content" (when syncMode=objectType)
+     identifiers: ""             # e.g. "do_123,do_456" (when syncMode=identifiers)
+     days: ""                    # e.g. "5" (when syncMode=days)
+   ```
 
-# Sync all nodes
-./install.sh sync full
+2. Deploy sync-tool only (does not redeploy other knowledgebb charts):
+   ```bash
+   cd opentofu/<cloud-provider>/<env>
+   ./install.sh install_service knowledgebb sync-tool
+   ```
 
-# Sync all nodes of a specific type
-./install.sh sync objecttype Content
+3. Monitor logs:
+   ```bash
+   kubectl logs -f -l app=sync-tool -n sunbird
+   ```
 
-# Sync specific node IDs
-./install.sh sync identifiers do_123,do_456,do_789
-
-# Sync nodes updated in last N days
-./install.sh sync days 5
-
-# Sync from a CSV file (one identifier per line)
-./install.sh sync file ../../../scripts/sync-tool/identifiers.csv
-```
-
-### Monitor
-
-Logs stream automatically after the job starts. If disconnected:
-
-```bash
-kubectl logs -f -l app=sync-tool -n sunbird
-```
+4. After sync completes, set `enabled: false` in `global-values.yaml`.
 
 ### File Mode
 
-An `identifiers.csv` template is at `scripts/sync-tool/identifiers.csv`:
+For syncing specific identifiers from a CSV file:
 
-1. Open `scripts/sync-tool/identifiers.csv` and add one node identifier per line
-2. Run from your environment directory:
-   ```bash
-   ./install.sh sync file ../../../scripts/sync-tool/identifiers.csv
-   ```
+1. Edit `helmcharts/knowledgebb/charts/sync-tool/identifiers.csv` — add one identifier per line
+2. Set `syncMode: file` in `global-values.yaml`
+3. Deploy: `./install.sh install_service knowledgebb sync-tool`
+
+### GitHub Actions
+
+Check `knowledgebb` bundle + type `sync-tool` in `specific_charts`. Sync config must be set in `global-values.yaml` before triggering.
 
 ### When to use
 
-| Scenario | Command |
-|----------|---------|
-| Empty index after environment setup | `./install.sh sync full` |
-| Missed CDC events for specific nodes | `./install.sh sync identifiers do_123,do_456` |
-| Backfill after adding new searchable fields | `./install.sh sync full` |
-| Repair a specific content type | `./install.sh sync objecttype Content` |
-| Catch up after pipeline downtime | `./install.sh sync days 3` |
+| Scenario | syncMode | value |
+|----------|----------|-------|
+| Empty index after environment setup | `full` | — |
+| Missed CDC events for specific nodes | `identifiers` | `do_123,do_456` |
+| Backfill after adding new searchable fields | `full` | — |
+| Repair a specific content type | `objectType` | `Content` |
+| Catch up after pipeline downtime | `days` | `3` |
 
 ---

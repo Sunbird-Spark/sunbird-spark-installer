@@ -440,10 +440,6 @@ else
     "create_client_forms")
         create_client_forms
         ;;
-    "sync")
-        shift
-        sync "$1" "$2"
-        ;;
     *)
         invoke_functions "$@"
         ;;
