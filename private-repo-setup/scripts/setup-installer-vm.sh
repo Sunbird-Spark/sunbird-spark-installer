@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ###############################################################
-# Azure VM Setup — Sunbird Spark Installer VM
+# Azure VM Setup - Sunbird Spark Installer VM
 #
 # This script:
 # 1. Creates VNet + subnets + VM with UserAssigned managed identity
@@ -16,15 +16,15 @@ set -euo pipefail
 ###############################################################
 
 # ── CONFIGURE THESE BEFORE RUNNING ──────────────────────────────────────────
-TENANT_ID=""              # Azure AD Tenant ID (Azure Portal → Azure Active Directory → Overview)
-SUBSCRIPTION_ID=""        # Azure Subscription ID (Azure Portal → Subscriptions)
+TENANT_ID=""              # Azure AD Tenant ID (Azure Portal -> Azure Active Directory -> Overview)
+SUBSCRIPTION_ID=""        # Azure Subscription ID (Azure Portal -> Subscriptions)
 BUILDING_BLOCK=""         # Must match global.building_block in global-values.yaml (e.g. "ed")
-ENVIRONMENT=""            # Must match configs/ folder name (e.g. "dev", "prod")
+ENVIRONMENT=""            # Must match configs/ folder name (e.g. "dev")
 RESOURCE_GROUP=""         # Azure resource group (e.g. "ed-dev")
 LOCATION=""               # Azure region (e.g. "Central India")
 GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # GitHub repo name for repo-level runner, or leave empty for org-level
-GITHUB_RUNNER_TOKEN=""    # GitHub → Settings → Actions → Runners → New runner → copy token
+GITHUB_RUNNER_TOKEN=""    # GitHub -> Settings -> Actions -> Runners -> New runner -> copy token
 VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "false" = Azure Bastion (no public IP on VM)
 # Required only when VPN_ENABLED=true:
 PRITUNL_VPN_NETWORK=""    # VPN client IP pool (e.g. "172.16.0.0/24")
@@ -114,13 +114,17 @@ else
 fi
 
 # ── Step 3: Create user-assigned managed identity ──────────────────────────
-az identity create \
-  --name "$IDENTITY_NAME" \
-  --resource-group "$RESOURCE_GROUP" \
-  --location "$LOCATION" >/dev/null
+if az identity show --name "$IDENTITY_NAME" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
+  echo "✓ Managed identity already exists: $IDENTITY_NAME"
+else
+  az identity create \
+    --name "$IDENTITY_NAME" \
+    --resource-group "$RESOURCE_GROUP" \
+    --location "$LOCATION" >/dev/null
+  echo "✓ Managed identity created: $IDENTITY_NAME"
+fi
 IDENTITY_ID=$(az identity show --name "$IDENTITY_NAME" --resource-group "$RESOURCE_GROUP" --query id -o tsv)
 IDENTITY_OBJECT_ID=$(az identity show --name "$IDENTITY_NAME" --resource-group "$RESOURCE_GROUP" --query principalId -o tsv)
-echo "✓ Managed identity created: $IDENTITY_NAME ($IDENTITY_OBJECT_ID)"
 
 # ── Step 4: Create least-privilege custom role ─────────────────────────────
 ROLE_JSON_FILE=$(mktemp)
@@ -267,7 +271,7 @@ write_files:
       curl -fsSL https://get.docker.com | bash
       usermod -aG docker azureuser
 
-      # VPN (Pritunl + WireGuard) — only when VPN_ENABLED=true
+      # VPN (Pritunl + WireGuard) - only when VPN_ENABLED=true
       if [ "\$VPN_ENABLED" = "true" ]; then
         apt-get install -y wireguard
         echo "deb https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
@@ -275,9 +279,20 @@ write_files:
         curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
         echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list
         apt-get update -qq && apt-get install -y pritunl mongodb-org
-        systemctl enable mongod pritunl && systemctl start mongod && sleep 5 && systemctl start pritunl && sleep 15
+
+        pritunl set-mongodb mongodb://localhost:27017/pritunl
+
+        systemctl enable mongod && systemctl start mongod
+
+        echo "Waiting for MongoDB..."
+        until mongosh --eval "db.runCommand({ping:1})" &>/dev/null; do sleep 3; done
+        echo "MongoDB ready"
+
+        systemctl enable pritunl && systemctl start pritunl
+        sleep 15
 
         DEFAULT_PASS=\$(pritunl default-password | grep "Password:" | awk '{print \$2}')
+        echo "Pritunl default password obtained"
         RESPONSE=\$(curl -s -k -X PUT "https://localhost/auth/session" \
           -H "Content-Type: application/json" \
           -d "{\"username\":\"pritunl\",\"password\":\"\${DEFAULT_PASS}\"}")
@@ -314,7 +329,7 @@ write_files:
           echo "WARNING: Pritunl API auth failed. Manual setup needed at https://\$(curl -s ifconfig.me)"
         fi
       else
-        echo "VPN_ENABLED=false — skipping Pritunl. Azure Bastion will be created by OpenTofu."
+        echo "VPN_ENABLED=false - skipping Pritunl. Azure Bastion will be created by OpenTofu."
       fi
 
       # GitHub Actions Runner
@@ -340,48 +355,72 @@ runcmd:
 CLOUDINIT
 
 # ── Step 8: Create VM with managed identity + cloud-init ──────────────────
-echo "Creating VM... (this takes ~2 minutes)"
-if [ "$VPN_ENABLED" = "true" ]; then
-  PUBLIC_IP_ARGS=(--public-ip-sku Standard)
+if az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" &>/dev/null; then
+  echo "✓ VM already exists: $VM_NAME (skipping creation)"
+  rm -f "$CLOUD_INIT_FILE"
 else
-  PUBLIC_IP_ARGS=(--no-public-ip-address)
+  echo "Creating VM... (this takes ~2 minutes)"
+  if [ "$VPN_ENABLED" = "true" ]; then
+    PUBLIC_IP_ARGS=(--public-ip-sku Standard)
+  else
+    PUBLIC_IP_ARGS=(--no-public-ip-address)
+  fi
+
+  az vm create \
+    --resource-group "$RESOURCE_GROUP" \
+    --name "$VM_NAME" \
+    --image "$VM_IMAGE" \
+    --size "$VM_SIZE" \
+    --admin-username "$VM_ADMIN_USER" \
+    --generate-ssh-keys \
+    --assign-identity "$IDENTITY_ID" \
+    --custom-data "$CLOUD_INIT_FILE" \
+    --vnet-name "$VNET_NAME" \
+    --subnet "$RUNNER_SUBNET_NAME" \
+    "${PUBLIC_IP_ARGS[@]}" >/dev/null
+
+  rm -f "$CLOUD_INIT_FILE"
+  echo "✓ VM created: $VM_NAME"
 fi
-
-az vm create \
-  --resource-group "$RESOURCE_GROUP" \
-  --name "$VM_NAME" \
-  --image "$VM_IMAGE" \
-  --size "$VM_SIZE" \
-  --admin-username "$VM_ADMIN_USER" \
-  --generate-ssh-keys \
-  --assign-identity "$IDENTITY_ID" \
-  --custom-data "$CLOUD_INIT_FILE" \
-  --vnet-name "$VNET_NAME" \
-  --subnet "$RUNNER_SUBNET_NAME" \
-  "${PUBLIC_IP_ARGS[@]}" >/dev/null
-
-rm -f "$CLOUD_INIT_FILE"
-echo "✓ VM created: $VM_NAME"
 
 # ── Open NSG ports (VPN only) ─────────────────────────────────────────────
 if [ "$VPN_ENABLED" = "true" ]; then
-  VM_NSG=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
-    --query "networkProfile.networkInterfaces[0].id" -o tsv | xargs az network nic show --ids \
-    --query "networkSecurityGroup.id" -o tsv | xargs basename)
+  # Azure auto-creates NSG named <VM_NAME>NSG
+  VM_NSG="${VM_NAME}NSG"
 
-  az network nsg rule create \
-    --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
-    --name "allow-wireguard" --priority 100 --protocol Udp \
-    --destination-port-range 1194 --access Allow 2>/dev/null || true
+  # Fallback: look up via NIC if default name doesn't exist
+  if ! az network nsg show --resource-group "$RESOURCE_GROUP" --name "$VM_NSG" &>/dev/null; then
+    NIC_ID=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
+      --query "networkProfile.networkInterfaces[0].id" -o tsv)
+    NSG_ID=$(az network nic show --ids "$NIC_ID" --query "networkSecurityGroup.id" -o tsv 2>/dev/null || true)
+    if [ -n "$NSG_ID" ]; then
+      VM_NSG=$(basename "$NSG_ID")
+    else
+      echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 1194, TCP 443"
+      VM_NSG=""
+    fi
+  fi
 
-  az network nsg rule create \
-    --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
-    --name "allow-pritunl-ui" --priority 110 --protocol Tcp \
-    --destination-port-range 443 --access Allow 2>/dev/null || true
+  if [ -n "$VM_NSG" ]; then
+    az network nsg rule create \
+      --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
+      --name "allow-wireguard" --priority 100 --protocol Udp \
+      --destination-port-range 1194 --access Allow 2>/dev/null || true
 
-  echo "✓ NSG rules added (UDP 1194, TCP 443)"
+    az network nsg rule create \
+      --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
+      --name "allow-pritunl-ui" --priority 110 --protocol Tcp \
+      --destination-port-range 443 --access Allow 2>/dev/null || true
+
+    az network nsg rule create \
+      --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
+      --name "allow-openvpn" --priority 120 --protocol Udp \
+      --destination-port-range 12535 --access Allow 2>/dev/null || true
+
+    echo "✓ NSG rules added (UDP 1194, UDP 12535, TCP 443)"
+  fi
 else
-  echo "✓ VPN disabled — no NSG rules added (VM has no public IP; access via Azure Bastion)"
+  echo "✓ VPN disabled - no NSG rules added (VM has no public IP; access via Azure Bastion)"
 fi
 
 # ── Done ───────────────────────────────────────────────────────────────────
@@ -396,7 +435,7 @@ if [ "$VPN_ENABLED" = "true" ]; then
   echo "  Public IP     : $VM_IP"
   echo "  SSH           : ssh azureuser@${VM_IP} (key in ~/.ssh/)"
 else
-  echo "  Public IP     : none (private VM — access via Azure Bastion after create_tf_resources)"
+  echo "  Public IP     : none (private VM - access via Azure Bastion after create_tf_resources)"
   echo "  SSH           : Azure Portal → Bastion → $VM_NAME"
 fi
 echo ""
@@ -417,3 +456,28 @@ fi
 echo ""
 echo "  Next: Trigger GitHub Actions workflow to create AKS + deploy"
 echo "=========================================="
+
+if [ "$VPN_ENABLED" = "true" ]; then
+  echo ""
+  echo "=========================================="
+  echo "  SHARE THESE WITH YOUR TEAM"
+  echo "=========================================="
+  echo ""
+  echo "  1. Pritunl VPN portal: https://${VM_IP}"
+  echo "     (ready ~5 min after this script finishes)"
+  echo ""
+  echo "  2. Login to https://${VM_IP} and set passwords for:"
+  for user_entry in "${PRITUNL_USERS[@]:-}"; do
+    name="${user_entry%%:*}"
+    email="${user_entry##*:}"
+    echo "     - ${name} (${email})"
+  done
+  echo ""
+  echo "  3. Each user steps:"
+  echo "     a. Install WireGuard: https://www.wireguard.com/install/"
+  echo "     b. Open https://${VM_IP} → login → download .conf profile"
+  echo "     c. Import .conf into WireGuard → Activate"
+  echo "     d. kubectl get pods -n sunbird  ← should work now"
+  echo ""
+  echo "=========================================="
+fi
