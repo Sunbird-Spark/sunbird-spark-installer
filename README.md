@@ -361,3 +361,60 @@ if saved_credential.get('key') == credential_iss:
 - [Kong Migration Guide](https://docs.konghq.com/gateway/latest/upgrade/)
 - [Kong 3.9.x Release Notes](https://docs.konghq.com/gateway/changelog/)
 - [YugabyteDB PostgreSQL Compatibility](https://docs.yugabyte.com/preview/explore/ysql-language-features/)
+
+---
+
+## Sync Tool — JanusGraph to OpenSearch
+
+Bulk sync/repair tool for syncing JanusGraph graph data to the OpenSearch composite search index. Runs as a K8s Job — starts, syncs, exits. Zero cost when idle.
+
+Sync tool is a subchart of `knowledgebb`, disabled by default. Controlled via `global-values.yaml`.
+
+### Usage
+
+1. Edit `global-values.yaml` — set sync-tool config:
+   ```yaml
+   sync-tool:
+     enabled: true
+     syncMode: full              # full | objectType | identifiers | days | file
+     objectType: ""              # e.g. "Content" (when syncMode=objectType)
+     identifiers: ""             # e.g. "do_123,do_456" (when syncMode=identifiers)
+     days: ""                    # e.g. "5" (when syncMode=days)
+   ```
+
+2. Deploy sync-tool only (does not redeploy other knowledgebb charts):
+   ```bash
+   cd opentofu/<cloud-provider>/<env>
+   ./install.sh install_service knowledgebb sync-tool
+   ```
+
+3. Monitor logs:
+   ```bash
+   kubectl logs -f -l app=sync-tool -n sunbird
+   ```
+
+4. After sync completes, set `enabled: false` in `global-values.yaml`.
+
+### File Mode
+
+For syncing specific identifiers from a CSV file:
+
+1. Edit `helmcharts/knowledgebb/charts/sync-tool/identifiers.csv` — add one identifier per line
+2. Set `syncMode: file` in `global-values.yaml`
+3. Deploy: `./install.sh install_service knowledgebb sync-tool`
+
+### GitHub Actions
+
+Check `knowledgebb` bundle + type `sync-tool` in `specific_charts`. Sync config must be set in `global-values.yaml` before triggering.
+
+### When to use
+
+| Scenario | syncMode | value |
+|----------|----------|-------|
+| Empty index after environment setup | `full` | — |
+| Missed CDC events for specific nodes | `identifiers` | `do_123,do_456` |
+| Backfill after adding new searchable fields | `full` | — |
+| Repair a specific content type | `objectType` | `Content` |
+| Catch up after pipeline downtime | `days` | `3` |
+
+---

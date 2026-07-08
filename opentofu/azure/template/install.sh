@@ -135,7 +135,8 @@ function install_service() {
 
     local bundle="$1"
     shift
-    local target_charts=("$@")   # one or more chart names
+    local target_charts=("$@")
+    local extra_flags=()
 
     local current_directory="$(pwd)"
     if [ "$(basename "$current_directory")" != "helmcharts" ]; then
@@ -377,6 +378,7 @@ function check_pod_status() {
     done
     echo "All pods are running successfully."
 }
+
 
 RELEASE="release700"
 POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/5338608-e28d5510-20d5-466e-a9ad-3fcf59ea9f96?access_key=PMAT-01HMV5SB2ZPXCGNKD74J7ARKRQ"

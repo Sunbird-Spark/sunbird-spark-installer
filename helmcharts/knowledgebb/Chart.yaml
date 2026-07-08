@@ -55,3 +55,6 @@ dependencies:
   - name: flink
     version: 0.1.0
     condition: flink.enabled
+  - name: sync-tool
+    version: 0.1.0
+    condition: sync-tool.enabled
