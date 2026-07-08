@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "f801afb5-d27d-4e3f-9bb2-caced23c82d8",
+		"_postman_id": "454f6142-9c4c-455a-b9fd-38b599decda1",
 		"name": "Oneclick Installer - Sunbird Spark - Daylight Release",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "50198284"
+		"_exporter_id": "43139549"
 	},
 	"item": [
 		{
@@ -2003,6 +2003,201 @@
 			"name": "2 - Knowlg",
 			"item": [
 				{
+					"name": "7-Create Framework Categories Instance - USF",
+					"item": [
+						{
+							"name": "Create Framework Categories - Industry",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "accept",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Channel-Id",
+										"value": "{{channel_id}}"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Industry\",\n            \"code\": \"industry\"\n        }\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"framework",
+										"v1",
+										"category",
+										"create"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": "",
+											"disabled": true
+										},
+										{
+											"key": "framework",
+											"value": "{{default_Course_Framework}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Framework Categories - Domain",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "accept",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Channel-Id",
+										"value": "{{channel_id}}"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Domain\",\n            \"code\": \"domain\"\n        }\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"framework",
+										"v1",
+										"category",
+										"create"
+									],
+									"query": [
+										{
+											"key": "framework",
+											"value": "{{default_Course_Framework}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Framework Categories - Skills",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Channel-Id",
+										"value": "{{channel_id}}"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Skill\",\n            \"description\": \"Skill\",\n            \"code\": \"skill\",\n            \"targetIdFieldName\": \"targetSkillIds\",\n            \"searchLabelFieldName\": \"se_skills\",\n            \"searchIdFieldName\": \"se_skillIds\",\n            \"orgIdFieldName\": \"skillIds\"\n        }\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"framework",
+										"v1",
+										"category",
+										"create"
+									],
+									"query": [
+										{
+											"key": "framework",
+											"value": "{{default_Course_Framework}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Read Framework Categories - Industry",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Channel-Id",
+										"value": "{{channel_id}}"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{host}}/api/framework/v1/category/read/industry?framework={{default_Course_Framework}}",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"framework",
+										"v1",
+										"category",
+										"read",
+										"industry"
+									],
+									"query": [
+										{
+											"key": "framework",
+											"value": "{{default_Course_Framework}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "1-Create Default License",
 					"item": [
 						{
@@ -3097,32 +3292,32 @@
 									"request": {
 										"method": "POST",
 										"header": [
-										{
-											"key": "Content-Type",
-											"value": "application/json"
-										},
-										{
-											"key": "Authorization",
-											"value": "Bearer {{apikey}}",
-											"type": "text"
-										}
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											}
 										],
 										"body": {
-										"mode": "raw",
-										"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"SCORM Content\",\n            \"description\": \"SCORM Content\"\n        }\n    }\n}"
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"SCORM Content\",\n            \"description\": \"SCORM Content\"\n        }\n    }\n}"
 										},
 										"url": {
-										"raw": "{{host}}/api/object/category/v1/create",
-										"host": [
-											"{{host}}"
-										],
-										"path": [
-											"api",
-											"object",
-											"category",
-											"v1",
-											"create"
-										]
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
 										}
 									},
 									"response": []
@@ -3988,32 +4183,32 @@
 									"request": {
 										"method": "POST",
 										"header": [
-										{
-											"key": "Authorization",
-											"value": "Bearer {{apikey}}"
-										},
-										{
-											"key": "Content-Type",
-											"value": "application/json"
-										}
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
 										],
 										"body": {
-										"mode": "raw",
-										"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+											"mode": "raw",
+											"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
 										},
 										"url": {
-										"raw": "{{host}}/api/object/category/definition/v1/create",
-										"host": [
-											"{{host}}"
-										],
-										"path": [
-											"api",
-											"object",
-											"category",
-											"definition",
-											"v1",
-											"create"
-										]
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
 										}
 									},
 									"response": []
@@ -4082,16 +4277,17 @@
 							"response": []
 						},
 						{
-							"name": "Create Framework - TPD",
+							"name": "Create Framework - USF",
 							"event": [
 								{
 									"listen": "prerequest",
 									"script": {
 										"exec": [
-											" pm.environment.set(\"default_Course_Framework\", \"TPD\");"
+											" pm.environment.set(\"default_Course_Framework\", \"USF\");"
 										],
 										"type": "text/javascript",
-										"packages": {}
+										"packages": {},
+										"requests": {}
 									}
 								}
 							],
@@ -4118,7 +4314,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\"request\":{\"framework\":{\"name\":\"{{default_Course_Framework}}\",\"description\":\"Sunbird TPD framework\",\"type\":\"TPD\",\"code\":\"{{default_Course_Framework}}\",\"channels\":[{\"identifier\":\"{{channel_id}}\"}],\"systemDefault\":\"Yes\"}}}"
+									"raw": "{\n    \"request\": {\n        \"framework\": {\n            \"name\": \"{{default_Course_Framework}}\",\n            \"description\": \"Universal Skills Framework\",\n            \"type\": \"K-12\",\n            \"code\": \"{{default_Course_Framework}}\",\n            \"channels\": [\n                {\n                    \"identifier\": \"{{channel_id}}\"\n                }\n            ],\n            \"systemDefault\": \"Yes\"\n        }\n    }\n}"
 								},
 								"url": {
 									"raw": "{{host}}/api/framework/v1/create",
@@ -4288,6 +4484,129 @@
 								"body": {
 									"mode": "raw",
 									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Subject\",\n            \"description\": \"Subject\",\n            \"code\": \"subject\",\n            \"targetIdFieldName\": \"targetSubjectIds\",\n            \"searchLabelFieldName\": \"se_subjects\",\n            \"searchIdFieldName\": \"se_subjectIds\",\n            \"orgIdFieldName\": \"subjectIds\"\n        }\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/api/framework/v3/category/master/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"framework",
+										"v3",
+										"category",
+										"master",
+										"create"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Framework Master Category - Industry",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "X-Channel-Id",
+										"value": "{{channel_id}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Industry\",\n            \"description\": \"Industry\",\n            \"code\": \"industry\",\n            \"targetIdFieldName\": \"targetIndustryIds\",\n            \"searchLabelFieldName\": \"se_industrys\",\n            \"searchIdFieldName\": \"se_industryIds\",\n            \"orgIdFieldName\": \"industryIds\"\n        }\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/api/framework/v3/category/master/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"framework",
+										"v3",
+										"category",
+										"master",
+										"create"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Framework Master Category - Domain",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-Channel-Id",
+										"value": "{{channel_id}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Domain\",\n            \"description\": \"Domain\",\n            \"code\": \"domain\",\n            \"targetIdFieldName\": \"targetDomainIds\",\n            \"searchLabelFieldName\": \"se_domains\",\n            \"searchIdFieldName\": \"se_domainIds\",\n            \"orgIdFieldName\": \"domainIds\"\n        }\n    }\n}"
+								},
+								"url": {
+									"raw": "{{host}}/api/framework/v3/category/master/create",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"api",
+										"framework",
+										"v3",
+										"category",
+										"master",
+										"create"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Framework Master Category - Skills",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{apikey}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "X-Channel-Id",
+										"value": "{{channel_id}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Skill\",\n            \"description\": \"Skill\",\n            \"code\": \"skill\",\n            \"targetIdFieldName\": \"targetSkillIds\",\n            \"searchLabelFieldName\": \"se_skills\",\n            \"searchIdFieldName\": \"se_skillIds\",\n            \"orgIdFieldName\": \"skillIds\"\n        }\n    }\n}"
 								},
 								"url": {
 									"raw": "{{host}}/api/framework/v3/category/master/create",
@@ -4550,10 +4869,10 @@
 					]
 				},
 				{
-					"name": "7-Create Framework Categories Instance - TPD",
+					"name": "7-Create Framework Categories Instance - USF",
 					"item": [
 						{
-							"name": "Create Framework Categories - Board",
+							"name": "Create Framework Categories - Industry",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -4577,7 +4896,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Board\",\n            \"code\": \"board\"\n        }\n    }\n}"
+									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Industry\",\n            \"code\": \"industry\"\n        }\n    }\n}"
 								},
 								"url": {
 									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
@@ -4607,7 +4926,7 @@
 							"response": []
 						},
 						{
-							"name": "Create Framework Categories - Medium",
+							"name": "Create Framework Categories - Domain",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -4631,7 +4950,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Medium\",\n            \"code\": \"medium\"\n        }\n    }\n}"
+									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Domain\",\n            \"code\": \"domain\"\n        }\n    }\n}"
 								},
 								"url": {
 									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
@@ -4656,7 +4975,7 @@
 							"response": []
 						},
 						{
-							"name": "Create Framework Categories - GradeLevel",
+							"name": "Create Framework Categories - Skills",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -4676,7 +4995,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Grade Level\",\n            \"code\": \"gradeLevel\"\n        }\n    }\n}"
+									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Skill\",\n            \"description\": \"Skill\",\n            \"code\": \"skill\",\n            \"targetIdFieldName\": \"targetSkillIds\",\n            \"searchLabelFieldName\": \"se_skills\",\n            \"searchIdFieldName\": \"se_skillIds\",\n            \"orgIdFieldName\": \"skillIds\"\n        }\n    }\n}"
 								},
 								"url": {
 									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
@@ -4701,52 +5020,7 @@
 							"response": []
 						},
 						{
-							"name": "Create Framework Categories - Subject",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "X-Channel-Id",
-										"value": "{{channel_id}}"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{apikey}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Subject\",\n            \"code\": \"subject\"\n        }\n    }\n}"
-								},
-								"url": {
-									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
-									"host": [
-										"{{host}}"
-									],
-									"path": [
-										"api",
-										"framework",
-										"v1",
-										"category",
-										"create"
-									],
-									"query": [
-										{
-											"key": "framework",
-											"value": "{{default_Course_Framework}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Read Framework Categories - Subject",
+							"name": "Read Framework Categories - Industry",
 							"request": {
 								"method": "GET",
 								"header": [
@@ -4765,7 +5039,7 @@
 									}
 								],
 								"url": {
-									"raw": "{{host}}/api/framework/v1/category/read/board?framework={{default_Course_Framework}}",
+									"raw": "{{host}}/api/framework/v1/category/read/industry?framework={{default_Course_Framework}}",
 									"host": [
 										"{{host}}"
 									],
@@ -4775,7 +5049,7 @@
 										"v1",
 										"category",
 										"read",
-										"board"
+										"industry"
 									],
 									"query": [
 										{
@@ -5854,25 +6128,13 @@
 					]
 				},
 				{
-					"name": "9-Create Framework Terms - TPD",
+					"name": "9-Create Framework Terms - USF",
 					"item": [
 						{
-							"name": "Create Framework Term - Board",
+							"name": "Create Framework Term - Industry",
 							"item": [
 								{
-									"name": "Create Framework Term - Board - mscert",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
+									"name": "Create Framework Term - Industry - Information Technology",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -5890,16 +6152,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"mscert\",\n            \"name\": \"State (Maharashtra)\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"it\",\n            \"name\": \"Information Technology\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=board",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=industry",
 											"host": [
 												"{{host}}"
 											],
@@ -5917,7 +6178,7 @@
 												},
 												{
 													"key": "category",
-													"value": "board"
+													"value": "industry"
 												}
 											]
 										}
@@ -5925,18 +6186,7 @@
 									"response": []
 								},
 								{
-									"name": "Create Framework Term - Board - cbse",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
+									"name": "Create Framework Term - Industry - Data Science and AI",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -5954,16 +6204,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"name\": \"CBSE\",\n            \"code\": \"cbse\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"dsai\",\n            \"name\": \"Data Science and AI\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=board",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=industry",
 											"host": [
 												"{{host}}"
 											],
@@ -5981,7 +6230,7 @@
 												},
 												{
 													"key": "category",
-													"value": "board"
+													"value": "industry"
 												}
 											]
 										}
@@ -5989,18 +6238,7 @@
 									"response": []
 								},
 								{
-									"name": "Create Framework Term - Board - ka",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
+									"name": "Create Framework Term - Industry - Business and Management",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6018,16 +6256,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ka\",\n            \"name\": \"State (Karnataka)\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"bm\",\n            \"name\": \"Business and Management\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=board",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=industry",
 											"host": [
 												"{{host}}"
 											],
@@ -6045,7 +6282,7 @@
 												},
 												{
 													"key": "category",
-													"value": "board"
+													"value": "industry"
 												}
 											]
 										}
@@ -6053,18 +6290,7 @@
 									"response": []
 								},
 								{
-									"name": "Create Framework Term - Board - statetelangana",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
+									"name": "Create Framework Term - Industry - Finance and Accounting",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6082,16 +6308,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"statetelangana\",\n            \"name\": \"State (Telangana)\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"fa\",\n            \"name\": \"Finance and Accounting\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=board",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=industry",
 											"host": [
 												"{{host}}"
 											],
@@ -6109,7 +6334,59 @@
 												},
 												{
 													"key": "category",
-													"value": "board"
+													"value": "industry"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Industry - Education",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_id}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"edu\",\n            \"name\": \"Education\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=industry",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "industry"
 												}
 											]
 										}
@@ -6119,148 +6396,10 @@
 							]
 						},
 						{
-							"name": "Create Framework Term - Medium",
+							"name": "Create Framework Term - Domain",
 							"item": [
 								{
-									"name": "Create Framework Term - Medium - English",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "X-Channel-Id",
-												"value": ""
-											},
-											{
-												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"name\": \"English\",\n            \"code\": \"english\"\n        }\n    }\n}"
-										},
-										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=medium&X-Channel-Id={{channel_id}}",
-											"host": [
-												"{{host}}"
-											],
-											"path": [
-												"api",
-												"framework",
-												"v1",
-												"term",
-												"create"
-											],
-											"query": [
-												{
-													"key": "framework",
-													"value": "{{default_Course_Framework}}"
-												},
-												{
-													"key": "category",
-													"value": "medium"
-												},
-												{
-													"key": "X-Channel-Id",
-													"value": "{{channel_id}}"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Create Framework Term - Medium  - Tamil",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "X-Channel-Id",
-												"value": "{{channel_id}}"
-											},
-											{
-												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"tamil\",\n            \"name\": \"Tamil\"\n        }\n    }\n}"
-										},
-										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=medium",
-											"host": [
-												"{{host}}"
-											],
-											"path": [
-												"api",
-												"framework",
-												"v1",
-												"term",
-												"create"
-											],
-											"query": [
-												{
-													"key": "framework",
-													"value": "{{default_Course_Framework}}"
-												},
-												{
-													"key": "category",
-													"value": "medium"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Create Framework Term - Medium - Telugu",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
+									"name": "Create Framework Term - Domain - Software Development",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6274,16 +6413,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"telugu\",\n            \"name\": \"Telugu\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"sd\",\n            \"name\": \"Software Development\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=medium&X-Channel-Id={{channel_id}}",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
 											"host": [
 												"{{host}}"
 											],
@@ -6301,7 +6439,7 @@
 												},
 												{
 													"key": "category",
-													"value": "medium"
+													"value": "domain"
 												},
 												{
 													"key": "X-Channel-Id",
@@ -6313,19 +6451,7 @@
 									"response": []
 								},
 								{
-									"name": "Create Framework Term - Medium - Hindi",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
+									"name": "Create Framework Term - Domain - Cloud Computing",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6339,16 +6465,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"hindi\",\n            \"name\": \"Hindi\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"cc\",\n            \"name\": \"Cloud Computing\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=medium&X-Channel-Id={{channel_id}}",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
 											"host": [
 												"{{host}}"
 											],
@@ -6366,7 +6491,475 @@
 												},
 												{
 													"key": "category",
-													"value": "medium"
+													"value": "domain"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Domain - Cybersecurity",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"cs\",\n            \"name\": \"Cybersecurity\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "domain"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Domain - Data Science",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ds\",\n            \"name\": \"Data Science\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "domain"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Domain - Machine Learning",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ml\",\n            \"name\": \"Machine Learning\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "domain"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Domain - Project Management",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"pm\",\n            \"name\": \"Project Management\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "domain"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Domain - Leadership",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ld\",\n            \"name\": \"Leadership\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "domain"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Domain - Accounting",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ac\",\n            \"name\": \"Accounting\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "domain"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Domain - Finance",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"fi\",\n            \"name\": \"Finance\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "domain"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Domain - Mathematics",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ma\",\n            \"name\": \"Mathematics\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "domain"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Domain - Science",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"sc\",\n            \"name\": \"Science\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=domain&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "domain"
 												},
 												{
 													"key": "X-Channel-Id",
@@ -6380,22 +6973,10 @@
 							]
 						},
 						{
-							"name": "Create Framework Term - GradeLevel",
+							"name": "Create Framework Term - Skill",
 							"item": [
 								{
-									"name": "Create Framework Term - GradeLevel - class1",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
+									"name": "Create Framework Term - Skill - Python Programming",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6413,16 +6994,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": \n            {\n                \"name\": \"Class 1\",\n                \"code\": \"class1\"\n            }\n        }\n    }"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"pp\",\n            \"name\": \"Python Programming\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=gradeLevel&X-Channel-Id={{channel_id}}",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
 											"host": [
 												"{{host}}"
 											],
@@ -6440,7 +7020,7 @@
 												},
 												{
 													"key": "category",
-													"value": "gradeLevel"
+													"value": "skill"
 												},
 												{
 													"key": "X-Channel-Id",
@@ -6452,19 +7032,7 @@
 									"response": []
 								},
 								{
-									"name": "Create Framework Term - GradeLevel  - class2",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
+									"name": "Create Framework Term - Skill - Java Programming",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6482,16 +7050,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"class2\",\n            \"name\": \"Class 2\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"jp\",\n            \"name\": \"Java Programming\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=gradeLevel&X-Channel-Id={{channel_id}}",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
 											"host": [
 												"{{host}}"
 											],
@@ -6509,7 +7076,7 @@
 												},
 												{
 													"key": "category",
-													"value": "gradeLevel"
+													"value": "skill"
 												},
 												{
 													"key": "X-Channel-Id",
@@ -6521,19 +7088,7 @@
 									"response": []
 								},
 								{
-									"name": "Create Framework Term - GradeLevel - class3",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
+									"name": "Create Framework Term - Skill - JavaScript",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6551,16 +7106,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"class3\",\n            \"name\": \"Class 3\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"js\",\n            \"name\": \"JavaScript\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=gradeLevel&X-Channel-Id={{channel_id}}",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
 											"host": [
 												"{{host}}"
 											],
@@ -6578,7 +7132,7 @@
 												},
 												{
 													"key": "category",
-													"value": "gradeLevel"
+													"value": "skill"
 												},
 												{
 													"key": "X-Channel-Id",
@@ -6590,19 +7144,7 @@
 									"response": []
 								},
 								{
-									"name": "Create Framework Term - GradeLevel - class4",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
+									"name": "Create Framework Term - Skill - API Development",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6620,16 +7162,15 @@
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"class4\",\n            \"name\": \"Class 4\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ad\",\n            \"name\": \"API Development\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=gradeLevel&X-Channel-Id={{channel_id}}",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
 											"host": [
 												"{{host}}"
 											],
@@ -6647,138 +7188,7 @@
 												},
 												{
 													"key": "category",
-													"value": "gradeLevel"
-												},
-												{
-													"key": "X-Channel-Id",
-													"value": "{{channel_id}}"
-												}
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "Create Framework Term - Subject",
-							"item": [
-								{
-									"name": "Create Framework Term - Subject - english",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "X-Channel-Id",
-												"value": "{{channel_id}}"
-											},
-											{
-												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"name\": \"English\",\n            \"code\": \"english\"\n        }\n    }\n}"
-										},
-										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=subject",
-											"host": [
-												"{{host}}"
-											],
-											"path": [
-												"api",
-												"framework",
-												"v1",
-												"term",
-												"create"
-											],
-											"query": [
-												{
-													"key": "framework",
-													"value": "{{default_Course_Framework}}"
-												},
-												{
-													"key": "category",
-													"value": "subject"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "Create Framework Term - Subject - hindi",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
-									"request": {
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "X-Channel-Id",
-												"value": "{{channel_name}}"
-											},
-											{
-												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": \n            {\n                \"code\": \"hindi\",\n                \"name\": \"Hindi\"\n            }\n    }\n}"
-										},
-										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=subject&X-Channel-Id={{channel_id}}",
-											"host": [
-												"{{host}}"
-											],
-											"path": [
-												"api",
-												"framework",
-												"v1",
-												"term",
-												"create"
-											],
-											"query": [
-												{
-													"key": "framework",
-													"value": "{{default_Course_Framework}}"
-												},
-												{
-													"key": "category",
-													"value": "subject"
+													"value": "skill"
 												},
 												{
 													"key": "X-Channel-Id",
@@ -6790,19 +7200,7 @@
 									"response": []
 								},
 								{
-									"name": "Create Framework Term - Subject  - tamil",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
+									"name": "Create Framework Term - Skill - AWS",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6811,21 +7209,24 @@
 												"value": "application/json"
 											},
 											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
 												"key": "X-Channel-Id",
 												"value": "{{channel_name}}"
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"tamil\",\n            \"name\": \"Tamil\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"aw\",\n            \"name\": \"AWS\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=subject&X-Channel-Id={{channel_id}}",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
 											"host": [
 												"{{host}}"
 											],
@@ -6843,7 +7244,7 @@
 												},
 												{
 													"key": "category",
-													"value": "subject"
+													"value": "skill"
 												},
 												{
 													"key": "X-Channel-Id",
@@ -6855,19 +7256,7 @@
 									"response": []
 								},
 								{
-									"name": "Create Framework Term - Subject - telugu",
-									"event": [
-										{
-											"listen": "prerequest",
-											"script": {
-												"exec": [
-													""
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
+									"name": "Create Framework Term - Skill - Azure",
 									"request": {
 										"method": "POST",
 										"header": [
@@ -6876,21 +7265,24 @@
 												"value": "application/json"
 											},
 											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
 												"key": "X-Channel-Id",
 												"value": "{{channel_name}}"
 											},
 											{
 												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
+												"value": "Bearer {{apikey}}"
 											}
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"telugu\",\n            \"name\": \"Telugu\"\n        }\n    }\n}"
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"az\",\n            \"name\": \"Azure\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=subject&X-Channel-Id={{channel_id}}",
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
 											"host": [
 												"{{host}}"
 											],
@@ -6908,7 +7300,1071 @@
 												},
 												{
 													"key": "category",
-													"value": "subject"
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Google Cloud",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"gc\",\n            \"name\": \"Google Cloud\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Ethical Hacking",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"eh\",\n            \"name\": \"Ethical Hacking\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Network Security",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ns\",\n            \"name\": \"Network Security\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Data Analysis",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"da\",\n            \"name\": \"Data Analysis\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Data Visualization",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"dv\",\n            \"name\": \"Data Visualization\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Supervised Learning",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"sl\",\n            \"name\": \"Supervised Learning\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Deep Learning",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"dl\",\n            \"name\": \"Deep Learning\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Agile",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ag\",\n            \"name\": \"Agile\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Scrum",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"sm\",\n            \"name\": \"Scrum\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Communication Skills",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"cm\",\n            \"name\": \"Communication Skills\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Team Management",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"tm\",\n            \"name\": \"Team Management\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Bookkeeping",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"bk\",\n            \"name\": \"Bookkeeping\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Financial Reporting",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"fr\",\n            \"name\": \"Financial Reporting\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Financial Analysis",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"fa\",\n            \"name\": \"Financial Analysis\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Budgeting",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"bd\",\n            \"name\": \"Budgeting\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Algebra",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"al\",\n            \"name\": \"Algebra\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Geometry",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ge\",\n            \"name\": \"Geometry\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Physics",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ph\",\n            \"name\": \"Physics\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
+												},
+												{
+													"key": "X-Channel-Id",
+													"value": "{{channel_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Create Framework Term - Skill - Chemistry",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "accept",
+												"value": "application/json"
+											},
+											{
+												"key": "X-Channel-Id",
+												"value": "{{channel_name}}"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"term\": {\n            \"code\": \"ch\",\n            \"name\": \"Chemistry\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/framework/v1/term/create?framework={{default_Course_Framework}}&category=skill&X-Channel-Id={{channel_id}}",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"framework",
+												"v1",
+												"term",
+												"create"
+											],
+											"query": [
+												{
+													"key": "framework",
+													"value": "{{default_Course_Framework}}"
+												},
+												{
+													"key": "category",
+													"value": "skill"
 												},
 												{
 													"key": "X-Channel-Id",
@@ -7240,7 +8696,7 @@
 							"response": []
 						},
 						{
-							"name": "Publish Framework for TPD",
+							"name": "Publish Framework for USF",
 							"request": {
 								"method": "POST",
 								"header": [
