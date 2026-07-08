@@ -317,19 +317,6 @@ function migrate_forms() {
         --env env.json
 }
 
-function create_client_forms() {
-    local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../opentofu/azure/$environment 2>/dev/null || true
-    fi
-    cp -rf ../../../postman-collection/ED-${RELEASE}  .
-    check_pod_status
-    #loop through files inside collection folder
-    for FILES in ED-${RELEASE}/*.json; do
-     echo "Creating client forms in.. $FILES"
-      postman collection run $FILES --environment env.json --delay-request 500 --bail --insecure
-    done 
-   }
 
 function cleanworkspace() {
         rm  certkey.pem certpubkey.pem
@@ -396,7 +383,6 @@ if [ $# -eq 0 ]; then
     dns_mapping
     generate_postman_env
     run_post_install
-    create_client_forms
 else
     case "$1" in
     "create_tf_backend")
@@ -434,9 +420,6 @@ else
         ;;
     "certificate_config")
         certificate_config
-        ;;
-    "create_client_forms")
-        create_client_forms
         ;;
     *)
         invoke_functions "$@"
