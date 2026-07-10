@@ -130,4 +130,16 @@ global:
     REPLACE_ME
   proxy_certificate: |
     REPLACE_ME
-  # CERTIFICATE-KEYS 
+  # CERTIFICATE-KEYS
+
+# ── Sync Tool (on-demand JanusGraph → OpenSearch sync) ──────────────────────
+# NOT deployed during normal install.
+# To run: set enabled: true + syncMode below, then deploy via:
+#   ./install.sh install_service knowledgebb sync-tool
+# Or in GitHub Actions: check knowledgebb + type "sync-tool" in specific_charts
+sync-tool:
+  enabled: false
+  syncMode: full     # full | objectType | identifiers | days | file
+  objectType: ""     # used when syncMode=objectType (e.g. "Content")
+  identifiers: ""    # used when syncMode=identifiers (e.g. "do_123,do_456")
+  days: ""           # used when syncMode=days (e.g. "5") 

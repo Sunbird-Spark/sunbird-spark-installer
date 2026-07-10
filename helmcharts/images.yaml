@@ -50,7 +50,7 @@ images:
 
   player: &player
     repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "v.1.0.2.beta11_70c74cb"
+    tag: "spark-v1.0.2_dccfcf4"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -119,11 +119,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.1_b23d1ee"
+    tag: "spark-v1.0.2_448714d"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.0.2_e234cae"
+    tag: "spark-v1.0.2_448714d"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
@@ -155,9 +155,13 @@ images:
     repository: "sunbirded.azurecr.io/secor"
     tag: "spark"
 
+  sync_tool: &sync_tool
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
+    tag: "spark-v1.0.2_448714d"
+
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_eb2384f"
+    tag: "spark-v1.0.2_b8305ee"
 
 # Internal block with pull secrets
 internal: &internal
@@ -330,6 +334,11 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
+  sync-tool:
+    image: *sync_tool
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
   secor:
     image: *secor
     imagePullSecrets:
@@ -343,7 +352,7 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "v.1.0.2-beta1_964957e"
+    tag: "spark-v1.0.2_964957e"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
