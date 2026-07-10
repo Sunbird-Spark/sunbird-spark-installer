@@ -290,8 +290,8 @@ function generate_postman_env() {
 
 function restart_workloads_using_keys() {
     echo -e "\nRestart workloads using keycloak keys and wait for them to start..."
-    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
-    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
+    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry  registry
+    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry  registry
     echo -e "\nWaiting for all pods to start"
 }
 
@@ -398,7 +398,6 @@ if [ $# -eq 0 ]; then
     dns_mapping
     generate_postman_env
     run_post_install
-    create_client_forms
 else
     case "$1" in
     "create_tf_backend")
@@ -445,3 +444,4 @@ else
         ;;
     esac
 fi
+
