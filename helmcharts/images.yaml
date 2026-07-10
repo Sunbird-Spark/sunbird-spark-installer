@@ -119,11 +119,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.2_24e9602"
+    tag: "spark-v1.0.2_448714d"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.0.2_24e9602"
+    tag: "spark-v1.0.2_448714d"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
@@ -157,7 +157,7 @@ images:
 
   sync_tool: &sync_tool
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
-    tag: "spark-v1.0.2_24e9602"
+    tag: "spark-v1.0.2_448714d"
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
