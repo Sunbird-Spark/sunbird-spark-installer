@@ -157,7 +157,7 @@ images:
 
   sync_tool: &sync_tool
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
-    tag: "v1.0.2-beta14_8481b06"
+    tag: "spark-v1.0.2_24e9602"
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
