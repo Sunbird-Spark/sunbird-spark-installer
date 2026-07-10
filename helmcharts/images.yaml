@@ -159,10 +159,6 @@ images:
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "develop_eb2384f"
 
-  sync_tool: &sync_tool
-    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
-    tag: "spark-v1.0.2_24e9602"
-
 # Internal block with pull secrets
 internal: &internal
   velero:
