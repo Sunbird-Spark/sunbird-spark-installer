@@ -448,4 +448,4 @@ yugabyte:
       size: 10Gi
     tserver:
       count: 2
-      size: 10Gi
+      size: 25Gi

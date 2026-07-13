@@ -135,7 +135,8 @@ function install_service() {
 
     local bundle="$1"
     shift
-    local target_charts=("$@")   # one or more chart names
+    local target_charts=("$@")
+    local extra_flags=()
 
     local current_directory="$(pwd)"
     if [ "$(basename "$current_directory")" != "helmcharts" ]; then
@@ -289,8 +290,8 @@ function generate_postman_env() {
 
 function restart_workloads_using_keys() {
     echo -e "\nRestart workloads using keycloak keys and wait for them to start..."
-    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
-    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
+    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry  registry
+    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry  registry
     echo -e "\nWaiting for all pods to start"
 }
 
@@ -365,6 +366,7 @@ function check_pod_status() {
     echo "All pods are running successfully."
 }
 
+
 RELEASE="release700"
 POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/5338608-e28d5510-20d5-466e-a9ad-3fcf59ea9f96?access_key=PMAT-01HMV5SB2ZPXCGNKD74J7ARKRQ"
 CERTPUBLICKEY=""
@@ -426,3 +428,4 @@ else
         ;;
     esac
 fi
+
