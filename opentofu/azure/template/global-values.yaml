@@ -21,7 +21,7 @@ global:
   runner_subnet_name: ""         # required when network_module_enabled: false — name of existing runner subnet (e.g. "ed-dev-runner")
   private_cluster_enabled: true  # true = AKS API server private (requires VPN to access); false = AKS API server public
   sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
-  knowledge_platform_ref: "spark-v19"  # git branch or tag for knowledge-platform (schemas/local upload)
+  knowledge_platform_ref: "spark-v1.0.2"  # git branch or tag for knowledge-platform (schemas/local upload)
   resource_group_name: ""    # Azure resource group name
   building_block: "" # building block name
   env: ""
