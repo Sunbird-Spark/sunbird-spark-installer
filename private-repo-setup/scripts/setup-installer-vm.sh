@@ -24,14 +24,11 @@ RESOURCE_GROUP=""         # Azure resource group (e.g. "ed-dev")
 LOCATION=""               # Azure region (e.g. "Central India")
 GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # GitHub repo name for repo-level runner, or leave empty for org-level
-GITHUB_RUNNER_TOKEN=""    # GitHub -> Settings -> Actions -> Runners -> New runner -> copy token
+GITHUB_RUNNER_TOKEN=""    # GitHub -> Settings -> Actions -> Runners -> New runner -> copy token (expires in 1 hour)
 VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "false" = Azure Bastion (no public IP on VM)
 # Required only when VPN_ENABLED=true:
 PRITUNL_VPN_NETWORK=""    # VPN client IP pool (e.g. "172.16.0.0/24")
 PRITUNL_ORG_NAME=""       # Pritunl org name (e.g. "sunbird-spark")
-# PRITUNL_USERS: space-separated "name:email" pairs
-# e.g. PRITUNL_USERS=("divya:divya@example.com" "dev2:dev2@example.com")
-PRITUNL_USERS=()
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Validate inputs ────────────────────────────────────────────────────────
@@ -175,13 +172,19 @@ EOF
 
 EXISTING_ROLE=$(az role definition list --name "$CUSTOM_ROLE_NAME" --query "[0].roleName" -o tsv 2>/dev/null || true)
 if [ -z "$EXISTING_ROLE" ]; then
-  az role definition create --role-definition "$ROLE_JSON_FILE" >/dev/null
-  echo "✓ Custom role created: $CUSTOM_ROLE_NAME"
-  echo "  Waiting for role to propagate (30s)..."
-  sleep 30
+  if az role definition create --role-definition "$ROLE_JSON_FILE" >/dev/null 2>&1; then
+    echo "✓ Custom role created: $CUSTOM_ROLE_NAME"
+    echo "  Waiting for role to propagate (30s)..."
+    sleep 30
+  else
+    echo "⚠ Skipping role create (insufficient permissions — owner must run this once)"
+  fi
 else
-  az role definition update --role-definition "$ROLE_JSON_FILE" >/dev/null
-  echo "✓ Custom role updated: $CUSTOM_ROLE_NAME"
+  if az role definition update --role-definition "$ROLE_JSON_FILE" >/dev/null 2>&1; then
+    echo "✓ Custom role updated: $CUSTOM_ROLE_NAME"
+  else
+    echo "⚠ Skipping role update (insufficient permissions — owner must run this once)"
+  fi
 fi
 rm -f "$ROLE_JSON_FILE"
 
@@ -216,7 +219,145 @@ else
   GITHUB_URL="https://github.com/${GITHUB_ORG}"
 fi
 
-# ── Step 7: Create cloud-init script ──────────────────────────────────────
+# ── Step 7: Generate setup script ─────────────────────────────────────────
+# Generated once; used for both new VM (cloud-init) and existing VM (az run-command)
+SETUP_SCRIPT=$(mktemp)
+cat > "$SETUP_SCRIPT" <<SETUPSCRIPT
+#!/bin/bash
+set -e
+LOG=/var/log/runner-setup.log
+exec > >(tee -a \$LOG) 2>&1
+echo "=== Setup start \$(date) ==="
+VPN_ENABLED="${VPN_ENABLED}"
+
+# Base packages (cloud-init may not have run)
+apt-get update -qq
+apt-get install -y -qq unzip jq curl git openssl ca-certificates gnupg
+
+# Azure CLI
+curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+# kubectl
+KUBECTL_VER=\$(curl -sL https://dl.k8s.io/release/stable.txt)
+curl -sLO "https://dl.k8s.io/release/\${KUBECTL_VER}/bin/linux/amd64/kubectl"
+install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl
+
+# Helm
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+# OpenTofu
+TOFU_VERSION="1.11.4"
+curl -sLO "https://github.com/opentofu/opentofu/releases/download/v\${TOFU_VERSION}/tofu_\${TOFU_VERSION}_linux_amd64.zip"
+unzip -qo tofu_\${TOFU_VERSION}_linux_amd64.zip -d /usr/local/bin/ && rm tofu_\${TOFU_VERSION}_linux_amd64.zip
+
+# Terragrunt
+curl -sLo /usr/local/bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.77.5/terragrunt_linux_amd64"
+chmod +x /usr/local/bin/terragrunt
+
+# yq
+curl -sLo /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64"
+chmod +x /usr/local/bin/yq
+
+# rclone
+curl https://rclone.org/install.sh | bash || true
+
+# Docker
+curl -fsSL https://get.docker.com | bash || true
+usermod -aG docker azureuser
+
+# VPN (Pritunl + WireGuard) - only when VPN_ENABLED=true
+if [ "\$VPN_ENABLED" = "true" ]; then
+  echo "==> Installing Pritunl + WireGuard..."
+  set +e
+  apt-get install -y wireguard
+  echo "deb https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
+  apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+  curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
+  echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list
+  apt-get update -qq 2>&1 | tee /tmp/pritunl-apt-update.log
+  apt-get install -y pritunl mongodb-org 2>&1 | tee /tmp/pritunl-install.log
+  PRITUNL_INSTALL_STATUS=\$?
+  set -e
+  if [ \$PRITUNL_INSTALL_STATUS -ne 0 ]; then
+    echo "ERROR: Pritunl install failed. Reason:"
+    tail -20 /tmp/pritunl-install.log
+  else
+    pritunl set-mongodb mongodb://localhost:27017/pritunl
+    systemctl enable mongod && systemctl start mongod
+    echo "Waiting for MongoDB..."
+    until mongosh --eval "db.runCommand({ping:1})" &>/dev/null; do sleep 3; done
+    echo "MongoDB ready"
+    systemctl enable pritunl && systemctl start pritunl
+    sleep 15
+    DEFAULT_PASS=\$(pritunl default-password | grep -i '^\s*password:' | awk '{print \$2}' | tr -d '"')
+    echo "  Pritunl credentials → username: pritunl  password: \${DEFAULT_PASS}"
+    echo "pritunl:\${DEFAULT_PASS}" > /tmp/pritunl-creds
+    RESPONSE=\$(curl -s -k -X PUT "https://localhost/auth/session" \
+      -H "Content-Type: application/json" \
+      -d "{\"username\":\"pritunl\",\"password\":\"\${DEFAULT_PASS}\"}")
+    echo "Pritunl auth response: \$RESPONSE"
+    TOKEN=\$(echo "\$RESPONSE" | jq -r '.token // empty' 2>/dev/null || echo "")
+    if [ -n "\$TOKEN" ]; then
+      ORG_ID=\$(curl -s -k -X POST "https://localhost/organization" \
+        -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
+        -d '{"name":"${PRITUNL_ORG_NAME}"}' | jq -r '.id')
+      SERVER_ID=\$(curl -s -k -X POST "https://localhost/server" \
+        -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
+        -d '{"name":"runner-vpn","protocol":"wireguard","port":1194,"network":"${PRITUNL_VPN_NETWORK}","dns_servers":["168.63.129.16"]}' | jq -r '.id')
+      curl -s -k -X POST "https://localhost/server/\${SERVER_ID}/route" \
+        -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
+        -d '{"network":"10.0.0.0/8","comment":"VNet + AKS"}'
+      curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/organization/\${ORG_ID}" \
+        -H "Auth-Token: \$TOKEN"
+      curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/operation/start" \
+        -H "Auth-Token: \$TOKEN"
+      echo '${USERS_JSON}' | jq -c '.[]' | while read user; do
+        NAME=\$(echo \$user | jq -r '.name')
+        EMAIL=\$(echo \$user | jq -r '.email')
+        curl -s -k -X POST "https://localhost/user/\${ORG_ID}" \
+          -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
+          -d "{\"name\":\"\${NAME}\",\"email\":\"\${EMAIL}\"}"
+      done
+      echo "Pritunl configured."
+    else
+      echo "WARNING: Pritunl API auth failed. Check https://\$(curl -s ifconfig.me)"
+    fi
+  fi
+else
+  echo "VPN_ENABLED=false - skipping Pritunl."
+fi
+
+# GitHub Actions Runner
+echo "==> Installing GitHub Actions Runner..."
+set +e
+RUNNER_VERSION=\$(curl -s https://api.github.com/repos/actions/runner/releases/latest | jq -r '.tag_name' | sed 's/v//')
+mkdir -p /home/azureuser/actions-runner && cd /home/azureuser/actions-runner
+curl -sLO "https://github.com/actions/runner/releases/download/v\${RUNNER_VERSION}/actions-runner-linux-x64-\${RUNNER_VERSION}.tar.gz" 2>&1 | tee /tmp/runner-download.log
+tar xzf "actions-runner-linux-x64-\${RUNNER_VERSION}.tar.gz"
+rm "actions-runner-linux-x64-\${RUNNER_VERSION}.tar.gz"
+chown -R azureuser:azureuser /home/azureuser/actions-runner
+sudo -u azureuser ./config.sh \
+  --url "${GITHUB_URL}" \
+  --token "${GITHUB_RUNNER_TOKEN}" \
+  --name "\$(hostname)" \
+  --labels "self-hosted,azure,linux" \
+  --unattended --replace 2>&1 | tee /tmp/runner-config.log
+RUNNER_CONFIG_STATUS=\$?
+set -e
+if [ \$RUNNER_CONFIG_STATUS -ne 0 ]; then
+  echo "ERROR: GitHub Actions runner registration failed. Reason:"
+  tail -20 /tmp/runner-config.log
+else
+  ./svc.sh install azureuser && ./svc.sh start
+  echo "✓ GitHub Actions runner registered and started."
+fi
+echo "=== Setup complete \$(date) ==="
+echo "SUCCESS" > /tmp/setup-status
+SETUPSCRIPT
+
+# ── Step 7b: Wrap setup script in cloud-init for new VM ───────────────────
+# Use base64 encoding so { } characters in the bash script don't break YAML parsing.
+SETUP_SCRIPT_B64=$(openssl base64 -A -in "$SETUP_SCRIPT")
 CLOUD_INIT_FILE=$(mktemp)
 cat > "$CLOUD_INIT_FILE" <<CLOUDINIT
 #cloud-config
@@ -232,132 +373,35 @@ packages:
 write_files:
   - path: /opt/setup.sh
     permissions: '0755'
-    content: |
-      #!/bin/bash
-      set -e
-      LOG=/var/log/runner-setup.log
-      exec > >(tee -a \$LOG) 2>&1
-      echo "=== Setup start \$(date) ==="
-      VPN_ENABLED="${VPN_ENABLED}"
-
-      # Azure CLI
-      curl -sL https://aka.ms/InstallAzureCLIDeb | bash
-
-      # kubectl
-      KUBECTL_VER=\$(curl -sL https://dl.k8s.io/release/stable.txt)
-      curl -sLO "https://dl.k8s.io/release/\${KUBECTL_VER}/bin/linux/amd64/kubectl"
-      install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl
-
-      # Helm
-      curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-      # OpenTofu
-      TOFU_VERSION="1.11.4"
-      curl -sLO "https://github.com/opentofu/opentofu/releases/download/v\${TOFU_VERSION}/tofu_\${TOFU_VERSION}_linux_amd64.zip"
-      unzip -q tofu_\${TOFU_VERSION}_linux_amd64.zip -d /usr/local/bin/ && rm tofu_\${TOFU_VERSION}_linux_amd64.zip
-
-      # Terragrunt
-      curl -sLo /usr/local/bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.77.5/terragrunt_linux_amd64"
-      chmod +x /usr/local/bin/terragrunt
-
-      # yq
-      curl -sLo /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64"
-      chmod +x /usr/local/bin/yq
-
-      # rclone
-      curl https://rclone.org/install.sh | bash
-
-      # Docker
-      curl -fsSL https://get.docker.com | bash
-      usermod -aG docker azureuser
-
-      # VPN (Pritunl + WireGuard) - only when VPN_ENABLED=true
-      if [ "\$VPN_ENABLED" = "true" ]; then
-        apt-get install -y wireguard
-        echo "deb https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
-        apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7568D9BB55FF9E5287D586017AE645C0CF8E292A
-        curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
-        echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list
-        apt-get update -qq && apt-get install -y pritunl mongodb-org
-
-        pritunl set-mongodb mongodb://localhost:27017/pritunl
-
-        systemctl enable mongod && systemctl start mongod
-
-        echo "Waiting for MongoDB..."
-        until mongosh --eval "db.runCommand({ping:1})" &>/dev/null; do sleep 3; done
-        echo "MongoDB ready"
-
-        systemctl enable pritunl && systemctl start pritunl
-        sleep 15
-
-        DEFAULT_PASS=\$(pritunl default-password | grep "Password:" | awk '{print \$2}')
-        echo "Pritunl default password obtained"
-        RESPONSE=\$(curl -s -k -X PUT "https://localhost/auth/session" \
-          -H "Content-Type: application/json" \
-          -d "{\"username\":\"pritunl\",\"password\":\"\${DEFAULT_PASS}\"}")
-        TOKEN=\$(echo \$RESPONSE | jq -r '.token // empty')
-
-        if [ -n "\$TOKEN" ]; then
-          ORG_ID=\$(curl -s -k -X POST "https://localhost/organization" \
-            -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-            -d '{"name":"${PRITUNL_ORG_NAME}"}' | jq -r '.id')
-
-          SERVER_ID=\$(curl -s -k -X POST "https://localhost/server" \
-            -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-            -d '{"name":"runner-vpn","protocol":"wireguard","port":1194,"network":"${PRITUNL_VPN_NETWORK}","dns_servers":["168.63.129.16"]}' | jq -r '.id')
-
-          curl -s -k -X POST "https://localhost/server/\${SERVER_ID}/route" \
-            -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-            -d '{"network":"10.0.0.0/8","comment":"VNet + AKS"}'
-
-          curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/organization/\${ORG_ID}" \
-            -H "Auth-Token: \$TOKEN"
-
-          curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/operation/start" \
-            -H "Auth-Token: \$TOKEN"
-
-          echo '${USERS_JSON}' | jq -c '.[]' | while read user; do
-            NAME=\$(echo \$user | jq -r '.name')
-            EMAIL=\$(echo \$user | jq -r '.email')
-            curl -s -k -X POST "https://localhost/user/\${ORG_ID}" \
-              -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-              -d "{\"name\":\"\${NAME}\",\"email\":\"\${EMAIL}\"}"
-          done
-          echo "Pritunl configured."
-        else
-          echo "WARNING: Pritunl API auth failed. Manual setup needed at https://\$(curl -s ifconfig.me)"
-        fi
-      else
-        echo "VPN_ENABLED=false - skipping Pritunl. Azure Bastion will be created by OpenTofu."
-      fi
-
-      # GitHub Actions Runner
-      RUNNER_VERSION=\$(curl -s https://api.github.com/repos/actions/runner/releases/latest | jq -r '.tag_name' | sed 's/v//')
-      mkdir -p /home/azureuser/actions-runner && cd /home/azureuser/actions-runner
-      curl -sLO "https://github.com/actions/runner/releases/download/v\${RUNNER_VERSION}/actions-runner-linux-x64-\${RUNNER_VERSION}.tar.gz"
-      tar xzf "actions-runner-linux-x64-\${RUNNER_VERSION}.tar.gz"
-      rm "actions-runner-linux-x64-\${RUNNER_VERSION}.tar.gz"
-      chown -R azureuser:azureuser /home/azureuser/actions-runner
-
-      sudo -u azureuser ./config.sh \
-        --url "${GITHUB_URL}" \
-        --token "${GITHUB_RUNNER_TOKEN}" \
-        --name "\$(hostname)" \
-        --labels "self-hosted,azure,linux" \
-        --unattended --replace
-
-      ./svc.sh install azureuser && ./svc.sh start
-      echo "=== Setup complete \$(date) ==="
+    encoding: b64
+    content: ${SETUP_SCRIPT_B64}
 
 runcmd:
   - bash /opt/setup.sh
 CLOUDINIT
 
-# ── Step 8: Create VM with managed identity + cloud-init ──────────────────
+# ── Step 8: Create VM or run setup on existing VM ──────────────────────────
+VM_EXISTED="false"
 if az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" &>/dev/null; then
-  echo "✓ VM already exists: $VM_NAME (skipping creation)"
-  rm -f "$CLOUD_INIT_FILE"
+  VM_EXISTED="true"
+  echo "✓ VM already exists: $VM_NAME — running setup via Azure Run Command (~10 min)..."
+  RUN_OUTPUT=$(az vm run-command invoke \
+    --resource-group "$RESOURCE_GROUP" \
+    --name "$VM_NAME" \
+    --command-id RunShellScript \
+    --scripts @"$SETUP_SCRIPT" \
+    --query "value[0].message" -o tsv 2>&1)
+  echo "$RUN_OUTPUT"
+  VM_IP_CHECK=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" --show-details --query publicIps -o tsv)
+  SETUP_STATUS=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 azureuser@"$VM_IP_CHECK" 'cat /tmp/setup-status 2>/dev/null || echo UNKNOWN')
+  if [ "$SETUP_STATUS" = "SUCCESS" ]; then
+    echo "✓ Setup completed successfully on existing VM."
+  else
+    echo "ERROR: Setup failed or output was truncated. Check full log:"
+    echo "  ssh azureuser@${VM_IP_CHECK} 'sudo tail -100 /var/log/runner-setup.log'"
+    exit 1
+  fi
+  rm -f "$SETUP_SCRIPT" "$CLOUD_INIT_FILE"
 else
   echo "Creating VM... (this takes ~2 minutes)"
   if [ "$VPN_ENABLED" = "true" ]; then
@@ -379,7 +423,7 @@ else
     --subnet "$RUNNER_SUBNET_NAME" \
     "${PUBLIC_IP_ARGS[@]}" >/dev/null
 
-  rm -f "$CLOUD_INIT_FILE"
+  rm -f "$SETUP_SCRIPT" "$CLOUD_INIT_FILE"
   echo "✓ VM created: $VM_NAME"
 fi
 
@@ -439,15 +483,19 @@ else
   echo "  SSH           : Azure Portal → Bastion → $VM_NAME"
 fi
 echo ""
-echo "  cloud-init running in background (~5 min):"
-if [ "$VPN_ENABLED" = "true" ]; then
-  echo "  - Installs: Pritunl, WireGuard, kubectl, helm, tofu, az CLI"
-  echo "  - Configures VPN server + users"
+if [ "$VM_EXISTED" = "true" ]; then
+  echo "  Setup ran synchronously (complete). Runner and VPN are ready now."
 else
-  echo "  - Installs: kubectl, helm, tofu, az CLI (no VPN)"
-  echo "  - Run create_tf_resources next to deploy Azure Bastion"
+  echo "  cloud-init running in background (~10 min):"
+  if [ "$VPN_ENABLED" = "true" ]; then
+    echo "  - Installs: Pritunl, WireGuard, kubectl, helm, tofu, az CLI"
+    echo "  - Configures VPN server + users"
+  else
+    echo "  - Installs: kubectl, helm, tofu, az CLI (no VPN)"
+    echo "  - Run create_tf_resources next to deploy Azure Bastion"
+  fi
+  echo "  - Registers GitHub Actions runner"
 fi
-echo "  - Registers GitHub Actions runner"
 echo ""
 echo "  Check runner: https://github.com/${GITHUB_ORG} → Settings → Actions → Runners"
 if [ "$VPN_ENABLED" = "true" ]; then
@@ -464,16 +512,27 @@ if [ "$VPN_ENABLED" = "true" ]; then
   echo "=========================================="
   echo ""
   echo "  1. Pritunl VPN portal: https://${VM_IP}"
-  echo "     (ready ~5 min after this script finishes)"
+  if [ "$VM_EXISTED" = "true" ]; then
+    echo "     (setup already complete — should be accessible now)"
+  else
+    echo "     (ready ~10 min after this script finishes)"
+  fi
   echo ""
-  echo "  2. Login to https://${VM_IP} and set passwords for:"
-  for user_entry in "${PRITUNL_USERS[@]:-}"; do
-    name="${user_entry%%:*}"
-    email="${user_entry##*:}"
-    echo "     - ${name} (${email})"
-  done
+  PRITUNL_CREDS=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 azureuser@"$VM_IP" 'cat /tmp/pritunl-creds 2>/dev/null || echo ""')
+  PRITUNL_PASS=$(echo "$PRITUNL_CREDS" | cut -d: -f2)
+  echo "  2. Pritunl admin credentials:"
+  echo "     Username : pritunl"
+  if [ -n "$PRITUNL_PASS" ]; then
+    echo "     Password : ${PRITUNL_PASS}"
+  else
+    echo "     Password : run → ssh azureuser@${VM_IP} 'sudo pritunl default-password'"
+  fi
   echo ""
-  echo "  3. Each user steps:"
+  echo "  3. Self-hosted runner (ready after ~5 min):"
+  echo "     Check: https://github.com/${GITHUB_ORG}/${GITHUB_REPO} → Settings → Actions → Runners"
+  echo "     Should show: ed-sandbox-runner (idle)"
+  echo ""
+  echo "  4. Each user VPN steps:"
   echo "     a. Install WireGuard: https://www.wireguard.com/install/"
   echo "     b. Open https://${VM_IP} → login → download .conf profile"
   echo "     c. Import .conf into WireGuard → Activate"
