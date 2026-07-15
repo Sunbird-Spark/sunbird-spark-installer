@@ -308,7 +308,7 @@ if [ "\$VPN_ENABLED" = "true" ]; then
         -d '{"name":"${PRITUNL_ORG_NAME}"}' | jq -r '.id')
       SERVER_ID=\$(curl -s -k -X POST "https://localhost/server" \
         -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-        -d '{"name":"runner-vpn","protocol":"wireguard","port":1194,"network":"${PRITUNL_VPN_NETWORK}","dns_servers":["168.63.129.16"]}' | jq -r '.id')
+        -d '{"name":"runner-vpn","protocol":"wireguard","port":12548,"wg_port":11485,"network":"${PRITUNL_VPN_NETWORK}","dns_servers":["168.63.129.16"]}' | jq -r '.id')
       curl -s -k -X POST "https://localhost/server/\${SERVER_ID}/route" \
         -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
         -d '{"network":"10.0.0.0/8","comment":"VNet + AKS"}'
@@ -445,7 +445,7 @@ if [ "$VPN_ENABLED" = "true" ]; then
     if [ -n "$NSG_ID" ]; then
       VM_NSG=$(basename "$NSG_ID")
     else
-      echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 1194, TCP 443"
+      echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 12548, UDP 11485, TCP 443"
       VM_NSG=""
     fi
   fi
@@ -453,8 +453,8 @@ if [ "$VPN_ENABLED" = "true" ]; then
   if [ -n "$VM_NSG" ]; then
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
-      --name "allow-wireguard" --priority 100 --protocol Udp \
-      --destination-port-range 1194 --access Allow 2>/dev/null || true
+      --name "allow-pritunl-vpn" --priority 100 --protocol Udp \
+      --destination-port-range 12548 --access Allow 2>/dev/null || true
 
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
@@ -463,10 +463,10 @@ if [ "$VPN_ENABLED" = "true" ]; then
 
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
-      --name "allow-openvpn" --priority 120 --protocol Udp \
-      --destination-port-range 12535 --access Allow 2>/dev/null || true
+      --name "allow-wireguard-wg" --priority 120 --protocol Udp \
+      --destination-port-range 11485 --access Allow 2>/dev/null || true
 
-    echo "✓ NSG rules added (UDP 1194, UDP 12535, TCP 443)"
+    echo "✓ NSG rules added (UDP 12548, UDP 11485, TCP 443)"
   fi
 else
   echo "✓ VPN disabled - no NSG rules added (VM has no public IP; access via Azure Bastion)"
