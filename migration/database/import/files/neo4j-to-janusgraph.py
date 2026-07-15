@@ -77,7 +77,7 @@ def migrate():
         for f in ["nodes.csv", "relationships.csv"]:
             kubectl_cp(f"/tmp/{f}", pod, f"/tmp/{f}")
         
-        for s in ["import_data.groovy", "set_graphid.groovy", "verify_migration.groovy"]:
+        for s in ["import_data.groovy", "set_graphid.groovy", "remove_node_id.groovy", "verify_migration.groovy"]:
             kubectl_cp(f"/scripts/{s}", pod, f"/tmp/{s}")
 
         # 4. Execute and Count
@@ -85,7 +85,7 @@ def migrate():
         rel_total = sum(1 for _ in open('/tmp/relationships.csv')) - 1
 
         gremlin = CONFIG['janusgraph']['gremlinBin']
-        for s in ["import_data.groovy", "set_graphid.groovy", "verify_migration.groovy"]:
+        for s in ["import_data.groovy", "set_graphid.groovy", "remove_node_id.groovy", "verify_migration.groovy"]:
             logger.info(f"==> Running {s}...")
             out, err, rc = kubectl_exec(pod, [gremlin, "-e", f"/tmp/{s}"])
             if out: logger.info(out)
