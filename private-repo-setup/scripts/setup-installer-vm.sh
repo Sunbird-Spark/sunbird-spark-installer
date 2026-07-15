@@ -230,6 +230,11 @@ exec > >(tee -a \$LOG) 2>&1
 echo "=== Setup start \$(date) ==="
 VPN_ENABLED="${VPN_ENABLED}"
 
+# Configure Azure DNS so private AKS endpoints (privatelink.*.azmk8s.io) resolve correctly
+mkdir -p /etc/systemd/resolved.conf.d
+echo -e "[Resolve]\nDNS=168.63.129.16" > /etc/systemd/resolved.conf.d/azure.conf
+systemctl restart systemd-resolved
+
 # Base packages (cloud-init may not have run)
 apt-get update -qq
 apt-get install -y -qq unzip jq curl git openssl ca-certificates gnupg
