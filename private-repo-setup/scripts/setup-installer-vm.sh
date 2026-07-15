@@ -468,75 +468,33 @@ else
 fi
 
 # ── Done ───────────────────────────────────────────────────────────────────
-echo ""
-echo "=========================================="
-echo "  Runner VM Setup Complete"
-echo "=========================================="
-echo "  VM Name       : $VM_NAME"
+echo "Runner VM setup complete."
+echo "VM: $VM_NAME"
 if [ "$VPN_ENABLED" = "true" ]; then
   VM_IP=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
     --show-details --query publicIps -o tsv)
-  echo "  Public IP     : $VM_IP"
-  echo "  SSH           : ssh azureuser@${VM_IP} (key in ~/.ssh/)"
+  echo "Public IP: $VM_IP"
+  echo "SSH: ssh azureuser@${VM_IP}"
 else
-  echo "  Public IP     : none (private VM - access via Azure Bastion after create_tf_resources)"
-  echo "  SSH           : Azure Portal → Bastion → $VM_NAME"
+  echo "Public IP: none (private VM, access via Azure Bastion after create_tf_resources)"
 fi
-echo ""
+
 if [ "$VM_EXISTED" = "true" ]; then
-  echo "  Setup ran synchronously (complete). Runner and VPN are ready now."
+  echo "Setup complete. Runner and VPN are ready."
 else
-  echo "  cloud-init running in background (~10 min):"
-  if [ "$VPN_ENABLED" = "true" ]; then
-    echo "  - Installs: Pritunl, WireGuard, kubectl, helm, tofu, az CLI"
-    echo "  - Configures VPN server + users"
-  else
-    echo "  - Installs: kubectl, helm, tofu, az CLI (no VPN)"
-    echo "  - Run create_tf_resources next to deploy Azure Bastion"
-  fi
-  echo "  - Registers GitHub Actions runner"
+  echo "cloud-init running in background (~10 min). Check: ssh azureuser@${VM_IP:-<ip>} 'sudo tail -f /var/log/runner-setup.log'"
 fi
-echo ""
-echo "  Check runner: https://github.com/${GITHUB_ORG} → Settings → Actions → Runners"
-if [ "$VPN_ENABLED" = "true" ]; then
-  echo "  VPN portal:   https://${VM_IP}  (ready after ~5 min)"
-fi
-echo ""
-echo "  Next: Trigger GitHub Actions workflow to create AKS + deploy"
-echo "=========================================="
+
+echo "Runner: https://github.com/${GITHUB_ORG}/${GITHUB_REPO:+${GITHUB_REPO}/}settings/actions/runners"
 
 if [ "$VPN_ENABLED" = "true" ]; then
-  echo ""
-  echo "=========================================="
-  echo "  SHARE THESE WITH YOUR TEAM"
-  echo "=========================================="
-  echo ""
-  echo "  1. Pritunl VPN portal: https://${VM_IP}"
-  if [ "$VM_EXISTED" = "true" ]; then
-    echo "     (setup already complete — should be accessible now)"
-  else
-    echo "     (ready ~10 min after this script finishes)"
-  fi
-  echo ""
   PRITUNL_CREDS=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 azureuser@"$VM_IP" 'cat /tmp/pritunl-creds 2>/dev/null || echo ""')
   PRITUNL_PASS=$(echo "$PRITUNL_CREDS" | cut -d: -f2)
-  echo "  2. Pritunl admin credentials:"
-  echo "     Username : pritunl"
+  echo "Pritunl VPN: https://${VM_IP}"
+  echo "Pritunl username: pritunl"
   if [ -n "$PRITUNL_PASS" ]; then
-    echo "     Password : ${PRITUNL_PASS}"
+    echo "Pritunl password: ${PRITUNL_PASS}"
   else
-    echo "     Password : run → ssh azureuser@${VM_IP} 'sudo pritunl default-password'"
+    echo "Pritunl password: ssh azureuser@${VM_IP} 'sudo pritunl default-password'"
   fi
-  echo ""
-  echo "  3. Self-hosted runner (ready after ~5 min):"
-  echo "     Check: https://github.com/${GITHUB_ORG}/${GITHUB_REPO} → Settings → Actions → Runners"
-  echo "     Should show: ed-sandbox-runner (idle)"
-  echo ""
-  echo "  4. Each user VPN steps:"
-  echo "     a. Install WireGuard: https://www.wireguard.com/install/"
-  echo "     b. Open https://${VM_IP} → login → download .conf profile"
-  echo "     c. Import .conf into WireGuard → Activate"
-  echo "     d. kubectl get pods -n sunbird  ← should work now"
-  echo ""
-  echo "=========================================="
 fi
