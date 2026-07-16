@@ -99,14 +99,10 @@ resource "azurerm_role_assignment" "workload_identity_user_delegation_key" {
   role_definition_id = azurerm_role_definition.user_delegation_key.role_definition_resource_id
 }
 
-# Container-level role assignments for least-privilege access
-# Managed identity can only access specified containers
-resource "azurerm_role_assignment" "workload_identity_containers" {
-  for_each = toset(var.container_names)
-
+resource "azurerm_role_assignment" "workload_identity_storage_blob_contributor" {
   principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = "${var.storage_account_id}/blobServices/default/containers/${each.value}"
-  role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
+  scope                = var.storage_account_id
+  role_definition_name = "Storage Blob Data Contributor"
 }
 
 resource "kubernetes_service_account" "workload_identity" {
