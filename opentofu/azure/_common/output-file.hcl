@@ -21,11 +21,11 @@ terraform {
 }
 
 dependency "aks" {
-    config_path = "../aks"
+    config_path = "${get_original_terragrunt_dir()}/../aks"
 }
 
 dependency "storage" {
-    config_path = "../storage"
+    config_path = "${get_original_terragrunt_dir()}/../storage"
     mock_outputs = {
       azurerm_storage_account_name      = "dummy-storage"
       azurerm_storage_container_private = "dummy-private"
@@ -37,7 +37,7 @@ dependency "storage" {
 }
 
 dependency "workload_identity" {
-    config_path = "../workload-identity"
+    config_path = "${get_original_terragrunt_dir()}/../workload-identity"
     mock_outputs = {
       client_id                    = "00000000-0000-0000-0000-000000000000"
       managed_identity_principal_id = "00000000-0000-0000-0000-000000000000"
@@ -47,7 +47,7 @@ dependency "workload_identity" {
 }
 
 dependency "keys" {
-    config_path = "../keys"
+    config_path = "${get_original_terragrunt_dir()}/../keys"
     mock_outputs = {
       random_string     = "dummy-string"
     }
