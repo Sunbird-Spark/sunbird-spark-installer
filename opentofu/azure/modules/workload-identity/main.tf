@@ -105,6 +105,12 @@ resource "azurerm_role_assignment" "workload_identity_storage_blob_contributor" 
   role_definition_name = "Storage Blob Data Contributor"
 }
 
+resource "azurerm_role_assignment" "workload_identity_storage_reader" {
+  principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
+  scope                = var.storage_account_id
+  role_definition_name = "Reader"
+}
+
 resource "kubernetes_service_account" "workload_identity" {
   for_each = var.k8s_service_accounts
 
