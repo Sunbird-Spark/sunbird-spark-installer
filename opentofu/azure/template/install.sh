@@ -33,8 +33,8 @@ function create_tf_resources() {
     deploy_tf_module storage
     deploy_tf_module aks
     deploy_tf_module workload-identity
-    deploy_tf_module random_passwords
-    deploy_tf_module keys
+    # deploy_tf_module random_passwords
+    # deploy_tf_module keys
     # deploy_tf_module output-file
     # deploy_tf_module upload-files
     [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
