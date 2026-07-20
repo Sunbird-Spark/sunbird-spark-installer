@@ -204,10 +204,9 @@ Developers connect to the Pritunl VPN to access the private AKS cluster.
 
 1. Open `https://<vm-public-ip>` (printed by setup script)
 2. Log in with Pritunl credentials (admin set password after setup)
-3. Download WireGuard profile
-4. Install [WireGuard client](https://www.wireguard.com/install/) (Windows / Mac / Linux)
-5. Import profile → Connect VPN
-6. `kubectl get pods -n sunbird` → works ✓
+3. Install [Pritunl Client](https://client.pritunl.com/) (Windows / Mac / Linux) — it imports Pritunl-generated WireGuard profiles natively, no separate WireGuard app needed
+4. Download your profile from the Pritunl web UI → import into Pritunl Client → Connect
+5. `kubectl get pods -n sunbird` → works ✓
 
 > Without VPN: `kubectl` fails — AKS API server has no public endpoint.
 

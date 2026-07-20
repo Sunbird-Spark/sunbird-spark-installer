@@ -87,11 +87,10 @@ vpn_enabled: true               # true = Pritunl VPN on runner VM; false = Azure
 
 **Developer setup (one time):**
 
-1. Open `https://<runner-vm-public-ip>` → log in with Pritunl credentials
-2. Go to **Users** → download your `.conf` WireGuard profile
-3. Install [WireGuard](https://www.wireguard.com/install/)
-4. Import `.conf` → **Activate**
-5. `kubectl get pods -n sunbird` — works from your laptop
+1. Install [Pritunl Client](https://client.pritunl.com/) — imports Pritunl-generated WireGuard profiles natively, no separate WireGuard app needed
+2. Open `https://<runner-vm-public-ip>` → log in with Pritunl credentials
+3. Go to **Users** → download your `.conf` profile → import into Pritunl Client → **Activate**
+4. `kubectl get pods -n sunbird` — works from your laptop
 
 > The runner VM public IP is printed by `setup-installer-vm.sh` at the end of VM creation.
 
