@@ -13,6 +13,18 @@ keycloak:
   keycloak_password: *keycloak-password
 keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
+# ── Sync Tool (on-demand JanusGraph → OpenSearch sync) ──────────────────────
+# NOT deployed during normal install.
+# To run: set enabled: true + syncMode below, then deploy via:
+#   ./install.sh install_service knowledgebb sync-tool
+# Or in GitHub Actions: check knowledgebb + type "sync-tool" in specific_charts
+sync-tool:
+  enabled: false
+  syncMode: full     # full | objectType | identifiers | days | file
+  objectType: ""     # used when syncMode=objectType (e.g. "Content")
+  identifiers: ""    # used when syncMode=identifiers (e.g. "do_123,do_456")
+  days: ""           # used when syncMode=days (e.g. "5") 
+
 global:
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
   skip_network_module: false  # false = reuse existing VNet/subnets (set vnet_name and subnet names below); true = network module creates VNet/subnets
@@ -137,15 +149,3 @@ global:
   proxy_certificate: |
     REPLACE_ME
   # CERTIFICATE-KEYS
-
-# ── Sync Tool (on-demand JanusGraph → OpenSearch sync) ──────────────────────
-# NOT deployed during normal install.
-# To run: set enabled: true + syncMode below, then deploy via:
-#   ./install.sh install_service knowledgebb sync-tool
-# Or in GitHub Actions: check knowledgebb + type "sync-tool" in specific_charts
-sync-tool:
-  enabled: false
-  syncMode: full     # full | objectType | identifiers | days | file
-  objectType: ""     # used when syncMode=objectType (e.g. "Content")
-  identifiers: ""    # used when syncMode=identifiers (e.g. "do_123,do_456")
-  days: ""           # used when syncMode=days (e.g. "5") 
