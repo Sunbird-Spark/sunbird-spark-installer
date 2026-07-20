@@ -92,19 +92,14 @@ cp $INSTALLER_PATH/private-repo-setup/.github/workflows/sunbird-spark-addons.yam
 cp $INSTALLER_PATH/opentofu/azure/template/global-values.yaml configs/demo/global-values.yaml
 ```
 
-Open the file and fill in all required fields — see the root [README.md](../README.md) for the full field reference.
+Open the file and fill in all required fields — see the root [README.md](../README.md) for the full field reference. Only `vpn_enabled` is relevant here; VM sizing, GitHub runner registration, and Pritunl org/network/users are **not** set in this file.
 
-Also fill in the VM + VPN fields added at the bottom:
-```yaml
-vm_size: "Standard_B2s"
-vm_admin_username: "azureuser"
-github_runner_token: "REPLACE_WITH_GITHUB_RUNNER_TOKEN"  # GitHub → Settings → Actions → Runners → New runner
-github_org: "REPLACE_WITH_GITHUB_ORG"
-pritunl_vpn_network: "172.16.0.0/24"
-pritunl_org_name: "sunbird-spark"
-pritunl_users:
-  - name: "your-name"
-    email: "your@email.com"
+Also edit the variables at the top of `setup-installer-vm.sh` before running it in Step 5 below:
+```bash
+VM_SIZE="Standard_B2s"
+VM_ADMIN_USER="azureuser"
+GITHUB_RUNNER_TOKEN=""   # GitHub → Settings → Actions → Runners → New runner
+GITHUB_ORG=""
 ```
 
 > **Important:** `global.environment` must exactly match the `configs/` folder name and the GitHub Actions environment name set in Step 6.
@@ -146,9 +141,6 @@ LOCATION=""               # Azure region (e.g. "Central India")
 GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # Leave empty for org-level runner
 GITHUB_RUNNER_TOKEN=""    # GitHub → Settings → Actions → Runners → New runner → copy token
-PRITUNL_VPN_NETWORK=""    # VPN client IP pool (e.g. "172.16.0.0/24")
-PRITUNL_ORG_NAME=""       # Pritunl org name
-PRITUNL_USERS=("name:email@example.com")  # VPN users
 ```
 
 Then run:
@@ -165,7 +157,7 @@ bash $INSTALLER_PATH/private-repo-setup/scripts/setup-installer-vm.sh
 
 **cloud-init runs automatically on VM boot (~5 min):**
 - Installs: Pritunl, WireGuard, kubectl, helm, opentofu, terragrunt, az CLI, jq, yq, rclone, Docker
-- Configures Pritunl VPN server + creates users
+- Starts Pritunl + prints its admin credentials — org, server, and users are **not** created automatically; set these up via the Pritunl Admin UI (see the "Pritunl Admin" section below)
 - Registers GitHub Actions runner → shows as **Idle** in GitHub
 
 > **Wait ~5 minutes** after VM creation. Once runner shows **Idle** in GitHub → Settings → Actions → Runners, the VM is ready.
@@ -216,6 +208,37 @@ Developers connect to the Pritunl VPN to access the private AKS cluster.
 6. `kubectl get pods -n sunbird` → works ✓
 
 > Without VPN: `kubectl` fails — AKS API server has no public endpoint.
+
+### Pritunl Admin — Adding Users, Orgs, and Passwords
+
+Required firewall/NSG ports (already opened by the setup script, listed here for reference):
+
+| Port | Protocol | Purpose |
+|------|----------|---------|
+| 443  | TCP      | Pritunl admin/user web UI (`https://<vm-public-ip>`) |
+| 1194 | UDP      | WireGuard VPN tunnel traffic |
+
+**Add a new VPN user (full flow):**
+
+1. Log into `https://<vm-public-ip>` as admin. While resetting the admin password, Pritunl also prompts you to enable two-factor authentication (Google Authenticator) — set this up if prompted.
+2. **Organizations** → **Add Organization** → enter a name → **Add**
+3. **Servers** → **Add Server** → configure as WireGuard, port `1194` → **Add**, then select the server → **Attach Organization** → pick the org → **Operation** → **Restart**
+4. Go to **Users** → select the organization
+5. Click **Add User** → enter name + email → **Add**
+6. Send the new user the link to this doc — they follow the Step 8 flow above to download their own profile and connect
+
+> Steps 2-3 are one-time setup — the install script starts Pritunl but does **not** create the org or server automatically, so you'll need to do this once per environment.
+
+> VPN users authenticate via their downloaded WireGuard profile (key-based), not a password — there's nothing to "set" for a user's VPN login.
+
+**Reset the Pritunl admin password:**
+
+- Via CLI (SSH into the runner VM):
+  ```bash
+  sudo pritunl reset-password
+  ```
+  Prints a new admin password directly in the terminal — copy it immediately, it's only shown once.
+- Via Web UI (if already logged in): **Settings** → **Administrators** → select the admin account → set new password → **Save**
 
 ---
 

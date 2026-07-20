@@ -26,9 +26,6 @@ GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # GitHub repo name for repo-level runner, or leave empty for org-level
 GITHUB_RUNNER_TOKEN=""    # GitHub -> Settings -> Actions -> Runners -> New runner -> copy token (expires in 1 hour)
 VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "false" = Azure Bastion (no public IP on VM)
-# Required only when VPN_ENABLED=true:
-PRITUNL_VPN_NETWORK=""    # VPN client IP pool (e.g. "172.16.0.0/24")
-PRITUNL_ORG_NAME=""       # Pritunl org name (e.g. "sunbird-spark")
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Validate inputs ────────────────────────────────────────────────────────
@@ -38,15 +35,6 @@ for var in TENANT_ID SUBSCRIPTION_ID BUILDING_BLOCK ENVIRONMENT RESOURCE_GROUP L
     exit 1
   fi
 done
-
-if [ "$VPN_ENABLED" = "true" ]; then
-  for var in PRITUNL_VPN_NETWORK PRITUNL_ORG_NAME; do
-    if [ -z "${!var}" ]; then
-      echo "❌ ERROR: $var is required when VPN_ENABLED=true."
-      exit 1
-    fi
-  done
-fi
 
 # ── VM config ──────────────────────────────────────────────────────────────
 VM_NAME="${BUILDING_BLOCK}-${ENVIRONMENT}-runner"
@@ -204,14 +192,6 @@ az role assignment create \
   && echo "✓ AKS Cluster Admin role assigned" \
   || echo "✓ AKS Cluster Admin role already assigned (skipped)"
 
-# ── Step 5: Build Pritunl users JSON for cloud-init ───────────────────────
-USERS_JSON="[]"
-for user_entry in "${PRITUNL_USERS[@]:-}"; do
-  name="${user_entry%%:*}"
-  email="${user_entry##*:}"
-  USERS_JSON=$(echo "$USERS_JSON" | jq --arg n "$name" --arg e "$email" '. += [{"name":$n,"email":$e}]')
-done
-
 # ── Step 6: Build GitHub runner URL ───────────────────────────────────────
 if [ -n "$GITHUB_REPO" ]; then
   GITHUB_URL="https://github.com/${GITHUB_ORG}/${GITHUB_REPO}"
@@ -297,36 +277,7 @@ if [ "\$VPN_ENABLED" = "true" ]; then
     DEFAULT_PASS=\$(pritunl default-password | grep -i '^\s*password:' | awk '{print \$2}' | tr -d '"')
     echo "  Pritunl credentials → username: pritunl  password: \${DEFAULT_PASS}"
     echo "pritunl:\${DEFAULT_PASS}" > /tmp/pritunl-creds
-    RESPONSE=\$(curl -s -k -X PUT "https://localhost/auth/session" \
-      -H "Content-Type: application/json" \
-      -d "{\"username\":\"pritunl\",\"password\":\"\${DEFAULT_PASS}\"}")
-    echo "Pritunl auth response: \$RESPONSE"
-    TOKEN=\$(echo "\$RESPONSE" | jq -r '.token // empty' 2>/dev/null || echo "")
-    if [ -n "\$TOKEN" ]; then
-      ORG_ID=\$(curl -s -k -X POST "https://localhost/organization" \
-        -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-        -d '{"name":"${PRITUNL_ORG_NAME}"}' | jq -r '.id')
-      SERVER_ID=\$(curl -s -k -X POST "https://localhost/server" \
-        -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-        -d '{"name":"runner-vpn","protocol":"wireguard","port":12548,"wg_port":11485,"network":"${PRITUNL_VPN_NETWORK}","dns_servers":["168.63.129.16"]}' | jq -r '.id')
-      curl -s -k -X POST "https://localhost/server/\${SERVER_ID}/route" \
-        -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-        -d '{"network":"10.0.0.0/8","comment":"VNet + AKS"}'
-      curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/organization/\${ORG_ID}" \
-        -H "Auth-Token: \$TOKEN"
-      curl -s -k -X PUT "https://localhost/server/\${SERVER_ID}/operation/start" \
-        -H "Auth-Token: \$TOKEN"
-      echo '${USERS_JSON}' | jq -c '.[]' | while read user; do
-        NAME=\$(echo \$user | jq -r '.name')
-        EMAIL=\$(echo \$user | jq -r '.email')
-        curl -s -k -X POST "https://localhost/user/\${ORG_ID}" \
-          -H "Auth-Token: \$TOKEN" -H "Content-Type: application/json" \
-          -d "{\"name\":\"\${NAME}\",\"email\":\"\${EMAIL}\"}"
-      done
-      echo "Pritunl configured."
-    else
-      echo "WARNING: Pritunl API auth failed. Check https://\$(curl -s ifconfig.me)"
-    fi
+    echo "  Org, server, and users are NOT created automatically — set them up via the Pritunl Admin UI (see private-repo-setup/README.md)."
   fi
 else
   echo "VPN_ENABLED=false - skipping Pritunl."

@@ -83,15 +83,7 @@ vpn_enabled: true               # true = Pritunl VPN on runner VM; false = Azure
 
 ### Pritunl VPN Path (`vpn_enabled: true`)
 
-Required fields in `global-values.yaml`:
-
-```yaml
-pritunl_vpn_network: "172.16.0.0/24"   # VPN client IP pool
-pritunl_org_name: "sunbird-spark"
-pritunl_users:
-  - name: "your-name"
-    email: "your@email.com"
-```
+`vpn_enabled` is the only Pritunl-related field in `global-values.yaml`. Everything else (VPN network, org name, initial users) is configured via `setup-installer-vm.sh` — see [private-repo-setup/BASTION-SETUP.md](private-repo-setup/BASTION-SETUP.md).
 
 **Developer setup (one time):**
 
