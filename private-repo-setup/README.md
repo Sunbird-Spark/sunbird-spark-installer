@@ -125,6 +125,8 @@ git push
 
 ## Step 5 — Create the Runner VM (One Time)
 
+Just run the script below — it reads `VPN_ENABLED` and installs Pritunl VPN + WireGuard when `true`, or skips it when `false`. Azure Bastion itself isn't created here — it gets created automatically by `install.sh create_tf_resources` in Step 9, when `vpn_enabled: false` in `global-values.yaml`. Developer access afterward differs by path: Step 8 covers VPN; for Bastion, connect via Azure Portal → your resource group → `<bb>-<env>-bastion` → **Connect** (see [BASTION-SETUP.md](BASTION-SETUP.md) for details).
+
 This script creates the VM with managed identity, installs Pritunl VPN + WireGuard + GitHub Actions runner automatically via cloud-init.
 
 **Requires:** `az` CLI installed + Azure **Owner role** on the subscription/resource group.
@@ -270,7 +272,7 @@ After Phase 1, **add a DNS A record** for your domain pointing to the load balan
 
 Enable `5️⃣ Install Helm components`, mode: `all`.
 
-Deploys all 7 building blocks: monitoring → edbb → learnbb → knowledgebb → obsrvbb → inquirybb → additional.
+Deploys all 6 building blocks: monitoring → edbb → learnbb → knowledgebb → obsrvbb → additional.
 
 > First run takes 25–40 minutes as container images are pulled.
 
