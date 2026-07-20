@@ -222,7 +222,7 @@ function install_helm_components() {
         install_component "$1"
     else
         # No args: deploy all bundles in order (original behavior)
-        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "inquirybb" "additional")
+        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional")
         for component in "${components[@]}"; do
             install_component "$component"
         done
