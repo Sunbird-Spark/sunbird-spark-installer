@@ -13,6 +13,38 @@ Two approaches are available, both covering infrastructure provisioning and depl
 | **GitHub Actions** | Automated CI/CD using OIDC federated credentials. Infra and deployments run from a private GitHub repository — no credentials stored in GitHub. |
 | **Manual via Azure VM** | An Azure VM with a system-assigned managed identity runs `install.sh` directly over SSH. No CI/CD setup needed. |
 
+## Private Cluster & Access Options
+
+Two independent fields in `global-values.yaml` control network exposure and how developers reach the cluster. Decide both **before** running `create_tf_resources`.
+
+### 1. `private_cluster_enabled` — is the AKS API server public or private?
+
+```yaml
+global:
+  private_cluster_enabled: true   # AKS API server has no public endpoint — kubectl only works from inside the VNet
+  # or
+  private_cluster_enabled: false  # AKS API server is public — kubectl works from anywhere with valid credentials
+```
+
+- **`false`** — simplest option. No VPN or Bastion needed; `kubectl` works directly once you have `az aks get-credentials`.
+- **`true`** — more secure, but requires a way to reach *into* the VNet. That's the second choice below.
+
+### 2. `vpn_enabled` — only relevant when `private_cluster_enabled: true`
+
+```yaml
+global:
+  vpn_enabled: true    # Pritunl VPN on the runner VM — developers connect via a WireGuard-compatible client
+  # or
+  vpn_enabled: false   # Azure Bastion instead — browser-based SSH through Azure Portal, no VPN client needed
+```
+
+| `vpn_enabled` | Access method | Full setup guide |
+|---|---|---|
+| `true` (default) | Pritunl VPN → developer connects via Pritunl Client → direct `kubectl` from their laptop | [private-repo-setup/README.md](../../private-repo-setup/README.md) |
+| `false` | Azure Bastion → browser-based SSH into the runner VM → `kubectl` inside the VM only | [private-repo-setup/BASTION-SETUP.md](../../private-repo-setup/BASTION-SETUP.md) |
+
+Both paths register the **same self-hosted GitHub Actions runner** via `setup-installer-vm.sh` — `vpn_enabled` only changes what gets installed on that VM and how a developer reaches it afterward, not how GitHub Actions deploys.
+
 ## What Gets Provisioned
 
 OpenTofu modules in `opentofu/azure/modules/` create:

@@ -65,50 +65,9 @@ Two approaches are available for provisioning infrastructure and deploying Sunbi
 
 By default the installer creates a **private AKS cluster** — the Kubernetes API server has no public endpoint. Developers and CI/CD runners must be inside the VNet to run `kubectl` or `helm`.
 
-Two access modes are supported, controlled by a single flag in `global-values.yaml`:
+Two independent fields in `global-values.yaml` — `private_cluster_enabled` and `vpn_enabled` — control this and the developer access method (Pritunl VPN vs. Azure Bastion). Full explanation, decision tree, and setup guides:
 
-| Flag | Value | Access method |
-|------|-------|---------------|
-| `vpn_enabled` | `true` *(default)* | **Pritunl VPN** — WireGuard client on developer laptop → direct `kubectl` from anywhere |
-| `vpn_enabled` | `false` | **Azure Bastion** — browser-based SSH through Azure Portal → `kubectl` inside runner VM only |
-
-### Enable / Disable Private Cluster
-
-In `opentofu/azure/<env>/global-values.yaml`:
-
-```yaml
-private_cluster_enabled: true   # true = AKS API server private; false = public
-vpn_enabled: true               # true = Pritunl VPN on runner VM; false = Azure Bastion
-```
-
-### Pritunl VPN Path (`vpn_enabled: true`)
-
-`vpn_enabled` is the only Pritunl-related field in `global-values.yaml`. Everything else (VPN network, org name, initial users) is configured via `setup-installer-vm.sh` — see [private-repo-setup/BASTION-SETUP.md](private-repo-setup/BASTION-SETUP.md).
-
-**Developer setup (one time):**
-
-1. Install [Pritunl Client](https://client.pritunl.com/) — imports Pritunl-generated WireGuard profiles natively, no separate WireGuard app needed
-2. Open `https://<runner-vm-public-ip>` → log in with Pritunl credentials
-3. Go to **Users** → download your `.conf` profile → import into Pritunl Client → **Activate**
-4. `kubectl get pods -n sunbird` — works from your laptop
-
-> The runner VM public IP is printed by `setup-installer-vm.sh` at the end of VM creation.
-
-### Azure Bastion Path (`vpn_enabled: false`)
-
-No VPN client needed. Access is via Azure Portal:
-
-1. Azure Portal → your resource group → `<bb>-<env>-bastion`
-2. Click **Connect** → select the runner VM → **SSH**
-3. Enter `azureuser` + your SSH key
-4. Run `kubectl` commands inside the browser SSH session
-
-> Azure Bastion is created automatically during `create_tf_resources` (~10 min to become active).
-
-For the full setup walkthrough (runner VM creation, GitHub Actions, secrets), see:
-
-**[private-repo-setup/README.md](private-repo-setup/README.md)** — Self-hosted runner + VPN path
-**[private-repo-setup/BASTION-SETUP.md](private-repo-setup/BASTION-SETUP.md)** — Azure Bastion path
+**[opentofu/azure/README.md](opentofu/azure/README.md#private-cluster--access-options)**
 
 ---
 
