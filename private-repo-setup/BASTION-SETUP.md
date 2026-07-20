@@ -24,6 +24,8 @@ Developer access:
 
 **Azure Bastion is a separate Azure-managed PaaS service** — not installed on the runner VM. It lives in `AzureBastionSubnet` and acts as a secure SSH proxy. Runner VM has no public IP.
 
+**Same self-hosted runner pattern as the VPN path:** `setup-installer-vm.sh` registers the runner VM as a GitHub Actions self-hosted runner regardless of `vpn_enabled`. GitHub Actions workflows execute directly on this VM either way — the only difference between the two paths is how a *developer* reaches the VM afterward (VPN client vs. Bastion SSH), not how GitHub Actions reaches it.
+
 ---
 
 ## Prerequisites
@@ -123,6 +125,20 @@ After Phase 1: add DNS A record for your domain pointing to the load balancer IP
 ### Phase 2 — Deploy Helm Bundles
 
 Enable `5️⃣ Install Helm components`, mode: `all`.
+
+### Manual Alternative (via Bastion SSH)
+
+Both phases above are just GitHub Actions wrappers around `install.sh` functions. Since Bastion gives you a shell directly on the runner VM, you can skip GitHub Actions entirely and run the same commands yourself:
+
+```bash
+cd sunbird-spark-installer/opentofu/azure/<env-name>
+
+./install.sh create_tf_backend
+./install.sh create_tf_resources
+./install.sh install_helm_components
+```
+
+Useful for debugging or re-running a single failed step without waiting on a full workflow run. See `CLAUDE.md` for the full command reference.
 
 ---
 

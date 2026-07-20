@@ -285,6 +285,31 @@ Run in order:
 - `1️⃣1️⃣ Run post-install`
 - `1️⃣2️⃣ Create client forms`
 
+### Manual Alternative (SSH into the Runner VM)
+
+Every step above is just a GitHub Actions wrapper around `install.sh` functions. You can run the exact same deployment by SSHing into the runner VM (or the Bastion-connected VM) and calling `install.sh` directly — useful for debugging, re-running a single failed step, or environments without the GitHub Actions workflow set up.
+
+```bash
+cd sunbird-spark-installer/opentofu/azure/<env-name>
+
+# Phase 1 — Infrastructure
+./install.sh create_tf_backend
+./install.sh create_tf_resources
+
+# Phase 2 — Deploy Helm Bundles
+./install.sh install_helm_components
+
+# Phase 3 — Finalise the Platform
+./install.sh restart_workloads_using_keys
+./install.sh certificate_config
+./install.sh dns_mapping
+./install.sh generate_postman_env
+./install.sh run_post_install
+./install.sh migrate_forms
+```
+
+Functions can also be chained in one call: `./install.sh create_tf_backend create_tf_resources`. See `CLAUDE.md` for the full command reference.
+
 ---
 
 ## Deploying Specific Helm Charts
