@@ -100,7 +100,6 @@ redis: &redis
 
 yugabyte: &yugabyte
   enabled: true
-  enableLoadBalancer: false
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 
@@ -154,10 +153,6 @@ opensearch: &opensearch
 
 keycloak:
   enabled: true
-  extraEnv: |
-    - name: KC_DB_MIGRATION_STRATEGY
-      value: "IGNORE_INVALID_CHANGES"
-
 keycloak-kids-keys:
   enabled: true
 
