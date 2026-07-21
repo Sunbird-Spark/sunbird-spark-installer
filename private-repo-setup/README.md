@@ -10,11 +10,18 @@ This guide walks through creating a **private GitHub repository** that holds you
 
 | Path | When to use |
 |------|-------------|
-| **Self-hosted runner + Managed Identity** *(recommended)* | Private AKS cluster, no Azure credentials stored anywhere, VPN access for developers |
+| **Self-hosted runner + Managed Identity** *(recommended)* | Private AKS cluster, no Azure credentials stored anywhere, developer access via VPN or Bastion |
 | **GitHub Actions (OIDC)** | Public AKS cluster, Azure OIDC auth via service principals |
 | **Manual via Azure VM** | Quick start — SSH into a VM and run `install.sh` directly |
 
-This guide covers the **Self-hosted runner** path. For the OIDC path, see [OIDC Setup](#github-actions-oidc-path).
+This guide covers the **Self-hosted runner** path, which has two developer-access variants controlled by `vpn_enabled` in `global-values.yaml` (see [opentofu/azure/README.md](../opentofu/azure/README.md#private-cluster--access-options) for the full decision tree):
+
+| `vpn_enabled` | Access method | Guide |
+|---|---|---|
+| `true` (default) | Pritunl VPN — WireGuard-compatible client on developer laptop | **This guide**, below |
+| `false` | Azure Bastion — browser-based SSH through Azure Portal, no VPN client | [BASTION-SETUP.md](BASTION-SETUP.md) |
+
+For the OIDC path, see [OIDC Setup](#github-actions-oidc-path).
 
 ---
 
