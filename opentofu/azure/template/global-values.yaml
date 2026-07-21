@@ -27,10 +27,10 @@ sync-tool:
 
 global:
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
-  skip_network_module: false  # false = reuse existing VNet/subnets (set vnet_name and subnet names below); true = network module creates VNet/subnets
-  vnet_name: ""                  # required when network_module_enabled: false — name of existing VNet (e.g. "ed-dev")
-  aks_subnet_name: ""            # required when network_module_enabled: false — name of existing AKS subnet (e.g. "ed-dev-aks")
-  runner_subnet_name: ""         # required when network_module_enabled: false — name of existing runner subnet (e.g. "ed-dev-runner")
+  skip_network_module: false  # true = reuse existing VNet/subnets (set vnet_name and subnet names below); false = network module creates VNet/subnets
+  vnet_name: ""                  # required when skip_network_module: true — name of existing VNet (e.g. "ed-dev")
+  aks_subnet_name: ""            # required when skip_network_module: true — name of existing AKS subnet (e.g. "ed-dev-aks")
+  runner_subnet_name: ""         # required when skip_network_module: true — name of existing runner subnet (e.g. "ed-dev-runner")
   private_cluster_enabled: true  # true = AKS API server private (requires VPN to access); false = AKS API server public
   sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
   knowledge_platform_ref: "spark-v1.0.2"  # git branch or tag for knowledge-platform (schemas/local upload)
