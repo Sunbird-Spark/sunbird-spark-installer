@@ -38,19 +38,19 @@ variable "skip_network_module" {
 
 variable "vnet_name" {
   type        = string
-  description = "Name of existing VNet to reuse. Required when network_module_enabled is false."
+  description = "Name of existing VNet to reuse. Required when skip_network_module is true."
   default     = ""
 }
 
 variable "aks_subnet_name" {
   type        = string
-  description = "Name of existing AKS subnet to reuse. Required when network_module_enabled is false."
+  description = "Name of existing AKS subnet to reuse. Required when skip_network_module is true."
   default     = ""
 }
 
 variable "runner_subnet_name" {
   type        = string
-  description = "Name of existing runner subnet to reuse. Required when network_module_enabled is false."
+  description = "Name of existing runner subnet to reuse. Required when skip_network_module is true."
   default     = ""
 }
 
