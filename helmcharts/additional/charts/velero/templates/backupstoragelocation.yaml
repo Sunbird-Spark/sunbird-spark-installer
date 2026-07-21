@@ -56,7 +56,6 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- end }}
 
 {{- range .Values.configuration.dbbackupStorageLocation }}
 ---
