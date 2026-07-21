@@ -72,7 +72,7 @@ spark-devops/
 
 1. Create a new **private** repository in your GitHub account or organization.
 
-2. Clone it locally and create the folder structure:
+2. Clone it locally and create the folder structure — stay on the default branch (`main`) for this step:
 
 ```bash
 git clone https://github.com/org-name/spark-devops.git
@@ -84,18 +84,28 @@ mkdir -p .github/workflows configs/demo
 
 ## Step 2 — Copy Workflow Templates
 
+Workflow files must live on `main` (the repo's default branch) — GitHub Actions only lists `workflow_dispatch` workflows for manual triggering if they exist there. They are **not** per-environment.
+
 ```bash
 INSTALLER_PATH=/path/to/sunbird-spark-installer
 
 cp $INSTALLER_PATH/private-repo-setup/.github/workflows/sunbird-spark-platform.yaml .github/workflows/
 cp $INSTALLER_PATH/private-repo-setup/.github/workflows/sunbird-spark-addons.yaml .github/workflows/
+
+git add .github/workflows/
+git commit -m "Add Sunbird Spark deployment workflows"
+git push origin main
 ```
 
 ---
 
 ## Step 3 — Prepare `global-values.yaml`
 
+Create a **branch for this environment** first — one per environment, named to match the `configs/<env>` folder (e.g. `demo`, `dev`, `staging`, `production`). Env config is **not** committed to `main`; only the workflow files (Step 2) live there.
+
 ```bash
+git checkout -b demo   # one branch per environment
+
 cp $INSTALLER_PATH/opentofu/azure/template/global-values.yaml configs/demo/global-values.yaml
 ```
 
@@ -123,7 +133,7 @@ ansible-vault encrypt configs/demo/global-values.yaml
 
 git add configs/demo/global-values.yaml
 git commit -m "Add encrypted environment config"
-git push
+git push -u origin demo   # push the env branch created in Step 3, not main
 ```
 
 > Confirm encryption: the file should start with `$ANSIBLE_VAULT;1.1;AES256`. Never commit it unencrypted.
@@ -259,7 +269,7 @@ Fill in the inputs:
 | Input | Description |
 |-------|-------------|
 | **environment** | Your environment name (e.g. `demo`) |
-| **config_branch** | Branch of your private repo (default: `main`) |
+| **config_branch** | Branch of your private repo holding this environment's config — the branch you created in Step 3 (e.g. `demo`), **not** `main` |
 | **source_branch** | Branch of sunbird-spark-installer (default: `main`) |
 
 Run in three phases:
