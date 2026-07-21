@@ -199,6 +199,9 @@ yugabytecql:
 dialservice: &dialservice
   base_url: "http://dial-service:9000"
 
+sync-tool:
+  enabled: false
+
 search:
   enabled: true
 

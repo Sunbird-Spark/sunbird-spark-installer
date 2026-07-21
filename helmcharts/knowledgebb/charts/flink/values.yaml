@@ -340,7 +340,7 @@ flink_jobs:
         input.topic = "{{ .Values.global.env }}.knowlg.publish.job.request"
         post_publish.topic = "{{ .Values.global.env }}.knowlg.content.postpublish.request"
         mvc.topic = "{{ .Values.global.env }}.knowlg.mvc.processor.job.request"
-        qrimage.topic = "{{ .Values.global.env }}.qrimage.request"
+        qrimage.topic = "{{ .Values.global.env }}.knowlg.qrimage.request"
         dialcode.context.topic = "{{ .Values.global.env }}.dialcode.context.job.request"
         error.topic = "{{ .Values.global.env }}.knowlg.learning.events.failed"
         groupId = "{{ .Values.global.env }}-knowlg-publish-group"

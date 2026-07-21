@@ -278,7 +278,22 @@ helm upgrade --install database-import . \
   --timeout 30m --wait
 ```
 
-Runs `import_data.groovy` → `set_graphid.groovy` → `verify_migration.groovy` inside the JanusGraph pod.
+Runs the following scripts inside the JanusGraph pod in order:
+
+| Script | What it does |
+|--------|-------------|
+| `import_data.groovy` | Imports all nodes and relationships from Neo4j CSV export. Temporarily sets `node_id` (Neo4j internal integer ID) on each vertex to resolve relationship endpoints. |
+| `set_graphid.groovy` | Sets `graphId=domain` on all imported vertices. |
+| `remove_node_id.groovy` | Removes the temporary `node_id` property from all vertices in batches of 200. `node_id` is a Neo4j internal ID with no meaning in JanusGraph — it must be cleaned up after import. |
+| `verify_migration.groovy` | Prints vertex/edge counts and a sample vertex for sanity check. |
+
+> **Known issue (fixed):** Older versions of the migration pipeline did not include `remove_node_id.groovy`. If you migrated with an older version, `node_id` will still be present on all JanusGraph nodes. Run the cleanup manually:
+> ```bash
+> kubectl cp migration/database/import/files/remove_node_id.groovy \
+>   sunbird/<janusgraph-pod>:/tmp/remove_node_id.groovy -c janusgraph
+> kubectl exec -n sunbird <janusgraph-pod> -c janusgraph -- \
+>   /opt/bitnami/janusgraph/bin/gremlin.sh -e /tmp/remove_node_id.groovy
+> ```
 
 ---
 
@@ -480,6 +495,7 @@ Trigger the GitHub Action with only these inputs:
 | YCQL keyspace not found | `targetPrefix` mismatch vs `global.env` | Fix prefix in Phase 4.3, rerun |
 | Mobile app cannot login | android client redirectUris not updated | Check Phase 6.1 job logs |
 | `helm timeout` on import job | Job is working but slow | Increase `--timeout 120m` |
+| JanusGraph nodes have `node_id` property after migration | Migrated with older pipeline that lacked `remove_node_id.groovy` | Run `remove_node_id.groovy` manually — see Phase 4.4 known issue |
 
 ---
 
