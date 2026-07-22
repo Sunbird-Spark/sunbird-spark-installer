@@ -53,6 +53,13 @@ global:
   openai_azure_endpoint: "REPLACE_WITH_OPENAI_AZURE_ENDPOINT"  # e.g. https://<resource>.openai.azure.com/
   openai_azure_deployment: "text-embedding-3-small"
   openai_azure_api_version: "2023-05-15"
+  # ai-pipeline (PyFlink) jobs: enrichment-router / caption-generator.
+  # No knowlg_api_key needed — internal calls to the knowlg platform
+  # require no auth. ai_pipeline_llm_api_key is injected directly as a
+  # plaintext env var (SUNBIRD_AI_MULTILINGUAL_API_KEY) via
+  # helmcharts/knowledgebb/charts/py-flink values.yaml's `extraEnv` for
+  # now — TEMPORARY, move to a real K8s Secret before production use.
+  ai_pipeline_llm_api_key: "REPLACE_WITH_LLM_API_KEY"
   superset:
       init:
         adminUser:
