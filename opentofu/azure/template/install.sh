@@ -32,9 +32,6 @@ function create_tf_resources() {
     deploy_tf_module network
     deploy_tf_module storage
     deploy_tf_module aks
-    building_block=$(yq '.global.building_block' global-values.yaml)
-    cluster_name="${building_block}-${environment}"
-    az aks get-credentials --name "$cluster_name" --resource-group "$cluster_name" --overwrite-existing
     deploy_tf_module workload-identity
     deploy_tf_module random_passwords
     deploy_tf_module keys

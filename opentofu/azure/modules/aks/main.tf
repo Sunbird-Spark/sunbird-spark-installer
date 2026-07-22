@@ -84,8 +84,6 @@ provider "azurerm" {
   #       )
   #   depends_on = [ azurerm_kubernetes_cluster.aks ]
   # }
-  # kubeconfig is fetched by the self-hosted runner VM via install.sh
-  # az aks get-credentials cannot run from laptop against a private cluster
 
   # Pre-create private LB in future if ever there is an instance of private ip
   # taken by node or some other service.
