@@ -1,0 +1,34 @@
+{{/*
+One Service per enabled py_flink_jobs.<name>, exposing only the
+Prometheus metrics port — unlike the sibling `flink` chart's
+service.yaml (jobmanager + taskmanager Service pair per job), each
+PyFlink job here is a single process (see templates/deployment.yaml),
+so there's exactly one Service per job.
+
+Inert until ai-pipeline exposes a Prometheus reporter on prom_port —
+see values.yaml serviceMonitor/prom_port comments.
+*/}}
+{{- range $jobName, $jobData := .Values.py_flink_jobs }}
+{{- if $jobData.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ $.Release.Namespace }}
+  name: {{ $jobName }}
+  labels:
+    {{- include "common.labels.standard" (dict "customLabels" $.Values.commonLabels "context" $) | nindent 4 }}
+  {{- if $.Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" $.Values.commonAnnotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: prom
+      port: {{ $jobData.prom_port | default $.Values.prom_port }}
+  selector:
+    app.kubernetes.io/component: {{ $jobName }}
+{{- end }}
+{{- end }}

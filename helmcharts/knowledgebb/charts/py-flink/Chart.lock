@@ -1,0 +1,6 @@
+dependencies:
+- name: common
+  repository: https://nimbushubin.github.io/helmcharts
+  version: 0.1.0
+digest: sha256:1caa4d36f25ec305383122b0a8a6d585921a608b03d9aaf15fa70b5044d109ea
+generated: "2026-07-22T12:56:38.312556+05:30"
