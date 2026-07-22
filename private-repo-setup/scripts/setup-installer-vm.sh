@@ -396,7 +396,7 @@ if [ "$VPN_ENABLED" = "true" ]; then
     if [ -n "$NSG_ID" ]; then
       VM_NSG=$(basename "$NSG_ID")
     else
-      echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 12548, UDP 11485, TCP 443"
+      echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 1194, TCP 443"
       VM_NSG=""
     fi
   fi
@@ -405,19 +405,14 @@ if [ "$VPN_ENABLED" = "true" ]; then
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
       --name "allow-pritunl-vpn" --priority 100 --protocol Udp \
-      --destination-port-range 12548 --access Allow 2>/dev/null || true
+      --destination-port-range 1194 --access Allow 2>/dev/null || true
 
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
       --name "allow-pritunl-ui" --priority 110 --protocol Tcp \
       --destination-port-range 443 --access Allow 2>/dev/null || true
 
-    az network nsg rule create \
-      --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
-      --name "allow-wireguard-wg" --priority 120 --protocol Udp \
-      --destination-port-range 11485 --access Allow 2>/dev/null || true
-
-    echo "✓ NSG rules added (UDP 12548, UDP 11485, TCP 443)"
+    echo "✓ NSG rules added (UDP 1194, TCP 443)"
   fi
 else
   echo "✓ VPN disabled - no NSG rules added (VM has no public IP; access via Azure Bastion)"
