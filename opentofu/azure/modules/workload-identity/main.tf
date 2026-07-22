@@ -53,28 +53,6 @@ resource "azurerm_federated_identity_credential" "workload_identity" {
   subject             = "system:serviceaccount:${each.value.namespace}:${each.value.name}"
 }
 
-resource "azurerm_role_definition" "blob_operator_least_privilege" {
-  name        = "${local.environment_name}-blob-operator-least-privilege"
-  scope       = var.storage_account_id
-  description = "Custom role for blob operations with least privilege - read, write, delete, move blobs. Cannot create/delete/manage containers."
-
-  assignable_scopes = [var.storage_account_id]
-
-  permissions {
-    actions = [
-      "Microsoft.Storage/storageAccounts/blobServices/containers/read",
-    ]
-
-    data_actions = [
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action",
-    ]
-  }
-}
-
 # Storage account-level role for generating user delegation keys (required for SAS tokens).
 # This permission cannot be granted at container scope — it must be at the storage account level.
 resource "azurerm_role_definition" "user_delegation_key" {
