@@ -358,3 +358,25 @@ global:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
     tag: "spark-v1.0.2_cbe9e07"
+
+  # ai-pipeline (PyFlink 1.20) jobs, deployed via the consolidated
+  # `py-flink` chart's py_flink_jobs map (helmcharts/knowledgebb/charts/
+  # py-flink) — each job entry there points at one of these anchors via
+  # its own `globalImageKey`, since (unlike knowledgeflink/learnflink
+  # above, which are one shared JVM image per building block selected via
+  # --job-classname) each PyFlink job ships its own dedicated image. See
+  # ai-pipeline/docker/Dockerfile.enrichment-router and
+  # Dockerfile.caption-generator.
+  #
+  # TEMPORARY: pointed at personal Docker Hub test images for the
+  # ai-pipeline-test sanity deploy — swap back to the real ghcr.io/sunbird
+  # images once a real CI build/push exists.
+  enrichment_router:
+    registry: "docker.io"
+    repository: "chethann07/enrichment-router"
+    tag: "v1"
+
+  caption_generator:
+    registry: "docker.io"
+    repository: "chethann07/caption-generator"
+    tag: "v1"
