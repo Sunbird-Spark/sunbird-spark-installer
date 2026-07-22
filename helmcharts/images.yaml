@@ -163,6 +163,10 @@ images:
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "spark-v1.0.2_b8305ee"
 
+  yugabyte_backup: &yugabyte_backup
+    repository: "ghcr.io/sunbird-spark/yugabyte-backup"
+    tag: "1.0.0"
+
 # Internal block with pull secrets
 internal: &internal
   velero:
@@ -341,6 +345,11 @@ internal: &internal
 
   secor:
     image: *secor
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  yugabyte-backup:
+    image: *yugabyte_backup
     imagePullSecrets:
       - name: "registry-secret-name"
 
