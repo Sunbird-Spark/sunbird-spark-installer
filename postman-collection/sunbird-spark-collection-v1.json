@@ -1615,7 +1615,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"request\": {\n    \"id\": \"appFaqURL\",\n    \"field\": \"appFaqURL\",\n    \"value\": \"{{blob_store_path}}{{public_container_name}}/public/app-faq/resources/res\"\n  }\n}",
+							"raw": "{\n  \"request\": {\n    \"id\": \"appFaqURL\",\n    \"field\": \"appFaqURL\",\n    \"value\": \"{{blob_store_path}}/{{public_container_name}}/public/app-faq/resources/res\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1756,7 +1756,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"request\": {\n    \"id\": \"portalFaqURL\",\n    \"field\": \"portalFaqURL\",\n    \"value\": \"{{blob_store_path}}{{public_container_name}}/public/portal-faq/resources/res\"\n  }\n}",
+							"raw": "{\n  \"request\": {\n    \"id\": \"portalFaqURL\",\n    \"field\": \"portalFaqURL\",\n    \"value\": \"{{blob_store_path}}/{{public_container_name}}/public/portal-faq/resources/res\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1897,7 +1897,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"request\": {\n    \"id\": \"orgAdminTnc\",\n    \"field\": \"orgAdminTnc\",\n    \"value\": \"{\\\"latestVersion\\\":\\\"1.0.0\\\",\\\"1.0.0\\\":{\\\"url\\\":\\\"{{blob_store_path}}{{public_container_name}}/termsandcondtions/terms-and-conditions-v9.html#termsOfUse\\\"}}\"\n  }\n}",
+							"raw": "{\n  \"request\": {\n    \"id\": \"orgAdminTnc\",\n    \"field\": \"orgAdminTnc\",\n    \"value\": \"{\\\"latestVersion\\\":\\\"1.0.0\\\",\\\"1.0.0\\\":{\\\"url\\\":\\\"{{blob_store_path}}/{{public_container_name}}/termsandcondtions/terms-and-conditions-v9.html#termsOfUse\\\"}}\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
