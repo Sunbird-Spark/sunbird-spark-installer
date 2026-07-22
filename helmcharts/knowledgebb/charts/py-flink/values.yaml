@@ -1,0 +1,318 @@
+# py-flink: consolidated chart for ai-pipeline's PyFlink 1.20 jobs.
+#
+# Structural pattern mirrors the sibling `flink` chart (../flink) exactly:
+# one map of jobs (here `py_flink_jobs`, there `flink_jobs`), with
+# templates/*.yaml ranging over that map and skipping any entry whose
+# `enabled` is false. Each entry can override `resources` (falls back to
+# the chart-level `resources` default below otherwise), same as
+# `flink`'s flink_jobs.*.resources override.
+#
+# What's genuinely different from `flink` (see Chart.yaml description for
+# the short version):
+#   - no shared global.knowledgeflink image + --job-classname selection —
+#     each job entry names its own helmcharts/images.yaml anchor via
+#     `globalImageKey` (global.enrichment_router / global.caption_generator).
+#   - no jobmanager/taskmanager Deployment pair per job — the image's own
+#     ENTRYPOINT already runs `flink run -py <entrypoint>.py --config
+#     config.yaml` as a single process, so templates/deployment.yaml emits
+#     exactly one Deployment per job.
+#   - config.yaml (ai-pipeline/jobs/<name>/config.yaml, upstream) is
+#     reproduced verbatim under each job's `config:` key, rendered into a
+#     ConfigMap and mounted at `configPath`. Secrets are deliberately left
+#     out of `config:` — they're injected as SUNBIRD_AI_* env vars instead,
+#     since ai-pipeline's JobConfig always prefers the env var override
+#     over the YAML file value (see ai-pipeline/core/docs/01_config.md).
+#
+# NOTE on secrets (temporary): the knowlg platform requires no auth for
+# these internal, same-cluster calls, so no key is needed there at all.
+# The LLM (multilingual translation) API key IS a real external secret,
+# but for now it's injected directly as a plaintext env var via
+# `extraEnv` below (values-file-controlled) rather than a K8s Secret —
+# deliberately simple to start; this must move to a proper Secret +
+# secretEnv reference before any real deployment.
+
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 1
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsUser: 9999
+  fsGroup: 9999
+
+securityContext: {}
+
+commonLabels: {}
+commonAnnotations:
+  reloader.stakater.com/auto: "true"
+
+# Fallback for any py_flink_jobs entry that doesn't set its own
+# `resources` (see templates/deployment.yaml) — mirrors `flink`'s
+# top-level `resources` + per-job flink_jobs.*.resources override.
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 1
+    memory: 2Gi
+
+# Each job here is a singleton streaming job (one `flink run -py` driver
+# process), not a horizontally-scalable stateless service — replicaCount
+# stays at 1 and autoscaling is disabled by default, kept only for parity
+# with other charts in this repo. In-job parallelism is controlled by
+# each job's config.job.parallelism instead.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+# No GPU node-pool convention (nodeSelector/tolerations/taints/runtimeClass
+# for e.g. nvidia.com/gpu) exists anywhere else in this repo today (checked
+# learnbb and every other building block). caption-generator's
+# transcription.device below defaults to "cpu" to match that reality. If/
+# when a GPU node pool is added, set transcription.device: "cuda" on that
+# job's config and populate nodeSelector/tolerations here (e.g. a taint
+# like `nvidia.com/gpu=present:NoSchedule` + matching toleration).
+
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
+initContainers: {}
+sidecars: {}
+
+# Plumbing only for now — enabled: false, and no metrics.reporter is
+# configured in ai-pipeline's job config yet (tracked separately). Mirrors
+# the sibling `flink` chart's serviceMonitor pattern, but with a single
+# "job" component instead of a jobmanager/taskmanager pair, since each
+# py_flink_jobs entry is one process (see templates/deployment.yaml).
+# Once a Prometheus reporter is added on the ai-pipeline side, enabling
+# this + setting prom_port to match is a values-only change.
+serviceMonitor: &serviceMonitor
+  enabled: false
+  job:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: monitoring # additional labels e.g. release: prometheus
+    honorLabels: true
+    jobLabel: "app.kubernetes.io/name"
+    port: prom
+
+# Inert until ai-pipeline exposes a Prometheus reporter on this port.
+prom_port: 9249
+
+py_flink_jobs:
+  enrichment-router:
+    enabled: true
+
+    # Points at helmcharts/images.yaml's global.enrichment_router anchor
+    # (registry/repository/tag) — see templates/deployment.yaml.
+    globalImageKey: enrichment_router
+
+    # Path the job's baked-in ENTRYPOINT expects
+    # (`flink run -py enrichment_router/main.py --config config.yaml`,
+    # run from WORKDIR /opt/sunbird-ai/jobs/enrichment_router — see
+    # ai-pipeline/docker/Dockerfile.enrichment-router).
+    configPath: /opt/sunbird-ai/jobs/enrichment_router/config.yaml
+
+    # Light job: read-only consumer, no model inference.
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+
+    # ── ai-pipeline jobs/enrichment_router/config.yaml, templated ─────────
+    # Same key names/nesting as the upstream config.yaml. Secrets
+    # (api keys, non-OIDC cloud storage credentials) are deliberately left
+    # out — injected as SUNBIRD_AI_* env vars via secretEnv below instead.
+    config:
+      job:
+        name: enrichment-router
+        parallelism: 4
+
+      kafka:
+        brokers: "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+        group_id: "{{ .Values.global.env }}-enrichment-router"
+        topics:
+          input: "{{ .Values.global.env }}.enriched.metadata"
+          transcription_out: "{{ .Values.global.env }}.media.transcription.request"
+          multilingual_out: "{{ .Values.global.env }}.media.multilingual.request"
+
+      janusgraph:
+        # janusgraph is a sibling subchart in this same knowledgebb
+        # umbrella/namespace (charts/janusgraph, fullnameOverride:
+        # "janusgraph"), reachable in-cluster by bare service name.
+        host: "{{ .Values.global.janusgraph.host }}"
+        port: "{{ .Values.global.janusgraph.port }}"
+
+      schema:
+        base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
+
+      knowlg:
+        # Matches the content_service_url convention already used by
+        # learnbb/charts/flink and edbb/charts/kong-apis (service name
+        # "knowlg-service", port 9000). No api_key — internal calls to the
+        # knowlg platform require no auth.
+        content_service_url: "http://knowlg-service:9000"
+        apis:
+          transcript_create: /content/v4/transcript/create
+          content_read: /content/v4/read/{identifier}
+
+      cloud_storage_type: azure
+      cloud_storage_auth_type: OIDC
+      cloud_storage_container: "{{ .Values.global.public_container_name }}"
+      # Only needed when cloud_storage_auth_type is ACCESS_KEY/IAM/DEV
+      # instead of OIDC (workload identity is the default here, matching
+      # the rest of this repo's azure.workload.identity/use convention —
+      # see templates/deployment.yaml). Leave empty for OIDC/IAM. See
+      # ai-pipeline/core/sunbird_ai_core/storage/blob_util.py for the
+      # exact keys each combination expects.
+      cloud_storage_auth: {}
+
+      enrichment:
+        transcript:
+          enabled: true
+          mime_types:
+            - video/mp4
+            - video/webm
+          languages: []
+          auto_approve:
+            source: false
+            multilingual: true
+
+    # No secrets needed — enrichment-router never calls an external
+    # authenticated API.
+    secretEnv: []
+    extraEnv: []
+
+    serviceMonitor: *serviceMonitor
+
+  caption-generator:
+    enabled: true
+
+    # Points at helmcharts/images.yaml's global.caption_generator anchor
+    # (registry/repository/tag) — see templates/deployment.yaml.
+    globalImageKey: caption_generator
+
+    # Path the job's baked-in ENTRYPOINT expects
+    # (`flink run -py caption_generator/main.py --config config.yaml`,
+    # run from WORKDIR /opt/sunbird-ai/jobs/caption_generator — see
+    # ai-pipeline/docker/Dockerfile.caption-generator).
+    configPath: /opt/sunbird-ai/jobs/caption_generator/config.yaml
+
+    # Heavier job: faster-whisper transcription (CPU by default, see
+    # transcription.device below) + concurrent per-language LLM
+    # translation calls via ThreadPoolExecutor.
+    resources:
+      requests:
+        cpu: "2"
+        memory: 4Gi
+      limits:
+        cpu: "4"
+        memory: 8Gi
+
+    # ── ai-pipeline jobs/caption_generator/config.yaml, templated ─────────
+    # Same key names/nesting as the upstream config.yaml. Secrets (api
+    # keys) are deliberately left out — injected as SUNBIRD_AI_* env vars
+    # via secretEnv below instead.
+    config:
+      job:
+        name: caption-generator
+        parallelism: 4
+
+      kafka:
+        brokers: "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+        group_id: "{{ .Values.global.env }}-caption-generator"
+        topics:
+          transcription_in: "{{ .Values.global.env }}.media.transcription.request"
+          multilingual_in: "{{ .Values.global.env }}.media.multilingual.request"
+          transcription_dlq: "{{ .Values.global.env }}.media.transcription.dlq"
+          multilingual_dlq: "{{ .Values.global.env }}.media.multilingual.dlq"
+
+      janusgraph:
+        # janusgraph is a sibling subchart in this same knowledgebb
+        # umbrella/namespace (charts/janusgraph, fullnameOverride:
+        # "janusgraph"), reachable in-cluster by bare service name.
+        host: "{{ .Values.global.janusgraph.host }}"
+        port: "{{ .Values.global.janusgraph.port }}"
+
+      schema:
+        base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
+
+      knowlg:
+        # Matches the content_service_url convention already used by
+        # learnbb/charts/flink and edbb/charts/kong-apis (service name
+        # "knowlg-service", port 9000). No api_key — internal calls to the
+        # knowlg platform require no auth.
+        content_service_url: "http://knowlg-service:9000"
+        apis:
+          transcript_create: /content/v4/transcript/create
+          content_read: /content/v4/read/{identifier}
+
+      cloud_storage_type: azure
+      cloud_storage_auth_type: OIDC
+      cloud_storage_container: "{{ .Values.global.public_container_name }}"
+      # See config.cloud_storage_auth above (enrichment-router entry) for
+      # when this needs to be populated instead of left empty.
+      cloud_storage_auth: {}
+
+      transcription:
+        provider: faster_whisper
+        model: large-v3-turbo
+        device: cpu # set to "cuda" only once a GPU node pool exists (see nodeSelector/tolerations comment above)
+        compute_type: int8
+        auto_approve: false
+
+      multilingual:
+        provider: litellm
+        # LLM model identifier passed straight through to LiteLLM (e.g.
+        # "azure/gpt-4o-mini", "gpt-4o-mini" — see LiteLLM provider docs).
+        # API key is injected via extraEnv below, never set in config
+        # directly.
+        model: "gpt-4o-mini"
+        batch_size: 80
+        context_overlap: 2
+        auto_approve: true
+        ecar:
+          # Source language must always be Live for ECAR generation to
+          # trigger. true (default): a permanently Failed language does
+          # not block ECAR generation — the ECAR is built from whatever
+          # languages succeeded. false: Failed is treated the same as
+          # Draft/Review/Processing — blocks generation until that
+          # language is retried/fixed.
+          allow_failed_languages: true
+
+    # No knowlg secret needed (internal calls, no auth). The LLM API key IS
+    # a real external secret — TEMPORARY: injected here as a plaintext env
+    # var straight from values, not yet a K8s Secret. Replace with a
+    # secretEnv entry (see enrichment-router's secretEnv comment history /
+    # git blame for the pattern) before any real deployment.
+    secretEnv: []
+    extraEnv:
+      - name: SUNBIRD_AI_MULTILINGUAL_API_KEY
+        value: "{{ .Values.global.ai_pipeline_llm_api_key }}"
+
+    serviceMonitor: *serviceMonitor

@@ -1,0 +1,28 @@
+apiVersion: v2
+name: py-flink
+description: >-
+  Consolidated Helm chart for PyFlink 1.20 streaming jobs from the
+  ai-pipeline repo (jobs/<name>). Each job is an entry in the
+  `py_flink_jobs` map (values.yaml), and templates/ range over that map to
+  produce one Deployment/ConfigMap per enabled job — the same "map of
+  jobs, range over templates" structural pattern the sibling `flink` chart
+  (../flink) uses for its flink_jobs map, adapted for Python jobs:
+    - each job ships its own dedicated Docker image (different deps —
+      caption-generator needs ffmpeg/faster-whisper/LiteLLM, enrichment-router
+      is lightweight), referenced via a per-job `globalImageKey` into
+      helmcharts/images.yaml's global.<key> anchor, instead of one shared
+      global.knowledgeflink image;
+    - each job runs via the image's own `flink run -py <entrypoint>.py
+      --config config.yaml` ENTRYPOINT (single process, no
+      --job-classname / jobmanager-taskmanager split);
+    - config is a YAML file mounted via ConfigMap, with
+      SUNBIRD_AI_<DOTTED_KEY> env var overrides for secrets (see
+      ai-pipeline/core/docs/01_config.md), not HOCON .conf with ${VAR}
+      substitution.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+dependencies:
+  - name: common
+    repository: https://nimbushubin.github.io/helmcharts
+    version: 0.1.0
