@@ -1,0 +1,114 @@
+{{/*
+One Deployment per enabled py_flink_jobs.<name> entry. Unlike the JVM
+`flink` chart's deployment.yaml (jobmanager + taskmanager Deployment pair
+per job, launched via standalone-job.sh --job-classname /
+taskmanager.sh), each PyFlink job here is a single process launched by
+the job's own Docker image ENTRYPOINT
+(`flink run -py <entrypoint>.py --config config.yaml`) — so there's
+exactly one Deployment per job, and no --job-classname/command override
+needed here at all.
+*/}}
+{{- $currentScope := . }}
+{{- range $jobName, $jobData := .Values.py_flink_jobs }}
+{{- if $jobData.enabled }}
+{{- with $currentScope }}
+{{- $img := index .Values.global $jobData.globalImageKey }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $jobName }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  annotations:
+    checksum/job-config: {{ $jobData.config | toYaml | sha256sum }}
+  {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+      app.kubernetes.io/component: {{ $jobName }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "common.names.name" . }}
+        app.kubernetes.io/component: {{ $jobName }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
+      annotations:
+        checksum/job-config: {{ $jobData.config | toYaml | sha256sum }}
+    spec:
+      {{- if or .Values.serviceAccount.create .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name | default (.Values.serviceAccount.name | default $jobName) }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $jobName }}
+          image: "{{ $img.registry }}/{{ $img.repository }}:{{ $img.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+            - name: AZURE_CLIENT_ID
+              value: "{{ .Values.global.azure_client_id }}"
+            {{- end }}
+            {{- range $jobData.secretEnv }}
+            - name: {{ .envName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
+                  optional: {{ .optional | default false }}
+            {{- end }}
+            {{- if $jobData.extraEnv }}
+            {{- include "common.tplvalues.render" (dict "value" $jobData.extraEnv "context" $) | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- if $jobData.resources }}
+            {{- toYaml $jobData.resources | nindent 12 }}
+            {{- else }}
+            {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: {{ $jobData.configPath }}
+              subPath: config.yaml
+      {{- with .Values.sidecars }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ printf "%s-config" $jobName }}
+            items:
+              - key: config.yaml
+                path: config.yaml
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
