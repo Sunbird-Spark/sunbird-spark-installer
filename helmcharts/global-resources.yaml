@@ -120,9 +120,33 @@ search:
       memory: 100Mi
     limits:
       cpu: 1
-      memory: 1024Mi 
+      memory: 1024Mi
 
-#learnbb     
+# ai-pipeline (PyFlink) jobs — deployed via the consolidated `py-flink`
+# chart's py_flink_jobs map (helmcharts/knowledgebb/charts/py-flink), not
+# via the shared JVM `flink` chart's flink_jobs map (see that chart's
+# values.yaml header for why the two families of jobs need different
+# chart shapes).
+py-flink:
+  py_flink_jobs:
+    enrichment-router:
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+        limits:
+          cpu: 1
+          memory: 2Gi
+    caption-generator:
+      resources:
+        requests:
+          cpu: "2"
+          memory: 4Gi
+        limits:
+          cpu: "4"
+          memory: 8Gi
+
+#learnbb
 cert:
   resources:
     requests:
