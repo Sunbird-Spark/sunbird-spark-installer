@@ -157,7 +157,7 @@ py_flink_jobs:
         brokers: "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
         group_id: "{{ .Values.global.env }}-enrichment-router"
         topics:
-          input: "{{ .Values.global.env }}.enriched.metadata"
+          input: "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
           transcription_out: "{{ .Values.global.env }}.media.transcription.request"
           multilingual_out: "{{ .Values.global.env }}.media.multilingual.request"
 
