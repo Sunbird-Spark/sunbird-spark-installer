@@ -12,14 +12,14 @@ description: >-
       is lightweight), referenced via a per-job `globalImageKey` into
       helmcharts/images.yaml's global.<key> anchor, instead of one shared
       global.knowledgeflink image;
-    - each job gets a dedicated session cluster — a real JobManager +
-      TaskManager(s) Deployment pair, started plain (jobmanager /
-      taskmanager, no job baked into the command — PyFlink's PythonDriver
-      doesn't support Application Mode's --job-classname loading the way
-      real Java job classes do), plus a one-shot submit Job
-      (templates/job-submit.yaml) that runs `flink run -py <entrypoint>.py
-      --config config.yaml -m <jm-service>:<rest-port>` against it once
-      it's up;
+    - each job runs in real Application Mode — a dedicated JobManager +
+      TaskManager(s) Deployment pair per job (same shape as `flink`'s
+      JM/TM split), launched via standalone-job.sh --job-classname
+      org.apache.flink.client.python.PythonDriver -py <entrypoint>.py
+      --config config.yaml (JM) / taskmanager.sh (TM) — all cluster
+      config (ports, parallelism) via FLINK_PROPERTIES, never mixed into
+      PythonDriver's own args, since its arg parser is strict and breaks
+      on any flag it doesn't recognize;
     - config is a YAML file mounted via ConfigMap, with
       SUNBIRD_AI_<DOTTED_KEY> env var overrides for secrets (see
       ai-pipeline/core/docs/01_config.md), not HOCON .conf with ${VAR}
