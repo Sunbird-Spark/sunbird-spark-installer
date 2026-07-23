@@ -117,10 +117,10 @@ kafka: &kafka
     - name: "{{ .Values.global.env }}.knowlg.embedding.chunks"
       partitions: 1
       replicationFactor: 1
-    # ai-pipeline (PyFlink) jobs: enrichment-router / caption-generator
-    - name: "{{ .Values.global.env }}.enriched.metadata"
-      partitions: 1
-      replicationFactor: 1
+    # ai-pipeline (PyFlink) jobs: enrichment-router / caption-generator.
+    # enrichment-router's input is the existing
+    # {{ .Values.global.env }}.knowlg.enriched.content.metadata topic above
+    # (real content-publish events) — not a separate topic.
     - name: "{{ .Values.global.env }}.media.transcription.request"
       partitions: 1
       replicationFactor: 1
