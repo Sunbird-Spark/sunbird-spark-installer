@@ -1,12 +1,16 @@
 {{/*
-One Deployment per enabled py_flink_jobs.<name> entry. Unlike the JVM
-`flink` chart's deployment.yaml (jobmanager + taskmanager Deployment pair
-per job, launched via standalone-job.sh --job-classname /
-taskmanager.sh), each PyFlink job here is a single process launched by
-the job's own Docker image ENTRYPOINT
-(`flink run -py <entrypoint>.py --config config.yaml`) — so there's
-exactly one Deployment per job, and no --job-classname/command override
-needed here at all.
+JobManager + TaskManager Deployment pair per enabled py_flink_jobs.<name>
+entry — mirrors the sibling `flink` chart's deployment.yaml exactly
+(standalone-job.sh + --job-classname for JM, taskmanager.sh for TM),
+adapted for PyFlink: --job-classname is always
+org.apache.flink.client.python.PythonDriver (Flink's own generic driver
+for launching a Python script as the cluster's job), with the job's own
+script path passed via -py and its --config flag forwarded straight
+through. Each job ships its own dedicated image (globalImageKey), unlike
+`flink`'s single shared global.knowledgeflink image.
+
+TM discovers JM via the Service templates/service.yaml creates, named
+{{ jobName }}-jobmanager (bare in-cluster DNS, same namespace).
 */}}
 {{- $currentScope := . }}
 {{- range $jobName, $jobData := .Values.py_flink_jobs }}
@@ -17,7 +21,7 @@ needed here at all.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $jobName }}
+  name: {{ printf "%s-taskmanager" $jobName }}
   namespace: {{ .Release.Namespace }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
   annotations:
@@ -26,16 +30,16 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ $jobData.taskManagerReplicas | default .Values.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "common.names.name" . }}
-      app.kubernetes.io/component: {{ $jobName }}
+      app.kubernetes.io/component: {{ printf "%s-taskmanager" $jobName }}
   template:
     metadata:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
-        app.kubernetes.io/component: {{ $jobName }}
+        app.kubernetes.io/component: {{ printf "%s-taskmanager" $jobName }}
         {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
         azure.workload.identity/use: "true"
         {{- end }}
@@ -56,9 +60,22 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ $jobName }}
+        - name: {{ $jobName }}-taskmanager
           image: "{{ $img.registry }}/{{ $img.repository }}:{{ $img.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # Python UDFs/process functions run in a worker process spawned by
+          # the TaskManager (not the JobManager) — same workingDir as the JM
+          # so any relative-path config lookup behaves identically.
+          workingDir: /opt/sunbird-ai/jobs/{{ $jobData.jobDir }}
+          command: ["taskmanager"]
+          args: ["start-foreground",
+            "-Djobmanager.rpc.address={{ $jobName }}-jobmanager",
+            "-Djobmanager.rpc.port={{ .Values.jobmanager.rpc_port }}",
+            "-Dtaskmanager.rpc.port={{ .Values.taskmanager.rpc_port }}",
+            "-Dtaskmanager.numberOfTaskSlots={{ $jobData.taskSlots | default .Values.taskmanager.numberOfTaskSlots }}"]
+          ports:
+            - containerPort: {{ .Values.taskmanager.rpc_port }}
+              name: rpc
           env:
             {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
             - name: AZURE_CLIENT_ID
@@ -80,6 +97,126 @@ spec:
             {{- toYaml $jobData.resources | nindent 12 }}
             {{- else }}
             {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: {{ $jobData.configPath }}
+              subPath: config.yaml
+      {{- with .Values.sidecars }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ printf "%s-config" $jobName }}
+            items:
+              - key: config.yaml
+                path: config.yaml
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-jobmanager" $jobName }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  annotations:
+    checksum/job-config: {{ $jobData.config | toYaml | sha256sum }}
+  {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  # Always 1 — this is a dedicated per-job JobManager (Application Mode),
+  # not a shared session cluster; more than one would just fight over
+  # the same job, not add capacity. Scale processing via taskManagerReplicas
+  # / taskSlots instead.
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+      app.kubernetes.io/component: {{ printf "%s-jobmanager" $jobName }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "common.names.name" . }}
+        app.kubernetes.io/component: {{ printf "%s-jobmanager" $jobName }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
+      annotations:
+        checksum/job-config: {{ $jobData.config | toYaml | sha256sum }}
+    spec:
+      {{- if or .Values.serviceAccount.create .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name | default (.Values.serviceAccount.name | default $jobName) }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $jobName }}-jobmanager
+          image: "{{ $img.registry }}/{{ $img.repository }}:{{ $img.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: /opt/sunbird-ai/jobs/{{ $jobData.jobDir }}
+          command: ["standalone-job"]
+          args: ["start-foreground",
+            "--job-classname", "org.apache.flink.client.python.PythonDriver",
+            "-py", "{{ $jobData.pyEntrypoint }}",
+            "--config", "config.yaml",
+            "-Djobmanager.rpc.address={{ $jobName }}-jobmanager",
+            "-Djobmanager.rpc.port={{ .Values.jobmanager.rpc_port }}",
+            "-Dblob.server.port={{ .Values.jobmanager.blob_port }}",
+            "-Dqueryable-state.server.ports={{ .Values.jobmanager.query_port }}",
+            "-Dparallelism.default={{ $jobData.config.job.parallelism | default 1 }}"]
+          ports:
+            - containerPort: {{ .Values.jobmanager.rpc_port }}
+              name: rpc
+            - containerPort: {{ .Values.jobmanager.blob_port }}
+              name: blob
+            - containerPort: {{ .Values.jobmanager.query_port }}
+              name: query
+            - containerPort: {{ .Values.jobmanager.ui_port }}
+              name: ui
+          env:
+            {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+            - name: AZURE_CLIENT_ID
+              value: "{{ .Values.global.azure_client_id }}"
+            {{- end }}
+            {{- range $jobData.secretEnv }}
+            - name: {{ .envName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
+                  optional: {{ .optional | default false }}
+            {{- end }}
+            {{- if $jobData.extraEnv }}
+            {{- include "common.tplvalues.render" (dict "value" $jobData.extraEnv "context" $) | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- if $jobData.jobManagerResources }}
+            {{- toYaml $jobData.jobManagerResources | nindent 12 }}
+            {{- else }}
+            {{- toYaml .Values.jobManagerResources | nindent 12 }}
             {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}

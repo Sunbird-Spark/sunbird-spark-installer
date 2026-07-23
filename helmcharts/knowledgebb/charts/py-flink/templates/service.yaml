@@ -1,11 +1,11 @@
 {{/*
-One Service per enabled py_flink_jobs.<name>, exposing only the
-Prometheus metrics port — unlike the sibling `flink` chart's
-service.yaml (jobmanager + taskmanager Service pair per job), each
-PyFlink job here is a single process (see templates/deployment.yaml),
-so there's exactly one Service per job.
+JobManager + TaskManager Service pair per enabled py_flink_jobs.<name> —
+mirrors the sibling `flink` chart's service.yaml exactly. The JobManager
+Service name ({{ jobName }}-jobmanager) is what the TaskManager
+Deployment's jobmanager.rpc.address points at (bare in-cluster DNS,
+same namespace) — see templates/deployment.yaml.
 
-Inert until ai-pipeline exposes a Prometheus reporter on prom_port —
+prom ports are inert until ai-pipeline exposes a Prometheus reporter —
 see values.yaml serviceMonitor/prom_port comments.
 */}}
 {{- range $jobName, $jobData := .Values.py_flink_jobs }}
@@ -15,7 +15,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: {{ $.Release.Namespace }}
-  name: {{ $jobName }}
+  name: {{ printf "%s-taskmanager" $jobName }}
   labels:
     {{- include "common.labels.standard" (dict "customLabels" $.Values.commonLabels "context" $) | nindent 4 }}
   {{- if $.Values.commonAnnotations }}
@@ -29,6 +29,34 @@ spec:
     - name: prom
       port: {{ $jobData.prom_port | default $.Values.prom_port }}
   selector:
-    app.kubernetes.io/component: {{ $jobName }}
+    app.kubernetes.io/component: {{ printf "%s-taskmanager" $jobName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ $.Release.Namespace }}
+  name: {{ printf "%s-jobmanager" $jobName }}
+  labels:
+    {{- include "common.labels.standard" (dict "customLabels" $.Values.commonLabels "context" $) | nindent 4 }}
+  {{- if $.Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" $.Values.commonAnnotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: rpc
+      port: {{ $.Values.jobmanager.rpc_port }}
+    - name: blob
+      port: {{ $.Values.jobmanager.blob_port }}
+    - name: query
+      port: {{ $.Values.jobmanager.query_port }}
+    - name: ui
+      port: {{ $.Values.jobmanager.ui_port }}
+    - name: prom
+      port: {{ $jobData.prom_port | default $.Values.prom_port }}
+  selector:
+    app.kubernetes.io/component: {{ printf "%s-jobmanager" $jobName }}
 {{- end }}
 {{- end }}

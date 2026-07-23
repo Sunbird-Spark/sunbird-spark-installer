@@ -12,9 +12,11 @@ description: >-
       is lightweight), referenced via a per-job `globalImageKey` into
       helmcharts/images.yaml's global.<key> anchor, instead of one shared
       global.knowledgeflink image;
-    - each job runs via the image's own `flink run -py <entrypoint>.py
-      --config config.yaml` ENTRYPOINT (single process, no
-      --job-classname / jobmanager-taskmanager split);
+    - each job runs in real standalone Application Mode — a dedicated
+      JobManager + TaskManager(s) Deployment pair per job (same shape as
+      `flink`'s JM/TM split), launched via standalone-job.sh
+      --job-classname org.apache.flink.client.python.PythonDriver -py
+      <entrypoint>.py (JM) / taskmanager.sh (TM);
     - config is a YAML file mounted via ConfigMap, with
       SUNBIRD_AI_<DOTTED_KEY> env var overrides for secrets (see
       ai-pipeline/core/docs/01_config.md), not HOCON .conf with ${VAR}

@@ -1,4 +1,7 @@
-# py-flink: consolidated chart for ai-pipeline's PyFlink 1.20 jobs.
+# py-flink: consolidated chart for ai-pipeline's PyFlink 1.20 jobs,
+# running in real standalone Application Mode — a dedicated JobManager +
+# TaskManager(s) per job (see templates/deployment.yaml), same shape as
+# the sibling `flink` chart's JM/TM pair.
 #
 # Structural pattern mirrors the sibling `flink` chart (../flink) exactly:
 # one map of jobs (here `py_flink_jobs`, there `flink_jobs`), with
@@ -12,10 +15,10 @@
 #   - no shared global.knowledgeflink image + --job-classname selection —
 #     each job entry names its own helmcharts/images.yaml anchor via
 #     `globalImageKey` (global.enrichment_router / global.caption_generator).
-#   - no jobmanager/taskmanager Deployment pair per job — the image's own
-#     ENTRYPOINT already runs `flink run -py <entrypoint>.py --config
-#     config.yaml` as a single process, so templates/deployment.yaml emits
-#     exactly one Deployment per job.
+#   - --job-classname is always org.apache.flink.client.python.PythonDriver
+#     (Flink's own generic driver for running a Python script as the
+#     cluster's job) — the job-specific bit is `pyEntrypoint` (the script
+#     path passed via -py), not a different Java class per job.
 #   - config.yaml (ai-pipeline/jobs/<name>/config.yaml, upstream) is
 #     reproduced verbatim under each job's `config:` key, rendered into a
 #     ConfigMap and mounted at `configPath`. Secrets are deliberately left
@@ -55,6 +58,8 @@ commonAnnotations:
 # Fallback for any py_flink_jobs entry that doesn't set its own
 # `resources` (see templates/deployment.yaml) — mirrors `flink`'s
 # top-level `resources` + per-job flink_jobs.*.resources override.
+# This is the TaskManager default (actual processing happens there);
+# JobManager gets the much lighter jobManagerResources below instead.
 resources:
   requests:
     cpu: 500m
@@ -62,6 +67,34 @@ resources:
   limits:
     cpu: 1
     memory: 2Gi
+
+# JobManager only coordinates (no Kafka/whisper/LLM work happens there) —
+# deliberately light, same for every job unless a job overrides
+# jobManagerResources itself.
+jobManagerResources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+# Standalone Application Mode: dedicated JobManager (always 1 replica,
+# see deployment.yaml) + TaskManager(s) per job, connected via the
+# {{ jobName }}-jobmanager Service — mirrors the sibling `flink` chart's
+# jobmanager/taskmanager port config exactly.
+jobmanager:
+  rpc_port: 6123
+  blob_port: 6124
+  query_port: 6125
+  ui_port: 8081
+
+taskmanager:
+  rpc_port: 6122
+  # Fallback for any py_flink_jobs entry that doesn't set its own
+  # taskSlots. Total parallelism available = taskSlots * taskManagerReplicas
+  # (job-level default replicaCount, or a job's own taskManagerReplicas).
+  numberOfTaskSlots: 4
 
 # Each job here is a singleton streaming job (one `flink run -py` driver
 # process), not a horizontally-scalable stateless service — replicaCount
@@ -100,12 +133,14 @@ initContainers: {}
 sidecars: {}
 
 # Plumbing only for now — enabled: false, and no metrics.reporter is
-# configured in ai-pipeline's job config yet (tracked separately). Mirrors
-# the sibling `flink` chart's serviceMonitor pattern, but with a single
-# "job" component instead of a jobmanager/taskmanager pair, since each
-# py_flink_jobs entry is one process (see templates/deployment.yaml).
-# Once a Prometheus reporter is added on the ai-pipeline side, enabling
-# this + setting prom_port to match is a values-only change.
+# configured in ai-pipeline's job config yet (tracked separately). Both
+# the jobmanager and taskmanager Services expose a "prom" named port
+# (templates/service.yaml); this single broad-selector ServiceMonitor
+# scrapes both, same as the sibling `flink` chart's own selector (which
+# also doesn't distinguish jobmanager vs taskmanager, relying only on the
+# named port existing). Once a Prometheus reporter is added on the
+# ai-pipeline side, enabling this + setting prom_port to match is a
+# values-only change.
 serviceMonitor: &serviceMonitor
   enabled: false
   job:
@@ -129,13 +164,17 @@ py_flink_jobs:
     # (registry/repository/tag) — see templates/deployment.yaml.
     globalImageKey: enrichment_router
 
-    # Path the job's baked-in ENTRYPOINT expects
-    # (`flink run -py enrichment_router/main.py --config config.yaml`,
-    # run from WORKDIR /opt/sunbird-ai/jobs/enrichment_router — see
-    # ai-pipeline/docker/Dockerfile.enrichment-router).
+    # jobDir -> JM/TM containers' workingDir (/opt/sunbird-ai/jobs/<jobDir>).
+    # pyEntrypoint -> the -py argument passed to PythonDriver, relative to
+    # that workingDir (see ai-pipeline/docker/Dockerfile.enrichment-router).
+    jobDir: enrichment_router
+    pyEntrypoint: enrichment_router/main.py
+
     configPath: /opt/sunbird-ai/jobs/enrichment_router/config.yaml
 
-    # Light job: read-only consumer, no model inference.
+    # Light job: read-only consumer, no model inference. This is the
+    # TaskManager's resources (see jobManagerResources for the JM's).
+
     resources:
       requests:
         cpu: 500m
@@ -217,10 +256,12 @@ py_flink_jobs:
     # (registry/repository/tag) — see templates/deployment.yaml.
     globalImageKey: caption_generator
 
-    # Path the job's baked-in ENTRYPOINT expects
-    # (`flink run -py caption_generator/main.py --config config.yaml`,
-    # run from WORKDIR /opt/sunbird-ai/jobs/caption_generator — see
-    # ai-pipeline/docker/Dockerfile.caption-generator).
+    # jobDir -> JM/TM containers' workingDir (/opt/sunbird-ai/jobs/<jobDir>).
+    # pyEntrypoint -> the -py argument passed to PythonDriver, relative to
+    # that workingDir (see ai-pipeline/docker/Dockerfile.caption-generator).
+    jobDir: caption_generator
+    pyEntrypoint: caption_generator/main.py
+
     configPath: /opt/sunbird-ai/jobs/caption_generator/config.yaml
 
     # Heavier job: faster-whisper transcription (CPU by default, see
