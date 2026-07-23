@@ -368,15 +368,15 @@ global:
   # ai-pipeline/docker/Dockerfile.enrichment-router and
   # Dockerfile.caption-generator.
   #
-  # TEMPORARY: pointed at personal Docker Hub test images for the
-  # ai-pipeline-test sanity deploy — swap back to the real ghcr.io/sunbird
-  # images once a real CI build/push exists.
+  # Built and pushed by ai-pipeline's .github/workflows/build.yaml on tag
+  # push — tag format is <git-tag>_<short-sha> (see knowlg-service.yml for
+  # the same convention).
   enrichment_router:
-    registry: "docker.io"
-    repository: "chethann07/enrichment-router"
-    tag: "v1"
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/enrichment-router"
+    tag: "spark-v1.0.3-captions-beta1_b54a5cd"
 
   caption_generator:
-    registry: "docker.io"
-    repository: "chethann07/caption-generator"
-    tag: "v1"
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/caption-generator"
+    tag: "spark-v1.0.3-captions-beta1_b54a5cd"
