@@ -1,22 +1,32 @@
 {{/*
 JobManager + TaskManager Deployment pair per enabled py_flink_jobs.<name>
-entry — real standalone session cluster (not JVM `flink` chart's
---job-classname Application Mode pattern, which doesn't work for PyFlink:
-verified empirically that Flink's ClusterEntrypoint forwards its entire,
-unfiltered arg list to the loaded job class's main(), and PythonDriver's
-own arg parser is strict — any extra flag anywhere breaks it).
+entry — real Application Mode, job baked directly into the JobManager's
+own startup command, same as the sibling `flink` chart's --job-classname
+pattern (a JM restart re-runs this same command, which re-submits the
+job as a side effect — no separate resubmission step needed, matching
+how Java/Scala jobs behave here).
 
-Instead: JM + TM start as a plain generic session cluster (no job baked
-into their command at all — just "jobmanager" / "taskmanager", relying
-on FLINK_PROPERTIES for all cluster config, never args — verified that
-manually including "start-foreground" in args causes docker-entrypoint.sh
-to pass it twice, since it already hardcodes that itself, corrupting
-jobmanager.sh's own positional arg parsing). The actual PyFlink job gets
-submitted separately, once, by templates/job-submit.yaml running
-`flink run -m {{ jobName }}-jobmanager:<rest-port> -py <script> --config
-config.yaml` against this now-real, already-running JobManager — the
-exact `flink run` invocation ai-pipeline used before, which only ever
-failed because no JobManager existed to receive it.
+Two real bugs had to be fixed to get here (both confirmed via direct
+testing, not guesswork):
+  1. Kubernetes' `command:` field replaces the image's ENTRYPOINT
+     entirely (unlike plain `docker run <image> args...`, which appends
+     to it) — so args must NOT set `command:`, and "standalone-job" /
+     "jobmanager" / "taskmanager" go in `args` instead, letting the
+     inherited docker-entrypoint.sh dispatch on them.
+  2. docker-entrypoint.sh's own "standalone-job"/"jobmanager" branches
+     already hardcode "start-foreground" themselves — including it again
+     in our own args gets it forwarded twice, corrupting the underlying
+     script's positional argument parsing.
+  3. PythonDriver (org.apache.flink.client.python.PythonDriver, Flink's
+     generic driver for running a Python script as the cluster's job)
+     has its own strict argument parser — ClusterEntrypoint forwards its
+     entire, unfiltered arg list to it, and PythonDriver breaks on ANY
+     flag it doesn't recognize, anywhere in that list. So JM's `args`
+     must contain ONLY --job-classname/-py/--config — nothing else, no
+     -D flags mixed in. All cluster config (rpc/blob/query/rest ports,
+     parallelism) goes via FLINK_PROPERTIES instead, exactly like the
+     official Flink Kubernetes Operator's own FlinkDeployment spec does
+     for PyFlink jobs (verified against its documented example).
 */}}
 {{- $currentScope := . }}
 {{- range $jobName, $jobData := .Values.py_flink_jobs }}
@@ -71,7 +81,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           # Python UDFs/process functions run in a worker process spawned by
           # the TaskManager (not the JobManager) — same workingDir as the
-          # submit Job so any relative-path config lookup behaves the same.
+          # JobManager so any relative-path config lookup behaves the same.
           workingDir: /opt/sunbird-ai/jobs/{{ $jobData.jobDir }}
           # No `command:` override (Kubernetes' command replaces the
           # image's ENTRYPOINT entirely, unlike plain `docker run <image>
@@ -153,7 +163,7 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  # Always 1 — this is a dedicated per-job session cluster's JobManager,
+  # Always 1 — this is a dedicated per-job JobManager (Application Mode),
   # not a shared multi-tenant one; more than one would just fight over
   # leadership, not add capacity. Scale processing via taskManagerReplicas
   # / taskSlots instead.
@@ -190,9 +200,15 @@ spec:
         - name: {{ $jobName }}-jobmanager
           image: "{{ $img.registry }}/{{ $img.repository }}:{{ $img.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          # No `command:`/"start-foreground" in args — see taskmanager
-          # container's comment above for why.
-          args: ["jobmanager"]
+          workingDir: /opt/sunbird-ai/jobs/{{ $jobData.jobDir }}
+          # No `command:` override, no "start-foreground" in args (see
+          # file header). args must contain ONLY what PythonDriver's own
+          # strict parser understands — --job-classname, -py, --config —
+          # nothing else. All cluster config goes via FLINK_PROPERTIES.
+          args: ["standalone-job",
+            "--job-classname", "org.apache.flink.client.python.PythonDriver",
+            "-py", "{{ $jobData.pyEntrypoint }}",
+            "--config", "config.yaml"]
           ports:
             - containerPort: {{ .Values.jobmanager.rpc_port }}
               name: rpc
@@ -242,9 +258,20 @@ spec:
             {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: {{ $jobData.configPath }}
+              subPath: config.yaml
       {{- with .Values.sidecars }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ printf "%s-config" $jobName }}
+            items:
+              - key: config.yaml
+                path: config.yaml
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
