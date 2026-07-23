@@ -1,9 +1,25 @@
 # py-flink: consolidated chart for ai-pipeline's PyFlink 1.20 jobs,
-# running in real standalone Application Mode — a dedicated JobManager +
-# TaskManager(s) per job (see templates/deployment.yaml), same shape as
-# the sibling `flink` chart's JM/TM pair.
+# running as a real dedicated session cluster per job — JobManager +
+# TaskManager(s) (see templates/deployment.yaml), plus a one-shot submit
+# Job (templates/job-submit.yaml) that actually runs `flink run -py
+# <entrypoint> --config config.yaml -m <jobmanager>:<rest-port>` against
+# it once it's up.
 #
-# Structural pattern mirrors the sibling `flink` chart (../flink) exactly:
+# NOT the same shape as the sibling `flink` chart's JM/TM pair, even
+# though it looks similar: `flink`'s jobs load a real Java class via
+# --job-classname, which Flink's ClusterEntrypoint supports natively.
+# PyFlink's own driver (org.apache.flink.client.python.PythonDriver) does
+# NOT work the same way — verified empirically that ClusterEntrypoint
+# forwards its entire, unfiltered arg list to whatever class
+# --job-classname names, and PythonDriver's own arg parser is strict
+# enough that any extra flag anywhere in that list breaks it. So instead
+# of baking the job into JM's own startup command, JM/TM start as a plain
+# generic session cluster (just "jobmanager" / "taskmanager", all config
+# via FLINK_PROPERTIES) and the job gets submitted separately, once, the
+# normal way `flink run -py` already works when a real JobManager exists
+# to receive it.
+#
+# Structural pattern otherwise mirrors the sibling `flink` chart (../flink):
 # one map of jobs (here `py_flink_jobs`, there `flink_jobs`), with
 # templates/*.yaml ranging over that map and skipping any entry whose
 # `enabled` is false. Each entry can override `resources` (falls back to
@@ -12,13 +28,11 @@
 #
 # What's genuinely different from `flink` (see Chart.yaml description for
 # the short version):
-#   - no shared global.knowledgeflink image + --job-classname selection —
-#     each job entry names its own helmcharts/images.yaml anchor via
-#     `globalImageKey` (global.enrichment_router / global.caption_generator).
-#   - --job-classname is always org.apache.flink.client.python.PythonDriver
-#     (Flink's own generic driver for running a Python script as the
-#     cluster's job) — the job-specific bit is `pyEntrypoint` (the script
-#     path passed via -py), not a different Java class per job.
+#   - no shared global.knowledgeflink image — each job entry names its
+#     own helmcharts/images.yaml anchor via `globalImageKey`
+#     (global.enrichment_router / global.caption_generator).
+#   - `pyEntrypoint` (the -py script path) is the job-specific bit passed
+#     to the submit Job's `flink run`, not a --job-classname selection.
 #   - config.yaml (ai-pipeline/jobs/<name>/config.yaml, upstream) is
 #     reproduced verbatim under each job's `config:` key, rendered into a
 #     ConfigMap and mounted at `configPath`. Secrets are deliberately left

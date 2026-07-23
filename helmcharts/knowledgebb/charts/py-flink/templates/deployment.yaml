@@ -1,16 +1,22 @@
 {{/*
 JobManager + TaskManager Deployment pair per enabled py_flink_jobs.<name>
-entry — mirrors the sibling `flink` chart's deployment.yaml exactly
-(standalone-job.sh + --job-classname for JM, taskmanager.sh for TM),
-adapted for PyFlink: --job-classname is always
-org.apache.flink.client.python.PythonDriver (Flink's own generic driver
-for launching a Python script as the cluster's job), with the job's own
-script path passed via -py and its --config flag forwarded straight
-through. Each job ships its own dedicated image (globalImageKey), unlike
-`flink`'s single shared global.knowledgeflink image.
+entry — real standalone session cluster (not JVM `flink` chart's
+--job-classname Application Mode pattern, which doesn't work for PyFlink:
+verified empirically that Flink's ClusterEntrypoint forwards its entire,
+unfiltered arg list to the loaded job class's main(), and PythonDriver's
+own arg parser is strict — any extra flag anywhere breaks it).
 
-TM discovers JM via the Service templates/service.yaml creates, named
-{{ jobName }}-jobmanager (bare in-cluster DNS, same namespace).
+Instead: JM + TM start as a plain generic session cluster (no job baked
+into their command at all — just "jobmanager" / "taskmanager", relying
+on FLINK_PROPERTIES for all cluster config, never args — verified that
+manually including "start-foreground" in args causes docker-entrypoint.sh
+to pass it twice, since it already hardcodes that itself, corrupting
+jobmanager.sh's own positional arg parsing). The actual PyFlink job gets
+submitted separately, once, by templates/job-submit.yaml running
+`flink run -m {{ jobName }}-jobmanager:<rest-port> -py <script> --config
+config.yaml` against this now-real, already-running JobManager — the
+exact `flink run` invocation ai-pipeline used before, which only ever
+failed because no JobManager existed to receive it.
 */}}
 {{- $currentScope := . }}
 {{- range $jobName, $jobData := .Values.py_flink_jobs }}
@@ -64,19 +70,27 @@ spec:
           image: "{{ $img.registry }}/{{ $img.repository }}:{{ $img.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           # Python UDFs/process functions run in a worker process spawned by
-          # the TaskManager (not the JobManager) — same workingDir as the JM
-          # so any relative-path config lookup behaves identically.
+          # the TaskManager (not the JobManager) — same workingDir as the
+          # submit Job so any relative-path config lookup behaves the same.
           workingDir: /opt/sunbird-ai/jobs/{{ $jobData.jobDir }}
-          command: ["taskmanager"]
-          args: ["start-foreground",
-            "-Djobmanager.rpc.address={{ $jobName }}-jobmanager",
-            "-Djobmanager.rpc.port={{ .Values.jobmanager.rpc_port }}",
-            "-Dtaskmanager.rpc.port={{ .Values.taskmanager.rpc_port }}",
-            "-Dtaskmanager.numberOfTaskSlots={{ $jobData.taskSlots | default .Values.taskmanager.numberOfTaskSlots }}"]
+          # No `command:` override (Kubernetes' command replaces the
+          # image's ENTRYPOINT entirely, unlike plain `docker run <image>
+          # args...` which appends to it) and no "start-foreground" in
+          # args either — docker-entrypoint.sh's own "taskmanager" branch
+          # already hardcodes start-foreground; including it again here
+          # gets forwarded as a stray extra arg. All cluster config goes
+          # via FLINK_PROPERTIES below, never -D flags in args.
+          args: ["taskmanager"]
           ports:
             - containerPort: {{ .Values.taskmanager.rpc_port }}
               name: rpc
           env:
+            - name: FLINK_PROPERTIES
+              value: |
+                jobmanager.rpc.address: {{ printf "%s-jobmanager" $jobName }}
+                jobmanager.rpc.port: {{ .Values.jobmanager.rpc_port }}
+                taskmanager.rpc.port: {{ .Values.taskmanager.rpc_port }}
+                taskmanager.numberOfTaskSlots: {{ $jobData.taskSlots | default .Values.taskmanager.numberOfTaskSlots }}
             {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
             - name: AZURE_CLIENT_ID
               value: "{{ .Values.global.azure_client_id }}"
@@ -139,9 +153,9 @@ metadata:
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
-  # Always 1 — this is a dedicated per-job JobManager (Application Mode),
-  # not a shared session cluster; more than one would just fight over
-  # the same job, not add capacity. Scale processing via taskManagerReplicas
+  # Always 1 — this is a dedicated per-job session cluster's JobManager,
+  # not a shared multi-tenant one; more than one would just fight over
+  # leadership, not add capacity. Scale processing via taskManagerReplicas
   # / taskSlots instead.
   replicas: 1
   selector:
@@ -176,17 +190,9 @@ spec:
         - name: {{ $jobName }}-jobmanager
           image: "{{ $img.registry }}/{{ $img.repository }}:{{ $img.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          workingDir: /opt/sunbird-ai/jobs/{{ $jobData.jobDir }}
-          command: ["standalone-job"]
-          args: ["start-foreground",
-            "--job-classname", "org.apache.flink.client.python.PythonDriver",
-            "-py", "{{ $jobData.pyEntrypoint }}",
-            "--config", "config.yaml",
-            "-Djobmanager.rpc.address={{ $jobName }}-jobmanager",
-            "-Djobmanager.rpc.port={{ .Values.jobmanager.rpc_port }}",
-            "-Dblob.server.port={{ .Values.jobmanager.blob_port }}",
-            "-Dqueryable-state.server.ports={{ .Values.jobmanager.query_port }}",
-            "-Dparallelism.default={{ $jobData.config.job.parallelism | default 1 }}"]
+          # No `command:`/"start-foreground" in args — see taskmanager
+          # container's comment above for why.
+          args: ["jobmanager"]
           ports:
             - containerPort: {{ .Values.jobmanager.rpc_port }}
               name: rpc
@@ -197,6 +203,22 @@ spec:
             - containerPort: {{ .Values.jobmanager.ui_port }}
               name: ui
           env:
+            # JOB_MANAGER_RPC_ADDRESS is read by docker-entrypoint.sh
+            # directly (not just via FLINK_PROPERTIES) to set
+            # jobmanager.rpc.address — verified empirically that without
+            # this explicit env var, it falls back to `hostname -f`, which
+            # resolved to garbage in testing and broke the Service DNS
+            # TaskManagers connect through.
+            - name: JOB_MANAGER_RPC_ADDRESS
+              value: {{ printf "%s-jobmanager" $jobName }}
+            - name: FLINK_PROPERTIES
+              value: |
+                jobmanager.rpc.port: {{ .Values.jobmanager.rpc_port }}
+                blob.server.port: {{ .Values.jobmanager.blob_port }}
+                queryable-state.server.ports: {{ .Values.jobmanager.query_port }}
+                rest.port: {{ .Values.jobmanager.ui_port }}
+                rest.address: 0.0.0.0
+                parallelism.default: {{ $jobData.config.job.parallelism | default 1 }}
             {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
             - name: AZURE_CLIENT_ID
               value: "{{ .Values.global.azure_client_id }}"
@@ -220,20 +242,9 @@ spec:
             {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          volumeMounts:
-            - name: config-volume
-              mountPath: {{ $jobData.configPath }}
-              subPath: config.yaml
       {{- with .Values.sidecars }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      volumes:
-        - name: config-volume
-          configMap:
-            name: {{ printf "%s-config" $jobName }}
-            items:
-              - key: config.yaml
-                path: config.yaml
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
