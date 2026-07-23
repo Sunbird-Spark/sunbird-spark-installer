@@ -119,7 +119,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.3-captions-beta1_467dfa4"
+    tag: "spark-v1.0.3-captions-beta5_408c84c"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
