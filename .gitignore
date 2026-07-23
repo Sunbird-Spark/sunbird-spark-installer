@@ -14,8 +14,10 @@ terragrunt
 .DS_Store
 *.terrahelpbkp
 
-# Ignoring common charts
+# Ignoring common charts (both the extracted dir and the versioned .tgz
+# archive helm dependency update actually produces, e.g. common-0.1.0.tgz)
 **/charts/common
+**/charts/common-*.tgz
 # Ignoring test directories
 **/kitchen
 
