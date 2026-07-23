@@ -234,13 +234,13 @@ py_flink_jobs:
       cloud_storage_type: azure
       cloud_storage_auth_type: OIDC
       cloud_storage_container: "{{ .Values.global.public_container_name }}"
-      # Only needed when cloud_storage_auth_type is ACCESS_KEY/IAM/DEV
-      # instead of OIDC (workload identity is the default here, matching
-      # the rest of this repo's azure.workload.identity/use convention —
-      # see templates/deployment.yaml). Leave empty for OIDC/IAM. See
-      # ai-pipeline/core/sunbird_ai_core/storage/blob_util.py for the
-      # exact keys each combination expects.
-      cloud_storage_auth: {}
+      # account_name is required for every Azure auth_type except DEV (see
+      # ai-pipeline/core/sunbird_ai_core/storage/blob_util.py
+      # _build_storage_options — OIDC/IAM still read config["account_name"],
+      # only account_key is ACCESS_KEY-specific). Derived from
+      # object_storage_endpoint ("<account_name>.blob.core.windows.net").
+      cloud_storage_auth:
+        account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
 
       enrichment:
         transcript:
@@ -327,9 +327,10 @@ py_flink_jobs:
       cloud_storage_type: azure
       cloud_storage_auth_type: OIDC
       cloud_storage_container: "{{ .Values.global.public_container_name }}"
-      # See config.cloud_storage_auth above (enrichment-router entry) for
-      # when this needs to be populated instead of left empty.
-      cloud_storage_auth: {}
+      # See config.cloud_storage_auth above (enrichment-router entry) —
+      # account_name is required for OIDC too, not just ACCESS_KEY/IAM/DEV.
+      cloud_storage_auth:
+        account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
 
       transcription:
         provider: faster_whisper
