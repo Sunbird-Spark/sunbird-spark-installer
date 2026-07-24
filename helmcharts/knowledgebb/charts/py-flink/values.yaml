@@ -241,6 +241,10 @@ py_flink_jobs:
       # object_storage_endpoint ("<account_name>.blob.core.windows.net").
       cloud_storage_auth:
         account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
+      # Host only — used to build public https:// artifactUrl/captionsUrl
+      # instead of the internal az:// scheme, since this container is
+      # public-read (see ai-pipeline/core/sunbird_ai_core/storage/blob_util.py).
+      cloud_storage_public_endpoint: "{{ .Values.global.object_storage_endpoint }}"
 
       enrichment:
         transcript:
@@ -331,6 +335,7 @@ py_flink_jobs:
       # account_name is required for OIDC too, not just ACCESS_KEY/IAM/DEV.
       cloud_storage_auth:
         account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
+      cloud_storage_public_endpoint: "{{ .Values.global.object_storage_endpoint }}"
 
       transcription:
         provider: faster_whisper
