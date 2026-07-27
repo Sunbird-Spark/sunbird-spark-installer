@@ -118,8 +118,8 @@ volume-autoscaler:
 
 yugabyte-backup:
   enabled: false
-  schedule: "0 2 * * *"    # daily at 2 AM UTC
-  retentionDays: "7"
+  schedule: "30 11 * * 5"    # weekly, Friday 5:00 PM IST
+  retentionDays: "56"    # ~8 weekly backups; final count TBD
   ttlSecondsAfterFinished: 86400
   image:
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"

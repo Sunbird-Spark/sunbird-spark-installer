@@ -13,17 +13,17 @@ YB_YSQL_PORT="${YB_YSQL_PORT:-5433}"
 YB_YCQL_PORT="${YB_YCQL_PORT:-9042}"
 YB_USER="${YB_USER:-yugabyte}"
 YB_PASSWORD="${YB_PASSWORD:-yugabyte}"
-YSQL_DATABASES="${YSQL_DATABASES:-keycloak quartz enc-keys registry sunbird}"
+YSQL_DATABASES="${YSQL_DATABASES:-keycloak registry quartz enc-keys kong portal superset sunbird}"
 CLOUD_SERVICE="${CLOUD_SERVICE:-azure}"
 CLOUD_STORAGE_AUTH_TYPE="${CLOUD_STORAGE_AUTH_TYPE:-workload_identity}"
-RETENTION_DAYS="${RETENTION_DAYS:-7}"
+RETENTION_DAYS="${RETENTION_DAYS:-56}"
 
 echo "=== YugabyteDB Backup ==="
 echo "Date     : $BACKUP_DATE"
 echo "Cloud    : $CLOUD_SERVICE"
 echo "Auth     : $CLOUD_STORAGE_AUTH_TYPE"
 
-# ── YSQL Backup (pg_dump per database) ──────────────────────────────────────
+# ── YSQL Backup (pg_dump per database, plain SQL + DROP/CREATE, gzipped) ─────
 echo ""
 echo "--- YSQL Backup ---"
 for db in $YSQL_DATABASES; do
@@ -32,13 +32,15 @@ for db in $YSQL_DATABASES; do
         -h "$YB_HOST" \
         -p "$YB_YSQL_PORT" \
         -U "$YB_USER" \
-        -F c \
-        -d "$db" \
-        -f "$YSQL_DIR/${db}.dump" && \
+        --format=plain \
+        --clean \
+        --if-exists \
+        --create \
+        -d "$db" | gzip > "$YSQL_DIR/${db}.sql.gz" && \
         echo "  ✓ $db dumped" || echo "  ✗ $db failed (skipping)"
 done
 
-# ── YCQL Backup (Python cassandra-driver) ────────────────────────────────────
+# ── YCQL Backup (Python cassandra-driver, then tar+gzip per keyspace) ───────
 echo ""
 echo "--- YCQL Backup ---"
 python3 /ycql_backup.py \
@@ -47,6 +49,13 @@ python3 /ycql_backup.py \
     --output-dir "$YCQL_DIR" \
     --keyspaces "${YCQL_KEYSPACES:-}" && \
     echo "  ✓ YCQL backup complete" || echo "  ✗ YCQL backup failed"
+
+for ks_dir in "$YCQL_DIR"/*/; do
+    [ -d "$ks_dir" ] || continue
+    ks=$(basename "$ks_dir")
+    tar -czf "$YCQL_DIR/${ks}.tar.gz" -C "$YCQL_DIR" "$ks"
+    echo "  ✓ $ks archived"
+done
 
 # ── Upload to cloud storage ──────────────────────────────────────────────────
 echo ""
@@ -86,18 +95,20 @@ upload_file() {
     fi
 }
 
-# Upload YSQL dumps
-for f in "$YSQL_DIR"/*.dump; do
+# Upload YSQL dumps: ysql/<db-name>/<timestamp>.sql.gz
+for f in "$YSQL_DIR"/*.sql.gz; do
     [ -f "$f" ] || continue
-    remote="yugabyte-backups/ysql/$BACKUP_DATE/$(basename "$f")"
-    upload_file "$f" "$remote" && echo "  ✓ uploaded $(basename "$f")"
+    db=$(basename "$f" .sql.gz)
+    remote="yugabyte-backups/ysql/${db}/${BACKUP_DATE}.sql.gz"
+    upload_file "$f" "$remote" && echo "  ✓ uploaded $db"
 done
 
-# Upload YCQL files
-find "$YCQL_DIR" -type f | while read -r f; do
-    rel="${f#$BACKUP_DIR/}"
-    remote="yugabyte-backups/$rel"
-    upload_file "$f" "$remote" && echo "  ✓ uploaded $(basename "$f")"
+# Upload YCQL archives: ycql/<keyspace-name>/<timestamp>.tar.gz
+for f in "$YCQL_DIR"/*.tar.gz; do
+    [ -f "$f" ] || continue
+    ks=$(basename "$f" .tar.gz)
+    remote="yugabyte-backups/ycql/${ks}/${BACKUP_DATE}.tar.gz"
+    upload_file "$f" "$remote" && echo "  ✓ uploaded $ks"
 done
 
 # ── Cleanup old backups ──────────────────────────────────────────────────────

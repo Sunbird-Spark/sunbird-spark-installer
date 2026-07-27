@@ -9,8 +9,8 @@ In `global-values.yaml`:
 ```yaml
 yugabyte-backup:
   enabled: true
-  schedule: "0 2 * * *"    # daily at 2 AM UTC
-  retentionDays: "7"
+  schedule: "30 11 * * 5"    # weekly, Friday 5:00 PM IST
+  retentionDays: "56"        # ~8 weekly backups; final count TBD
 ```
 
 Then deploy the `additional` building block:
@@ -23,98 +23,103 @@ Then deploy the `additional` building block:
 Backups are stored in the private cloud storage container/bucket under:
 ```
 yugabyte-backups/
-├── ysql/<date>/
-│   ├── keycloak.dump
-│   ├── quartz.dump
-│   ├── enc-keys.dump
-│   ├── registry.dump
-│   └── sunbird.dump
-└── ycql/<date>/
-    ├── <keyspace>/schema.cql
-    └── <keyspace>/<table>.csv
+├── ysql/<db-name>/<timestamp>.sql.gz         # plain SQL, DROP/CREATE included, gzipped
+│   e.g. ysql/keycloak/2026-07-27_170000.sql.gz
+└── ycql/<keyspace-name>/<timestamp>.tar.gz   # schema.cql + one <table>.csv per table, tarred + gzipped
+    e.g. ycql/janusgraph/2026-07-27_170000.tar.gz
 ```
+
+In-scope YSQL databases (8): `keycloak`, `registry`, `quartz`, `enc-keys`, `kong`, `portal`, `superset`, `sunbird`
+
+In-scope YCQL keyspaces (~15, auto-discovered): all non-system keyspaces, including `janusgraph` (JanusGraph's storage backend).
 
 ---
 
 ## Restore
 
+> Always preview the restore commands before running them against production.
+
 ### YSQL Restore (PostgreSQL)
 
-**Step 1 — Download backup from cloud storage**
+**Step 1 — Retrieve the backup file from blob storage**
 
 ```bash
 # Azure
 az storage blob download \
   --account-name <storage_account> \
   --container-name <private_container> \
-  --name yugabyte-backups/ysql/<date>/keycloak.dump \
-  --file /restore/keycloak.dump \
+  --name yugabyte-backups/ysql/keycloak/<timestamp>.sql.gz \
+  --file /tmp/keycloak.sql.gz \
   --auth-mode login
 
 # GCP
-gsutil cp gs://<bucket>/yugabyte-backups/ysql/<date>/keycloak.dump /restore/
+gsutil cp gs://<bucket>/yugabyte-backups/ysql/keycloak/<timestamp>.sql.gz /tmp/
 
 # AWS
-aws s3 cp s3://<bucket>/yugabyte-backups/ysql/<date>/keycloak.dump /restore/
+aws s3 cp s3://<bucket>/yugabyte-backups/ysql/keycloak/<timestamp>.sql.gz /tmp/
 ```
 
-**Step 2 — Drop and recreate database (if restoring to existing cluster)**
+**Step 2 — Decompress**
 
 ```bash
-psql -h yb-tserver-service -p 5433 -U yugabyte -c "DROP DATABASE IF EXISTS keycloak;"
-psql -h yb-tserver-service -p 5433 -U yugabyte -c "CREATE DATABASE keycloak;"
+gunzip /tmp/keycloak.sql.gz
 ```
 
-**Step 3 — Restore**
+**Step 3 — Apply**
+
+The dump was generated with `--clean --if-exists --create`, so it already contains
+`DROP DATABASE IF EXISTS` / `CREATE DATABASE` / `\connect` statements — safe to re-run,
+no separate drop/create step needed. Connect to any existing maintenance database
+(here, YugabyteDB's default `yugabyte` db):
 
 ```bash
-PGPASSWORD=yugabyte pg_restore \
-  -h yb-tserver-service \
-  -p 5433 \
-  -U yugabyte \
-  -d keycloak \
-  -F c \
-  /restore/keycloak.dump
+psql -h yb-tserver-service -p 5433 -U yugabyte -f /tmp/keycloak.sql
 ```
 
-Repeat for each database: `quartz`, `enc-keys`, `registry`, `sunbird`.
+Repeat for each database: `registry`, `quartz`, `enc-keys`, `kong`, `portal`, `superset`, `sunbird`.
 
 ---
 
 ### YCQL Restore (Cassandra)
 
-**Step 1 — Download backup from cloud storage**
+**Step 1 — Retrieve the backup file from blob storage**
 
 ```bash
 # Azure
-az storage blob download-batch \
+az storage blob download \
   --account-name <storage_account> \
-  --source <private_container> \
-  --pattern "yugabyte-backups/ycql/<date>/*" \
-  --destination /restore/ \
+  --container-name <private_container> \
+  --name yugabyte-backups/ycql/janusgraph/<timestamp>.tar.gz \
+  --file /tmp/janusgraph.tar.gz \
   --auth-mode login
 
 # GCP
-gsutil -m cp -r gs://<bucket>/yugabyte-backups/ycql/<date>/ /restore/
+gsutil cp gs://<bucket>/yugabyte-backups/ycql/janusgraph/<timestamp>.tar.gz /tmp/
 
 # AWS
-aws s3 cp s3://<bucket>/yugabyte-backups/ycql/<date>/ /restore/ --recursive
+aws s3 cp s3://<bucket>/yugabyte-backups/ycql/janusgraph/<timestamp>.tar.gz /tmp/
 ```
 
-**Step 2 — Restore schema**
+**Step 2 — Unpack** (contains `schema.cql` + one `<table>.csv` per table)
 
 ```bash
-ycqlsh yb-tserver-service 9042 -f /restore/<keyspace>/schema.cql
+tar -xzf /tmp/janusgraph.tar.gz -C /tmp/
 ```
 
-**Step 3 — Restore data per table**
+**Step 3 — Restore schema**
+
+```bash
+ycqlsh yb-tserver-service 9042 -f /tmp/janusgraph/schema.cql
+```
+
+**Step 4 — Restore data per table**
 
 ```bash
 ycqlsh yb-tserver-service 9042 \
-  -e "COPY <keyspace>.<table> FROM '/restore/<keyspace>/<table>.csv' WITH HEADER=true;"
+  -e "COPY janusgraph.<table> FROM '/tmp/janusgraph/<table>.csv' WITH HEADER=true;"
 ```
 
-Repeat for each table in each keyspace.
+Repeat for each table in the keyspace, and for each keyspace being restored.
 
 ---
 
