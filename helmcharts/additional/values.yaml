@@ -117,7 +117,7 @@ volume-autoscaler:
   scale_up_max_size: ""     
 
 yugabyte-backup:
-  enabled: false
+  enabled: true
   schedule: "30 11 * * 5"    # weekly, Friday 5:00 PM IST
   retentionDays: "56"    # ~8 weekly backups; final count TBD
   ttlSecondsAfterFinished: 86400
