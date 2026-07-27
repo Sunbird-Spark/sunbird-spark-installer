@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     gzip \
     tar \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Azure CLI
@@ -27,7 +28,7 @@ RUN curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dea
 
 # AWS CLI
 RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip && \
-    python3 -m zipfile -e /tmp/awscliv2.zip /tmp/ && \
+    unzip -q /tmp/awscliv2.zip -d /tmp && \
     /tmp/aws/install && \
     rm -rf /tmp/awscliv2.zip /tmp/aws
 
