@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'spark-v*'
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'TEMPORARY: manual test tag (revert this input once done testing)'
+        required: true
+        default: '2.0.2'
 
 jobs:
   docker-build-push:
@@ -39,9 +45,13 @@ jobs:
         id: prep
         run: |
           echo "OWNER_LOWERCASE=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
-          # Format: spark-v<tag>_<short-sha> e.g. spark-v1.0.2_abc1234
-          GIT_TAG="${GITHUB_REF_NAME}"
-          RAW_TAG="${GIT_TAG}_${GITHUB_SHA::7}"
+          if [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            RAW_TAG="${{ github.event.inputs.image_tag }}"
+          else
+            # Format: spark-v<tag>_<short-sha> e.g. spark-v1.0.2_abc1234
+            GIT_TAG="${GITHUB_REF_NAME}"
+            RAW_TAG="${GIT_TAG}_${GITHUB_SHA::7}"
+          fi
           echo "IMAGE_TAG=$(echo $RAW_TAG | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
 
       - name: Build and Push
