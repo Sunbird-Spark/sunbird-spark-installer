@@ -202,6 +202,7 @@ py_flink_jobs:
       job:
         name: enrichment-router
         parallelism: 4
+        log_level: INFO
 
       kafka:
         brokers: "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
@@ -298,6 +299,7 @@ py_flink_jobs:
       job:
         name: caption-generator
         parallelism: 4
+        log_level: INFO
 
       kafka:
         brokers: "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
