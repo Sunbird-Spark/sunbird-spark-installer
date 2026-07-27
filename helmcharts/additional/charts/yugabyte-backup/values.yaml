@@ -6,7 +6,7 @@ image:
   pullPolicy: IfNotPresent
   imagePullSecrets: "registry-secret-name"
 
-schedule: "0 2 * * *"    # daily at 2 AM UTC
+schedule: "30 11 * * 5"    # weekly, Friday 5:00 PM IST
 restartPolicy: OnFailure
 retryLimit: 3
 
@@ -18,17 +18,20 @@ yugabyte:
   password: "yugabyte"
 
 # Space-separated list of YSQL databases to back up
-ysqlDatabases: "keycloak quartz enc-keys registry sunbird"
+ysqlDatabases: "keycloak registry quartz enc-keys kong portal superset sunbird"
 
 # Comma-separated YCQL keyspaces. Empty = auto-discover all non-system keyspaces
+# (covers all ~15 in-scope keyspaces, including janusgraph, with no list to maintain)
 ycqlKeyspaces: ""
 
-retentionDays: "7"   # days to keep backup files in cloud storage
+# days to keep backup files in cloud storage; 56 = ~8 weekly backups.
+# Final retention count is still TBD — see plan's Open Items.
+retentionDays: "56"
 ttlSecondsAfterFinished: 86400   # seconds to keep completed Job pods (24h)
 
 serviceAccount:
   create: false
-  name: "azure-managed-identity-sa"   # reuse existing workload identity SA in sunbird namespace
+  name: ""   # empty = use global.workload_identity_service_account_name (workload identity SA in sunbird namespace)
 
 podAnnotations:
   azure.workload.identity/use: "true"

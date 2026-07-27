@@ -13,6 +13,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- if .Values.serviceAccount.create }}
 {{- .Values.serviceAccount.name | default (printf "%s-sa" (include "yugabyte-backup.fullname" .)) }}
 {{- else }}
-default
+{{- .Values.serviceAccount.name | default .Values.global.workload_identity_service_account_name | default "default" }}
 {{- end }}
 {{- end }}
