@@ -24,9 +24,8 @@ ysqlDatabases: "keycloak registry quartz enc-keys kong portal superset sunbird"
 # (covers all ~15 in-scope keyspaces, including janusgraph, with no list to maintain)
 ycqlKeyspaces: ""
 
-# days to keep backup files in cloud storage; 56 = ~8 weekly backups.
-# Final retention count is still TBD — see plan's Open Items.
-retentionDays: "56"
+# days to keep backup files in cloud storage; 28 = 4 weekly backups (confirmed with manager).
+retentionDays: "28"
 ttlSecondsAfterFinished: 86400   # seconds to keep completed Job pods (24h)
 
 serviceAccount:

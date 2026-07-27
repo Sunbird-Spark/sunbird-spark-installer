@@ -16,7 +16,7 @@ YB_PASSWORD="${YB_PASSWORD:-yugabyte}"
 YSQL_DATABASES="${YSQL_DATABASES:-keycloak registry quartz enc-keys kong portal superset sunbird}"
 CLOUD_SERVICE="${CLOUD_SERVICE:-azure}"
 CLOUD_STORAGE_AUTH_TYPE="${CLOUD_STORAGE_AUTH_TYPE:-workload_identity}"
-RETENTION_DAYS="${RETENTION_DAYS:-56}"
+RETENTION_DAYS="${RETENTION_DAYS:-28}"
 
 echo "=== YugabyteDB Backup ==="
 echo "Date     : $BACKUP_DATE"

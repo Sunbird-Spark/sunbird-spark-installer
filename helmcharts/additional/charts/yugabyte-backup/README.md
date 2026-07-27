@@ -10,7 +10,7 @@ In `global-values.yaml`:
 yugabyte-backup:
   enabled: true
   schedule: "30 11 * * 5"    # weekly, Friday 5:00 PM IST
-  retentionDays: "56"        # ~8 weekly backups; final count TBD
+  retentionDays: "28"        # 4 weekly backups
 ```
 
 Then deploy the `additional` building block:
