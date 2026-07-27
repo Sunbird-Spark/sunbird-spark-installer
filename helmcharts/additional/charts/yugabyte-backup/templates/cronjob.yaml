@@ -6,8 +6,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "yugabyte-backup.labels" . | nindent 4 }}
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
 spec:
   schedule: {{ .Values.schedule | quote }}
   failedJobsHistoryLimit: 3

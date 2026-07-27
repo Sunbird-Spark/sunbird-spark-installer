@@ -18,6 +18,20 @@ Then deploy the `additional` building block:
 ./install.sh install_component additional
 ```
 
+## Auth Modes
+
+Cloud storage auth is driven by `global.cloud_storage_auth_type`, shared with every
+other chart in this repo (flink, cert, lern, knowlg, velero, secor, nlwebflink):
+
+| Value | Behavior |
+|---|---|
+| `"OIDC"` | Workload identity — no key needed. This is what Terraform auto-generates for Azure (`global-cloud-values.yaml`). Requires the pod's `azure.workload.identity/use: "true"` label + the federated SA (handled automatically by this chart). |
+| anything else (unset, `"access_key"`, etc.) | Key-based — set `global.cloud_storage_secret_key` (and `cloud_storage_access_key` for the account/bucket name) yourself. This is the only path for GCP today (Terraform always populates `cloud_storage_secret_key` there and never sets `cloud_storage_auth_type`), and the fallback for Azure environments without workload identity set up. |
+
+If you don't have OIDC/workload identity configured, just leave `cloud_storage_auth_type`
+unset (or set it to anything other than `"OIDC"`) and provide `cloud_storage_secret_key` —
+the chart will create a Secret and wire up key-based auth automatically.
+
 ## Backup Output
 
 Backups are stored in the private cloud storage container/bucket under:

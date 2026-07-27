@@ -131,7 +131,7 @@ CUTOFF_DATE=$(date -d "-${RETENTION_DAYS} days" +%Y-%m-%d 2>/dev/null || \
 
 if [ "$CLOUD_SERVICE" == "azure" ]; then
     AUTH_ARGS="--auth-mode login"
-    [ "$CLOUD_STORAGE_AUTH_TYPE" == "access_key" ] && \
+    [ "$CLOUD_STORAGE_AUTH_TYPE" != "OIDC" ] && \
         AUTH_ARGS="--account-key $AZURE_KEY"
 
     az storage blob delete-batch \
