@@ -29,6 +29,13 @@ yugabyte-backups/
     e.g. ycql/janusgraph/2026-07-27_170000.tar.gz
 ```
 
+Full blob URL format (Azure): `https://<storage_account>.blob.core.windows.net/<private_container>/yugabyte-backups/<ysql|ycql>/<db-or-keyspace-name>/<timestamp>.<sql.gz|tar.gz>`
+
+Example, as actually observed on `ed-dev`:
+```
+https://eddevda72f12a.blob.core.windows.net/ed-dev-private-0c422ccdbf/yugabyte-backups/ycql/content_store/2026-07-27_071355.tar.gz
+```
+
 In-scope YSQL databases (8): `keycloak`, `registry`, `quartz`, `enc-keys`, `kong`, `portal`, `superset`, `sunbird`
 
 In-scope YCQL keyspaces (~15, auto-discovered): all non-system keyspaces, including `janusgraph` (JanusGraph's storage backend).
