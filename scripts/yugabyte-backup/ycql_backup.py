@@ -37,6 +37,9 @@ def backup_keyspace(session, keyspace, output_dir):
     tables = list(ks_meta.tables.keys())
 
     with open(schema_path, "w") as f:
+        # CREATE KEYSPACE first — restoring schema.cql onto an empty cluster
+        # would otherwise fail with "Keyspace Not Found" on the first CREATE TABLE.
+        f.write(ks_meta.as_cql_query() + ";\n\n")
         for table in tables:
             f.write(ks_meta.tables[table].as_cql_query() + ";\n\n")
     print(f"  Schema written: {schema_path}")

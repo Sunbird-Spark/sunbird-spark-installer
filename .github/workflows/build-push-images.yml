@@ -9,7 +9,7 @@ on:
       image_tag:
         description: 'TEMPORARY: manual test tag (revert this input once done testing)'
         required: true
-        default: '2.0.2'
+        default: '2.0.3'
 
 jobs:
   docker-build-push:

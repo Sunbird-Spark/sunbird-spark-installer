@@ -97,6 +97,13 @@ no separate drop/create step needed. Connect to any existing maintenance databas
 psql -h yb-tserver-service -p 5433 -U yugabyte -f /tmp/keycloak.sql
 ```
 
+> If you restore with YugabyteDB's own `ysqlsh` instead of `psql`, you'll see
+> `error: invalid command \restrict` / `\unrestrict` a few times in the output —
+> these come from a newer pg_dump security feature `ysqlsh` doesn't recognize yet.
+> They're harmless; `ysqlsh` skips them and keeps applying the rest of the file.
+> Confirmed via a live restore test (data came back byte-for-byte correct despite
+> these warnings).
+
 Repeat for each database: `registry`, `quartz`, `enc-keys`, `kong`, `portal`, `superset`, `sunbird`.
 
 ---
