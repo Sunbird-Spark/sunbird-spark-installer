@@ -342,15 +342,19 @@ py_flink_jobs:
         model: large-v3-turbo
         device: cpu # set to "cuda" only once a GPU node pool exists (see nodeSelector/tolerations comment above)
         compute_type: int8
-        auto_approve: false
+        auto_approve: true
 
       multilingual:
         provider: litellm
-        # LLM model identifier passed straight through to LiteLLM (e.g.
-        # "azure/gpt-4o-mini", "gpt-4o-mini" — see LiteLLM provider docs).
+        # LLM model identifier passed straight through to LiteLLM. "azure/"
+        # prefix routes to Azure OpenAI (needs api_base + api_version below)
+        # instead of plain OpenAI — must match the deployment name exactly,
+        # not necessarily the underlying model's own name.
         # API key is injected via extraEnv below, never set in config
         # directly.
-        model: "gpt-4o-mini"
+        model: "azure/gpt-5-mini"
+        api_base: "https://cossdev-semanticsearch.openai.azure.com/"
+        api_version: "2024-12-01-preview"
         batch_size: 80
         context_overlap: 2
         auto_approve: true
