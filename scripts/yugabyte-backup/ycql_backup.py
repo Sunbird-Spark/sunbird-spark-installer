@@ -29,20 +29,16 @@ def backup_keyspace(session, keyspace, output_dir):
     ks_dir = os.path.join(output_dir, keyspace)
     os.makedirs(ks_dir, exist_ok=True)
 
-    # Schema DDL
+    # Schema DDL — DESCRIBE is a cqlsh/ycqlsh shell meta-command, not real CQL,
+    # so it can't be sent via session.execute(). Use the driver's own schema
+    # metadata (populated automatically on connect) to generate CREATE TABLE DDL.
     schema_path = os.path.join(ks_dir, "schema.cql")
-    rows = session.execute(
-        "SELECT * FROM system_schema.tables WHERE keyspace_name=%s", [keyspace]
-    )
-    tables = [r.table_name for r in rows]
+    ks_meta = session.cluster.metadata.keyspaces[keyspace]
+    tables = list(ks_meta.tables.keys())
 
     with open(schema_path, "w") as f:
         for table in tables:
-            desc_rows = session.execute(
-                f"DESCRIBE TABLE {keyspace}.{table}"
-            )
-            for row in desc_rows:
-                f.write(row[0] + ";\n\n")
+            f.write(ks_meta.tables[table].as_cql_query() + ";\n\n")
     print(f"  Schema written: {schema_path}")
 
     # Data CSV per table

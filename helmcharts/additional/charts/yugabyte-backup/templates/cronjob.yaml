@@ -55,14 +55,14 @@ spec:
                 - name: CLOUD_SERVICE
                   value: {{ .Values.global.cloud_service_provider | quote }}
                 - name: CLOUD_STORAGE_AUTH_TYPE
-                  value: {{ .Values.global.cloud_storage_auth_type | default "workload_identity" | quote }}
+                  value: {{ .Values.global.cloud_storage_auth_type | default "" | quote }}
 
                 {{- if eq .Values.global.cloud_service_provider "azure" }}
                 - name: AZURE_STORAGE_ACCOUNT
                   value: {{ .Values.global.cloud_storage_access_key | quote }}
                 - name: AZURE_CONTAINER
                   value: {{ .Values.global.private_container_name | quote }}
-                {{- if eq (.Values.global.cloud_storage_auth_type | default "workload_identity") "access_key" }}
+                {{- if ne (.Values.global.cloud_storage_auth_type | default "") "OIDC" }}
                 - name: AZURE_KEY
                   valueFrom:
                     secretKeyRef:
@@ -81,7 +81,7 @@ spec:
                   value: {{ .Values.global.cloud_storage_access_key | quote }}
                 - name: AWS_DEFAULT_REGION
                   value: {{ .Values.global.cloud_storage_region | quote }}
-                {{- if eq (.Values.global.cloud_storage_auth_type | default "workload_identity") "access_key" }}
+                {{- if ne (.Values.global.cloud_storage_auth_type | default "") "OIDC" }}
                 - name: AWS_ACCESS_KEY_ID
                   valueFrom:
                     secretKeyRef:
@@ -95,7 +95,7 @@ spec:
                 {{- end }}
                 {{- end }}
 
-              {{- if and (eq (.Values.global.cloud_storage_auth_type | default "workload_identity") "access_key") (eq .Values.global.cloud_service_provider "gcp") }}
+              {{- if and (ne (.Values.global.cloud_storage_auth_type | default "") "OIDC") (eq .Values.global.cloud_service_provider "gcp") }}
               volumeMounts:
                 - name: gcp-sa
                   mountPath: /secrets

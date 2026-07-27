@@ -66,7 +66,7 @@ upload_file() {
     local remote_path="$2"
 
     if [ "$CLOUD_SERVICE" == "azure" ]; then
-        if [ "$CLOUD_STORAGE_AUTH_TYPE" == "workload_identity" ]; then
+        if [ "$CLOUD_STORAGE_AUTH_TYPE" == "OIDC" ]; then
             az storage blob upload \
                 --account-name "$AZURE_STORAGE_ACCOUNT" \
                 --container-name "$AZURE_CONTAINER" \
@@ -85,7 +85,7 @@ upload_file() {
         fi
 
     elif [ "$CLOUD_SERVICE" == "gcp" ]; then
-        if [ "$CLOUD_STORAGE_AUTH_TYPE" == "access_key" ]; then
+        if [ "$CLOUD_STORAGE_AUTH_TYPE" != "OIDC" ]; then
             export GOOGLE_APPLICATION_CREDENTIALS="/secrets/gcp-sa.json"
         fi
         gsutil cp "$local_file" "gs://${GCS_BUCKET}/${remote_path}"
