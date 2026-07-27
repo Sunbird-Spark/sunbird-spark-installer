@@ -20,6 +20,9 @@ spec:
         metadata:
           labels:
             {{- include "yugabyte-backup.labels" . | nindent 12 }}
+            {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+            azure.workload.identity/use: "true"
+            {{- end }}
           {{- with .Values.podAnnotations }}
           annotations:
             {{- toYaml . | nindent 12 }}

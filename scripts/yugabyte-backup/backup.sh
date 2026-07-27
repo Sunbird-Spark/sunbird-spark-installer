@@ -61,6 +61,18 @@ done
 echo ""
 echo "--- Uploading to $CLOUD_SERVICE ---"
 
+# The az CLI keeps its own session cache and doesn't auto-discover workload
+# identity — unlike SDK-based tools (DefaultAzureCredential), it needs one
+# explicit login exchanging the federated token for a real AAD token first.
+if [ "$CLOUD_SERVICE" == "azure" ] && [ "$CLOUD_STORAGE_AUTH_TYPE" == "OIDC" ]; then
+    az login --service-principal \
+        -u "$AZURE_CLIENT_ID" \
+        -t "$AZURE_TENANT_ID" \
+        --federated-token "$(cat "$AZURE_FEDERATED_TOKEN_FILE")" \
+        >/dev/null
+    echo "✓ Logged in to Azure via workload identity"
+fi
+
 upload_file() {
     local local_file="$1"
     local remote_path="$2"

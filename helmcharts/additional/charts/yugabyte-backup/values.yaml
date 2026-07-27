@@ -2,7 +2,7 @@ enabled: true
 
 image:
   repository: "ghcr.io/sunbird-spark/yugabyte-backup"
-  tag: "2.0.0"
+  tag: "2.0.1"
   pullPolicy: Always   # tag is mutable (e.g. 1.0.0), not a per-commit sha — always pull the latest push
   imagePullSecrets: "registry-secret-name"
 
@@ -33,5 +33,7 @@ serviceAccount:
   create: false
   name: ""   # empty = use global.workload_identity_service_account_name (workload identity SA in sunbird namespace)
 
-podAnnotations:
-  azure.workload.identity/use: "true"
+# azure.workload.identity/use: "true" is set automatically as a pod LABEL in
+# cronjob.yaml when on Azure — the AKS mutating webhook requires it as a label,
+# not an annotation, to inject AZURE_CLIENT_ID/AZURE_TENANT_ID/the federated token.
+podAnnotations: {}
