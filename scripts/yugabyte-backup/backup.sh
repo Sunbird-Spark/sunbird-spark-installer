@@ -142,13 +142,33 @@ if [ "$CLOUD_SERVICE" == "azure" ]; then
         $AUTH_ARGS 2>/dev/null || true
 
 elif [ "$CLOUD_SERVICE" == "gcp" ]; then
-    gsutil -m rm -r "gs://${GCS_BUCKET}/yugabyte-backups/$(date -d "-${RETENTION_DAYS} days" +%Y-%m-%d)*" 2>/dev/null || true
+    # Backup objects live at yugabyte-backups/ysql/<db>/<ts>.sql.gz and
+    # yugabyte-backups/ycql/<ks>/<ts>.tar.gz — the date is nested two levels
+    # deep, not a prefix of "yugabyte-backups/", so match by object
+    # modification time instead of a date-string glob.
+    CUTOFF_EPOCH=$(date -d "-${RETENTION_DAYS} days" +%s 2>/dev/null || \
+                   date -v-${RETENTION_DAYS}d +%s 2>/dev/null)
+    gsutil ls -l "gs://${GCS_BUCKET}/yugabyte-backups/**" 2>/dev/null | while read -r size mtime url; do
+        case "$url" in
+            gs://*) ;;
+            *) continue ;;
+        esac
+        obj_epoch=$(date -d "$mtime" +%s 2>/dev/null) || continue
+        if [ "$obj_epoch" -lt "$CUTOFF_EPOCH" ]; then
+            gsutil rm "$url" 2>/dev/null || true
+        fi
+    done || true
 
 elif [ "$CLOUD_SERVICE" == "aws" ]; then
-    aws s3 rm "s3://${S3_BUCKET}/yugabyte-backups/" \
-        --recursive \
-        --exclude "*" \
-        --include "$(date -d "-${RETENTION_DAYS} days" +%Y-%m-%d)*" 2>/dev/null || true
+    # Same reasoning as GCP above — match by LastModified, not a date-string glob.
+    CUTOFF_ISO=$(date -u -d "-${RETENTION_DAYS} days" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || \
+                 date -u -v-${RETENTION_DAYS}d +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)
+    aws s3api list-objects-v2 --bucket "$S3_BUCKET" --prefix "yugabyte-backups/" \
+        --query "Contents[?LastModified<='${CUTOFF_ISO}'].Key" --output text 2>/dev/null | \
+        tr '\t' '\n' | while read -r key; do
+            [ -n "$key" ] || continue
+            aws s3 rm "s3://${S3_BUCKET}/${key}" 2>/dev/null || true
+        done || true
 fi
 
 echo ""
