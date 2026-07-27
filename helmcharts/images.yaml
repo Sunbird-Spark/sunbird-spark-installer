@@ -161,7 +161,7 @@ images:
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
-    tag: "2.0.1"
+    tag: "2.0.2"
 
 # Internal block with pull secrets
 internal: &internal
