@@ -212,16 +212,6 @@ py_flink_jobs:
           transcription_out: "{{ .Values.global.env }}.media.transcription.request"
           multilingual_out: "{{ .Values.global.env }}.media.multilingual.request"
 
-      janusgraph:
-        # janusgraph is a sibling subchart in this same knowledgebb
-        # umbrella/namespace (charts/janusgraph, fullnameOverride:
-        # "janusgraph"), reachable in-cluster by bare service name.
-        host: "{{ .Values.global.janusgraph.host }}"
-        port: "{{ .Values.global.janusgraph.port }}"
-
-      schema:
-        base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
-
       knowlg:
         # Matches the content_service_url convention already used by
         # learnbb/charts/flink and edbb/charts/kong-apis (service name
@@ -229,7 +219,11 @@ py_flink_jobs:
         # knowlg platform require no auth.
         content_service_url: "http://knowlg-service:9000"
         apis:
-          transcript_create: /content/v4/transcript/create
+          object_create: /content/v4/enrichment/object/create/{identifier}
+          object_update: /content/v4/enrichment/object/update/{identifier}/{objectIdentifier}
+          object_approve: /content/v4/enrichment/object/approve/{identifier}/{objectIdentifier}
+          object_reject: /content/v4/enrichment/object/reject/{identifier}/{objectIdentifier}
+          enrichment_read: /content/v4/enrichment/read/{identifier}
           content_read: /content/v4/read/{identifier}
 
       cloud_storage_type: azure
@@ -317,16 +311,6 @@ py_flink_jobs:
           transcription_dlq: "{{ .Values.global.env }}.media.transcription.dlq"
           multilingual_dlq: "{{ .Values.global.env }}.media.multilingual.dlq"
 
-      janusgraph:
-        # janusgraph is a sibling subchart in this same knowledgebb
-        # umbrella/namespace (charts/janusgraph, fullnameOverride:
-        # "janusgraph"), reachable in-cluster by bare service name.
-        host: "{{ .Values.global.janusgraph.host }}"
-        port: "{{ .Values.global.janusgraph.port }}"
-
-      schema:
-        base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
-
       knowlg:
         # Matches the content_service_url convention already used by
         # learnbb/charts/flink and edbb/charts/kong-apis (service name
@@ -334,7 +318,11 @@ py_flink_jobs:
         # knowlg platform require no auth.
         content_service_url: "http://knowlg-service:9000"
         apis:
-          transcript_create: /content/v4/transcript/create
+          object_create: /content/v4/enrichment/object/create/{identifier}
+          object_update: /content/v4/enrichment/object/update/{identifier}/{objectIdentifier}
+          object_approve: /content/v4/enrichment/object/approve/{identifier}/{objectIdentifier}
+          object_reject: /content/v4/enrichment/object/reject/{identifier}/{objectIdentifier}
+          enrichment_read: /content/v4/enrichment/read/{identifier}
           content_read: /content/v4/read/{identifier}
 
       cloud_storage_type: azure
@@ -373,14 +361,6 @@ py_flink_jobs:
         batch_size: 80
         context_overlap: 2
         auto_approve: true
-        ecar:
-          # Source language must always be Live for ECAR generation to
-          # trigger. true (default): a permanently Failed language does
-          # not block ECAR generation — the ECAR is built from whatever
-          # languages succeeded. false: Failed is treated the same as
-          # Draft/Review/Processing — blocks generation until that
-          # language is retried/fixed.
-          allow_failed_languages: true
 
     # No knowlg secret needed (internal calls, no auth). The LLM API key IS
     # a real external secret — TEMPORARY: injected here as a plaintext env
