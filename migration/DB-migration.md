@@ -340,7 +340,7 @@ Trigger the GitHub Action with:
 | `install_helm` | ✅ |
 | `helm_mode` | `all` |
 
-Runs all 7 bundles (monitoring, edbb, learnbb, knowledgebb, obsrvbb, inquirybb, additional). Charts already installed in Phase 3 upgrade in place — no data loss.
+Runs all 6 bundles (monitoring, edbb, learnbb, knowledgebb, obsrvbb, additional). Charts already installed in Phase 3 upgrade in place — no data loss.
 
 ---
 
