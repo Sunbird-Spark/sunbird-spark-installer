@@ -153,7 +153,6 @@ opensearch: &opensearch
 
 keycloak:
   enabled: true
-
 keycloak-kids-keys:
   enabled: true
 
