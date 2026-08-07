@@ -10,6 +10,7 @@ import re
 import csv
 import ast
 import sys
+import io
 
 # Default csv field limit (128KB) is too small for blob columns (body, oldbody,
 # screenshots, stageicons in content_data) which can exceed 1MB per field.
@@ -443,12 +444,14 @@ def classify_table(cols):
 
 
 def _unescape_cqlsh_text(s):
-    # cqlsh COPY TO converts special chars to escape sequences BEFORE csv-writing,
-    # then the csv writer escapes the leading backslash again:
-    #   actual \n  →  \n (escape seq)  →  \\n in CSV file
-    #   actual \\  →  \\              →  \\\\ in CSV file
-    # Python csv with escapechar='\\' strips one level: \\n → \n (literal 2 chars).
-    # This function restores the original characters from that intermediate form.
+    # cqlsh COPY TO backslash-escapes control chars in text fields with a
+    # SINGLE backslash before writing to CSV: actual newline -> literal `\n`
+    # (2 chars: backslash + 'n'), actual backslash -> literal `\\` (2 chars),
+    # etc. Confirmed against real cqlsh 6.x COPY TO output (2026-07-31 debug
+    # session) — cqlsh does NOT double the backslash; that was a wrong
+    # assumption in an earlier version of this function. The CSV is read
+    # via _prepare_csv_for_reading() + csv.DictReader with NO escapechar, so
+    # these single-backslash sequences survive untouched into `raw` here.
     result = []
     i = 0
     while i < len(s):
@@ -468,6 +471,32 @@ def _unescape_cqlsh_text(s):
             i += 2
         else:
             result.append(s[i])
+            i += 1
+    return ''.join(result)
+
+
+def _prepare_csv_for_reading(text):
+    # cqlsh backslash-escapes BOTH control chars (\n \t \r \\) AND embedded
+    # double-quotes (\") within quoted CSV fields (e.g. JSON blob columns).
+    # Python's csv module has no escapechar mode that unescapes only quotes
+    # while leaving \n/\t/\r/\\ literal for _unescape_cqlsh_text() to handle
+    # afterward — escapechar='\\' strips the backslash unconditionally for
+    # ANY following character, destroying the \n/\t/\r/\\ information before
+    # _unescape_cqlsh_text() ever sees it.
+    #
+    # Fix: pre-convert \" -> "" (the native RFC4180 doubled-quote form,
+    # correctly handled by csv.DictReader(doublequote=True)) while leaving
+    # every other backslash sequence untouched, then read with NO
+    # escapechar at all. \n/\t/\r/\\ then survive into the parsed field
+    # value exactly as cqlsh wrote them, ready for _unescape_cqlsh_text().
+    result = []
+    i = 0
+    while i < len(text):
+        if text[i] == '\\' and i + 1 < len(text) and text[i + 1] == '"':
+            result.append('""')
+            i += 2
+        else:
+            result.append(text[i])
             i += 1
     return ''.join(result)
 
@@ -714,12 +743,16 @@ def load_table(keyspace, table, csv_path):
             except Exception as e:
                 log.warning(f"  truncate {keyspace}.{table} failed (table may not exist yet): {str(e)[:80]}")
 
-        with open(csv_path, newline="") as f:
-            # cqlsh COPY TO defaults: DELIMITER=',', QUOTE='"', ESCAPE='\'
-            # escapechar='\\' is critical for correctly parsing escaped quotes in JSON.
-            reader = csv.DictReader(f, quotechar='"', doublequote=True, escapechar='\\')
-            fieldnames = [c.strip() for c in (reader.fieldnames or [])]
-            rows = list(reader)
+        with open(csv_path, newline="", encoding="utf-8") as f:
+            raw_text = f.read()
+        # See _prepare_csv_for_reading(): normalizes cqlsh's \" escaping to the
+        # native "" form so csv.DictReader parses quoted-field boundaries
+        # correctly, without an escapechar that would destroy \n/\t/\r/\\
+        # before _unescape_cqlsh_text() (in parse_value) can restore them.
+        prepared = _prepare_csv_for_reading(raw_text)
+        reader = csv.DictReader(io.StringIO(prepared), quotechar='"', doublequote=True)
+        fieldnames = [c.strip() for c in (reader.fieldnames or [])]
+        rows = list(reader)
         if not rows:
             return 0
 
@@ -728,10 +761,14 @@ def load_table(keyspace, table, csv_path):
             try:
                 # Use stripped and lowercased keys for robust matching
                 row_data = {str(k).strip().lower(): v for k, v in r.items() if k is not None}
-                converted.append([
-                    parse_value(row_data.get(c.lower()), type_by_col.get(c.lower(), "text"), udt_map)
-                    for c in fieldnames
-                ])
+                parsed_row = []
+                for c in fieldnames:
+                    raw_val = row_data.get(c.lower())
+                    try:
+                        parsed_row.append(parse_value(raw_val, type_by_col.get(c.lower(), "text"), udt_map))
+                    except Exception as e:
+                        raise ValueError(f"column '{c}' value {raw_val!r} -> {e}") from e
+                converted.append(parsed_row)
             except Exception as e:
                 log.error(f"    Skipping row {row_idx} in {keyspace}.{table} due to error: {e}")
                 continue
