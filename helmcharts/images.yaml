@@ -48,9 +48,9 @@ images:
     repository: "ghcr.io/project-sunbird/sunbird-echo-service"
     tag: "release-7.7.0_rc1_50b5b2d_2"
 
-  player: &player
-    repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "spark-v1.0.1_71c2d11"
+  player: &player 
+    repository: "ghcr.io/uzer6000/sunbird-spark-portal"
+    tag: "v103_26e673b"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -69,9 +69,9 @@ images:
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
     tag: "develop_b599482"
 
-  knowledge_mw: &knowledge_mw
-    repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "spark-v1.0.3_61d7904_16"
+  knowledge_mw: &knowledge_mw 
+    repository: "ghcr.io/sho6000/knowledge-mw-service"
+    tag: "vtest.1.1_eec36e9_3"
     
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -82,8 +82,8 @@ images:
     tag: "release-7.0.0_8e6b2db_23"
 
   adminutil: &adminutil
-    repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
-    tag: "spark-v1.0.0_b8f4778_3"
+    repository: "ghcr.io/sho6000/sunbird-apimanager-util"
+    tag: "tag-v5_bf32f26_5"
 
   cert: &cert
     repository: "ghcr.io/sunbird-lern/cert-service"
@@ -110,24 +110,24 @@ images:
     tag: "develop_499032f"
 
   lern: &lern
-    repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v1.0.2_d25f276_27"
+    repository: "ghcr.io/sho6000/lern-service"
+    tag: "test-v7_94fb404_12"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
     tag: "sparkv0.0.13.1"
 
   knowlg: &knowlg
-    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "v1.0.2-beta5_36279aa"
+    repository: "ghcr.io/sho6000/knowledge-platform/knowlg-service"
+    tag: "dhi-v9_57072ff"
 
   search: &search
-    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.0.2_e234cae"
+    repository: "ghcr.io/sho6000/knowledge-platform/search-api"
+    tag: "dhi-v20_927063a"
 
   telemetry: &telemetry
-    repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
-    tag: "spark-v0.1_8b8e877_5"
+    repository: "ghcr.io/sho6000/sunbird-telemetry-service"
+    tag: "tag-v15_991ad0a_15"
 
   superset: &superset
     repository: sanketikahub/superset
