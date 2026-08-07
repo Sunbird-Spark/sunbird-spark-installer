@@ -64,6 +64,12 @@ variable "azure_client_id" {
   default     = ""
 }
 
+variable "managed_identity_principal_id" {
+  type        = string
+  description = "Principal ID of the user-assigned managed identity — used by addon storage modules (e.g. DIAL) to assign blob access roles."
+  default     = ""
+}
+
 variable "k8s_service_account_name" {
   type        = string
   description = "Name of the Kubernetes service account for Workload Identity (created by workload-identity module)."

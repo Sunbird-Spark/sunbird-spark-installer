@@ -1,0 +1,34 @@
+{{/*
+Renders each enabled py_flink_jobs.<name>.config into ai-pipeline's
+jobs/<name>/config.yaml, resolving any embedded "{{ .Values.global.xxx }}"
+template strings the same way the sibling `flink` chart's configmap.yaml
+does for its HOCON config (toYaml the relevant values subset, then run it
+through Helm's templating engine once more via common.tplvalues.render).
+
+Secrets are intentionally NOT included here — see values.yaml
+py_flink_jobs.<name>.secretEnv and templates/deployment.yaml, which inject
+them as SUNBIRD_AI_* env vars instead (ai-pipeline's JobConfig always
+prefers the env var override).
+*/}}
+{{- $currentScope := . }}
+{{- range $jobName, $jobData := .Values.py_flink_jobs }}
+{{- if $jobData.enabled }}
+{{- with $currentScope }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-config" $jobName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+    {{- include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
+  {{- end }}
+data:
+  config.yaml: |
+    {{- include "common.tplvalues.render" (dict "value" $jobData.config "context" $) | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

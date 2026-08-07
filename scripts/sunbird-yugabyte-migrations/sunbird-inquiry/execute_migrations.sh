@@ -71,6 +71,23 @@ print_header() {
 }
 
 #####################################################
+# Function: Check if a column already exists
+# (ponytail: YCQL has no ADD COLUMN IF NOT EXISTS,
+#  so ALTER files pre-check instead of relying on error text)
+#####################################################
+column_exists() {
+    local keyspace=$1
+    local table=$2
+    local column=$3
+    local result
+    result=$(ycqlsh "${YCQLSH_HOST}" "${YCQLSH_PORT}" \
+        -u "${YCQLSH_USERNAME}" \
+        -p "${YCQLSH_PASSWORD}" \
+        -e "SELECT column_name FROM system_schema.columns WHERE keyspace_name='${keyspace}' AND table_name='${table}' AND column_name='${column}';" 2>>"${LOG_FILE}")
+    echo "${result}" | grep -qw "${column}"
+}
+
+#####################################################
 # Function: Execute CQL file
 #####################################################
 execute_cql_file() {
@@ -91,10 +108,10 @@ execute_cql_file() {
         -f "${temp_file}" >> "${LOG_FILE}" 2>&1
     local exit_code=$?
     set -e  # Re-enable exit on error
-    
+
     # Clean up temp file
     rm -f "${temp_file}"
-    
+
     if [ $exit_code -eq 0 ]; then
         print_message "${GREEN}" "✓ SUCCESS: ${filename} executed successfully"
         SUCCESSFUL_FILES=$((SUCCESSFUL_FILES + 1))
@@ -145,6 +162,7 @@ fi
 CQL_FILES=(
     "hierarchy_store.cql"
     "question_store.cql"
+    "question_store_add_pairs.cql"
 )
 
 print_header "Starting CQL File Execution"
@@ -155,7 +173,12 @@ for cql_file in "${CQL_FILES[@]}"; do
     
     if [ -f "${full_path}" ]; then
         TOTAL_FILES=$((TOTAL_FILES + 1))
-        execute_cql_file "${full_path}"
+        if [ "${cql_file}" = "question_store_add_pairs.cql" ] && column_exists "${ENVIRONMENT}_question_store" "question_data" "pairs"; then
+            print_message "${GREEN}" "✓ SKIPPED: ${cql_file} (column 'pairs' already exists)"
+            SUCCESSFUL_FILES=$((SUCCESSFUL_FILES + 1))
+        else
+            execute_cql_file "${full_path}"
+        fi
     else
         print_message "${YELLOW}" "WARNING: ${cql_file} not found, skipping..."
         echo ""

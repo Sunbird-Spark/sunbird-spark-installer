@@ -53,28 +53,6 @@ resource "azurerm_federated_identity_credential" "workload_identity" {
   subject             = "system:serviceaccount:${each.value.namespace}:${each.value.name}"
 }
 
-resource "azurerm_role_definition" "blob_operator_least_privilege" {
-  name        = "${local.environment_name}-blob-operator-least-privilege"
-  scope       = var.storage_account_id
-  description = "Custom role for blob operations with least privilege - read, write, delete, move blobs. Cannot create/delete/manage containers."
-
-  assignable_scopes = [var.storage_account_id]
-
-  permissions {
-    actions = [
-      "Microsoft.Storage/storageAccounts/blobServices/containers/read",
-    ]
-
-    data_actions = [
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/move/action",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action",
-    ]
-  }
-}
-
 # Storage account-level role for generating user delegation keys (required for SAS tokens).
 # This permission cannot be granted at container scope — it must be at the storage account level.
 resource "azurerm_role_definition" "user_delegation_key" {
@@ -99,32 +77,16 @@ resource "azurerm_role_assignment" "workload_identity_user_delegation_key" {
   role_definition_id = azurerm_role_definition.user_delegation_key.role_definition_resource_id
 }
 
-# Container-level role assignments for least-privilege access
-# Managed identity can only access specified containers
-resource "azurerm_role_assignment" "workload_identity_containers" {
-  for_each = toset(var.container_names)
-
+resource "azurerm_role_assignment" "workload_identity_storage_blob_contributor" {
   principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = "${var.storage_account_id}/blobServices/default/containers/${each.value}"
-  role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
+  scope                = var.storage_account_id
+  role_definition_name = "Storage Blob Data Contributor"
 }
 
-# Check if the DIAL container exists in Azure by querying the storage account directly.
-# The dial addon names its container: ${building_block}-${environment}-dial-${uuid}
-# If the container exists, assign the role; if not, skip without error.
-data "external" "dial_container" {
-  program = [
-    "bash", "-c",
-    "result=$(az storage container list --account-name ${local.storage_account_name} --auth-mode login --query \"[?contains(name, '${local.environment_name}-dial-')].name | [0]\" --output tsv 2>/dev/null || echo ''); echo \"{\\\"name\\\": \\\"$${result:-}\\\"}\""
-  ]
-}
-
-resource "azurerm_role_assignment" "workload_identity_dial_container" {
-  count = data.external.dial_container.result["name"] != "" ? 1 : 0
-
+resource "azurerm_role_assignment" "workload_identity_storage_reader" {
   principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = "${var.storage_account_id}/blobServices/default/containers/${data.external.dial_container.result["name"]}"
-  role_definition_id   = azurerm_role_definition.blob_operator_least_privilege.role_definition_resource_id
+  scope                = var.storage_account_id
+  role_definition_name = "Reader"
 }
 
 resource "kubernetes_service_account" "workload_identity" {

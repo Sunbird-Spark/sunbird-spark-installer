@@ -13,10 +13,27 @@ keycloak:
   keycloak_password: *keycloak-password
 keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
+# ── Sync Tool (on-demand JanusGraph → OpenSearch sync) ──────────────────────
+# NOT deployed during normal install.
+# To run: set enabled: true + syncMode below, then deploy via:
+#   ./install.sh install_service knowledgebb sync-tool
+# Or in GitHub Actions: check knowledgebb + type "sync-tool" in specific_charts
+sync-tool:
+  enabled: false
+  syncMode: full     # full | objectType | identifiers | days | file
+  objectType: ""     # used when syncMode=objectType (e.g. "Content")
+  identifiers: ""    # used when syncMode=identifiers (e.g. "do_123,do_456")
+  days: ""           # used when syncMode=days (e.g. "5") 
+
 global:
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
+  skip_network_module: false  # true = reuse existing VNet/subnets (set vnet_name and subnet names below); false = network module creates VNet/subnets
+  vnet_name: ""                  # required when skip_network_module: true — name of existing VNet (e.g. "ed-dev")
+  aks_subnet_name: ""            # required when skip_network_module: true — name of existing AKS subnet (e.g. "ed-dev-aks")
+  runner_subnet_name: ""         # required when skip_network_module: true — name of existing runner subnet (e.g. "ed-dev-runner")
+  private_cluster_enabled: true  # true = AKS API server private (requires VPN to access); false = AKS API server public
   sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
-  knowledge_platform_ref: "spark-v19"  # git branch or tag for knowledge-platform (schemas/local upload)
+  knowledge_platform_ref: "spark-v1.0.2"  # git branch or tag for knowledge-platform (schemas/local upload)
   resource_group_name: ""    # Azure resource group name
   building_block: "" # building block name
   env: ""
@@ -31,6 +48,7 @@ global:
   subscription_id: ""
   cloud_storage_region: ""
   aks_version: "1.35.1" # required — always specify the exact Kubernetes version e.g. "1.35.1". Run: az aks get-versions --location <region> --output table
+  vpn_enabled: true  # true = Pritunl VPN on runner VM (direct kubectl from laptop); false = Azure Bastion created by OpenTofu (kubectl inside VM only)
   sunbird_cloud_storage_provider: "azure" # Provide the cloud storage provider
   checkpoint_store_type: "azure"
   cloud_service_provider: "azure"
@@ -53,6 +71,13 @@ global:
   openai_azure_endpoint: "REPLACE_WITH_OPENAI_AZURE_ENDPOINT"  # e.g. https://<resource>.openai.azure.com/
   openai_azure_deployment: "text-embedding-3-small"
   openai_azure_api_version: "2023-05-15"
+  # ai-pipeline (PyFlink) jobs: enrichment-router / caption-generator.
+  # No knowlg_api_key needed — internal calls to the knowlg platform
+  # require no auth. ai_pipeline_llm_api_key is injected directly as a
+  # plaintext env var (SUNBIRD_AI_MULTILINGUAL_API_KEY) via
+  # helmcharts/knowledgebb/charts/py-flink values.yaml's `extraEnv` for
+  # now — TEMPORARY, move to a real K8s Secret before production use.
+  ai_pipeline_llm_api_key: "REPLACE_WITH_LLM_API_KEY"
   superset:
       init:
         adminUser:
@@ -130,4 +155,4 @@ global:
     REPLACE_ME
   proxy_certificate: |
     REPLACE_ME
-  # CERTIFICATE-KEYS 
+  # CERTIFICATE-KEYS

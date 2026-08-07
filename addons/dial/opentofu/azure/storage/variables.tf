@@ -27,3 +27,8 @@ variable "global_cloud_values_file" {
   type        = string
   description = "Absolute path to global-cloud-values.yaml"
 }
+
+variable "workload_identity_principal_id" {
+  type        = string
+  description = "Principal ID of the workload identity managed identity — used to assign blob access on the DIAL container."
+}

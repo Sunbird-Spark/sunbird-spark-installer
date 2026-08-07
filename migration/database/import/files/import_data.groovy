@@ -144,20 +144,9 @@ try {
 }
 println "Loaded ${propTypes.size()} property keys from schema."
 
-// Cleanup pass: drop any vertices left over from a previous broken run.
-// "Junk" = a vertex that has `node_id` but no `IL_UNIQUE_ID`. These were
-// produced by the old regex-based parser when JSON deserialisation failed
-// and the fallback regex matched single characters as key/value pairs,
-// creating a vertex with garbage props like `o=s, p=k, s=3, i=d, ...`.
-// Re-running the importer must remove these so the correct vertices can
-// be inserted (the importer skips when node_id already exists in JG).
-junkBefore = graph.traversal().V().has('node_id').hasNot('IL_UNIQUE_ID').count().next()
-if (junkBefore > 0) {
-    println "Cleanup: dropping ${junkBefore} junk vertices left over from a previous run..."
-    graph.traversal().V().has('node_id').hasNot('IL_UNIQUE_ID').drop().iterate()
-    graph.tx().commit()
-    println "Cleanup done. Vertices now: " + graph.traversal().V().count().next()
-}
+// In-memory map: Neo4j node_id (Long) → JanusGraph vertex id.
+// Used to resolve relationship endpoints without storing node_id on vertices.
+nodeIdToJGId = [:]
 
 println "--- STARTING DATA MIGRATION (quote-aware parser) ---"
 
@@ -282,11 +271,8 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
             return
         }
 
-        def existing = g.V().has('node_id', nodeIdVal).tryNext().orElse(null)
-        if (!existing) {
-            def uid = propsMap['IL_UNIQUE_ID']
-            if (uid) existing = g.V().has('IL_UNIQUE_ID', uid).tryNext().orElse(null)
-        }
+        def uid = propsMap['IL_UNIQUE_ID']
+        def existing = uid ? g.V().has('IL_UNIQUE_ID', uid).tryNext().orElse(null) : null
 
         if (existing && replaceExisting) {
             def dropTx = graph.newTransaction()
@@ -295,9 +281,12 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
             existing = null
         }
 
-        if (existing) return
+        if (existing) {
+            nodeIdToJGId[nodeIdVal] = existing.id()
+            return
+        }
 
-        def v = binding.tx.addVertex(T.label, label, 'node_id', nodeIdVal)
+        def v = binding.tx.addVertex(T.label, label)
         propsMap.each { k, vprop ->
             if (vprop == null) return
             String keyName = k.toString().trim()
@@ -329,6 +318,7 @@ new File('/tmp/nodes.csv').eachLine { line, idx ->
                 catch (Exception pe) { println "  skip ${keyName}=${coerced}: ${pe.message}" }
             }
         }
+        nodeIdToJGId[nodeIdVal] = v.id()
         stats_imported++
     } catch (Exception e) {
         stats_errors++
@@ -374,11 +364,14 @@ new File('/tmp/relationships.csv').eachLine { line, idx ->
             }
         }
 
-        def fromV = g.V().has('node_id', fromId).tryNext().orElse(null)
-        def toV = g.V().has('node_id', toId).tryNext().orElse(null)
+        def fromJGId = nodeIdToJGId[fromId]
+        def toJGId = nodeIdToJGId[toId]
+        def fromV = fromJGId ? g.V(fromJGId).tryNext().orElse(null) : null
+        def toV = toJGId ? g.V(toJGId).tryNext().orElse(null) : null
 
         if (fromV && toV) {
-            def existing = fromV.edges(Direction.OUT, relType).find { it.inVertex().value('node_id') == toId }
+            def toJGIdFinal = toJGId
+            def existing = fromV.edges(Direction.OUT, relType).find { it.inVertex().id() == toJGIdFinal }
             if (!existing) {
                 def e = fromV.addEdge(relType, toV)
                 propsMap.each { k, vv ->

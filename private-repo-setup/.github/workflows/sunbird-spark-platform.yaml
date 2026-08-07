@@ -83,8 +83,12 @@ on:
         description: '7️⃣ Restart workloads using keycloak keys'
         type: boolean
         default: false
+      certificate_keys:
+        description: '8️⃣ Generate certificate RSA keys (deletes existing keys first to force regeneration)'
+        type: boolean
+        default: false
       certificate_config:
-        description: '8️⃣ Configure certificate keys'
+        description: '9️⃣ Configure certificate keys'
         type: boolean
         default: false
       dns_mapping:
@@ -99,17 +103,12 @@ on:
         description: '1️⃣1️⃣ Run post-install (Postman collection)'
         type: boolean
         default: false
-      create_client_forms:
-        description: '1️⃣2️⃣ Create client forms'
-        type: boolean
-        default: false
-      setup_forms:
-        description: '1️⃣3️⃣ Setup missing forms (read-check then create)'
+      migrate_forms:
+        description: '1️⃣3️⃣ Migrate forms (read-check then create missing)'
         type: boolean
         default: false
 
 permissions:
-  id-token: write
   contents: write
 
 env:
@@ -125,7 +124,7 @@ jobs:
   infra:
     name: "1 — Infrastructure (Core Terraform)"
     if: ${{ inputs.create_tf_backend || inputs.backup_configs || inputs.create_tf_resources }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
 
     steps:
@@ -139,17 +138,17 @@ jobs:
           git clone --depth 1 --branch ${{ inputs.source_branch }} \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
           echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "=== SOURCE COMMIT ==="
+          git -C sunbird-spark-installer log --oneline -1
 
-      - name: Azure Login (Infra)
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_INFRA_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure Login (Managed Identity)
+        run: |
+          az login --identity
+          echo "✅ Logged in via VM managed identity"
 
       - name: Decrypt Config Files
         run: |
-          pip install ansible
+          sudo apt-get install -y ansible -q
 
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
@@ -167,17 +166,25 @@ jobs:
 
           rm /tmp/vault_pass.txt
 
-      - name: Install Terraform Tools
+      - name: Verify Tools
         if: ${{ inputs.create_tf_backend || inputs.create_tf_resources }}
         run: |
-          curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
-          sudo wget -qO /usr/local/bin/terragrunt \
-            https://github.com/gruntwork-io/terragrunt/releases/download/v1.0.3/terragrunt_linux_amd64
-          sudo chmod +x /usr/local/bin/terragrunt
-          sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+          if ! command -v tofu &>/dev/null; then
+            sudo apt-get install -y unzip -q
+            curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
+          fi
+          if ! command -v terragrunt &>/dev/null; then
+            sudo wget -qO /usr/local/bin/terragrunt               https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.21/terragrunt_linux_amd64
+            sudo chmod +x /usr/local/bin/terragrunt
+          fi
+          if ! command -v yq &>/dev/null; then
+            sudo wget -qO /usr/local/bin/yq               https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo chmod +x /usr/local/bin/yq
+          fi
+          echo "/usr/local/bin" >> $GITHUB_PATH
+          export PATH="/usr/local/bin:$PATH"
           tofu --version && terragrunt --version && yq --version
+          echo "✅ Terraform tools ready"
 
       - name: Setup Environment Folder
         run: |
@@ -198,7 +205,7 @@ jobs:
         if: ${{ inputs.create_tf_backend }}
         run: |
           cd $ENV_FOLDER
-          export TERRAGRUNT_TFPATH=$(which tofu)
+          export TERRAGRUNT_TFPATH=/usr/local/bin/tofu
           bash install.sh create_tf_backend
           echo "✅ create_tf_backend done"
 
@@ -213,7 +220,7 @@ jobs:
         if: ${{ inputs.create_tf_resources }}
         run: |
           cd $ENV_FOLDER
-          export TERRAGRUNT_TFPATH=$(which tofu)
+          export TERRAGRUNT_TFPATH=/usr/local/bin/tofu
           bash install.sh create_tf_resources
           echo "✅ create_tf_resources done"
 
@@ -222,8 +229,23 @@ jobs:
         run: |
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
+                    # Save cert keys before rsync (yq operations in keys module can corrupt/remove them)
+          grep -E "^\s*CERTIFICATE(SIGN)?_(PRIVATE|PUBLIC)_KEY:" \
+            $CONFIG_PATH/global-values.yaml > /tmp/cert_keys_section.txt 2>/dev/null || true
+
           rsync -av --exclude='.terragrunt-cache' --exclude='.terraform' \
             $ENV_FOLDER/ $CONFIG_PATH/
+
+          # Always restore cert keys after rsync if we had them before
+          if [ -s /tmp/cert_keys_section.txt ]; then
+            sed -i '/^\s*CERTIFICATE_PRIVATE_KEY:/d' $CONFIG_PATH/global-values.yaml
+            sed -i '/^\s*CERTIFICATE_PUBLIC_KEY:/d' $CONFIG_PATH/global-values.yaml
+            sed -i '/^\s*CERTIFICATESIGN_PRIVATE_KEY:/d' $CONFIG_PATH/global-values.yaml
+            sed -i '/^\s*CERTIFICATESIGN_PUBLIC_KEY:/d' $CONFIG_PATH/global-values.yaml
+            cat /tmp/cert_keys_section.txt >> $CONFIG_PATH/global-values.yaml
+            echo "✓ Cert keys restored after rsync"
+          fi
+          rm -f /tmp/cert_keys_section.txt
 
           for f in $CONFIG_PATH/global-values.yaml $CONFIG_PATH/global-cloud-values.yaml; do
             [ -f "$f" ] && ansible-vault encrypt "$f" --vault-password-file=/tmp/vault_pass.txt \
@@ -267,7 +289,7 @@ jobs:
     name: "2 — Deploy (Helm Bundles)"
     if: ${{ always() && (inputs.install_helm || inputs.specific_charts != '') }}
     needs: [infra]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
 
     steps:
@@ -281,17 +303,19 @@ jobs:
           git clone --depth 1 --branch ${{ inputs.source_branch }} \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
           echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "=== SOURCE BRANCH + COMMIT ==="
+          echo "input source_branch: ${{ inputs.source_branch }}"
+          git -C sunbird-spark-installer log --oneline -1
+          git -C sunbird-spark-installer rev-parse HEAD
 
-      - name: Azure Login (Deploy)
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure Login (Managed Identity)
+        run: |
+          az login --identity
+          echo "✅ Logged in via VM managed identity"
 
       - name: Decrypt Config Files
         run: |
-          pip install ansible
+          sudo apt-get install -y ansible -q
 
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
@@ -311,22 +335,7 @@ jobs:
             cp $CONFIG_PATH/postman.env.json sunbird-spark-installer/opentofu/azure/template/
           fi
 
-          if [ -f "$CONFIG_PATH/addons/global-cloud-values.yaml" ]; then
-            ansible-vault decrypt $CONFIG_PATH/addons/global-cloud-values.yaml \
-              --vault-password-file=/tmp/vault_pass.txt
-            if [ -f "sunbird-spark-installer/addons/global-cloud-values.yaml" ]; then
-              yq eval-all 'select(fileIndex==0) * select(fileIndex==1)' \
-                sunbird-spark-installer/addons/global-cloud-values.yaml \
-                $CONFIG_PATH/addons/global-cloud-values.yaml \
-                > /tmp/merged-addon-cloud.yaml
-              cp /tmp/merged-addon-cloud.yaml sunbird-spark-installer/addons/global-cloud-values.yaml
-              echo "✅ Addon cloud values merged"
-            else
-              cp $CONFIG_PATH/addons/global-cloud-values.yaml \
-                sunbird-spark-installer/addons/global-cloud-values.yaml
-              echo "✅ Addon cloud values copied"
-            fi
-          fi
+          # Addon global-cloud-values handled only in sunbird-spark-addons.yaml workflow
 
           rm /tmp/vault_pass.txt
 
@@ -341,15 +350,10 @@ jobs:
           fi
           echo "✅ Environment folder ready: $ENV_FOLDER"
 
-      - name: Install Deploy Tools
+      - name: Verify Deploy Tools
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
           kubectl version --client && helm version && yq --version
+          echo "✅ Tools verified (pre-installed on runner VM)"
 
       - name: Get AKS Credentials
         run: |
@@ -361,6 +365,34 @@ jobs:
             --overwrite-existing
           kubectl get nodes
           echo "✅ AKS credentials configured (cluster: $CLUSTER_NAME)"
+
+      - name: 🔍 debug-source-state
+        if: ${{ inputs.install_helm && (inputs.edbb || inputs.helm_mode == 'all') }}
+        run: |
+          echo "=== INPUTS ==="
+          echo "source_branch input : ${{ inputs.source_branch }}"
+          echo "environment         : ${{ inputs.environment }}"
+          echo ""
+          echo "=== CLONED REPO ==="
+          cd sunbird-spark-installer
+          echo "HEAD commit : $(git log --oneline -1)"
+          echo "SHA         : $(git rev-parse HEAD)"
+          echo ""
+          echo "=== knowledgemw/templates/configmap.yaml lines 13-28 ==="
+          sed -n '13,28p' helmcharts/edbb/charts/knowledgemw/templates/configmap.yaml | cat -n
+          echo ""
+          echo "=== helm version ==="
+          helm version --short
+          echo ""
+          echo "=== RENDER knowledgemw/configmap ==="
+          cd $GITHUB_WORKSPACE
+          helm template edbb $HELMCHARTS_DIR/edbb --namespace sunbird \
+            -f $HELMCHARTS_DIR/edbb/values.yaml \
+            -f $HELMCHARTS_DIR/images.yaml \
+            -f $HELMCHARTS_DIR/global-resources.yaml \
+            -f $ENV_FOLDER/global-values.yaml \
+            -f $ENV_FOLDER/global-cloud-values.yaml \
+            --show-only charts/knowledgemw/templates/configmap.yaml 2>&1 | cat -n | sed -n '1,30p'
 
       - name: 5️⃣ install_helm — all bundles
         if: ${{ inputs.install_helm && inputs.helm_mode == 'all' }}
@@ -389,6 +421,50 @@ jobs:
         run: |
           cd $ENV_FOLDER && bash install.sh install_component learnbb
           echo "✅ learnbb installed"
+
+      - name: 5️⃣ Commit certificate keys after learnbb
+        if: ${{ inputs.install_helm && (inputs.learnbb || inputs.helm_mode == 'all') && inputs.specific_charts == '' }}
+        run: |
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+
+          # Copy back global-values.yaml (may have cert keys appended)
+          cp $ENV_FOLDER/global-values.yaml $CONFIG_PATH/global-values.yaml
+
+          # If cert keys missing from global-values.yaml, regenerate them
+          if ! grep -q "CERTIFICATE_PRIVATE_KEY" $ENV_FOLDER/global-values.yaml 2>/dev/null; then
+            echo "⚠️  CERTIFICATE keys missing — running certificate_keys()..."
+            cd $ENV_FOLDER && bash install.sh certificate_keys
+            cp $ENV_FOLDER/global-values.yaml $CONFIG_PATH/global-values.yaml
+            echo "✓ Certificate keys generated and copied"
+          fi
+
+          # Copy pem files if generated by certificate_keys()
+          for f in certkey.pem certpubkey.pem; do
+            if [ -f "$ENV_FOLDER/$f" ]; then
+              cp $ENV_FOLDER/$f $CONFIG_PATH/$f
+              echo "✓ Copied $f"
+            fi
+          done
+
+          # Encrypt only cert-related files
+          for f in $CONFIG_PATH/global-values.yaml $CONFIG_PATH/certkey.pem $CONFIG_PATH/certpubkey.pem; do
+            [ -f "$f" ] && ! grep -q "ANSIBLE_VAULT" "$f" && \
+              ansible-vault encrypt "$f" --vault-password-file=/tmp/vault_pass.txt && \
+              echo "✓ Encrypted: $(basename $f)"
+          done
+
+          rm /tmp/vault_pass.txt
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Add ONLY cert files — do NOT use git add $CONFIG_PATH/ (avoids committing decrypted cloud values)
+          git add $CONFIG_PATH/global-values.yaml
+          [ -f "$CONFIG_PATH/certkey.pem" ]    && git add $CONFIG_PATH/certkey.pem
+          [ -f "$CONFIG_PATH/certpubkey.pem" ] && git add $CONFIG_PATH/certpubkey.pem
+          git commit -m "chore: save certificate keys after learnbb deploy [${{ inputs.environment }}] [skip ci]" \
+            || echo "No changes to commit"
+          git push || echo "Push failed or no changes"
+          echo "✅ Certificate keys committed"
 
       - name: 5️⃣ install_helm — knowledgebb
         if: ${{ inputs.install_helm && inputs.helm_mode == 'selective' && inputs.knowledgebb && inputs.specific_charts == '' }}
@@ -464,9 +540,9 @@ jobs:
 # ════════════════════════════════════════════════════════════════════════════
   platform:
     name: "3 — Platform (Post-Install Config)"
-    if: ${{ always() && (inputs.restart_workloads || inputs.certificate_config || inputs.dns_mapping || inputs.generate_postman_env || inputs.run_post_install || inputs.create_client_forms || inputs.setup_forms) }}
+    if: ${{ always() && (inputs.restart_workloads || inputs.certificate_config || inputs.dns_mapping || inputs.generate_postman_env || inputs.run_post_install || inputs.migrate_forms) }}
     needs: [deploy]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
 
     steps:
@@ -481,16 +557,14 @@ jobs:
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
           echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
 
-      - name: Azure Login (Deploy)
-        uses: azure/login@v1
-        with:
-          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Azure Login (Managed Identity)
+        run: |
+          az login --identity
+          echo "✅ Logged in via VM managed identity"
 
       - name: Decrypt Config Files
         run: |
-          pip install ansible
+          sudo apt-get install -y ansible -q
 
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
@@ -510,6 +584,13 @@ jobs:
             cp $CONFIG_PATH/postman.env.json sunbird-spark-installer/opentofu/azure/template/
           fi
 
+          if [ -f "$CONFIG_PATH/env.json" ]; then
+            ansible-vault decrypt $CONFIG_PATH/env.json \
+              --vault-password-file=/tmp/vault_pass.txt
+            cp $CONFIG_PATH/env.json sunbird-spark-installer/opentofu/azure/template/
+            echo "✅ env.json decrypted and staged"
+          fi
+
           rm /tmp/vault_pass.txt
 
       - name: Setup Environment Folder
@@ -525,15 +606,11 @@ jobs:
 
       - name: Install Platform Tools
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
-          sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          openssl version
-          echo "✅ Tools installed"
+          if ! command -v postman &>/dev/null; then
+            curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+          fi
+          kubectl version --client && helm version && yq --version && openssl version && postman --version
+          echo "✅ Platform tools ready"
 
       - name: Get AKS Credentials
         run: |
@@ -591,17 +668,11 @@ jobs:
           cd $ENV_FOLDER && bash install.sh run_post_install
           echo "✅ run_post_install done"
 
-      - name: 1️⃣2️⃣ create_client_forms
-        if: ${{ inputs.create_client_forms }}
+      - name: 1️⃣3️⃣ migrate_forms
+        if: ${{ inputs.migrate_forms }}
         run: |
-          cd $ENV_FOLDER && bash install.sh create_client_forms
-          echo "✅ create_client_forms done"
-
-      - name: 1️⃣3️⃣ setup_forms
-        if: ${{ inputs.setup_forms }}
-        run: |
-          cd $ENV_FOLDER && bash install.sh setup_forms
-          echo "✅ setup_forms done"
+          cd $ENV_FOLDER && bash install.sh migrate_forms
+          echo "✅ migrate_forms done"
 
       - name: Platform Summary
         if: always()
@@ -615,6 +686,5 @@ jobs:
           [ "${{ inputs.dns_mapping }}"          == "true" ] && echo "  ✅ 9️⃣   dns_mapping"          || echo "  ⏭️  9️⃣   dns_mapping (skipped)"
           [ "${{ inputs.generate_postman_env }}" == "true" ] && echo "  ✅ 🔟   generate_postman_env" || echo "  ⏭️  🔟   generate_postman_env (skipped)"
           [ "${{ inputs.run_post_install }}"     == "true" ] && echo "  ✅ 1️⃣1️⃣  run_post_install"     || echo "  ⏭️  1️⃣1️⃣  run_post_install (skipped)"
-          [ "${{ inputs.create_client_forms }}"  == "true" ] && echo "  ✅ 1️⃣2️⃣  create_client_forms"  || echo "  ⏭️  1️⃣2️⃣  create_client_forms (skipped)"
-          [ "${{ inputs.setup_forms }}"          == "true" ] && echo "  ✅ 1️⃣3️⃣  setup_forms"          || echo "  ⏭️  1️⃣3️⃣  setup_forms (skipped)"
+          [ "${{ inputs.migrate_forms }}"          == "true" ] && echo "  ✅ 1️⃣3️⃣  migrate_forms"          || echo "  ⏭️  1️⃣3️⃣  migrate_forms (skipped)"
           echo "================================================"

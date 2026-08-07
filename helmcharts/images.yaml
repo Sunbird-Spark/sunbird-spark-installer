@@ -155,9 +155,17 @@ images:
     repository: "sunbirded.azurecr.io/secor"
     tag: "spark"
 
+  sync_tool: &sync_tool
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
+    tag: "spark-v1.0.2_24e9602"
+
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_eb2384f"
+    tag: "spark-v1.0.2_b8305ee"
+
+  yugabyte_backup: &yugabyte_backup
+    repository: "ghcr.io/sunbird-spark/yugabyte-backup"
+    tag: "2.0.3"
 
 # Internal block with pull secrets
 internal: &internal
@@ -330,8 +338,18 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
+  sync-tool:
+    image: *sync_tool
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
   secor:
     image: *secor
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  yugabyte-backup:
+    image: *yugabyte_backup
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -343,9 +361,31 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.0.1_57a34d3"
+    tag: "spark-v1.0.2_964957e"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
     tag: "spark-v1.0.2_cbe9e07"
+
+  # ai-pipeline (PyFlink 1.20) jobs, deployed via the consolidated
+  # `py-flink` chart's py_flink_jobs map (helmcharts/knowledgebb/charts/
+  # py-flink) — each job entry there points at one of these anchors via
+  # its own `globalImageKey`, since (unlike knowledgeflink/learnflink
+  # above, which are one shared JVM image per building block selected via
+  # --job-classname) each PyFlink job ships its own dedicated image. See
+  # ai-pipeline/docker/Dockerfile.enrichment-router and
+  # Dockerfile.caption-generator.
+  #
+  # Built and pushed by ai-pipeline's .github/workflows/build.yaml on tag
+  # push — tag format is <git-tag>_<short-sha> (see knowlg-service.yml for
+  # the same convention).
+  enrichment_router:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/enrichment-router"
+    tag: "spark-v1.0.3-captions-beta32_c08a00e"
+
+  caption_generator:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/caption-generator"
+    tag: "spark-v1.0.3-captions-beta32_c08a00e"

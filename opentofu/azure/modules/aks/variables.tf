@@ -106,3 +106,9 @@ variable "subscription_id" {
   description = "Azure Subscription ID"
   type        = string
 }
+
+variable "private_cluster_enabled" {
+  type        = bool
+  description = "When true, AKS API server has no public endpoint. Requires VPN or self-hosted runner inside the VNet."
+  default     = true
+}
