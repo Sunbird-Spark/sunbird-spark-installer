@@ -9,6 +9,11 @@ image:
   pullPolicy: IfNotPresent
   pullSecrets: []
 
+imageDev:
+  repository: dhi.io/kong
+  tag: 3.9.3-debian13-dev
+  pullPolicy: IfNotPresent
+
 podAnnotations: {}
 
 podSecurityContext: {}
