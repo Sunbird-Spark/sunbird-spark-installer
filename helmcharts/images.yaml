@@ -49,8 +49,8 @@ images:
     tag: "release-7.7.0_rc1_50b5b2d_2"
 
   player: &player 
-    repository: "ghcr.io/uzer6000/sunbird-spark-portal"
-    tag: "v103_26e673b"
+    repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
+    tag: "v1.0.3.dhi_9d2c2ac"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -69,10 +69,10 @@ images:
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
     tag: "develop_b599482"
 
-  knowledge_mw: &knowledge_mw 
-    repository: "ghcr.io/sho6000/knowledge-mw-service"
-    tag: "vtest.1.1_eec36e9_3"
-    
+  knowledge_mw: &knowledge_mw  
+    repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
+    tag: "v1.0.3.dhi_3a7d7fa_17"
+
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
     tag: "release-7.0.0_8e6b2db_23"
@@ -81,9 +81,9 @@ images:
     repository: "sunbirded.azurecr.io/proxy"
     tag: "release-7.0.0_8e6b2db_23"
 
-  adminutil: &adminutil
-    repository: "ghcr.io/sho6000/sunbird-apimanager-util"
-    tag: "tag-v5_bf32f26_5"
+  adminutil: &adminutil 
+    repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
+    tag: "v1.0.3.dhi_aa14ea1_4"
 
   cert: &cert
     repository: "ghcr.io/sunbird-lern/cert-service"
@@ -109,25 +109,25 @@ images:
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
     tag: "develop_499032f"
 
-  lern: &lern
-    repository: "ghcr.io/sho6000/lern-service"
-    tag: "test-v7_94fb404_12"
+  lern: &lern 
+    repository: "ghcr.io/sunbird-lern/lern-service"
+    tag: "spark-v1.0.3.dhi_27c018b_49"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
     tag: "sparkv0.0.13.1"
 
   knowlg: &knowlg
-    repository: "ghcr.io/sho6000/knowledge-platform/knowlg-service"
-    tag: "dhi-v9_57072ff"
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
+    tag: "v1.0.3.dhi_5578352"
 
   search: &search
-    repository: "ghcr.io/sho6000/knowledge-platform/search-api"
-    tag: "dhi-v20_927063a"
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
+    tag: "v1.0.3.dhi_5578352"
 
   telemetry: &telemetry
-    repository: "ghcr.io/sho6000/sunbird-telemetry-service"
-    tag: "tag-v15_991ad0a_15"
+    repository: "ghcr.io/sunbird-telemetry/sunbird-telemetry-service"
+    tag: "v1.0.3.dhi_4452f9b_17"
 
   superset: &superset
     repository: sanketikahub/superset
