@@ -345,6 +345,11 @@ py_flink_jobs:
           multilingual_in: "{{ .Values.global.env }}.media.multilingual.request"
           transcription_dlq: "{{ .Values.global.env }}.media.transcription.dlq"
           multilingual_dlq: "{{ .Values.global.env }}.media.multilingual.dlq"
+          # Auto-approved Transcript events go back out on the same topic
+          # enrichment-router consumes as its input (topics.input above),
+          # closing the loop so it can dispatch multilingual generation —
+          # see caption_generator/main.py's enriched_metadata_out sink.
+          enriched_metadata_out: "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
 
       knowlg:
         # Matches the content_service_url convention already used by
