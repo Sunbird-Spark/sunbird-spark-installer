@@ -45,6 +45,41 @@
 # deliberately simple to start; this must move to a proper Secret +
 # secretEnv reference before any real deployment.
 
+# Same log4j2 config as the sibling `flink` chart (../flink/values.yaml),
+# mounted over the base image's default at /opt/flink/conf/log4j-console.properties
+# (see templates/deployment.yaml). Shared across every py_flink_jobs entry —
+# one ConfigMap key per job, same rendered value.
+log4j_console_properties: |
+  # This affects logging for both user code and Flink
+  rootLogger.level = INFO
+  rootLogger.appenderRef.console.ref = ConsoleAppender
+
+  # The following lines keep the log level of common libraries/connectors on
+  # log level INFO. The root logger does not override this. You have to manually
+  # change the log levels here.
+  logger.pekko.name = pekko
+  logger.pekko.level = ERROR
+  logger.kafka.name= org.apache.kafka
+  logger.kafka.level = ERROR
+  logger.hadoop.name = org.apache.hadoop
+  logger.hadoop.level = ERROR
+
+  # MetricGroup logs an INFO/WARN line every time a metric is registered —
+  # every job restart and every parallel subtask spams this, drowning out
+  # our own step-by-step application logs.
+  logger.flink_metrics.name = org.apache.flink.metrics.MetricGroup
+  logger.flink_metrics.level = ERROR
+
+  # Log all infos to the console
+  appender.console.name = ConsoleAppender
+  appender.console.type = CONSOLE
+  appender.console.layout.type = PatternLayout
+  appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+
+  # Suppress the irrelevant (wrong) warnings from the Netty channel handler
+  logger.netty.name = org.apache.flink.shaded.pekko.org.jboss.netty.channel.DefaultChannelPipeline
+  logger.netty.level = OFF
+
 nameOverride: ""
 fullnameOverride: ""
 
