@@ -69,7 +69,7 @@ spec:
           env:
           - name: ENVOY_UID
             value: "1111"
-          image: envoyproxy/envoy:v1.20.0
+          image: dhi.io/envoy:1.37-debian13
           imagePullPolicy: IfNotPresent
           name: envoy
           livenessProbe:
@@ -119,7 +119,7 @@ spec:
           - -p
           - "9999"
           - -u
-          - "1111"
+          - "65532"
           - -w
           - "8282,10000"
           image: openpolicyagent/proxy_init:v5

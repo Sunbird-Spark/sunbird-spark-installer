@@ -80,9 +80,9 @@ spec:
           - --config-path
           - /config/config.yaml
           env:
-          - name: ENVOY_UID
-            value: "1111"
-          image: envoyproxy/envoy:v1.20.0
+          # - name: ENVOY_UID
+          #   value: "1111"
+          image: dhi.io/envoy:1.37-debian13
           imagePullPolicy: IfNotPresent
           name: envoy
           livenessProbe:
