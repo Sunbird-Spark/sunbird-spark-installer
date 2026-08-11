@@ -298,7 +298,7 @@ flink_jobs:
       # Fields stripped from the composite-search index document before
       # upsert (TransactionEventProcessorConfig.scala:204-207) - was
       # relying on the code default, making it explicit here.
-      ignored.fields = ["responseDeclaration", "body"]
+      ignored.fields = ["responseDeclaration", "body", "transcripts"]
       nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "provider", "osMetadata", "actions"]
       schema.definition_cache.expiry = 14400
       restrict {
