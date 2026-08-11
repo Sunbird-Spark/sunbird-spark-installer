@@ -40,9 +40,9 @@ images:
     digest: ""
 
   alloy: &alloy
-    registry: "docker.io"
-    repository: grafana/alloy
-    tag: v1.12.1
+    registry: "dhi.io"
+    repository: alloy
+    tag: 1.18.1
 
   echo: &echo
     repository: "ghcr.io/project-sunbird/sunbird-echo-service"
