@@ -119,7 +119,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.3-captions-beta31_f77c643"
+    tag: "spark-v1.0.3-captions-beta35_54b6caa"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -383,9 +383,9 @@ global:
   enrichment_router:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/enrichment-router"
-    tag: "spark-v1.0.3-captions-beta32_c08a00e"
+    tag: "spark-v1.0.3-captions-beta35_570a40b"
 
   caption_generator:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/caption-generator"
-    tag: "spark-v1.0.3-captions-beta32_c08a00e"
+    tag: "spark-v1.0.3-captions-beta35_570a40b"
