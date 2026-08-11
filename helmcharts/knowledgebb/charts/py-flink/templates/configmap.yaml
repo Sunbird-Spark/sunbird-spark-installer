@@ -29,6 +29,8 @@ metadata:
 data:
   config.yaml: |
     {{- include "common.tplvalues.render" (dict "value" $jobData.config "context" $) | nindent 4 }}
+  log4j_console_properties: |
+    {{- include "common.tplvalues.render" (dict "value" .Values.log4j_console_properties "context" $) | nindent 4 }}
 {{- end }}
 {{- end }}
 {{- end }}
