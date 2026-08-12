@@ -262,12 +262,16 @@ py_flink_jobs:
       # BaseProcessFunction.open() always builds a BlobStorageUtil regardless
       # of whether the job calls it, so cloud_storage_type/auth_type/container
       # are required even though enrichment-router's own logic never touches
-      # self.storage. cloud_storage_auth/public_endpoint are optional
-      # (default {}/"" in BaseProcessFunction) and genuinely unused here -
-      # omitted.
+      # self.storage afterward. cloud_storage_auth.account_name is ALSO
+      # required eagerly for OIDC/IAM (_build_storage_options in
+      # blob_util.py raises KeyError on construction if missing, confirmed
+      # by a real crash-loop) - only cloud_storage_public_endpoint is
+      # genuinely safe to omit (lazy, guarded default "").
       cloud_storage_type: azure
       cloud_storage_auth_type: OIDC
       cloud_storage_container: "{{ .Values.global.public_container_name }}"
+      cloud_storage_auth:
+        account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
 
       enrichment:
         transcript:
