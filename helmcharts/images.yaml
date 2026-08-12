@@ -34,9 +34,9 @@ images:
     tag: "2.19.5"
 
   grafana: &grafana
-    registry: "dhi.io"
-    repository: "grafana"
-    tag: "12.4.6-debian13"
+    registry: "docker.io"
+    repository: "grafana/grafana"
+    tag: "11.4.0"
     digest: ""
 
   alloy: &alloy

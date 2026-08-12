@@ -605,9 +605,9 @@ alertmanager:
     ## Image of Alertmanager
     ##
     image:
-      registry: quay.io
-      repository: prometheus/alertmanager
-      tag: v0.26.0
+      registry: dhi.io
+      repository: alertmanager
+      tag: 0.33.1-debian13
       sha: ""
 
     ## If true then the user will be responsible to provide a secret with alertmanager configuration
@@ -2454,9 +2454,9 @@ prometheusOperator:
   ## Thanos side-car image when configured
   ##
   thanosImage:
-    registry: quay.io
-    repository: thanos/thanos
-    tag: v0.32.5
+    registry: dhi.io
+    repository: thanos
+    tag: 0.42.4-debian13
     sha: ""
 
   ## Set a Label Selector to filter watched prometheus and prometheusAgent
