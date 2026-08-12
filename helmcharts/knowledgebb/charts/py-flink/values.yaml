@@ -402,14 +402,15 @@ py_flink_jobs:
         context_overlap: 2
         auto_approve: true
 
-    # No knowlg secret needed (internal calls, no auth). The LLM API key IS
-    # a real external secret — TEMPORARY: injected here as a plaintext env
-    # var straight from values, not yet a K8s Secret. Replace with a
-    # secretEnv entry (see enrichment-router's secretEnv comment history /
-    # git blame for the pattern) before any real deployment.
-    secretEnv: []
-    extraEnv:
-      - name: SUNBIRD_AI_MULTILINGUAL_API_KEY
-        value: "{{ .Values.global.ai_pipeline_llm_api_key }}"
+    # No knowlg secret needed (internal calls, no auth). The LLM API key
+    # points at the same Azure OpenAI resource (cossdev-semanticsearch)
+    # search-api's embedding service already authenticates against via the
+    # existing openai-secret/OPENAI_API_KEY - reusing it here instead of a
+    # separate never-populated global.ai_pipeline_llm_api_key value.
+    secretEnv:
+      - envName: SUNBIRD_AI_MULTILINGUAL_API_KEY
+        secretName: openai-secret
+        secretKey: OPENAI_API_KEY
+    extraEnv: []
 
     serviceMonitor: *serviceMonitor
