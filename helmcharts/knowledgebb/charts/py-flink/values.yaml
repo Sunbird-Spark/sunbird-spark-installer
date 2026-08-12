@@ -390,7 +390,14 @@ py_flink_jobs:
         model: "azure/gpt-5-mini"
         api_base: "https://cossdev-semanticsearch.openai.azure.com/"
         api_version: "2024-12-01-preview"
-        batch_size: 80
+        # gpt-5-mini deployment quota is tight (15 req/min, 40k tokens/min) -
+        # batch_size/max_concurrency sized down to stay under it, and
+        # max_completion_tokens raised since reasoning models spend part of
+        # that budget on hidden reasoning tokens before the visible reply
+        # (too low truncates the translated JSON mid-string).
+        max_completion_tokens: 4000
+        batch_size: 20
+        max_concurrency: 2
         context_overlap: 2
         auto_approve: true
 
