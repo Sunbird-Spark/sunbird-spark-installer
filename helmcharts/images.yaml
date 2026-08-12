@@ -9,9 +9,8 @@ imagePullSecrets:
 # All images defined with anchors
 images:
   velero: &velero
-    registry: "docker.io"
-    repository: "velero/velero"
-    tag: "v1.15.0"
+    repository: "dhi.io/velero"
+    tag: "1.18.2-debian13"
 
   volume_autoscaler: &volume_autoscaler
     registry: "docker.io"
