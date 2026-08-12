@@ -383,9 +383,9 @@ global:
   enrichment_router:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/enrichment-router"
-    tag: "spark-v1.0.3-captions-beta35_570a40b"
+    tag: "spark-v1.0.3-captions-beta36_5a9d582"
 
   caption_generator:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/caption-generator"
-    tag: "spark-v1.0.3-captions-beta35_570a40b"
+    tag: "spark-v1.0.3-captions-beta36_5a9d582"
