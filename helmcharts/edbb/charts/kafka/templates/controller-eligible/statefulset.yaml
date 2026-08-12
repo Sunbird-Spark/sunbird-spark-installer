@@ -132,10 +132,12 @@ spec:
           env:
             - name: KAFKA_HEAP_OPTS
               value: {{ coalesce .Values.controller.heapOpts .Values.heapOpts | quote }}
-            - name: KAFKA_CFG_PROCESS_ROLES
-              value: {{ ternary "controller" "controller,broker" .Values.controller.controllerOnly | quote }}
-            - name: KAFKA_INITIAL_CONTROLLERS_FILE
-              value: /shared/initial-controllers.txt
+            {{/* DHI migration: process.roles is already set directly in server.properties
+                 (controller-eligible/configmap.yaml). KAFKA_CFG_PROCESS_ROLES was
+                 Bitnami-only and redundant. KAFKA_INITIAL_CONTROLLERS_FILE fed the old
+                 dynamic-quorum bootstrap mechanism (initial-controllers.txt), now
+                 superseded by the static controller.quorum.voters list in
+                 kafka.commonConfig - both env vars are dropped, not just renamed. */}}
             {{- include "kafka.commonEnv" . | nindent 12 }}
             {{- if .Values.controller.extraEnvVars }}
             {{- include "common.tplvalues.render" ( dict "value" .Values.controller.extraEnvVars "context" $) | nindent 12 }}
@@ -186,11 +188,11 @@ spec:
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customLivenessProbe "context" $) | nindent 12 }}
           {{- else if .Values.controller.livenessProbe.enabled }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.controller.livenessProbe "enabled") "context" $) | nindent 12 }}
-            exec:
-              command:
-                - pgrep
-                - -f
-                - kafka
+            {{/* DHI migration: pgrep doesn't exist on DHI's image, so the exec-based
+                 check would always fail and crash-loop an otherwise-healthy pod.
+                 tcpSocket matches this chart's own readinessProbe fallback below. */}}
+            tcpSocket:
+              port: "client"
           {{- end }}
           {{- if .Values.controller.customReadinessProbe }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.controller.customReadinessProbe "context" $) | nindent 12 }}
@@ -221,7 +223,7 @@ spec:
             - name: logs
               mountPath: {{ .Values.controller.logPersistence.mountPath }}
             - name: kafka-config
-              mountPath: /opt/bitnami/kafka/config/server.properties
+              mountPath: /opt/kafka/config/server.properties
               subPath: server.properties
             - name: tmp
               mountPath: /tmp
@@ -229,17 +231,17 @@ spec:
               mountPath: /shared
             {{- if or .Values.log4j2 .Values.existingLog4j2ConfigMap }}
             - name: log4j2-config
-              mountPath: /opt/bitnami/kafka/config/log4j2.yaml
+              mountPath: /opt/kafka/config/log4j2.yaml
               subPath: log4j2.yaml
             {{- end }}
             {{- if include "kafka.sslEnabled" . }}
             - name: kafka-shared-certs
-              mountPath: /opt/bitnami/kafka/config/certs
+              mountPath: /opt/kafka/config/certs
               readOnly: true
             {{- end }}
             {{- if and .Values.usePasswordFiles (include "kafka.saslEnabled" .) }}
             - name: kafka-sasl
-              mountPath: /opt/bitnami/kafka/config/secrets
+              mountPath: /opt/kafka/config/secrets
               readOnly: true
             {{- end }}
             {{- if .Values.extraVolumeMounts }}

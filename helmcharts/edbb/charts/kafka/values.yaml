@@ -94,6 +94,12 @@ serviceBindings:
 ## @param image.pullSecrets Specify docker-registry secret names as an array
 ## @param image.debug Specify if debug values should be set
 ##
+
+imageDev:
+  repository: dhi.io/kafka
+  tag: 4.1.2-debian13-dev
+
+
 image:
   registry: docker.io
   repository: bitnami/kafka
@@ -1096,8 +1102,12 @@ controller:
     ##
     selector: {}
     ## @param controller.persistence.mountPath Mount path of the Kafka data volume
+    ## DHI migration: was /bitnami/kafka. Using /var/lib/kafka rather than a path
+    ## under /opt/kafka, since that directory holds DHI's own bin/config and a
+    ## volume mount there would shadow them. kafka.controller.config appends "/data"
+    ## itself, so log.dir ends up as /var/lib/kafka/data.
     ##
-    mountPath: /bitnami/kafka
+    mountPath: /var/lib/kafka
   ## Log Persistence parameters
   ##
   logPersistence:
@@ -1134,7 +1144,7 @@ controller:
     selector: {}
     ## @param controller.logPersistence.mountPath Mount path of the Kafka logs volume
     ##
-    mountPath: /opt/bitnami/kafka/logs
+    mountPath: /opt/kafka/logs
 ## @section Broker-only statefulset parameters
 ##
 broker:
@@ -1562,8 +1572,10 @@ broker:
     ##
     selector: {}
     ## @param broker.persistence.mountPath Mount path of the Kafka data volume
+    ## DHI migration: was /bitnami/kafka. See controller.persistence.mountPath above
+    ## for why /var/lib/kafka is used instead of a path under /opt/kafka.
     ##
-    mountPath: /bitnami/kafka
+    mountPath: /var/lib/kafka
   ## Log Persistence parameters
   ##
   logPersistence:
@@ -1600,7 +1612,7 @@ broker:
     selector: {}
     ## @param broker.logPersistence.mountPath Mount path of the Kafka logs volume
     ##
-    mountPath: /opt/bitnami/kafka/logs
+    mountPath: /opt/kafka/logs
 ## @section Traffic Exposure parameters
 ##
 
