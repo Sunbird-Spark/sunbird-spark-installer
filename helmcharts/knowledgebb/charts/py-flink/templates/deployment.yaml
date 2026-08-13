@@ -47,6 +47,14 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ $jobData.taskManagerReplicas | default .Values.replicaCount }}
+  # RollingUpdate needs surge capacity to run old+new pods briefly side by
+  # side - this cluster doesn't reliably have that headroom (confirmed via
+  # repeated FailedScheduling/Insufficient cpu deadlocks on every deploy).
+  # Recreate kills the old pod(s) first instead, so a rollout never needs
+  # more than steady-state capacity. Fine for a Flink job: the JobManager
+  # already re-submits the job on every restart regardless.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "common.names.name" . }}
@@ -173,6 +181,10 @@ spec:
   # leadership, not add capacity. Scale processing via taskManagerReplicas
   # / taskSlots instead.
   replicas: 1
+  # See the taskmanager Deployment above for why Recreate instead of the
+  # RollingUpdate default — same cluster-capacity reasoning applies here.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "common.names.name" . }}
