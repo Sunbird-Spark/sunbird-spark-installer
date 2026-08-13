@@ -116,14 +116,16 @@ resources:
 
 # JobManager only coordinates (no Kafka/whisper/LLM work happens there) —
 # deliberately light, same for every job unless a job overrides
-# jobManagerResources itself.
+# jobManagerResources itself. Matches the sibling `flink` chart's own
+# JobManager convention (transaction-event-processor, knowlg-publish, etc.)
+# so py-flink's JobManagers ask for the same as every other Flink job here.
 jobManagerResources:
   requests:
-    cpu: 200m
-    memory: 512Mi
-  limits:
-    cpu: 500m
+    cpu: 100m
     memory: 1Gi
+  limits:
+    cpu: 1
+    memory: 2Gi
 
 # Standalone Application Mode: dedicated JobManager (always 1 replica,
 # see deployment.yaml) + TaskManager(s) per job, connected via the
