@@ -94,7 +94,8 @@ else
     --name "$RUNNER_SUBNET_NAME" \
     --vnet-name "$VNET_NAME" \
     --resource-group "$RESOURCE_GROUP" \
-    --address-prefixes "10.0.16.0/28" >/dev/null
+    --address-prefixes "10.0.16.0/28" \
+    --service-endpoints "Microsoft.Storage" >/dev/null
   echo "✓ Runner subnet created: $RUNNER_SUBNET_NAME (10.0.16.0/28)"
 fi
 
