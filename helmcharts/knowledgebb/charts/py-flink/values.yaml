@@ -313,12 +313,16 @@ py_flink_jobs:
     # (large-v3-turbo int8, ~1.5-2GB) plus decode/inference headroom, not
     # parallelism x that.
     taskSlots: 1
+    # cpu request bumped 1->2: live usage sits pinned at 2 full cores for the
+    # entire duration of any transcription (faster-whisper is CPU-bound), so
+    # requesting only 1 under-reserved it - this makes the request match
+    # actual steady-state need instead of throttling from the start.
     resources:
       requests:
-        cpu: "1"
+        cpu: "2"
         memory: 2Gi
       limits:
-        cpu: "2"
+        cpu: "3"
         memory: 4Gi
 
     # ── ai-pipeline jobs/caption_generator/config.yaml, templated ─────────
