@@ -220,12 +220,14 @@ py_flink_jobs:
 
     configPath: /opt/sunbird-ai/jobs/enrichment_router/config.yaml
 
-    # Light job: read-only consumer, no model inference. This is the
+    # Light job: read-only consumer, no model inference. Matches every other
+    # Flink job's TaskManager convention here (transaction-event-processor,
+    # knowlg-publish, etc.) instead of an ad-hoc higher value. This is the
     # TaskManager's resources (see jobManagerResources for the JM's).
 
     resources:
       requests:
-        cpu: 500m
+        cpu: 100m
         memory: 1Gi
       limits:
         cpu: 1
