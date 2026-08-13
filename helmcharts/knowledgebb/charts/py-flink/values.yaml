@@ -306,16 +306,20 @@ py_flink_jobs:
 
     configPath: /opt/sunbird-ai/jobs/caption_generator/config.yaml
 
-    # Heavier job: faster-whisper transcription (CPU by default, see
-    # transcription.device below) + concurrent per-language LLM
-    # translation calls via ThreadPoolExecutor.
+    # parallelism 1 below means only one subtask ever runs, so only one
+    # faster-whisper model instance is ever loaded into RAM at a time
+    # (WhisperModel is loaded once per subtask in FasterWhisperProvider.__init__,
+    # called from TranscriptionFunction.open()) — sized for that one instance
+    # (large-v3-turbo int8, ~1.5-2GB) plus decode/inference headroom, not
+    # parallelism x that.
+    taskSlots: 1
     resources:
       requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
         cpu: "2"
         memory: 4Gi
-      limits:
-        cpu: "4"
-        memory: 8Gi
 
     # ── ai-pipeline jobs/caption_generator/config.yaml, templated ─────────
     # Same key names/nesting as the upstream config.yaml. Secrets (api
@@ -324,7 +328,7 @@ py_flink_jobs:
     config:
       job:
         name: caption-generator
-        parallelism: 4
+        parallelism: 1
         log_level: INFO
         # Transcription is a long synchronous CPU call — the default 60s
         # checkpoint timeout expires mid-transcription, and once that
