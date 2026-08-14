@@ -1,54 +1,12 @@
-# py-flink: consolidated chart for ai-pipeline's PyFlink 1.20 jobs,
-# running in real Application Mode — job baked directly into a dedicated
-# JobManager + TaskManager(s) Deployment pair per job (see
-# templates/deployment.yaml), same shape as the sibling `flink` chart's
-# JM/TM split. A JM restart re-runs the same startup command, which
-# re-submits the job as a side effect — no separate resubmission step,
-# same as Java/Scala jobs here.
+# py-flink: Consolidated Helm chart for running PyFlink 1.20 streaming jobs in Application Mode.
 #
-# --job-classname is always org.apache.flink.client.python.PythonDriver
-# (Flink's own generic driver for running a Python script as the
-# cluster's job) — the job-specific bit is `pyEntrypoint` (the script
-# path passed via -py), not a different Java class per job. Getting this
-# working took fixing two real bugs (see templates/deployment.yaml's
-# header comment for the full account): Kubernetes' `command:` field
-# replacing the image's ENTRYPOINT outright, and PythonDriver's own
-# strict arg parser breaking on any -D flag mixed into its args — all
-# cluster config (ports, parallelism) must go via FLINK_PROPERTIES
-# instead, exactly like the official Flink Kubernetes Operator's own
-# FlinkDeployment spec does for PyFlink jobs.
-#
-# Structural pattern otherwise mirrors the sibling `flink` chart (../flink):
-# one map of jobs (here `py_flink_jobs`, there `flink_jobs`), with
-# templates/*.yaml ranging over that map and skipping any entry whose
-# `enabled` is false. Each entry can override `resources` (falls back to
-# the chart-level `resources` default below otherwise), same as
-# `flink`'s flink_jobs.*.resources override.
-#
-# What's genuinely different from `flink` (see Chart.yaml description for
-# the short version):
-#   - no shared global.knowledgeflink image — each job entry names its
-#     own helmcharts/images.yaml anchor via `globalImageKey`
-#     (global.enrichment_router / global.caption_generator).
-#   - config.yaml (ai-pipeline/jobs/<name>/config.yaml, upstream) is
-#     reproduced verbatim under each job's `config:` key, rendered into a
-#     ConfigMap and mounted at `configPath`. Secrets are deliberately left
-#     out of `config:` — they're injected as SUNBIRD_AI_* env vars instead,
-#     since ai-pipeline's JobConfig always prefers the env var override
-#     over the YAML file value (see ai-pipeline/core/docs/01_config.md).
-#
-# NOTE on secrets (temporary): the knowlg platform requires no auth for
-# these internal, same-cluster calls, so no key is needed there at all.
-# The LLM (multilingual translation) API key IS a real external secret,
-# but for now it's injected directly as a plaintext env var via
-# `extraEnv` below (values-file-controlled) rather than a K8s Secret —
-# deliberately simple to start; this must move to a proper Secret +
-# secretEnv reference before any real deployment.
-
-# Same log4j2 config as the sibling `flink` chart (../flink/values.yaml),
-# mounted over the base image's default at /opt/flink/conf/log4j-console.properties
-# (see templates/deployment.yaml). Shared across every py_flink_jobs entry —
-# one ConfigMap key per job, same rendered value.
+# Key architecture details:
+# 1. Job Isolation: Each enabled entry in `py_flink_jobs` runs on a dedicated JobManager + TaskManager(s) deployment pair.
+# 2. Image Selection: Each job specifies its own image key (`globalImageKey`) referencing helmcharts/images.yaml.
+# 3. Execution: Run using Flink's generic `PythonDriver` class with a job-specific `pyEntrypoint`.
+#    CLI arguments are strict; all Flink properties must be configured via the `FLINK_PROPERTIES` environment variable.
+# 4. Configurations: App configs are mounted as YAML. Secrets must be injected via environment variables (e.g. `SUNBIRD_AI_*`).
+# 5. Logging: Shared log4j properties are mounted across all JobManager/TaskManager nodes.
 log4j_console_properties: |
   # This affects logging for both user code and Flink
   rootLogger.level = INFO
@@ -101,11 +59,8 @@ commonLabels: {}
 commonAnnotations:
   reloader.stakater.com/auto: "true"
 
-# Fallback for any py_flink_jobs entry that doesn't set its own
-# `resources` (see templates/deployment.yaml) — mirrors `flink`'s
-# top-level `resources` + per-job flink_jobs.*.resources override.
-# This is the TaskManager default (actual processing happens there);
-# JobManager gets the much lighter jobManagerResources below instead.
+# Default resources for TaskManagers. Individual jobs can override this in `py_flink_jobs`.
+# JobManagers use the lighter `jobManagerResources` config below.
 resources:
   requests:
     cpu: 500m
@@ -114,11 +69,7 @@ resources:
     cpu: 1
     memory: 2Gi
 
-# JobManager only coordinates (no Kafka/whisper/LLM work happens there) —
-# deliberately light, same for every job unless a job overrides
-# jobManagerResources itself. Matches the sibling `flink` chart's own
-# JobManager convention (transaction-event-processor, knowlg-publish, etc.)
-# so py-flink's JobManagers ask for the same as every other Flink job here.
+# Default resources for the coordinating JobManager (lightweight; no heavy processing happens here).
 jobManagerResources:
   requests:
     cpu: 100m
@@ -127,10 +78,7 @@ jobManagerResources:
     cpu: 1
     memory: 2Gi
 
-# Standalone Application Mode: dedicated JobManager (always 1 replica,
-# see deployment.yaml) + TaskManager(s) per job, connected via the
-# {{ jobName }}-jobmanager Service — mirrors the sibling `flink` chart's
-# jobmanager/taskmanager port config exactly.
+# Port configuration for JobManager and TaskManager.
 jobmanager:
   rpc_port: 6123
   blob_port: 6124
@@ -139,16 +87,10 @@ jobmanager:
 
 taskmanager:
   rpc_port: 6122
-  # Fallback for any py_flink_jobs entry that doesn't set its own
-  # taskSlots. Total parallelism available = taskSlots * taskManagerReplicas
-  # (job-level default replicaCount, or a job's own taskManagerReplicas).
+  # Default TaskManager taskSlots. Total parallelism = taskSlots * taskManagerReplicas.
   numberOfTaskSlots: 4
 
-# Each job here is a singleton streaming job (one `flink run -py` driver
-# process), not a horizontally-scalable stateless service — replicaCount
-# stays at 1 and autoscaling is disabled by default, kept only for parity
-# with other charts in this repo. In-job parallelism is controlled by
-# each job's config.job.parallelism instead.
+# In-job parallelism is controlled via app config. Autoscaling is disabled by default.
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -164,13 +106,8 @@ autoscaling:
 nodeSelector: {}
 tolerations: []
 affinity: {}
-# No GPU node-pool convention (nodeSelector/tolerations/taints/runtimeClass
-# for e.g. nvidia.com/gpu) exists anywhere else in this repo today (checked
-# learnbb and every other building block). caption-generator's
-# transcription.device below defaults to "cpu" to match that reality. If/
-# when a GPU node pool is added, set transcription.device: "cuda" on that
-# job's config and populate nodeSelector/tolerations here (e.g. a taint
-# like `nvidia.com/gpu=present:NoSchedule` + matching toleration).
+# GPU node-pools are not configured by default. To use GPUs (e.g. for transcription.device: cuda),
+# configure nodeSelector/tolerations accordingly.
 
 serviceAccount:
   create: false
@@ -180,15 +117,8 @@ serviceAccount:
 initContainers: {}
 sidecars: {}
 
-# Plumbing only for now — enabled: false, and no metrics.reporter is
-# configured in ai-pipeline's job config yet (tracked separately). Both
-# the jobmanager and taskmanager Services expose a "prom" named port
-# (templates/service.yaml); this single broad-selector ServiceMonitor
-# scrapes both, same as the sibling `flink` chart's own selector (which
-# also doesn't distinguish jobmanager vs taskmanager, relying only on the
-# named port existing). Once a Prometheus reporter is added on the
-# ai-pipeline side, enabling this + setting prom_port to match is a
-# values-only change.
+# Inactive until Prometheus reporter is configured in ai-pipeline. Scrapes the "prom" named port
+# on JobManager and TaskManager Services.
 serviceMonitor: &serviceMonitor
   enabled: false
   job:
@@ -208,25 +138,16 @@ py_flink_jobs:
   enrichment-router:
     enabled: true
 
-    # Points at helmcharts/images.yaml's global.enrichment_router anchor
-    # (registry/repository/tag) — see templates/deployment.yaml.
+    # References the image defined under global.enrichment_router in helmcharts/images.yaml.
     globalImageKey: enrichment_router
 
-    # jobDir -> JM/TM containers' workingDir (/opt/sunbird-ai/jobs/<jobDir>).
-    # pyEntrypoint -> the -py argument passed to PythonDriver, relative to
-    # that workingDir (see ai-pipeline/docker/Dockerfile.enrichment-router).
+    # jobDir maps to container workingDir. pyEntrypoint is the -py path relative to it.
     jobDir: enrichment_router
     pyEntrypoint: enrichment_router/main.py
 
     configPath: /opt/sunbird-ai/jobs/enrichment_router/config.yaml
 
-    # Light job: read-only consumer, no model inference. Matches every other
-    # Flink job's TaskManager convention here (transaction-event-processor,
-    # knowlg-publish, etc.) instead of an ad-hoc higher value. This is the
-    # TaskManager's resources (see jobManagerResources for the JM's).
-    #
-    # helmcharts/global-resources.yaml's py-flink.py_flink_jobs.enrichment-router
-    # duplicates this and wins in the merge order — keep both in sync.
+    # TaskManager resources. Synchronized with global-resources.yaml overrides.
     resources:
       requests:
         cpu: 100m
@@ -235,19 +156,13 @@ py_flink_jobs:
         cpu: 1
         memory: 2Gi
 
-    # ── ai-pipeline jobs/enrichment_router/config.yaml, templated ─────────
-    # Same key names/nesting as the upstream config.yaml. Secrets
-    # (api keys, non-OIDC cloud storage credentials) are deliberately left
-    # out — injected as SUNBIRD_AI_* env vars via secretEnv below instead.
+    # Upstream config.yaml. Secrets are omitted here and injected via SUNBIRD_AI_* env vars.
     config:
       job:
         name: enrichment-router
         parallelism: 4
         log_level: INFO
-        # Stamped into context.env on outgoing BE_JOB_REQUEST events
-        # (MediaTranscriptionRequest/MediaMultilingualRequest/
-        # EnrichedMetadataEvent) — was previously unset, so every event
-        # went out with context.env="".
+        # Populates context.env on outgoing BE_JOB_REQUEST events.
         env: "{{ .Values.global.env }}"
 
       kafka:
@@ -259,22 +174,10 @@ py_flink_jobs:
           multilingual_out: "{{ .Values.global.env }}.media.multilingual.request"
 
       knowlg:
-        # Matches the content_service_url convention already used by
-        # learnbb/charts/flink and edbb/charts/kong-apis (service name
-        # "knowlg-service", port 9000). No api_key — internal calls to the
-        # knowlg platform require no auth. object_update/object_create/
-        # enrichment_read are all hardcoded in KnowlgClient (shared by every
-        # job, platform-wide fixed paths) — nothing left to list here.
+        # In-cluster content service URL. No auth key is required for internal calls.
         content_service_url: "http://knowlg-service:9000"
 
-      # BaseProcessFunction.open() always builds a BlobStorageUtil regardless
-      # of whether the job calls it, so cloud_storage_type/auth_type/container
-      # are required even though enrichment-router's own logic never touches
-      # self.storage afterward. cloud_storage_auth.account_name is ALSO
-      # required eagerly for OIDC/IAM (_build_storage_options in
-      # blob_util.py raises KeyError on construction if missing, confirmed
-      # by a real crash-loop) - only cloud_storage_public_endpoint is
-      # genuinely safe to omit (lazy, guarded default "").
+      # Storage configurations are required by Flink's BaseProcessFunction initialization.
       cloud_storage_type: azure
       cloud_storage_auth_type: OIDC
       cloud_storage_container: "{{ .Values.global.public_container_name }}"
@@ -298,32 +201,18 @@ py_flink_jobs:
   caption-generator:
     enabled: true
 
-    # Points at helmcharts/images.yaml's global.caption_generator anchor
-    # (registry/repository/tag) — see templates/deployment.yaml.
+    # References the image defined under global.caption_generator in helmcharts/images.yaml.
     globalImageKey: caption_generator
 
-    # jobDir -> JM/TM containers' workingDir (/opt/sunbird-ai/jobs/<jobDir>).
-    # pyEntrypoint -> the -py argument passed to PythonDriver, relative to
-    # that workingDir (see ai-pipeline/docker/Dockerfile.caption-generator).
+    # jobDir maps to container workingDir. pyEntrypoint is the -py path relative to it.
     jobDir: caption_generator
     pyEntrypoint: caption_generator/main.py
 
     configPath: /opt/sunbird-ai/jobs/caption_generator/config.yaml
 
-    # parallelism 1 below means only one subtask ever runs, so only one
-    # faster-whisper model instance is ever loaded into RAM at a time
-    # (WhisperModel is loaded once per subtask in FasterWhisperProvider.__init__,
-    # called from TranscriptionFunction.open()) — sized for that one instance
-    # (large-v3-turbo int8, ~1.5-2GB) plus decode/inference headroom, not
-    # parallelism x that.
+    # Kept at 1 to limit RAM consumption of faster-whisper model instances.
     taskSlots: 1
-    # cpu request bumped 1->2: live usage sits pinned at 2 full cores for the
-    # entire duration of any transcription (faster-whisper is CPU-bound), so
-    # requesting only 1 under-reserved it - this makes the request match
-    # actual steady-state need instead of throttling from the start.
-    #
-    # helmcharts/global-resources.yaml's py-flink.py_flink_jobs.caption-generator
-    # duplicates this and wins in the merge order — keep both in sync.
+    # TaskManager resources. Synchronized with global-resources.yaml overrides.
     resources:
       requests:
         cpu: "2"
@@ -332,25 +221,15 @@ py_flink_jobs:
         cpu: "3"
         memory: 4Gi
 
-    # ── ai-pipeline jobs/caption_generator/config.yaml, templated ─────────
-    # Same key names/nesting as the upstream config.yaml. Secrets (api
-    # keys) are deliberately left out — injected as SUNBIRD_AI_* env vars
-    # via secretEnv below instead.
+    # Upstream config.yaml. Secrets are omitted here and injected via SUNBIRD_AI_* env vars.
     config:
       job:
         name: caption-generator
         parallelism: 1
         log_level: INFO
-        # Stamped into context.env on outgoing BE_JOB_REQUEST events
-        # (MediaTranscriptionRequest/MediaMultilingualRequest/
-        # EnrichedMetadataEvent) — was previously unset, so every event
-        # went out with context.env="".
+        # Populates context.env on outgoing BE_JOB_REQUEST events.
         env: "{{ .Values.global.env }}"
-        # Transcription is a long synchronous CPU call — the default 60s
-        # checkpoint timeout expires mid-transcription, and once that
-        # happens enough times in a row Flink kills the job (restart
-        # re-downloads and re-transcribes the same in-flight request,
-        # looking like an infinite loop).
+        # Increase checkpoint timeouts to avoid failures during long CPU-bound transcription calls.
         checkpointing_interval_ms: 300000
         checkpointing_timeout_ms: 900000
 
@@ -362,28 +241,17 @@ py_flink_jobs:
           multilingual_in: "{{ .Values.global.env }}.media.multilingual.request"
           transcription_dlq: "{{ .Values.global.env }}.media.transcription.dlq"
           multilingual_dlq: "{{ .Values.global.env }}.media.multilingual.dlq"
-          # Auto-approved Transcript events go back out on the same topic
-          # enrichment-router consumes as its input (topics.input above),
-          # closing the loop so it can dispatch multilingual generation —
-          # see caption_generator/main.py's enriched_metadata_out sink.
+          # Auto-approved Transcript events go back to enrichment-router's input topic.
           enriched_metadata_out: "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
 
       knowlg:
-        # Matches the content_service_url convention already used by
-        # learnbb/charts/flink and edbb/charts/kong-apis (service name
-        # "knowlg-service", port 9000). No api_key — internal calls to the
-        # knowlg platform require no auth. object_update/enrichment_read are
-        # both hardcoded in KnowlgClient (shared by every job, platform-wide
-        # fixed paths) — nothing left to list here.
+        # In-cluster content service URL. No auth key is required for internal calls.
         content_service_url: "http://knowlg-service:9000"
 
       cloud_storage_type: azure
       cloud_storage_auth_type: OIDC
       cloud_storage_container: "{{ .Values.global.public_container_name }}"
-      # account_name required for OIDC (see ai-pipeline/core/sunbird_ai_core/
-      # storage/blob_util.py _build_storage_options). Both this and
-      # public_endpoint are genuinely used here (download/upload + public
-      # artifactUrl/captionsUrl generation), unlike enrichment-router.
+      # account_name and public_endpoint are required for OIDC storage configuration.
       cloud_storage_auth:
         account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
       cloud_storage_public_endpoint: "{{ .Values.global.object_storage_endpoint }}"
@@ -394,40 +262,24 @@ py_flink_jobs:
         device: cpu # set to "cuda" only once a GPU node pool exists (see nodeSelector/tolerations comment above)
         compute_type: int8
         auto_approve: true
-        # More windows sampled + majority-voted across the audio, rather
-        # than trusting one or two — lower-resource languages are more
-        # likely to get misdetected as a major language from just a
-        # couple of windows.
+        # Increased segments for more accurate language detection in lower-resource languages.
         language_detection_segments: 8
         language_detection_threshold: 0.7
 
       multilingual:
         provider: litellm
-        # LLM model identifier passed straight through to LiteLLM. "azure/"
-        # prefix routes to Azure OpenAI (needs api_base + api_version below)
-        # instead of plain OpenAI — must match the deployment name exactly,
-        # not necessarily the underlying model's own name.
-        # API key is injected via extraEnv below, never set in config
-        # directly.
+        # LiteLLM model identifier. Prefix with 'azure/' to route to Azure OpenAI.
         model: "azure/gpt-5-mini"
         api_base: "https://cossdev-semanticsearch.openai.azure.com/"
         api_version: "2024-12-01-preview"
-        # gpt-5-mini deployment quota is tight (15 req/min, 40k tokens/min) -
-        # batch_size/max_concurrency sized down to stay under it, and
-        # max_completion_tokens raised since reasoning models spend part of
-        # that budget on hidden reasoning tokens before the visible reply
-        # (too low truncates the translated JSON mid-string).
+        # Token and concurrency limits optimized for gpt-5-mini API quotas.
         max_completion_tokens: 4000
         batch_size: 20
         max_concurrency: 2
         context_overlap: 2
         auto_approve: true
 
-    # No knowlg secret needed (internal calls, no auth). The LLM API key
-    # points at the same Azure OpenAI resource (cossdev-semanticsearch)
-    # search-api's embedding service already authenticates against via the
-    # existing openai-secret/OPENAI_API_KEY - reusing it here instead of a
-    # separate never-populated global.ai_pipeline_llm_api_key value.
+    # Reuses existing openai-secret/OPENAI_API_KEY for the LLM API authentication.
     secretEnv:
       - envName: SUNBIRD_AI_MULTILINGUAL_API_KEY
         secretName: openai-secret
