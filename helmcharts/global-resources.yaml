@@ -129,10 +129,14 @@ search:
 # chart shapes).
 py-flink:
   py_flink_jobs:
+    # These must match helmcharts/knowledgebb/charts/py-flink/values.yaml's
+    # per-job resources exactly — this file merges after the chart's own
+    # values.yaml and wins, so a mismatch here silently overrides whatever
+    # is tuned there. Update both together.
     enrichment-router:
       resources:
         requests:
-          cpu: 500m
+          cpu: 100m
           memory: 1Gi
         limits:
           cpu: 1
@@ -141,10 +145,10 @@ py-flink:
       resources:
         requests:
           cpu: "2"
-          memory: 4Gi
+          memory: 2Gi
         limits:
-          cpu: "4"
-          memory: 8Gi
+          cpu: "3"
+          memory: 4Gi
 
 #learnbb
 cert:
