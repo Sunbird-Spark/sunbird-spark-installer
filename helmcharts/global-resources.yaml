@@ -122,17 +122,10 @@ search:
       cpu: 1
       memory: 1024Mi
 
-# ai-pipeline (PyFlink) jobs — deployed via the consolidated `py-flink`
-# chart's py_flink_jobs map (helmcharts/knowledgebb/charts/py-flink), not
-# via the shared JVM `flink` chart's flink_jobs map (see that chart's
-# values.yaml header for why the two families of jobs need different
-# chart shapes).
+# Resource specifications for ai-pipeline (PyFlink) jobs.
 py-flink:
   py_flink_jobs:
-    # These must match helmcharts/knowledgebb/charts/py-flink/values.yaml's
-    # per-job resources exactly — this file merges after the chart's own
-    # values.yaml and wins, so a mismatch here silently overrides whatever
-    # is tuned there. Update both together.
+    # Must match the per-job resources in py-flink/values.yaml exactly to avoid silent overrides.
     enrichment-router:
       resources:
         requests:
