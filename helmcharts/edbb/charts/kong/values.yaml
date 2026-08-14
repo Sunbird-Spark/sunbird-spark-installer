@@ -4,8 +4,9 @@ fullnameOverride: "kong"
 replicaCount: 1
 
 image:
-  repository: dhi.io/kong
-  tag: "3.9.3-debian13"
+  registry: "docker.io"
+  repository: kong
+  tag: "3.9.1"
   pullPolicy: IfNotPresent
   pullSecrets: []
 

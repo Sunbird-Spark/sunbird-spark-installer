@@ -56,7 +56,8 @@ images:
     tag: "release-3.9.0_RC1_01339f9_07941f0_1_router"
 
   kong: &kong
-    repository: "dhi.io/kong"
+    registry: "dhi.io"
+    repository: "kong"
     tag: "3.9.3-debian13"
 
   kong_apis: &kong_apis
