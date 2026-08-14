@@ -21,8 +21,8 @@ spec:
             until nc -z {{.Values.global.yugabyte.host}} {{.Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.imageDev.repository }}:{{ .Values.imageDev.tag }}"
-          imagePullPolicy: {{ .Values.imageDev.pullPolicy }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - /bin/bash
             - -c
