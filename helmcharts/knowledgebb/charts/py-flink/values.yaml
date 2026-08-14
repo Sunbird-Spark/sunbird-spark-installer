@@ -262,13 +262,10 @@ py_flink_jobs:
         # Matches the content_service_url convention already used by
         # learnbb/charts/flink and edbb/charts/kong-apis (service name
         # "knowlg-service", port 9000). No api_key — internal calls to the
-        # knowlg platform require no auth. object_update is hardcoded in
-        # KnowlgClient (shared by every job), not listed here. Only
-        # object_create and enrichment_read are actually called by this job.
+        # knowlg platform require no auth. object_update/object_create/
+        # enrichment_read are all hardcoded in KnowlgClient (shared by every
+        # job, platform-wide fixed paths) — nothing left to list here.
         content_service_url: "http://knowlg-service:9000"
-        apis:
-          object_create: /content/v4/enrichment/object/create/{identifier}
-          enrichment_read: /content/v4/enrichment/read/{identifier}
 
       # BaseProcessFunction.open() always builds a BlobStorageUtil regardless
       # of whether the job calls it, so cloud_storage_type/auth_type/container
@@ -375,12 +372,10 @@ py_flink_jobs:
         # Matches the content_service_url convention already used by
         # learnbb/charts/flink and edbb/charts/kong-apis (service name
         # "knowlg-service", port 9000). No api_key — internal calls to the
-        # knowlg platform require no auth. object_update is hardcoded in
-        # KnowlgClient (shared by every job), not listed here. enrichment_read
-        # is the only other API this job calls.
+        # knowlg platform require no auth. object_update/enrichment_read are
+        # both hardcoded in KnowlgClient (shared by every job, platform-wide
+        # fixed paths) — nothing left to list here.
         content_service_url: "http://knowlg-service:9000"
-        apis:
-          enrichment_read: /content/v4/enrichment/read/{identifier}
 
       cloud_storage_type: azure
       cloud_storage_auth_type: OIDC
