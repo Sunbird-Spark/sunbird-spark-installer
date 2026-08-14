@@ -176,12 +176,13 @@ Returns an init-container that prepares the Kafka configuration files for main c
           return $return_value
       }
       kafka_server_conf_set() {
-          local -r key="$1" value="$2"
-          if grep -qE "^${key}=" "$KAFKA_CONF_FILE" 2>/dev/null; then
-              sed -i "s|^${key}=.*|${key}=${value}|" "$KAFKA_CONF_FILE"
-          else
-              echo "${key}=${value}" >> "$KAFKA_CONF_FILE"
-          fi
+        local -r key="$1" value="$2"
+        if grep -qE "^${key}=" "$KAFKA_CONF_FILE" 2>/dev/null; then
+            sed -i "s|^${key}=.*|${key}=${value}|" "$KAFKA_CONF_FILE"
+        else
+            [[ -s "$KAFKA_CONF_FILE" ]] && [[ -n "$(tail -c1 "$KAFKA_CONF_FILE")" ]] && echo >> "$KAFKA_CONF_FILE"
+            echo "${key}=${value}" >> "$KAFKA_CONF_FILE"
+        fi
       }
       replace_in_file() {
           local -r file="$1" match="$2" substitute="$3"
@@ -229,7 +230,7 @@ Returns an init-container that prepares the Kafka configuration files for main c
           # Remove previously existing keystores and certificates, if any
           rm -f /certs/kafka.keystore.jks /certs/kafka.truststore.jks
           rm -f /certs/tls.crt /certs/tls.key /certs/ca.crt
-          find /certs -name "xx*" -exec rm {} \;
+          rm -f /certs/xx*
           if [[ "${KAFKA_TLS_TYPE}" = "PEM" ]]; then
               # Copy PEM certificate and key
               if [[ -f "/mounted-certs/kafka-${POD_ROLE}-${POD_ID}.crt" && "/mounted-certs/kafka-${POD_ROLE}-${POD_ID}.key" ]]; then
@@ -351,17 +352,17 @@ Returns an init-container that prepares the Kafka configuration files for main c
 
       # Configure node.id
       ID=$((POD_ID + KAFKA_MIN_ID))
-      [[ -f "/var/lib/kafka/data/meta.properties" ]] && ID="$(grep "node.id" /var/lib/kafka/data/meta.properties | awk -F '=' '{print $2}')"
+      [[ -f "/var/lib/kafka/data/meta.properties" ]] && ID="$(grep "node.id" /var/lib/kafka/data/meta.properties | cut -d'=' -f2)"
       kafka_server_conf_set "node.id" "$ID"
       # Configure initial controllers
       if [[ "controller" =~ "$POD_ROLE" ]]; then
           INITIAL_CONTROLLERS=()
           for ((i = 0; i < {{ int .context.Values.controller.replicaCount }}; i++)); do
               var="KAFKA_CONTROLLER_${i}_DIR_ID"; DIR_ID="${!var}"
-              [[ $i -eq $POD_ID ]] && [[ -f "/var/lib/kafka/data/meta.properties" ]] && DIR_ID="$(grep "directory.id" /var/lib/kafka/data/meta.properties | awk -F '=' '{print $2}')"
+              [[ $i -eq $POD_ID ]] && [[ -f "/var/lib/kafka/data/meta.properties" ]] && DIR_ID="$(grep "directory.id" /var/lib/kafka/data/meta.properties | cut -d'=' -f2)"
               INITIAL_CONTROLLERS+=("${i}@${KAFKA_FULLNAME}-${POD_ROLE}-${i}.${KAFKA_CONTROLLER_SVC_NAME}.${MY_POD_NAMESPACE}.svc.${CLUSTER_DOMAIN}:${KAFKA_CONTROLLER_PORT}:${DIR_ID}")
           done
-          echo "${INITIAL_CONTROLLERS[*]}" | awk -v OFS=',' '{$1=$1}1' > /shared/initial-controllers.txt
+          (IFS=,; echo "${INITIAL_CONTROLLERS[*]}") > /shared/initial-controllers.txt
       fi
       {{- if not .context.Values.listeners.advertisedListeners }}
       replace_in_file "$KAFKA_CONF_FILE" "advertised-address-placeholder" "${MY_POD_NAME}.${KAFKA_FULLNAME}-${POD_ROLE}-headless.${MY_POD_NAMESPACE}.svc.${CLUSTER_DOMAIN}"

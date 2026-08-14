@@ -49,7 +49,7 @@ spec:
       {{- end }}
       initContainers:
         - name: prepare-config
-          image: {{ .Values.imageDev.repository }}:{{ .Values.imageDev.tag }}
+          image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.provisioning.containerSecurityContext.enabled }}
           securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.provisioning.containerSecurityContext "context" $) | nindent 12 }}
@@ -72,7 +72,13 @@ spec:
                   {{- if eq (upper .Values.provisioning.auth.tls.type) "PEM" }}
                   {{- if .Values.provisioning.auth.tls.caCert }}
                   file_to_multiline_property() {
-                      awk 'NR > 1{print line" \\"}{line=$0;}END{print $0" "}' <"${1:?missing file}"
+                      local file="${1:?missing file}"
+                      local first=true line
+                      while IFS= read -r line || [[ -n "$line" ]]; do
+                          if $first; then printf '%s' "$line"; first=false
+                          else printf ' \\\n%s' "$line"; fi
+                      done < "$file"
+                      printf ' '
                   }
                   conf_set ssl.keystore.key "$(file_to_multiline_property "/certs/{{ .Values.provisioning.auth.tls.key }}")"
                   conf_set ssl.keystore.certificate.chain "$(file_to_multiline_property "/certs/{{ .Values.provisioning.auth.tls.cert }}")"
@@ -159,7 +165,7 @@ spec:
         {{- end }}
         {{- if .Values.provisioning.waitForKafka }}
         - name: wait-for-available-kafka
-          image: {{ .Values.imageDev.repository }}:{{ .Values.imageDev.tag }}
+          image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.provisioning.containerSecurityContext.enabled }}
           securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.provisioning.containerSecurityContext "context" $) | nindent 12 }}
@@ -197,7 +203,7 @@ spec:
         {{- end }}
       containers:
         - name: kafka-provisioning
-          image: {{ .Values.imageDev.repository }}:{{ .Values.imageDev.tag }}
+          image: {{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.provisioning.containerSecurityContext.enabled }}
           securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.provisioning.containerSecurityContext "context" $) | nindent 12 }}

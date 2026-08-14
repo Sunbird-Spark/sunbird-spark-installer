@@ -95,15 +95,12 @@ serviceBindings:
 ## @param image.debug Specify if debug values should be set
 ##
 
-imageDev:
-  repository: dhi.io/kafka
-  tag: 4.1.2-debian13-dev
 
 
 image:
   registry: docker.io
-  repository: bitnami/kafka
-  tag: 4.0.0-debian-12-r7
+  repository: sanketikahub/kafka
+  tag: "4.0.0"
   digest: ""
   ## Specify a imagePullPolicy
   ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
