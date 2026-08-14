@@ -242,6 +242,11 @@ py_flink_jobs:
         name: enrichment-router
         parallelism: 4
         log_level: INFO
+        # Stamped into context.env on outgoing BE_JOB_REQUEST events
+        # (MediaTranscriptionRequest/MediaMultilingualRequest/
+        # EnrichedMetadataEvent) — was previously unset, so every event
+        # went out with context.env="".
+        env: "{{ .Values.global.env }}"
 
       kafka:
         brokers: "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
@@ -334,6 +339,11 @@ py_flink_jobs:
         name: caption-generator
         parallelism: 1
         log_level: INFO
+        # Stamped into context.env on outgoing BE_JOB_REQUEST events
+        # (MediaTranscriptionRequest/MediaMultilingualRequest/
+        # EnrichedMetadataEvent) — was previously unset, so every event
+        # went out with context.env="".
+        env: "{{ .Values.global.env }}"
         # Transcription is a long synchronous CPU call — the default 60s
         # checkpoint timeout expires mid-transcription, and once that
         # happens enough times in a row Flink kills the job (restart
