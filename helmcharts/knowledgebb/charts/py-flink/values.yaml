@@ -224,7 +224,9 @@ py_flink_jobs:
     # Flink job's TaskManager convention here (transaction-event-processor,
     # knowlg-publish, etc.) instead of an ad-hoc higher value. This is the
     # TaskManager's resources (see jobManagerResources for the JM's).
-
+    #
+    # helmcharts/global-resources.yaml's py-flink.py_flink_jobs.enrichment-router
+    # duplicates this and wins in the merge order — keep both in sync.
     resources:
       requests:
         cpu: 100m
@@ -322,6 +324,9 @@ py_flink_jobs:
     # entire duration of any transcription (faster-whisper is CPU-bound), so
     # requesting only 1 under-reserved it - this makes the request match
     # actual steady-state need instead of throttling from the start.
+    #
+    # helmcharts/global-resources.yaml's py-flink.py_flink_jobs.caption-generator
+    # duplicates this and wins in the merge order — keep both in sync.
     resources:
       requests:
         cpu: "2"
