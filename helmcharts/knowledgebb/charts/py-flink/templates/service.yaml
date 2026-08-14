@@ -1,12 +1,7 @@
 {{/*
-JobManager + TaskManager Service pair per enabled py_flink_jobs.<name> —
-mirrors the sibling `flink` chart's service.yaml exactly. The JobManager
-Service name ({{ jobName }}-jobmanager) is what the TaskManager
-Deployment's jobmanager.rpc.address points at (bare in-cluster DNS,
-same namespace) — see templates/deployment.yaml.
-
-prom ports are inert until ai-pipeline exposes a Prometheus reporter —
-see values.yaml serviceMonitor/prom_port comments.
+JobManager and TaskManager Services per enabled py_flink_job.
+The JobManager Service name is used as the in-cluster DNS address for TaskManager connections.
+Prometheus (prom) ports are active only when a reporter is configured.
 */}}
 {{- range $jobName, $jobData := .Values.py_flink_jobs }}
 {{- if $jobData.enabled }}
