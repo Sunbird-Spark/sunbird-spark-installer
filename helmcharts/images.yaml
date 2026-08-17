@@ -111,19 +111,21 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.2_448714d"
+    tag: "spark-v1.0.3-captions-beta37_978c7e0"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.0.2_448714d"
+    tag: "spark-v1.0.3-captions-beta37_978c7e0"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
     tag: "spark-v0.1_8b8e877_5"
 
   superset: &superset
-    repository: sanketikahub/superset
-    tag: 4.1.1
+    registry: sanketikahub
+    repository: "superset"
+    tag: "2.2.0"
+    digest: ""
 
   nlweb: &nlweb
     repository: "sanketikahub/nlweb"
@@ -143,9 +145,12 @@ images:
     repository: sunbird-spark/janusgraph
     tag: develop_8f2245e
 
+  # DHI-hardened secor (Dockerfiles/secor/Dockerfile.hardened; eclipse-temurin JDK11 DHI base)
   secor: &secor
-    repository: "sunbirded.azurecr.io/secor"
-    tag: "spark"
+    registry: sanketikahub
+    repository: "secor"
+    tag: "2.2.0"
+    digest: ""
 
   sync_tool: &sync_tool
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
@@ -407,3 +412,24 @@ reloader:
       image:
         name: dhi.io/stakater-reloader
         tag: 1.4.21-debian13
+  # ai-pipeline (PyFlink 1.20) jobs, deployed via the consolidated
+  # `py-flink` chart's py_flink_jobs map (helmcharts/knowledgebb/charts/
+  # py-flink) — each job entry there points at one of these anchors via
+  # its own `globalImageKey`, since (unlike knowledgeflink/learnflink
+  # above, which are one shared JVM image per building block selected via
+  # --job-classname) each PyFlink job ships its own dedicated image. See
+  # ai-pipeline/docker/Dockerfile.enrichment-router and
+  # Dockerfile.caption-generator.
+  #
+  # Built and pushed by ai-pipeline's .github/workflows/build.yaml on tag
+  # push — tag format is <git-tag>_<short-sha> (see knowlg-service.yml for
+  # the same convention).
+  enrichment_router:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/enrichment-router"
+    tag: "spark-v1.0.3-captions-beta46_64dd2a3"
+
+  caption_generator:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/caption-generator"
+    tag: "spark-v1.0.3-captions-beta46_64dd2a3"
