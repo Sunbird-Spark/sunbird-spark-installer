@@ -32,13 +32,6 @@ images:
     repository: "opensearchproject/opensearch"
     tag: "2.19.5"
 
-  # Stale, not used, but kept for reference
-  # grafana: &grafana
-  #   registry: "docker.io"
-  #   repository: "grafana/grafana"
-  #   tag: "11.4.0"
-  #   digest: ""
-
   alloy: &alloy
     registry: "dhi.io"
     repository: alloy
