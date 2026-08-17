@@ -32,11 +32,12 @@ images:
     repository: "opensearchproject/opensearch"
     tag: "2.19.5"
 
-  grafana: &grafana
-    registry: "docker.io"
-    repository: "grafana/grafana"
-    tag: "11.4.0"
-    digest: ""
+  # Stale, not used, but kept for reference
+  # grafana: &grafana
+  #   registry: "docker.io"
+  #   repository: "grafana/grafana"
+  #   tag: "11.4.0"
+  #   digest: ""
 
   alloy: &alloy
     registry: "dhi.io"
@@ -365,3 +366,51 @@ global:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
     tag: "spark-v1.0.2_cbe9e07"
+
+# Monitoring bundle images (kube-prometheus-stack + reloader subcharts) -
+# nested under the exact subchart key names, since these pass straight through
+# to the monitoring umbrella chart's subcharts, not the flat images/internal
+# anchor pattern used above.
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      image:
+        registry: dhi.io
+        repository: prometheus
+        tag: 3.13.2-debian13
+
+  grafana:
+    image:
+      repository: dhi.io/grafana
+      tag: 12.4.6-debian13
+
+  kube-state-metrics:
+    image:
+      registry: dhi.io
+      repository: kube-state-metrics
+      tag: 2.19.1-debian13
+
+  prometheus-node-exporter:
+    image:
+      registry: dhi.io
+      repository: node-exporter
+      tag: 1.12.1-debian13
+
+  prometheusOperator:
+    image:
+      registry: dhi.io
+      repository: prometheus-operator
+      tag: 0.93.1-debian13
+
+    prometheusConfigReloader:
+      image:
+        registry: dhi.io
+        repository: prometheus-config-reloader
+        tag: 0.93.1-debian13
+
+reloader:
+  reloader:
+    deployment:
+      image:
+        name: dhi.io/stakater-reloader
+        tag: 1.4.21-debian13

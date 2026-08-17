@@ -4,10 +4,6 @@ replicaCount: 1
 kube-prometheus-stack:
   prometheus:
     prometheusSpec:
-      image:
-         registry: dhi.io
-         repository: prometheus
-         tag: 3.13.2-debian13
       retention: "30d"
       storageSpec:
         volumeClaimTemplate:
@@ -17,35 +13,9 @@ kube-prometheus-stack:
               requests:
                 storage: 25Gi
   grafana:
-    image:
-      repository: dhi.io/grafana
-      tag: 12.4.6-debian13
     env:
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
       GF_SERVER_ROOT_URL: http://example.com/grafana/
-
-  kube-state-metrics:
-    image:
-      registry: dhi.io
-      repository: kube-state-metrics
-      tag: 2.19.1-debian13
-      
-  prometheus-node-exporter:
-    image:
-      registry: dhi.io
-      repository: node-exporter
-      tag: 1.12.1-debian13
-
-  prometheusOperator:
-     image:
-       registry: dhi.io
-       repository: prometheus-operator
-       tag: 0.93.1-debian13
-     prometheusConfigReloader:
-       image:
-         registry: dhi.io
-         repository: prometheus-config-reloader
-         tag: 0.93.1-debian13
 
 loki:
   loki:
@@ -75,10 +45,3 @@ loki:
     replicas: 1
     persistence:
       size: 25Gi
-
-reloader:
-  reloader:
-    deployment:
-      image:
-        name: dhi.io/stakater-reloader
-        tag: 1.4.21-debian13
