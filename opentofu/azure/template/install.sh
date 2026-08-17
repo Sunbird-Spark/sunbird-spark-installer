@@ -22,7 +22,7 @@ function deploy_tf_module() {
     echo -e "\nDeploying module: $module"
     cd $module
     terragrunt init --reconfigure
-    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    terragrunt apply --auto-approve --queue-ignore-errors
     cd ..
 }
 
@@ -222,7 +222,7 @@ function install_helm_components() {
         install_component "$1"
     else
         # No args: deploy all bundles in order (original behavior)
-        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "inquirybb" "additional")
+        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional")
         for component in "${components[@]}"; do
             install_component "$component"
         done
@@ -261,7 +261,7 @@ function generate_postman_env() {
         cd ../opentofu/azure/$environment 2>/dev/null || true
     fi
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
-    blob_store_path=$(kubectl get cm -n sunbird lern-env -o jsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
+    blob_store_path=$(kubectl get cm -n sunbird lern-env -o jsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$||')
     public_container_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_content_cloud_storage_container}') 
     api_key=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_authorization}')
     keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
@@ -318,19 +318,6 @@ function migrate_forms() {
         --env env.json
 }
 
-function create_client_forms() {
-    local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../opentofu/azure/$environment 2>/dev/null || true
-    fi
-    cp -rf ../../../postman-collection/ED-${RELEASE}  .
-    check_pod_status
-    #loop through files inside collection folder
-    for FILES in ED-${RELEASE}/*.json; do
-     echo "Creating client forms in.. $FILES"
-      postman collection run $FILES --environment env.json --delay-request 500 --bail --insecure
-    done 
-   }
 
 function cleanworkspace() {
         rm  certkey.pem certpubkey.pem
@@ -435,9 +422,6 @@ else
         ;;
     "certificate_config")
         certificate_config
-        ;;
-    "create_client_forms")
-        create_client_forms
         ;;
     *)
         invoke_functions "$@"

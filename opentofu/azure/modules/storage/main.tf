@@ -7,9 +7,10 @@ terraform {
   }
 }
 provider "azurerm" {
-  subscription_id = var.subscription_id
+  subscription_id                 = var.subscription_id
   features {}                              # Always include the features block for Azure provider
   resource_provider_registrations = "none" # Optional
+  storage_use_azuread              = true
 }
 data "azurerm_subscription" "current" {}
 
@@ -39,6 +40,7 @@ resource "azurerm_storage_account" "storage_account" {
   account_tier               = var.azure_storage_tier
   account_replication_type   = var.azure_storage_replication
   https_traffic_only_enabled = true
+  shared_access_key_enabled  = false
   blob_properties {
     cors_rule {
       max_age_in_seconds = 200
@@ -71,3 +73,4 @@ resource "azurerm_storage_container" "storage_container_public" {
   storage_account_name  = azurerm_storage_account.storage_account.name
   container_access_type = "blob"
 }
+

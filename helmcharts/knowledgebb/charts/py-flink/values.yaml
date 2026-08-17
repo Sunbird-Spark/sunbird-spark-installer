@@ -1,0 +1,289 @@
+# py-flink: Consolidated Helm chart for running PyFlink 1.20 streaming jobs in Application Mode.
+#
+# Key architecture details:
+# 1. Job Isolation: Each enabled entry in `py_flink_jobs` runs on a dedicated JobManager + TaskManager(s) deployment pair.
+# 2. Image Selection: Each job specifies its own image key (`globalImageKey`) referencing helmcharts/images.yaml.
+# 3. Execution: Run using Flink's generic `PythonDriver` class with a job-specific `pyEntrypoint`.
+#    CLI arguments are strict; all Flink properties must be configured via the `FLINK_PROPERTIES` environment variable.
+# 4. Configurations: App configs are mounted as YAML. Secrets must be injected via environment variables (e.g. `SUNBIRD_AI_*`).
+# 5. Logging: Shared log4j properties are mounted across all JobManager/TaskManager nodes.
+log4j_console_properties: |
+  # This affects logging for both user code and Flink
+  rootLogger.level = INFO
+  rootLogger.appenderRef.console.ref = ConsoleAppender
+
+  # The following lines keep the log level of common libraries/connectors on
+  # log level INFO. The root logger does not override this. You have to manually
+  # change the log levels here.
+  logger.pekko.name = pekko
+  logger.pekko.level = ERROR
+  logger.kafka.name= org.apache.kafka
+  logger.kafka.level = ERROR
+  logger.hadoop.name = org.apache.hadoop
+  logger.hadoop.level = ERROR
+
+  # MetricGroup logs an INFO/WARN line every time a metric is registered —
+  # every job restart and every parallel subtask spams this, drowning out
+  # our own step-by-step application logs.
+  logger.flink_metrics.name = org.apache.flink.metrics.MetricGroup
+  logger.flink_metrics.level = ERROR
+
+  # Log all infos to the console
+  appender.console.name = ConsoleAppender
+  appender.console.type = CONSOLE
+  appender.console.layout.type = PatternLayout
+  appender.console.layout.pattern = %d{yyyy-MM-dd HH:mm:ss,SSS} %-5p %-60c %x - %m%n
+
+  # Suppress the irrelevant (wrong) warnings from the Netty channel handler
+  logger.netty.name = org.apache.flink.shaded.pekko.org.jboss.netty.channel.DefaultChannelPipeline
+  logger.netty.level = OFF
+
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 1
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsUser: 9999
+  fsGroup: 9999
+
+securityContext: {}
+
+commonLabels: {}
+commonAnnotations:
+  reloader.stakater.com/auto: "true"
+
+# Default resources for TaskManagers. Individual jobs can override this in `py_flink_jobs`.
+# JobManagers use the lighter `jobManagerResources` config below.
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 1
+    memory: 2Gi
+
+# Default resources for the coordinating JobManager (lightweight; no heavy processing happens here).
+jobManagerResources:
+  requests:
+    cpu: 100m
+    memory: 1Gi
+  limits:
+    cpu: 1
+    memory: 2Gi
+
+# Port configuration for JobManager and TaskManager.
+jobmanager:
+  rpc_port: 6123
+  blob_port: 6124
+  query_port: 6125
+  ui_port: 8081
+
+taskmanager:
+  rpc_port: 6122
+  # Default TaskManager taskSlots. Total parallelism = taskSlots * taskManagerReplicas.
+  numberOfTaskSlots: 4
+
+# In-job parallelism is controlled via app config. Autoscaling is disabled by default.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+# GPU node-pools are not configured by default. To use GPUs (e.g. for transcription.device: cuda),
+# configure nodeSelector/tolerations accordingly.
+
+serviceAccount:
+  create: false
+  name: ""
+  annotations: {}
+
+initContainers: {}
+sidecars: {}
+
+# Inactive until Prometheus reporter is configured in ai-pipeline. Scrapes the "prom" named port
+# on JobManager and TaskManager Services.
+serviceMonitor: &serviceMonitor
+  enabled: false
+  job:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    labels:
+      release: monitoring # additional labels e.g. release: prometheus
+    honorLabels: true
+    jobLabel: "app.kubernetes.io/name"
+    port: prom
+
+# Inert until ai-pipeline exposes a Prometheus reporter on this port.
+prom_port: 9249
+
+py_flink_jobs:
+  enrichment-router:
+    enabled: true
+
+    # References the image defined under global.enrichment_router in helmcharts/images.yaml.
+    globalImageKey: enrichment_router
+
+    # jobDir maps to container workingDir. pyEntrypoint is the -py path relative to it.
+    jobDir: enrichment_router
+    pyEntrypoint: enrichment_router/main.py
+
+    configPath: /opt/sunbird-ai/jobs/enrichment_router/config.yaml
+
+    # TaskManager resources. Synchronized with global-resources.yaml overrides.
+    resources:
+      requests:
+        cpu: 100m
+        memory: 1Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+
+    # Upstream config.yaml. Secrets are omitted here and injected via SUNBIRD_AI_* env vars.
+    config:
+      job:
+        name: enrichment-router
+        parallelism: 4
+        log_level: INFO
+        # Populates context.env on outgoing BE_JOB_REQUEST events.
+        env: "{{ .Values.global.env }}"
+
+      kafka:
+        brokers: "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+        group_id: "{{ .Values.global.env }}-enrichment-router"
+        topics:
+          input: "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
+          transcription_out: "{{ .Values.global.env }}.media.transcription.request"
+          multilingual_out: "{{ .Values.global.env }}.media.multilingual.request"
+
+      knowlg:
+        # In-cluster content service URL. No auth key is required for internal calls.
+        content_service_url: "http://knowlg-service:9000"
+
+      # Storage configurations are required by Flink's BaseProcessFunction initialization.
+      cloud_storage_type: azure
+      cloud_storage_auth_type: OIDC
+      cloud_storage_container: "{{ .Values.global.public_container_name }}"
+      cloud_storage_auth:
+        account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
+
+      enrichment:
+        transcript:
+          mime_types:
+            - video/mp4
+            - video/webm
+          languages: ["ar", "en", "pt", "fr"]
+
+    # No secrets needed — enrichment-router never calls an external
+    # authenticated API.
+    secretEnv: []
+    extraEnv: []
+
+    serviceMonitor: *serviceMonitor
+
+  caption-generator:
+    enabled: true
+
+    # References the image defined under global.caption_generator in helmcharts/images.yaml.
+    globalImageKey: caption_generator
+
+    # jobDir maps to container workingDir. pyEntrypoint is the -py path relative to it.
+    jobDir: caption_generator
+    pyEntrypoint: caption_generator/main.py
+
+    configPath: /opt/sunbird-ai/jobs/caption_generator/config.yaml
+
+    # Kept at 1 to limit RAM consumption of faster-whisper model instances.
+    taskSlots: 1
+    # TaskManager resources. Synchronized with global-resources.yaml overrides.
+    resources:
+      requests:
+        cpu: "2"
+        memory: 2Gi
+      limits:
+        cpu: "3"
+        memory: 4Gi
+
+    # Upstream config.yaml. Secrets are omitted here and injected via SUNBIRD_AI_* env vars.
+    config:
+      job:
+        name: caption-generator
+        parallelism: 1
+        log_level: INFO
+        # Populates context.env on outgoing BE_JOB_REQUEST events.
+        env: "{{ .Values.global.env }}"
+        # Increase checkpoint timeouts to avoid failures during long CPU-bound transcription calls.
+        checkpointing_interval_ms: 300000
+        checkpointing_timeout_ms: 900000
+
+      kafka:
+        brokers: "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
+        group_id: "{{ .Values.global.env }}-caption-generator"
+        topics:
+          transcription_in: "{{ .Values.global.env }}.media.transcription.request"
+          multilingual_in: "{{ .Values.global.env }}.media.multilingual.request"
+          transcription_dlq: "{{ .Values.global.env }}.media.transcription.dlq"
+          multilingual_dlq: "{{ .Values.global.env }}.media.multilingual.dlq"
+          # Auto-approved Transcript events go back to enrichment-router's input topic.
+          enriched_metadata_out: "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
+
+      knowlg:
+        # In-cluster content service URL. No auth key is required for internal calls.
+        content_service_url: "http://knowlg-service:9000"
+
+      cloud_storage_type: azure
+      cloud_storage_auth_type: OIDC
+      cloud_storage_container: "{{ .Values.global.public_container_name }}"
+      # account_name and public_endpoint are required for OIDC storage configuration.
+      cloud_storage_auth:
+        account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
+      cloud_storage_public_endpoint: "{{ .Values.global.object_storage_endpoint }}"
+
+      transcription:
+        provider: faster_whisper
+        model: large-v3-turbo
+        device: cpu # set to "cuda" only once a GPU node pool exists (see nodeSelector/tolerations comment above)
+        compute_type: int8
+        auto_approve: true
+        # Increased segments for more accurate language detection in lower-resource languages.
+        language_detection_segments: 8
+        language_detection_threshold: 0.7
+
+      multilingual:
+        provider: litellm
+        # LiteLLM model identifier. Prefix with 'azure/' to route to Azure OpenAI.
+        model: "azure/gpt-5-mini"
+        api_base: "https://cossdev-semanticsearch.openai.azure.com/"
+        api_version: "2024-12-01-preview"
+        # Token and concurrency limits optimized for gpt-5-mini API quotas.
+        max_completion_tokens: 4000
+        batch_size: 20
+        max_concurrency: 2
+        context_overlap: 2
+        auto_approve: true
+
+    # Reuses existing openai-secret/OPENAI_API_KEY for the LLM API authentication.
+    secretEnv:
+      - envName: SUNBIRD_AI_MULTILINGUAL_API_KEY
+        secretName: openai-secret
+        secretKey: OPENAI_API_KEY
+    extraEnv: []
+
+    serviceMonitor: *serviceMonitor

@@ -1,0 +1,38 @@
+enabled: true
+
+image:
+  repository: "ghcr.io/sunbird-spark/yugabyte-backup"
+  tag: "2.0.3"
+  pullPolicy: Always   # tag is mutable (e.g. 1.0.0), not a per-commit sha — always pull the latest push
+  imagePullSecrets: "registry-secret-name"
+
+schedule: "30 11 * * 5"    # weekly, Friday 5:00 PM IST
+restartPolicy: OnFailure
+retryLimit: 3
+
+yugabyte:
+  host: "yb-tserver-service"
+  ysqlPort: "5433"
+  ycqlPort: "9042"
+  user: "yugabyte"
+  password: "yugabyte"
+
+# Space-separated list of YSQL databases to back up
+ysqlDatabases: "keycloak registry quartz enc-keys kong portal superset sunbird"
+
+# Comma-separated YCQL keyspaces. Empty = auto-discover all non-system keyspaces
+# (covers all ~15 in-scope keyspaces, including janusgraph, with no list to maintain)
+ycqlKeyspaces: ""
+
+# days to keep backup files in cloud storage; 28 = 4 weekly backups (confirmed with manager).
+retentionDays: "28"
+ttlSecondsAfterFinished: 86400   # seconds to keep completed Job pods (24h)
+
+serviceAccount:
+  create: false
+  name: ""   # empty = use global.workload_identity_service_account_name (workload identity SA in sunbird namespace)
+
+# azure.workload.identity/use: "true" is set automatically as a pod LABEL in
+# cronjob.yaml when on Azure — the AKS mutating webhook requires it as a label,
+# not an annotation, to inject AZURE_CLIENT_ID/AZURE_TENANT_ID/the federated token.
+podAnnotations: {}

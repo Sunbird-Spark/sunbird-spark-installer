@@ -16,6 +16,7 @@ jobs:
           - kong-api-scripts
           - sunbird-yugabyte-migrations
           - janusgraph
+          - yugabyte-backup
     permissions:
       contents: read
       packages: write

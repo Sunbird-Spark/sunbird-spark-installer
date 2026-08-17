@@ -120,9 +120,30 @@ search:
       memory: 100Mi
     limits:
       cpu: 1
-      memory: 1024Mi 
+      memory: 1024Mi
 
-#learnbb     
+# Resource specifications for ai-pipeline (PyFlink) jobs.
+py-flink:
+  py_flink_jobs:
+    # Must match the per-job resources in py-flink/values.yaml exactly to avoid silent overrides.
+    enrichment-router:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 1Gi
+        limits:
+          cpu: 1
+          memory: 2Gi
+    caption-generator:
+      resources:
+        requests:
+          cpu: "2"
+          memory: 2Gi
+        limits:
+          cpu: "3"
+          memory: 4Gi
+
+#learnbb
 cert:
   resources:
     requests:
@@ -398,10 +419,10 @@ velero:
   nodeAgent:
     resources:
       requests:
-        cpu: 500m
+        cpu: 100m
         memory: 512Mi
       limits:
-        cpu: 1000m
+        cpu: 500m
         memory: 1024Mi
     
 yugabyte:

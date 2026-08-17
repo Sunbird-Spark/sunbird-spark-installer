@@ -61,6 +61,16 @@ Two approaches are available for provisioning infrastructure and deploying Sunbi
 
 ---
 
+## Private AKS Cluster & VPN Access (Azure)
+
+By default the installer creates a **private AKS cluster** — the Kubernetes API server has no public endpoint. Developers and CI/CD runners must be inside the VNet to run `kubectl` or `helm`.
+
+Two independent fields in `global-values.yaml` — `private_cluster_enabled` and `vpn_enabled` — control this and the developer access method (Pritunl VPN vs. Azure Bastion). Full explanation, decision tree, and setup guides:
+
+**[opentofu/azure/README.md](opentofu/azure/README.md#private-cluster--access-options)**
+
+---
+
 ## Pre-requisites
 
 1. **Domain Name**

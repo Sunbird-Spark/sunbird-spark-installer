@@ -6,7 +6,7 @@ WORKDIR /build
 # Clone and build the CDC extension
 RUN git clone https://github.com/Sunbird-Knowlg/knowledge-platform-db-extensions.git && \
     cd knowledge-platform-db-extensions && \
-    git checkout develop && \
+    git checkout main && \
     cd janusgraph-cdc-extension && \
     mvn clean package -DskipTests
 
