@@ -492,8 +492,11 @@ def _prepare_csv_for_reading(text):
     result = []
     i = 0
     while i < len(text):
-        if text[i] == '\\' and i + 1 < len(text) and text[i + 1] == '"':
-            result.append('""')
+        if text[i] == '\\' and i + 1 < len(text):
+            if text[i + 1] == '"':
+                result.append('""')
+            else:
+                result.append(text[i:i + 2])
             i += 2
         else:
             result.append(text[i])
