@@ -10,7 +10,6 @@ import re
 import csv
 import ast
 import sys
-import io
 
 # Default csv field limit (128KB) is too small for blob columns (body, oldbody,
 # screenshots, stageicons in content_data) which can exceed 1MB per field.
@@ -747,15 +746,20 @@ def load_table(keyspace, table, csv_path):
                 log.warning(f"  truncate {keyspace}.{table} failed (table may not exist yet): {str(e)[:80]}")
 
         with open(csv_path, newline="", encoding="utf-8") as f:
-            raw_text = f.read()
-        # See _prepare_csv_for_reading(): normalizes cqlsh's \" escaping to the
-        # native "" form so csv.DictReader parses quoted-field boundaries
-        # correctly, without an escapechar that would destroy \n/\t/\r/\\
-        # before _unescape_cqlsh_text() (in parse_value) can restore them.
-        prepared = _prepare_csv_for_reading(raw_text)
-        reader = csv.DictReader(io.StringIO(prepared), quotechar='"', doublequote=True)
-        fieldnames = [c.strip() for c in (reader.fieldnames or [])]
-        rows = list(reader)
+            # See _prepare_csv_for_reading(): normalizes cqlsh's \" escaping to
+            # the native "" form so csv.DictReader parses quoted-field
+            # boundaries correctly, without an escapechar that would destroy
+            # \n/\t/\r/\\ before _unescape_cqlsh_text() (in parse_value) can
+            # restore them. cqlsh always escapes real control chars before
+            # writing, so no field ever contains a raw newline — each
+            # physical line is exactly one CSV row, safe to translate one
+            # line at a time instead of materializing the whole file.
+            reader = csv.DictReader(
+                (_prepare_csv_for_reading(line) for line in f),
+                quotechar='"', doublequote=True,
+            )
+            fieldnames = [c.strip() for c in (reader.fieldnames or [])]
+            rows = list(reader)
         if not rows:
             return 0
 
