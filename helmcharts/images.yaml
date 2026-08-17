@@ -50,7 +50,7 @@ images:
 
   player: &player
     repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "spark-v1.0.3_f11176b"
+    tag: "spark-v1.1.0_f11176b"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -71,7 +71,7 @@ images:
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "spark-v1.0.3_dbad626_18"
+    tag: "spark-v1.1.0_dbad626_19"
     
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -83,7 +83,7 @@ images:
 
   adminutil: &adminutil
     repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
-    tag: "spark-v1.0.3_a7d8c3f_5"
+    tag: "spark-v1.1.0_a7d8c3f_6"
 
   cert: &cert
     repository: "ghcr.io/sunbird-lern/cert-service"
@@ -119,11 +119,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.3_4a35a67"
+    tag: "spark-v1.1.0_4a35a67"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.0.3_4a35a67"
+    tag: "spark-v1.1.0_4a35a67"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
@@ -149,7 +149,7 @@ images:
   janusgraph: &janusgraph
     registry: ghcr.io
     repository: sunbird-spark/janusgraph
-    tag: spark-v1.0.3_bf8c392
+    tag: spark-v1.1.0_bf2dfd7
 
   secor: &secor
     repository: "sunbirded.azurecr.io/secor"
@@ -361,12 +361,12 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.0.2_964957e"
+    tag: "spark-v1.1.0_dec74d7"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v1.0.3_f36189f"
+    tag: "spark-v1.1.0_f36189f"
 
   # ai-pipeline (PyFlink 1.20) jobs, deployed via the consolidated
   # `py-flink` chart's py_flink_jobs map (helmcharts/knowledgebb/charts/
@@ -383,9 +383,9 @@ global:
   enrichment_router:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/enrichment-router"
-    tag: "spark-v1.0.3_93887dd"
+    tag: "spark-v1.1.0_93887dd"
 
   caption_generator:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/caption-generator"
-    tag: "spark-v1.0.3_93887dd"
+    tag: "spark-v1.1.0_93887dd"
