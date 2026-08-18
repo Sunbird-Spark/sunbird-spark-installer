@@ -12,6 +12,7 @@
     font-style: normal;
     font-display: swap;
 }
+
 @font-face {
     font-family: 'Rubik';
     src: url('fonts/rubik-v31-latin-700.woff2') format('woff2');
@@ -19,6 +20,7 @@
     font-style: normal;
     font-display: swap;
 }
+
 @font-face {
     font-family: 'Rubik';
     src: url('fonts/rubik-v31-latin-500.woff2') format('woff2');
@@ -26,6 +28,7 @@
     font-style: normal;
     font-display: swap;
 }
+
 @font-face {
     font-family: 'Rubik';
     src: url('fonts/rubik-v31-latin-600.woff2') format('woff2');
@@ -34,8 +37,45 @@
     font-display: swap;
 }
 
+/* Theme seed variables — overridden at runtime by template.ftl from sunbird-theme-seeds cookie.
+   Defaults match portal terracotta preset. */
+:root {
+    --sunbird-spark-theme-primary-h: 12;
+    --sunbird-spark-theme-primary-s: 50%;
+    --sunbird-spark-theme-primary-l: 45%;
+    --sunbird-spark-theme-chip-h: 45;
+    --sunbird-spark-theme-chip-s: 100%;
+    --sunbird-spark-theme-icon-h: 28;
+    --app-font-family: 'Rubik', sans-serif;
+
+    /* Radius tokens — Classic defaults. Every panel / form control consumes
+       these, so a template switch only needs to redefine the token (see
+       html[data-template="modern"]). New elements that use var(--r-*) become
+       template-aware automatically — no extra modern selector needed. */
+    --r-frame: 3rem;
+    /* split-container + side panels */
+    --r-lg: 16px;
+    /* reset-password inputs / buttons */
+    --r-md: 10px;
+    /* login inputs / buttons, alert */
+    --r-sm: 8px;
+    /* google button, OTP boxes, toast */
+    --r-xs: 6px;
+    /* toast close */
+
+    /* Elevation tokens — Classic defaults. Modern redefines these. */
+    --shadow-frame: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    /* split-container */
+    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.15);
+    /* login card */
+
+    --sunbird-primary: hsl(var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l));
+    --sunbird-primary-hover: hsl(var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) calc(var(--sunbird-spark-theme-primary-l) - 10%));
+    --sunbird-primary-focus-shadow: hsl(var(--sunbird-spark-theme-primary-h) var(--sunbird-spark-theme-primary-s) var(--sunbird-spark-theme-primary-l) / 0.2);
+}
+
 body {
-    font-family: 'Rubik', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: var(--app-font-family), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
     padding: 0;
     overflow-x: hidden;
@@ -43,7 +83,30 @@ body {
 
 /* Arabic font */
 [dir="rtl"] body {
-    font-family: 'Noto Sans Arabic', 'Rubik', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Noto Sans Arabic', var(--app-font-family), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Form controls don't inherit body font in all browsers (UA defaults).
+   Force the theme font on buttons, inputs, and placeholders so the login /
+   reset-password pages stay font-reactive. */
+button,
+input,
+textarea,
+select,
+.login-button,
+.kc-button,
+.kc-input,
+input[type="text"],
+input[type="password"] {
+    font-family: var(--app-font-family), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+input::placeholder,
+textarea::placeholder,
+.kc-input::placeholder,
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+    font-family: var(--app-font-family), -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Utility: Hide class used by login scripts to toggle visibility */
@@ -97,11 +160,11 @@ body {
     max-width: 64rem;
     min-height: max(520px, calc(100vh - 80px));
     margin: 10px auto;
-    border-radius: 3rem;
+    border-radius: var(--r-frame);
     overflow: hidden;
     position: relative;
     z-index: 10;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    box-shadow: var(--shadow-frame);
 }
 
 @media (min-width: 768px) {
@@ -122,7 +185,7 @@ body {
     border: var(--card-bg);
     box-shadow: none;
     border-width: 2px;
-    border-radius: 3rem 0 0 3rem;
+    border-radius: var(--r-frame) 0 0 var(--r-frame);
 }
 
 .login-left-panel-container {
@@ -136,7 +199,7 @@ body {
     width: 100%;
     height: 100%;
     align-self: stretch;
-    border-radius: 3rem;
+    border-radius: var(--r-frame);
 }
 
 .left-panel-content {
@@ -170,8 +233,8 @@ body {
     width: 100%;
     position: relative;
     background: var(--card-bg);
-    border-radius: 0 3rem 3rem 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 0 var(--r-frame) var(--r-frame) 0;
+    box-shadow: var(--shadow-card);
     padding: 48px;
 }
 
@@ -263,7 +326,7 @@ body {
     width: 100%;
     padding: 12px 16px;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: var(--r-sm);
     background: white;
     color: #374151;
     text-decoration: none;
@@ -350,28 +413,28 @@ body {
     font-style: medium;
     line-height: 100%;
     font-size: 14px;
-    color: #A85236;
+    color: var(--sunbird-primary);
     text-decoration: none;
     height: 16px;
 }
 
 .forgot-password a:hover {
-    color: #A85236;
+    color: var(--sunbird-primary);
     opacity: 0.8;
     cursor: pointer;
 }
 
 /* Login Button */
 .login-button {
-    background-color: #A85236 !important;
-    border-color: #A85236 !important;
+    background-color: var(--sunbird-primary) !important;
+    border-color: var(--sunbird-primary) !important;
     border: none !important;
     box-shadow: none !important;
     color: white !important;
     font-size: 16px !important;
     font-weight: 500 !important;
     padding: 16px 24px !important;
-    border-radius: 10px !important;
+    border-radius: var(--r-md) !important;
     width: 100%;
     cursor: pointer !important;
     transition: background-color 0.2s ease;
@@ -379,8 +442,8 @@ body {
 
 .login-button:hover {
     opacity: 0.85 !important;
-    background-color: #A85236 !important;
-    border-color: #A85236 !important;
+    background-color: var(--sunbird-primary) !important;
+    border-color: var(--sunbird-primary) !important;
     border: none !important;
     box-shadow: none !important;
     cursor: pointer !important;
@@ -398,7 +461,7 @@ body {
 }
 
 .registration-link a {
-    color: #A85236;
+    color: var(--sunbird-primary);
     text-decoration: none;
     font-weight: 500;
     font-size: 14px;
@@ -414,7 +477,7 @@ body {
 /* Form Input Styling */
 input[type="text"],
 input[type="password"] {
-    border-radius: 10px !important;
+    border-radius: var(--r-md) !important;
     border: 1px solid #ddd !important;
     padding: 12px 16px !important;
     height: 48px !important;
@@ -429,18 +492,21 @@ input[type="password"]::placeholder,
     color: #B2B2B2 !important;
     opacity: 1;
 }
+
 /* WebKit */
 input[type="text"]::-webkit-input-placeholder,
 input[type="password"]::-webkit-input-placeholder,
 .kc-input::-webkit-input-placeholder {
     color: #B2B2B2 !important;
 }
+
 /* Firefox */
 input[type="text"]::-moz-placeholder,
 input[type="password"]::-moz-placeholder,
 .kc-input::-moz-placeholder {
     color: #B2B2B2 !important;
 }
+
 /* Edge/IE */
 input[type="text"]:-ms-input-placeholder,
 input[type="password"]:-ms-input-placeholder,
@@ -450,20 +516,20 @@ input[type="password"]:-ms-input-placeholder,
 
 input[type="text"]:focus,
 input[type="password"]:focus {
-    border-color: #A85236 !important;
+    border-color: var(--sunbird-primary) !important;
     outline: none !important;
     background: white !important;
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #A85236 !important;
-    border-radius: 10px !important;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--sunbird-primary) !important;
+    border-radius: var(--r-md) !important;
 }
 
 /* Apply the same precise double-border effect on hover for consistency */
 input[type="text"]:hover,
 input[type="password"]:hover {
-    border-color: #A85236 !important;
+    border-color: var(--sunbird-primary) !important;
     background: white !important;
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #A85236 !important;
-    border-radius: 10px !important;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--sunbird-primary) !important;
+    border-radius: var(--r-md) !important;
 }
 
 label {
@@ -503,19 +569,23 @@ div[class*="kcFormGroupClass"] {
         box-shadow: none !important;
     }
 }
+
 @media (max-width: 768px) {
     .login-split-container {
         box-shadow: none !important;
     }
+
     .login-left-panel {
         display: none;
     }
+
     .login-right-panel {
         flex: 1 1 100%;
     }
+
     .login-card {
         height: fit-content !important;
-        border-radius: 3rem;
+        border-radius: var(--r-frame);
     }
 }
 
@@ -523,6 +593,7 @@ div[class*="kcFormGroupClass"] {
     .login-split-container {
         box-shadow: none !important;
     }
+
     .welcome-title {
         font-size: 22px;
     }
@@ -536,16 +607,69 @@ div[class*="kcFormGroupClass"] {
     }
 }
 
+/* Mobile-app client — force narrow single-pane layout regardless of viewport.
+   Mirrors the portal's mobile webview rendering when client=mobileApp. */
+html[data-client="mobileApp"] .login-wrapper {
+    background: var(--card-bg);
+}
+
+html[data-client="mobileApp"] .login-left-panel {
+    display: none;
+}
+
+html[data-client="mobileApp"] .login-right-panel {
+    flex: 1 1 100%;
+    align-items: normal;
+}
+
+html[data-client="mobileApp"] .login-split-container {
+    max-width: 100%;
+    padding: 0;
+}
+
+html[data-client="mobileApp"] .login-card {
+    width: 100%;
+    height: fit-content !important;
+    padding: 0;
+}
+
+html[data-client="mobileApp"] .close-button {
+    display: none;
+}
+
+/* Modern template — sharpen everything by redefining the radius tokens.
+   Every panel / input / button / OTP box already consumes var(--r-*), so this
+   single block sharpens the whole login UI. Mirrors portal template-overrides.
+   Shadows + heading weight stay as explicit modern rules below. */
+html[data-template="modern"] {
+    --r-frame: 8px;
+    --r-lg: 3px;
+    --r-md: 3px;
+    --r-sm: 3px;
+    --r-xs: 3px;
+    --shadow-frame: 0 12px 28px rgba(15, 23, 42, 0.12), 0 4px 8px rgba(15, 23, 42, 0.06);
+    --shadow-card: 0 4px 10px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+/* mobileApp — flat, full-bleed frame with no elevation, in ANY template.
+   Token override (not per-selector) placed AFTER the modern block so it wins
+   for modern+mobileApp by source order (equal single-attribute specificity). */
+html[data-client="mobileApp"] {
+    --r-frame: 0;
+    --shadow-frame: none;
+    --shadow-card: none;
+}
+
 /* Appended Styles from login1.css for Reset Password Page */
 
 :root {
-    --primary-color: #A85236;
-    --primary-hover: #8E311F;
+    --primary-color: var(--sunbird-primary);
+    --primary-hover: var(--sunbird-primary-hover);
     --teal-bg: #4F8A8B;
     --card-bg: #ffffff;
     --text-color: #2D3748;
     --text-secondary: #718096;
-    --font-family: 'Rubik', sans-serif;
+    --font-family: var(--app-font-family);
 }
 
 .sunbird-logo-wrapper {
@@ -556,7 +680,7 @@ div[class*="kcFormGroupClass"] {
 .sunbird-logo-text {
     font-size: 2.2rem;
     font-weight: 700;
-    color: #A85236;
+    color: var(--sunbird-primary);
     letter-spacing: -1.5px;
 }
 
@@ -611,7 +735,7 @@ div[class*="kcFormGroupClass"] {
     padding: 14px 22px;
     /* Slightly more breathing room */
     border: 1.5px solid #E2E8F0;
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     /* Matched to image curvature */
     font-size: 0.95rem;
     box-sizing: border-box;
@@ -622,11 +746,11 @@ div[class*="kcFormGroupClass"] {
 .kc-input:hover,
 .kc-input:focus {
     outline: none;
-    border-color: #A85236;
+    border-color: var(--sunbird-primary);
     background: white;
     /* Precise double border: Main Border -> White Gap -> Second Border */
-    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #A85236;
-    border-radius: 16px;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--sunbird-primary);
+    border-radius: var(--r-lg);
 }
 
 /* Ensure hover effects on other fields are hidden when one field is focused */
@@ -648,10 +772,10 @@ div[class*="kcFormGroupClass"] {
 .kc-button {
     width: 100%;
     padding: 16px 24px;
-    background: #A85236;
+    background: var(--sunbird-primary);
     color: white;
     border: none;
-    border-radius: 16px;
+    border-radius: var(--r-lg);
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
@@ -662,7 +786,7 @@ div[class*="kcFormGroupClass"] {
 
 .kc-button:hover {
     opacity: 0.85;
-    background: #A85236;
+    background: var(--sunbird-primary);
     transform: none;
     box-shadow: none;
     cursor: pointer;
@@ -696,7 +820,7 @@ div[class*="kcFormGroupClass"] {
     opacity: 0.85;
     box-shadow: none;
     transform: none;
-    background: #A85236;
+    background: var(--sunbird-primary);
 }
 
 .kc-form-buttons {
@@ -728,7 +852,7 @@ div[class*="kcFormGroupClass"] {
 
 .alert {
     padding: 14px;
-    border-radius: 10px;
+    border-radius: var(--r-md);
     margin-bottom: 25px;
     font-size: 0.95rem;
     text-align: center;
@@ -756,11 +880,16 @@ div[class*="kcFormGroupClass"] {
     }
 }
 
+html[data-client="mobileApp"] .spark-form-pane {
+    padding: 0px 24px;
+}
+
 /* OTP Validation Styles */
 .otp-container {
     display: flex;
     justify-content: space-between;
-    gap: 8px; /* Reduced gap for better fit */
+    gap: 8px;
+    /* Reduced gap for better fit */
     margin-bottom: 24px;
     max-width: 400px;
     margin-left: auto;
@@ -768,19 +897,20 @@ div[class*="kcFormGroupClass"] {
 }
 
 .otp-input {
-    width: 45px !important; /* Fixed width */
+    width: 45px !important;
+    /* Fixed width */
     height: 50px !important;
     text-align: center;
     font-size: 1.25rem !important;
     padding: 0 !important;
-    border-radius: 8px !important;
+    border-radius: var(--r-sm) !important;
     border: 1px solid #E2E8F0 !important;
     background: #fff !important;
 }
 
 .otp-input:focus {
-    border-color: #A85236 !important;
-    box-shadow: 0 0 0 2px rgba(167, 58, 36, 0.2) !important;
+    border-color: var(--sunbird-primary) !important;
+    box-shadow: 0 0 0 2px var(--sunbird-primary-focus-shadow) !important;
     outline: none !important;
 }
 
@@ -798,7 +928,7 @@ div[class*="kcFormGroupClass"] {
 }
 
 .resend-otp-container a {
-    color: #A85236;
+    color: var(--sunbird-primary);
     text-decoration: none;
     font-weight: 600;
 }
@@ -832,13 +962,14 @@ div[class*="kcFormGroupClass"] {
     z-index: 9999;
     pointer-events: none;
 }
+
 .toast {
     min-width: 280px;
     max-width: 360px;
     background: #EDEBE3;
     color: #111;
-    border-radius: 8px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    border-radius: var(--r-sm);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     padding: 12px 40px 12px 12px;
     line-height: 1.4;
     font-size: 14px;
@@ -848,25 +979,31 @@ div[class*="kcFormGroupClass"] {
     pointer-events: auto;
     position: relative;
 }
+
 .toast.show {
     opacity: 1;
     transform: translateY(0);
 }
+
 .toast-success {
     background: #EDEBE3;
     color: #111;
 }
+
 .toast-error {
     background: #EF4343;
     color: #fff;
 }
+
 .toast-title {
     font-weight: 600;
     margin-bottom: 4px;
 }
+
 .toast-message {
     display: block;
 }
+
 .toast-close {
     position: absolute;
     top: 8px;
@@ -874,23 +1011,27 @@ div[class*="kcFormGroupClass"] {
     width: 24px;
     height: 24px;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--r-xs);
     background: none;
     color: #111;
     cursor: pointer;
     opacity: 0;
     transition: opacity .2s ease;
 }
+
 .toast-close:hover {
     background: none;
 }
+
 .toast:hover .toast-close {
     opacity: 1;
 }
+
 .toast-error .toast-close {
     color: #fff;
     background: none;
 }
+
 .toast-error .toast-close:hover {
     background: none;
 }
@@ -898,17 +1039,20 @@ div[class*="kcFormGroupClass"] {
 .passwdchk {
     display: none;
 }
+
 .passwderr {
     display: block;
     color: #C53030;
     margin-top: 8px;
     font-size: 0.9rem;
 }
+
 .confpasswderr {
     color: #C53030;
     margin-top: 8px;
     font-size: 0.9rem;
 }
+
 .show {
     display: block;
 }
@@ -917,7 +1061,7 @@ div[class*="kcFormGroupClass"] {
 
 /* Left panel border-radius flipped */
 [dir="rtl"] .login-left-panel {
-    border-radius: 0 3rem 3rem 0;
+    border-radius: 0 var(--r-frame) var(--r-frame) 0;
 }
 
 [dir="rtl"] .login-left-panel-container {
@@ -932,7 +1076,7 @@ div[class*="kcFormGroupClass"] {
 
 /* Login card border-radius flipped */
 [dir="rtl"] .login-card {
-    border-radius: 3rem 0 0 3rem;
+    border-radius: var(--r-frame) 0 0 var(--r-frame);
 }
 
 /* Close button flipped */
@@ -979,4 +1123,3 @@ div[class*="kcFormGroupClass"] {
     right: auto;
     left: 8px;
 }
-
