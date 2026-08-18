@@ -34,10 +34,8 @@ images:
     tag: "2.19.5"
 
   grafana: &grafana
-    registry: "docker.io"
-    repository: "grafana/grafana"
+    repository: "docker.io/grafana/grafana"
     tag: "11.4.0"
-    digest: ""
 
   alloy: &alloy
     registry: "docker.io"
@@ -143,10 +141,9 @@ images:
     repository: "sunbirded.azurecr.io/flink-nlweb-job"
     tag: "0.0.3"
 
-  yugabyte: &yugabyte  
-    registry: yugabytedb
-    repository: yugabyte
-    tag: 2025.2.0.0-b131 
+  yugabyte: &yugabyte
+    repository: "yugabytedb/yugabyte"
+    tag: "2025.2.0.0-b131"
 
   janusgraph: &janusgraph
     registry: ghcr.io
@@ -330,7 +327,7 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
   yugabyte:
-    image: *yugabyte
+    Image: *yugabyte
     imagePullSecrets:
       - name: "registry-secret-name"
   yugabytecql:
@@ -364,16 +361,7 @@ internal: &internal
 # grafana's real image path — the root-level `grafana:` key above never reaches it
 kube-prometheus-stack:
   grafana:
-    image:
-      repository: "docker.io/grafana/grafana"
-      tag: "11.4.0"
-
-# yugabyte subchart reads .Values.Image (capital) — each bb's own `yugabyte.image`
-# (lowercase) key above never reaches it, this does
-yugabyte:
-  Image:
-    repository: "yugabytedb/yugabyte"
-    tag: "2025.2.0.0-b131"
+    image: *grafana
 
 # Flink images
 global:
