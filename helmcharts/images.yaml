@@ -361,6 +361,20 @@ internal: &internal
 # Merge internal into root for direct access
 <<: *internal
 
+# grafana's real image path — the root-level `grafana:` key above never reaches it
+kube-prometheus-stack:
+  grafana:
+    image:
+      repository: "docker.io/grafana/grafana"
+      tag: "11.4.0"
+
+# yugabyte subchart reads .Values.Image (capital) — each bb's own `yugabyte.image`
+# (lowercase) key above never reaches it, this does
+yugabyte:
+  Image:
+    repository: "yugabytedb/yugabyte"
+    tag: "2025.2.0.0-b131"
+
 # Flink images
 global:
   knowledgeflink:
