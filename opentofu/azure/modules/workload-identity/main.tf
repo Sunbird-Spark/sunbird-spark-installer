@@ -28,6 +28,16 @@ data "azurerm_client_config" "current" {}
 locals {
   environment_name     = "${var.building_block}-${var.environment}"
   storage_account_name = reverse(split("/", var.storage_account_id))[0]
+
+  # Containers this workload identity actually needs blob data access to.
+  # Scoping the role assignment per-container (instead of the whole storage
+  # account) limits the blast radius of any SAS token minted with the
+  # generateUserDelegationKey permission below to just these containers.
+  storage_containers = {
+    private = var.storage_container_private_name
+    public  = var.storage_container_public_name
+    velero  = var.storage_container_velero_name
+  }
 }
 
 resource "kubernetes_namespace" "namespaces" {
@@ -77,9 +87,14 @@ resource "azurerm_role_assignment" "workload_identity_user_delegation_key" {
   role_definition_id = azurerm_role_definition.user_delegation_key.role_definition_resource_id
 }
 
+# A user delegation SAS can never grant more than the signing principal's
+# actual RBAC on the target container — so scoping this per-container (rather
+# than at the storage account) is what actually bounds what a SAS minted via
+# generateUserDelegationKey (above) can be used for.
 resource "azurerm_role_assignment" "workload_identity_storage_blob_contributor" {
+  for_each             = local.storage_containers
   principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = var.storage_account_id
+  scope                = "${var.storage_account_id}/blobServices/default/containers/${each.value}"
   role_definition_name = "Storage Blob Data Contributor"
 }
 

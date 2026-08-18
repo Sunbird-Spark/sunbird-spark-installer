@@ -34,6 +34,21 @@ variable "storage_account_id" {
   description = "Resource ID of the storage account to grant blob access on."
 }
 
+variable "storage_container_private_name" {
+  type        = string
+  description = "Name of the private storage container to scope the Storage Blob Data Contributor role assignment to."
+}
+
+variable "storage_container_public_name" {
+  type        = string
+  description = "Name of the public storage container to scope the Storage Blob Data Contributor role assignment to."
+}
+
+variable "storage_container_velero_name" {
+  type        = string
+  description = "Name of the velero storage container to scope the Storage Blob Data Contributor role assignment to."
+}
+
 variable "kubernetes_host" {
   type        = string
   description = "Kubernetes API server host."
