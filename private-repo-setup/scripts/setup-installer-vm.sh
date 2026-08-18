@@ -138,6 +138,7 @@ cat > "$ROLE_JSON_FILE" <<EOF
     "Microsoft.Resources/subscriptions/read",
     "Microsoft.Resources/subscriptions/resourceGroups/read",
     "Microsoft.Resources/deployments/*",
+    "Microsoft.Compute/virtualMachines/read",
     "Microsoft.ContainerService/managedClusters/*",
     "Microsoft.ContainerService/locations/*/read",
     "Microsoft.ContainerService/locations/operationresults/read",
