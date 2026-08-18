@@ -365,6 +365,13 @@ kube-prometheus-stack:
 
 # Flink images
 global:
+  # learnbb/knowledgebb/obsrvbb's templates/provision/kafka.yaml Job reads
+  # global.kafka.image directly (a frozen snapshot of each bb's own local
+  # kafka: anchor) instead of kafka.image above, so it never picked up the
+  # override either
+  kafka:
+    image: *kafka
+
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
