@@ -58,6 +58,21 @@ else
   echo "✓ Resource group created: $RESOURCE_GROUP"
 fi
 
+# ── Step 2a: Enforce no-shared-key-access on any storage account in this RG ─
+POLICY_DEF_ID=$(az policy definition list --query "[?displayName=='Storage accounts should have shared key access disabled'].id" -o tsv 2>/dev/null || true)
+if [ -n "$POLICY_DEF_ID" ]; then
+  az policy assignment create \
+    --name "deny-storage-shared-key-${ENVIRONMENT}" \
+    --display-name "Deny storage accounts with shared key access enabled" \
+    --policy "$POLICY_DEF_ID" \
+    --params '{"effect": {"value": "Deny"}}' \
+    --scope "$RG_SCOPE" >/dev/null 2>&1 \
+    && echo "✓ Policy assigned: deny storage accounts with shared key access enabled" \
+    || echo "✓ Policy already assigned (skipped)"
+else
+  echo "⚠ Could not find built-in policy 'Storage accounts should have shared key access disabled' — skipping."
+fi
+
 # ── Step 2b: Create VNet and subnets ──────────────────────────────────────
 # Names must match OpenTofu network module: {building_block}-{environment}[-aks|-runner]
 VNET_NAME="${BUILDING_BLOCK}-${ENVIRONMENT}"
@@ -94,7 +109,8 @@ else
     --name "$RUNNER_SUBNET_NAME" \
     --vnet-name "$VNET_NAME" \
     --resource-group "$RESOURCE_GROUP" \
-    --address-prefixes "10.0.16.0/28" >/dev/null
+    --address-prefixes "10.0.16.0/28" \
+    --service-endpoints "Microsoft.Storage" >/dev/null
   echo "✓ Runner subnet created: $RUNNER_SUBNET_NAME (10.0.16.0/28)"
 fi
 

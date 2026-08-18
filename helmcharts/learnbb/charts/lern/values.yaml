@@ -194,6 +194,11 @@ activity_input_dedup_enabled: "false"
 filter_processed_enrolments: "true"
 assessment_direct_aggregation_enabled: "true"
 
+# Viewer Specific
+viewer_enabled: "true"
+deployment_mode: "monolith"
+viewer_summary_upload_path: "viewer-summary"
+
 # Notification Specific
 sunbird_cassandra_notification_keyspace: sunbird_notifications
 
