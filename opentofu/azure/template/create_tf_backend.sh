@@ -60,10 +60,26 @@ fi
 # Create the storage account
 az storage account create --resource-group "$RESOURCE_GROUP_NAME" \
   --name "$STORAGE_ACCOUNT_NAME" --sku Standard_LRS --encryption-services blob \
-  --min-tls-version TLS1_2
+  --min-tls-version TLS1_2 --allow-shared-key-access false
 
 # Create the blob container
-az storage container create --name "$CONTAINER_NAME" --account-name "$STORAGE_ACCOUNT_NAME"
+az storage container create --name "$CONTAINER_NAME" --account-name "$STORAGE_ACCOUNT_NAME" --auth-mode login
+
+# Lock the storage account to this VM's own subnet. This script runs ON the
+# installer VM (setup-installer-vm.sh already added Microsoft.Storage to its
+# subnet), so that subnet already exists at this point.
+VM_RESOURCE_ID=$(curl -s -H "Metadata:true" "http://169.254.169.254/metadata/instance/compute?api-version=2021-02-01" 2>/dev/null | jq -r '.resourceId // empty')
+if [ -n "$VM_RESOURCE_ID" ]; then
+  NIC_ID=$(az vm show --ids "$VM_RESOURCE_ID" --query "networkProfile.networkInterfaces[0].id" -o tsv)
+  SUBNET_ID=$(az network nic show --ids "$NIC_ID" --query "ipConfigurations[0].subnet.id" -o tsv)
+  SUBNET_NAME=$(echo "$SUBNET_ID" | awk -F'/' '{print $NF}')
+
+  az storage account network-rule add --account-name "$STORAGE_ACCOUNT_NAME" --subnet "$SUBNET_ID"
+  az storage account update --name "$STORAGE_ACCOUNT_NAME" --default-action Deny
+  echo "✓ Storage account $STORAGE_ACCOUNT_NAME locked to VM's subnet: $SUBNET_NAME"
+else
+  echo "⚠ Not running on an Azure VM (no instance metadata) — storage account network left open."
+fi
 
 # Export OpenTofu backend details to a file
 echo "export AZURE_OPENTOFU_BACKEND_RG=$RESOURCE_GROUP_NAME" > tf.sh

@@ -1615,7 +1615,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"request\": {\n    \"id\": \"appFaqURL\",\n    \"field\": \"appFaqURL\",\n    \"value\": \"{{blob_store_path}}{{public_container_name}}/public/app-faq/resources/res\"\n  }\n}",
+							"raw": "{\n  \"request\": {\n    \"id\": \"appFaqURL\",\n    \"field\": \"appFaqURL\",\n    \"value\": \"{{blob_store_path}}/{{public_container_name}}/public/app-faq/resources/res\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1756,7 +1756,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"request\": {\n    \"id\": \"portalFaqURL\",\n    \"field\": \"portalFaqURL\",\n    \"value\": \"{{blob_store_path}}{{public_container_name}}/public/portal-faq/resources/res\"\n  }\n}",
+							"raw": "{\n  \"request\": {\n    \"id\": \"portalFaqURL\",\n    \"field\": \"portalFaqURL\",\n    \"value\": \"{{blob_store_path}}/{{public_container_name}}/public/portal-faq/resources/res\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1897,7 +1897,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"request\": {\n    \"id\": \"orgAdminTnc\",\n    \"field\": \"orgAdminTnc\",\n    \"value\": \"{\\\"latestVersion\\\":\\\"1.0.0\\\",\\\"1.0.0\\\":{\\\"url\\\":\\\"{{blob_store_path}}{{public_container_name}}/termsandcondtions/terms-and-conditions-v9.html#termsOfUse\\\"}}\"\n  }\n}",
+							"raw": "{\n  \"request\": {\n    \"id\": \"orgAdminTnc\",\n    \"field\": \"orgAdminTnc\",\n    \"value\": \"{\\\"latestVersion\\\":\\\"1.0.0\\\",\\\"1.0.0\\\":{\\\"url\\\":\\\"{{blob_store_path}}/{{public_container_name}}/termsandcondtions/terms-and-conditions-v9.html#termsOfUse\\\"}}\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4263,9 +4263,9 @@
 											}
 										],
 										"body": {
-											"mode": "raw",
-											"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            }\n          }\n        }\n      }\n    }\n  }\n}"
-										},
+						                      		"mode": "raw",
+						                      		"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            },\n            \"maxAttempts\": {\n              \"type\": \"number\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+						                       },
 										"url": {
 											"raw": "{{host}}/api/object/category/definition/v1/create",
 											"host": [
