@@ -169,6 +169,67 @@ images:
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
     tag: "2.0.3"
 
+  # kube-prometheus-stack's own bundled images — previously entirely
+  # untracked here, running whatever that chart's own defaults were.
+  prometheus_operator: &prometheus_operator
+    registry: "quay.io"
+    repository: "prometheus-operator/prometheus-operator"
+    tag: "v0.68.0"
+
+  kube_webhook_certgen: &kube_webhook_certgen
+    registry: "registry.k8s.io"
+    repository: "ingress-nginx/kube-webhook-certgen"
+    tag: "v20221220-controller-v1.5.1-58-g787ea74b6"
+
+  prometheus: &prometheus
+    registry: "quay.io"
+    repository: "prometheus/prometheus"
+    tag: "v2.47.1"
+
+  alertmanager: &alertmanager
+    registry: "quay.io"
+    repository: "prometheus/alertmanager"
+    tag: "v0.26.0"
+
+  blackbox_exporter: &blackbox_exporter
+    registry: "quay.io"
+    repository: "prometheus/blackbox-exporter"
+    tag: "v0.24.0"
+
+  kube_state_metrics: &kube_state_metrics
+    registry: "registry.k8s.io"
+    repository: "kube-state-metrics/kube-state-metrics"
+    tag: "v2.10.0"
+
+  node_exporter: &node_exporter
+    registry: "quay.io"
+    repository: "prometheus/node-exporter"
+    tag: "v1.6.1"
+
+  # this subchart's own image field is repository (combined) + imageTag,
+  # not registry/repository/tag like the others above
+  statsd_exporter: &statsd_exporter
+    repository: "quay.io/prometheus/statsd-exporter"
+    imageTag: "v0.17.0"
+
+  k8s_sidecar: &k8s_sidecar
+    repository: "quay.io/kiwigrid/k8s-sidecar"
+    tag: "1.24.3"
+
+  # kubernetes-dashboard — separate top-level dependency under monitoring,
+  # not part of kube-prometheus-stack
+  dashboard_api: &dashboard_api
+    repository: "docker.io/kubernetesui/dashboard-api"
+    tag: "v1.0.0"
+
+  dashboard_web: &dashboard_web
+    repository: "docker.io/kubernetesui/dashboard-web"
+    tag: "v1.0.0"
+
+  dashboard_metrics_scraper: &dashboard_metrics_scraper
+    repository: "docker.io/kubernetesui/metrics-scraper"
+    tag: "v1.0.9"
+
 # Internal block with pull secrets
 internal: &internal
   velero:
@@ -362,6 +423,35 @@ internal: &internal
 kube-prometheus-stack:
   grafana:
     image: *grafana
+    sidecar:
+      image: *k8s_sidecar
+  prometheusOperator:
+    image: *prometheus_operator
+    admissionWebhooks:
+      patch:
+        image: *kube_webhook_certgen
+  prometheus:
+    prometheusSpec:
+      image: *prometheus
+  alertmanager:
+    alertmanagerSpec:
+      image: *alertmanager
+  prometheus-blackbox-exporter:
+    image: *blackbox_exporter
+  kube-state-metrics:
+    image: *kube_state_metrics
+  prometheus-node-exporter:
+    image: *node_exporter
+  statsd-exporter:
+    image: *statsd_exporter
+
+kubernetes-dashboard:
+  api:
+    image: *dashboard_api
+  web:
+    image: *dashboard_web
+  metricsScraper:
+    image: *dashboard_metrics_scraper
 
 # Flink images
 global:
