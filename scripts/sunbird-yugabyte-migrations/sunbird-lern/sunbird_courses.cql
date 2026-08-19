@@ -144,8 +144,8 @@ CREATE TABLE IF NOT EXISTS sunbird_courses.report_user_enrolments (
     AND transactions = {'enabled': 'true'};
 
 CREATE TABLE IF NOT EXISTS sunbird_courses.assessment_aggregator (
-    course_id text,
-    batch_id text,
+    collection_id text,
+    context_id text,
     user_id text,
     content_id text,
     attempt_id text,
@@ -156,8 +156,8 @@ CREATE TABLE IF NOT EXISTS sunbird_courses.assessment_aggregator (
     total_max_score double,
     total_score double,
     updated_on timestamp,
-    PRIMARY KEY (course_id, batch_id, user_id, content_id, attempt_id)
-) WITH CLUSTERING ORDER BY (batch_id ASC, user_id ASC, content_id ASC, attempt_id ASC)
+    PRIMARY KEY (collection_id, context_id, user_id, content_id, attempt_id)
+) WITH CLUSTERING ORDER BY (context_id ASC, user_id ASC, content_id ASC, attempt_id ASC)
     AND bloom_filter_fp_chance = 0.01
     AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
     AND comment = ''
@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS sunbird_courses.assessment_aggregator (
     AND read_repair_chance = 0.0
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
-CREATE INDEX IF NOT EXISTS assessment_aggregator_by_user ON sunbird_courses.assessment_aggregator (user_id, course_id, batch_id, content_id, attempt_id) INCLUDE (total_score, total_max_score, last_attempted_on) WITH CLUSTERING ORDER BY (course_id ASC, batch_id ASC, content_id ASC, attempt_id ASC) AND transactions = {'enabled': 'true'};
+CREATE INDEX IF NOT EXISTS assessment_aggregator_by_user ON sunbird_courses.assessment_aggregator (user_id, collection_id, context_id, content_id, attempt_id) INCLUDE (total_score, total_max_score, last_attempted_on) WITH CLUSTERING ORDER BY (collection_id ASC, context_id ASC, content_id ASC, attempt_id ASC) AND transactions = {'enabled': 'true'};
 
 CREATE TABLE IF NOT EXISTS sunbird_courses.course_batch (
     courseid text,
@@ -303,8 +303,8 @@ CREATE INDEX IF NOT EXISTS inx_bup_status ON sunbird_courses.bulk_upload_process
 
 CREATE TABLE IF NOT EXISTS sunbird_courses.user_content_consumption (
     userid text,
-    courseid text,
-    batchid text,
+    collectionid text,
+    contextid text,
     contentid text,
     completedcount int,
     completionpercentage float,
@@ -319,8 +319,8 @@ CREATE TABLE IF NOT EXISTS sunbird_courses.user_content_consumption (
     progressdetails text,
     status int,
     viewcount int,
-    PRIMARY KEY (userid, courseid, batchid, contentid)
-) WITH CLUSTERING ORDER BY (courseid ASC, batchid ASC, contentid ASC)
+    PRIMARY KEY (userid, collectionid, contextid, contentid)
+) WITH CLUSTERING ORDER BY (collectionid ASC, contextid ASC, contentid ASC)
     AND bloom_filter_fp_chance = 0.01
     AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
     AND comment = ''
