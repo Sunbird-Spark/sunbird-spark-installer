@@ -148,11 +148,9 @@ images:
     repository: sunbird-spark/janusgraph
     tag: spark-v1.1.0_bf2dfd7
 
-  # DHI-hardened secor (Dockerfiles/secor/Dockerfile.hardened; eclipse-temurin JDK11 DHI base)
-  # same registry-drop issue as superset above — repository must be combined
   secor: &secor
-    repository: "sanketikahub/secor"
-    tag: "2.2.0"
+    repository: "sunbirded.azurecr.io/secor"
+    tag: "spark"
 
   sync_tool: &sync_tool
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
