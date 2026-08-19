@@ -81,8 +81,8 @@ spec:
           - /config/config.yaml
           env:
           - name: ENVOY_UID
-            value: "65532"
-          image: dhi.io/envoy:1.37-debian13
+            value: "1111"
+          image: envoyproxy/envoy:v1.20.0
           imagePullPolicy: IfNotPresent
           name: envoy
           livenessProbe:
@@ -103,7 +103,7 @@ spec:
             mkdir /policies && cp -Lr /opa-policies/*.rego /policies && \
             sed -i "s|KEYCLOAK_KID|$KID|g" /policies/common.rego && \
             sed -i "s|KEYCLOAK_PUBLIC_KEY|$PUBLIC_KEY_PEM|g" /policies/common.rego && \
-            /usr/bin/opa run --server /policies \
+            /app/opa run --server /policies \
               --addr=localhost:8181 \
               --diagnostic-addr=0.0.0.0:8282 \
               --set=plugins.envoy_ext_authz_grpc.addr=:9191 \
@@ -112,7 +112,7 @@ spec:
               --set=plugins.print_decision_logs_on_failure.stdout=true \
               --log-level=error \
               --ignore=.*
-          image: dhi.io/open-policy-agent:1.19.0-debian13
+          image: sunbirded.azurecr.io/opa:0.34.2-envoy
           imagePullPolicy: IfNotPresent
           name: opa
           livenessProbe:
@@ -132,7 +132,7 @@ spec:
           - -p
           - "9999"
           - -u
-          - "65532"
+          - "1111"
           - -w
           - "8282,10000"
           image: openpolicyagent/proxy_init:v5

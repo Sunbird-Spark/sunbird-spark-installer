@@ -5,9 +5,9 @@
 replicaCount: 1
 
 image:
-  repository:  dhi.io/prometheus-statsd-exporter
+  repository: quay.io/prometheus/statsd-exporter
   pullPolicy: IfNotPresent
-  imageTag: 0.30.0-debian13
+  imageTag: v0.17.0
 
 imagePullSecrets: []
 nameOverride: ""

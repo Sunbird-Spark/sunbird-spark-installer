@@ -543,42 +543,17 @@ Returns the controller quorum bootstrap servers based on the number of controlle
 {{- end -}}
 
 {{/*
-DHI migration: returns a static "id@host:port" controller.quorum.voters list.
-Needed because DHI's docker-entrypoint.sh always formats storage with
---no-initial-controllers (hardcoded, not overridable), so the 3 controllers
-can only learn about each other via a static voters list in server.properties,
-not via the dynamic bootstrap-servers mechanism used above.
-Used unconditionally in kafka.commonConfig below - this chart now targets DHI's Kafka image directly.
-*/}}
-{{- define "kafka.dhi.quorumVoters" -}}
-  {{- $fullname := include "kafka.controller.fullname" . }}
-  {{- $serviceName := printf "%s-headless" (include "kafka.controller.fullname" .) | trunc 63 | trimSuffix "-" }}
-  {{- $releaseNamespace := include "common.names.namespace" . -}}
-  {{- $clusterDomain := .Values.clusterDomain }}
-  {{- $port := int .Values.listeners.controller.containerPort }}
-  {{- $voters := list -}}
-  {{- range $i := until (int .Values.controller.replicaCount) -}}
-    {{- $voter := printf "%d@%s-%d.%s.%s.svc.%s:%d" (int $i) $fullname (int $i) $serviceName $releaseNamespace $clusterDomain $port -}}
-    {{- $voters = append $voters $voter -}}
-  {{- end -}}
-  {{- join "," $voters -}}
-{{- end -}}
-
-{{/*
 Section of the server.properties shared by both controller-eligible and broker nodes
 */}}
 {{- define "kafka.commonConfig" -}}
 controller.listener.names: {{ .Values.listeners.controller.name }}
 controller.quorum.bootstrap.servers: {{ include "kafka.controller.quorumBootstrapServers" . }}
-# DHI migration: static voters list, required because dhi.io/kafka's entrypoint
-# always formats with --no-initial-controllers (see kafka.dhi.quorumVoters above)
-controller.quorum.voters: {{ include "kafka.dhi.quorumVoters" . }}
 {{- if include "kafka.sslEnabled" . }}
 # TLS configuration
 ssl.keystore.type: JKS
 ssl.truststore.type: JKS
-ssl.keystore.location: /opt/kafka/config/certs/kafka.keystore.jks
-ssl.truststore.location: /opt/kafka/config/certs/kafka.truststore.jks
+ssl.keystore.location: /opt/bitnami/kafka/config/certs/kafka.keystore.jks
+ssl.truststore.location: /opt/bitnami/kafka/config/certs/kafka.truststore.jks
 ssl.client.auth: {{ .Values.tls.sslClientAuth }}
 ssl.endpoint.identification.algorithm: {{ .Values.tls.endpointIdentificationAlgorithm }}
 {{- end }}
@@ -661,7 +636,7 @@ Environment variables required to configure SASL
   value: {{ join "," .Values.sasl.client.users | quote }}
 {{- if .Values.usePasswordFiles }}
 - name: KAFKA_CLIENT_PASSWORDS_FILE
-  value: /opt/kafka/config/secrets/client-passwords
+  value: /opt/bitnami/kafka/config/secrets/client-passwords
 {{- else }}
 - name: KAFKA_CLIENT_PASSWORDS
   valueFrom:
@@ -676,7 +651,7 @@ Environment variables required to configure SASL
   value: {{ .Values.sasl.interbroker.user | quote }}
 {{- if .Values.usePasswordFiles }}
 - name: KAFKA_INTER_BROKER_PASSWORD_FILE
-  value: /opt/kafka/config/secrets/inter-broker-password
+  value: /opt/bitnami/kafka/config/secrets/inter-broker-password
 {{- else }}
 - name: KAFKA_INTER_BROKER_PASSWORD
   valueFrom:
@@ -690,7 +665,7 @@ Environment variables required to configure SASL
   value: {{ .Values.sasl.interbroker.clientId | quote }}
 {{- if .Values.usePasswordFiles }}
 - name: KAFKA_INTER_BROKER_CLIENT_SECRET_FILE
-  value: /opt/kafka/config/secrets/inter-broker-client-secret
+  value: /opt/bitnami/kafka/config/secrets/inter-broker-client-secret
 {{- else }}
 - name: KAFKA_INTER_BROKER_CLIENT_SECRET
   valueFrom:
@@ -706,7 +681,7 @@ Environment variables required to configure SASL
   value: {{ .Values.sasl.controller.user | quote }}
 {{- if .Values.usePasswordFiles }}
 - name: KAFKA_CONTROLLER_PASSWORD_FILE
-  value: /opt/kafka/config/secrets/controller-password
+  value: /opt/bitnami/kafka/config/secrets/controller-password
 {{- else }}
 - name: KAFKA_CONTROLLER_PASSWORD
   valueFrom:
@@ -720,7 +695,7 @@ Environment variables required to configure SASL
   value: {{ .Values.sasl.controller.clientId | quote }}
 {{- if .Values.usePasswordFiles }}
 - name: KAFKA_CONTROLLER_CLIENT_SECRET_FILE
-  value: /opt/kafka/config/secrets/controller-client-secret
+  value: /opt/bitnami/kafka/config/secrets/controller-client-secret
 {{- else }}
 - name: KAFKA_CONTROLLER_CLIENT_SECRET
   valueFrom:
@@ -738,12 +713,7 @@ Environment variables shared by both controller-eligible and broker nodes
 {{- define "kafka.commonEnv" -}}
 - name: BITNAMI_DEBUG
   value: {{ ternary "true" "false" (or .Values.image.debug .Values.diagnosticMode.enabled) | quote }}
-{{/* DHI migration: DHI's entrypoint reads plain KAFKA_CLUSTER_ID, not Bitnami's
-     KAFKA_KRAFT_CLUSTER_ID. Without this exact name, DHI sees it as unset and
-     auto-generates a random cluster ID per-pod on first boot - each of the 3
-     controllers would end up with a different cluster ID and could never form
-     a valid quorum together. */}}
-- name: KAFKA_CLUSTER_ID
+- name: KAFKA_KRAFT_CLUSTER_ID
   valueFrom:
     secretKeyRef:
       name: {{ template "kafka.kraftSecretName" . }}
@@ -1016,15 +986,4 @@ kafka: tls.keyPasswordSecretKey,tls.keystorePasswordSecretKey,tls.truststorePass
 kafka: Missing controller-eligible nodes
     No controller-eligible nodes have been configured.
 {{- end -}}
-{{- end -}}
-
-{{- define "kafka.dhi.commonEnv" -}}
-- name: KAFKA_NODE_ID
-  value: {{ .Values.nodeId | quote }}
-- name: KAFKA_PROCESS_ROLES
-  value: {{ .Values.processRoles | quote }}
-{{- end -}}
-
-{{- define "kafka.dhi.dataDir" -}}
-/opt/kafka/logs
 {{- end -}}

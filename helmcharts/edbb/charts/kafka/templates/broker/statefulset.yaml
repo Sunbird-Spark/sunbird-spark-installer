@@ -128,9 +128,8 @@ spec:
           env:
             - name: KAFKA_HEAP_OPTS
               value: {{ coalesce .Values.broker.heapOpts .Values.heapOpts | quote }}
-            {{/* DHI migration: process.roles is already set directly in server.properties
-                 (broker/configmap.yaml) - KAFKA_CFG_PROCESS_ROLES was Bitnami-only and
-                 redundant; DHI's image wouldn't recognize that env var prefix anyway. */}}
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: broker
             {{- include "kafka.commonEnv" . | nindent 12 }}
             {{- if .Values.broker.extraEnvVars }}
             {{- include "common.tplvalues.render" ( dict "value" .Values.broker.extraEnvVars "context" $) | nindent 12 }}
@@ -177,11 +176,11 @@ spec:
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.broker.customLivenessProbe "context" $) | nindent 12 }}
           {{- else if .Values.broker.livenessProbe.enabled }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.broker.livenessProbe "enabled") "context" $) | nindent 12 }}
-            {{/* DHI migration: pgrep doesn't exist on DHI's image, so the exec-based
-                 check would always fail and crash-loop an otherwise-healthy pod.
-                 tcpSocket matches this chart's own readinessProbe fallback below. */}}
-            tcpSocket:
-              port: "client"
+            exec:
+              command:
+                - pgrep
+                - -f
+                - kafka
           {{- end }}
           {{- if .Values.broker.customReadinessProbe }}
           readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.broker.customReadinessProbe "context" $) | nindent 12 }}
@@ -212,23 +211,23 @@ spec:
             - name: logs
               mountPath: {{ .Values.broker.logPersistence.mountPath }}
             - name: kafka-config
-              mountPath: /opt/kafka/config/server.properties
+              mountPath: /opt/bitnami/kafka/config/server.properties
               subPath: server.properties
             - name: tmp
               mountPath: /tmp
             {{- if or .Values.log4j2 .Values.existingLog4j2ConfigMap }}
             - name: log4j2-config
-              mountPath: /opt/kafka/config/log4j2.yaml
+              mountPath: /opt/bitnami/kafka/config/log4j2.yaml
               subPath: log4j2.yaml
             {{- end }}
             {{- if include "kafka.sslEnabled" . }}
             - name: kafka-shared-certs
-              mountPath: /opt/kafka/config/certs
+              mountPath: /opt/bitnami/kafka/config/certs
               readOnly: true
             {{- end }}
             {{- if and .Values.usePasswordFiles (include "kafka.saslEnabled" .) }}
             - name: kafka-sasl
-              mountPath: /opt/kafka/config/secrets
+              mountPath: /opt/bitnami/kafka/config/secrets
               readOnly: true
             {{- end }}
             {{- if .Values.extraVolumeMounts }}

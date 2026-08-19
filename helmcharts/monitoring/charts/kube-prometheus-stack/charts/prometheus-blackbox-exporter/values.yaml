@@ -82,10 +82,10 @@ strategy:
   type: RollingUpdate
 
 image:
-  registry: dhi.io
-  repository: blackbox-exporter
+  registry: quay.io
+  repository: prometheus/blackbox-exporter
   # Overrides the image tag whose default is {{ printf "v%s" .Chart.AppVersion }}
-  tag: "0.28.0-debian13"
+  tag: ""
   pullPolicy: IfNotPresent
   digest: ""
 
