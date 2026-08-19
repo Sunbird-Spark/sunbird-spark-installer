@@ -76,7 +76,7 @@ spec:
           - /config/config.yaml
           env:
           - name: ENVOY_UID
-            value: "65532"
+            value: "1111"
           image: "{{ .Values.envoy_image.registry }}/{{ .Values.envoy_image.repository }}:{{ .Values.envoy_image.tag }}"
           imagePullPolicy: IfNotPresent
           name: envoy
@@ -98,7 +98,7 @@ spec:
             mkdir /policies && cp -Lr /opa-policies/*.rego /policies && \
             sed -i "s|KEYCLOAK_KID|$KID|g" /policies/common.rego && \
             sed -i "s|KEYCLOAK_PUBLIC_KEY|$PUBLIC_KEY_PEM|g" /policies/common.rego && \
-            /usr/bin/opa run --server /policies \
+            /app/opa run --server /policies \
               --addr=localhost:8181 \
               --diagnostic-addr=0.0.0.0:8282 \
               --set=plugins.envoy_ext_authz_grpc.addr=:9191 \
@@ -127,7 +127,7 @@ spec:
           - -p
           - "9999"
           - -u
-          - "65532"
+          - "1111"
           - -w
           - "8282,10000"
           image: "{{ .Values.proxy_init_image.registry }}/{{ .Values.proxy_init_image.repository }}:{{ .Values.proxy_init_image.tag }}"

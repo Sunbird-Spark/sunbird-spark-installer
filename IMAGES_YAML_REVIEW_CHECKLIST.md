@@ -27,7 +27,7 @@ Known non-standard shapes found so far in this repo:
 |---|---|---|
 | YugabyteDB (`yugabyte-*.tgz`) | `Image.repository` / `Image.tag` — **capital I** | No separate `registry` field. Combined repository string. `Image` (not `image`) is used in every template (`service.yaml` masters/tservers). Verified by extracting the chart directly. |
 | statsd-exporter (kube-prometheus-stack subchart) | `image.repository` (combined) / `image.imageTag` — **`imageTag`, not `tag`** | No `registry` field. |
-| reloader (`monitoring/charts/reloader`) | `reloader.image.name` / `.tag` | Field is `name`, not `repository`. No `deployment:` nesting — check the chart's own `values.yaml` before assuming otherwise. |
+| reloader (`monitoring/charts/reloader`) | `reloader.deployment.image.name` / `.tag` | Field is `name`, not `repository`, and it IS nested under `deployment:` — confirmed directly against `templates/deployment.yaml` line 75 (`{{ .Values.reloader.deployment.image.name }}`). An earlier pass here wrongly said there was no `deployment:` nesting; don't repeat that without re-checking the template. |
 | grafana's admission-webhook sidecar / dashboard sidecar (`k8s_sidecar`) | `sidecar.image.repository` (combined) / `.tag` | Split registry/repository is NOT read here. |
 | secor, superset (org DHI-hardened charts) | `image.repository` / `image.tag` — **no `.registry` at all** | If you set `registry:` separately in the anchor without combining it into `repository`, the pod silently tries to pull from `docker.io` instead of wherever `registry:` said. Confirmed via `edbb/charts/secor/templates/secor-statefulset.yaml` and every `obsrvbb/charts/superset/templates/deployment*.yaml`. |
 | janusgraph's logstash sidecar, velero's azure plugin initContainer | plain `"repo:tag"` string, not a map at all | These are literal Kubernetes container `image:` fields — the API requires a string, never an object. Don't "fix" these to look like the other anchors. |
@@ -144,7 +144,7 @@ kubernetes-dashboard.web.image
 kubernetes-dashboard.metricsScraper.image
 loki.image
 loki.gateway.image
-reloader.reloader.image                             (name + tag, no repository field)
+reloader.reloader.deployment.image                  (name + tag, no repository field)
 velero.image + velero.initContainers[].image        (plain string) + velero.kubectl.image
 janusgraph.image + janusgraph.sidecars[].image      (plain string)
 knowledgemw.image + knowledgemw.{envoy,opa,proxy_init}_image
