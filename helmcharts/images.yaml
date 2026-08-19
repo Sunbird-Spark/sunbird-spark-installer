@@ -648,4 +648,4 @@ global:
   caption_generator:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/caption-generator"
-    tag: "spark-v1.0.3-captions-beta46_64dd2a3"
+    tag: "spark-v1.1.0_93887dd"
