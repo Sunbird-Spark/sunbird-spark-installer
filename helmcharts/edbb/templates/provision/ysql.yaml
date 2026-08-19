@@ -17,14 +17,14 @@ spec:
       restartPolicy: Never
       initContainers:
       - name: wait-for-yugabyte-postgres
-        image: busybox
+        image: "{{ .Values.job_wait_image | default "busybox" }}"
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c']
         args:
         - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'"
       containers:
       - name: migration
-        image: yugabytedb/yugabyte:latest
+        image: "{{ .Values.yugabyte_migration_image | default "yugabytedb/yugabyte:latest" }}"
         imagePullPolicy: IfNotPresent
         command: ['bash', '-c']
         securityContext:

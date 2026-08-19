@@ -255,6 +255,19 @@ images:
   # this sidecar's image field is also a plain "repo:tag" string
   janusgraph_logstash: &janusgraph_logstash "docker.elastic.co/logstash/logstash-oss:7.10.2"
 
+  # these five were hardcoded literals directly in template source (no
+  # values.yaml field existed at all) until they were templatized alongside
+  # this same commit — see templates/provision/job-cleaner.yaml (x3 bbs),
+  # templates/provision/ysql.yaml, templates/provision/opensearch-migration.yaml,
+  # and knowledgemw/templates/deployment.yaml
+  job_cleaner_kubectl_image: &job_cleaner_kubectl_image "sunbirded.azurecr.io/kubectl:1.28.4"
+  job_wait_image: &job_wait_image "busybox"
+  yugabyte_migration_image: &yugabyte_migration_image "yugabytedb/yugabyte:latest"
+  opensearch_migration_image: &opensearch_migration_image "curlimages/curl:latest"
+  envoy_image: &envoy_image "envoyproxy/envoy:v1.20.0"
+  opa_image: &opa_image "sunbirded.azurecr.io/opa:0.34.2-envoy"
+  proxy_init_image: &proxy_init_image "openpolicyagent/proxy_init:v5"
+
 # Internal block with pull secrets
 internal: &internal
   velero:
@@ -500,6 +513,22 @@ velero:
           name: plugins
   kubectl:
     image: *velero_kubectl
+
+# Flat keys read directly off each building block's own root values (these
+# umbrella-level templates were reading a hardcoded literal until now, see
+# the anchors' comment above)
+job_cleaner_kubectl_image: *job_cleaner_kubectl_image
+job_wait_image: *job_wait_image
+yugabyte_migration_image: *yugabyte_migration_image
+opensearch_migration_image: *opensearch_migration_image
+
+# envoy/opa/proxy_init are read inside the knowledgemw SUBCHART's own
+# template, so .Values there resolves against edbb.knowledgemw.*, not
+# edbb's own root — has to be nested here, unlike the three flat keys above
+knowledgemw:
+  envoy_image: *envoy_image
+  opa_image: *opa_image
+  proxy_init_image: *proxy_init_image
 
 # Flink images
 global:
