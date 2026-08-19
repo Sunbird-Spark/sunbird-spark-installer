@@ -96,7 +96,17 @@ CACHE_CONFIG = {
 }
 DATA_CACHE_CONFIG = CACHE_CONFIG
 
-SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{env('DB_USER')}:{env('DB_PASS')}@{env('DB_HOST')}:{env('DB_PORT')}/{env('DB_NAME')}?options=-c%20default_transaction_isolation%3Dread%20committed"
+SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{env('DB_USER')}:{env('DB_PASS')}@{env('DB_HOST')}:{env('DB_PORT')}/{env('DB_NAME')}"
+# YugabyteDB's YSQL layer defaults new sessions to REPEATABLE READ, which
+# aborts under write conflicts with "current transaction is expired or
+# aborted" (YB001) — the exact failure Alembic's migrations hit here.
+# Forcing READ COMMITTED per-connection avoids it. Passed via connect_args
+# (not the URI's querystring) since "read committed" has a space in it and
+# a prior attempt at URL-encoding that inside the URI silently mangled it
+# down to just "read", confirmed live against yb-tserver-0.
+SQLALCHEMY_ENGINE_OPTIONS = {
+    "connect_args": {"options": "-c default_transaction_isolation=read committed"}
+}
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 class CeleryConfig:
