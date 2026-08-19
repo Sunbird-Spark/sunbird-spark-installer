@@ -17,14 +17,14 @@ spec:
       restartPolicy: Never
       initContainers:
       - name: wait-for-opensearch
-        image: "{{ .Values.job_wait_image | default "busybox" }}"
+        image: "{{ .Values.job_wait_image.registry }}/{{ .Values.job_wait_image.repository }}:{{ .Values.job_wait_image.tag }}"
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh", "-c"]
         args:
         - "timeout {{ .Values.migration.opensearch.waitTime }} sh -c 'until nc -z {{ .Values.global.opensearch.host }} {{ .Values.global.opensearch.port }}; do echo waiting for opensearch; sleep 10; done'"
       containers:
       - name: migration
-        image: "{{ .Values.opensearch_migration_image | default "curlimages/curl:latest" }}"
+        image: "{{ .Values.opensearch_migration_image.registry }}/{{ .Values.opensearch_migration_image.repository }}:{{ .Values.opensearch_migration_image.tag }}"
         imagePullPolicy: IfNotPresent
         command: ['sh', '-c']
         args:

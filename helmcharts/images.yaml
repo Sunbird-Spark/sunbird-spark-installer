@@ -255,18 +255,45 @@ images:
   # this sidecar's image field is also a plain "repo:tag" string
   janusgraph_logstash: &janusgraph_logstash "docker.elastic.co/logstash/logstash-oss:7.10.2"
 
-  # these five were hardcoded literals directly in template source (no
+  # these seven were hardcoded literals directly in template source (no
   # values.yaml field existed at all) until they were templatized alongside
   # this same commit — see templates/provision/job-cleaner.yaml (x3 bbs),
   # templates/provision/ysql.yaml, templates/provision/opensearch-migration.yaml,
   # and knowledgemw/templates/deployment.yaml
-  job_cleaner_kubectl_image: &job_cleaner_kubectl_image "sunbirded.azurecr.io/kubectl:1.28.4"
-  job_wait_image: &job_wait_image "busybox"
-  yugabyte_migration_image: &yugabyte_migration_image "yugabytedb/yugabyte:latest"
-  opensearch_migration_image: &opensearch_migration_image "curlimages/curl:latest"
-  envoy_image: &envoy_image "envoyproxy/envoy:v1.20.0"
-  opa_image: &opa_image "sunbirded.azurecr.io/opa:0.34.2-envoy"
-  proxy_init_image: &proxy_init_image "openpolicyagent/proxy_init:v5"
+  job_cleaner_kubectl_image: &job_cleaner_kubectl_image
+    registry: "sunbirded.azurecr.io"
+    repository: "kubectl"
+    tag: "1.28.4"
+
+  job_wait_image: &job_wait_image
+    registry: "docker.io"
+    repository: "busybox"
+    tag: "latest"
+
+  yugabyte_migration_image: &yugabyte_migration_image
+    registry: "docker.io"
+    repository: "yugabytedb/yugabyte"
+    tag: "latest"
+
+  opensearch_migration_image: &opensearch_migration_image
+    registry: "docker.io"
+    repository: "curlimages/curl"
+    tag: "latest"
+
+  envoy_image: &envoy_image
+    registry: "docker.io"
+    repository: "envoyproxy/envoy"
+    tag: "v1.20.0"
+
+  opa_image: &opa_image
+    registry: "sunbirded.azurecr.io"
+    repository: "opa"
+    tag: "0.34.2-envoy"
+
+  proxy_init_image: &proxy_init_image
+    registry: "docker.io"
+    repository: "openpolicyagent/proxy_init"
+    tag: "v5"
 
 # Internal block with pull secrets
 internal: &internal

@@ -74,6 +74,21 @@ migration:
   yugabyte:
     waitTime: 120
 
+job_cleaner_kubectl_image:
+  registry: "sunbirded.azurecr.io"
+  repository: "kubectl"
+  tag: "1.28.4"
+
+job_wait_image:
+  registry: "docker.io"
+  repository: "busybox"
+  tag: "latest"
+
+yugabyte_migration_image:
+  registry: "docker.io"
+  repository: "yugabytedb/yugabyte"
+  tag: "latest"
+
 nginx-private-ingress:
   enabled: false
 
