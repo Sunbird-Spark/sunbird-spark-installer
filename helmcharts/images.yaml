@@ -275,7 +275,7 @@ images:
   job_wait_image: &job_wait_image
     registry: "dhi.io"
     repository: "busybox"
-    tag: "1.27"
+    tag: "1.37"
 
   yugabyte_migration_image: &yugabyte_migration_image
     registry: "docker.io"
@@ -455,7 +455,7 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
   yugabyte:
-    image: *yugabyte
+    Image: *yugabyte
     imagePullSecrets:
       - name: "registry-secret-name"
   yugabytecql:
