@@ -152,7 +152,44 @@ Returns an init-container that prepares the Kafka configuration files for main c
   args:
     - -ec
     - |
-      . /opt/bitnami/scripts/libkafka.sh
+      {{/* DHI migration: libkafka.sh/libos.sh (Bitnami-only) don't exist on DHI's
+           image. This block is a plain-bash replacement for the specific helper
+           functions this script actually calls below - kept as a shim (rather than
+           rewriting every call site) since this script is long and calls these
+           from several different feature branches (TLS, external access, SASL,
+           rack awareness, node.id logic). */}}
+      error() { echo "ERROR: $1" >&2; exit 1; }
+      warn() { echo "WARN: $1" >&2; }
+      is_boolean_yes() {
+          local -r val="${1:-}"
+          [[ "$val" =~ ^(yes|true|1)$ ]]
+      }
+      retry_while() {
+          local -r cmd="${1:?cmd is required}"
+          local -r retries="${2:-12}"
+          local -r sleep_time="${3:-5}"
+          local return_value=1
+          for ((i = 1; i <= retries; i++)); do
+              bash -c "$cmd" && return_value=0 && break
+              sleep "$sleep_time"
+          done
+          return $return_value
+      }
+      kafka_server_conf_set() {
+        local -r key="$1" value="$2"
+        if grep -qE "^${key}=" "$KAFKA_CONF_FILE" 2>/dev/null; then
+            sed -i "s|^${key}=.*|${key}=${value}|" "$KAFKA_CONF_FILE"
+        else
+            [[ -s "$KAFKA_CONF_FILE" ]] && [[ -n "$(tail -c1 "$KAFKA_CONF_FILE")" ]] && echo >> "$KAFKA_CONF_FILE"
+            echo "${key}=${value}" >> "$KAFKA_CONF_FILE"
+        fi
+      }
+      replace_in_file() {
+          local -r file="$1" match="$2" substitute="$3"
+          local escaped_substitute
+          escaped_substitute=$(printf '%s' "$substitute" | sed -e 's/[\/&]/\\&/g')
+          sed -i "s/${match}/${escaped_substitute}/g" "$file"
+      }
 
       {{- if $externalAccessEnabled }}
       configure_external_access() {
@@ -193,7 +230,7 @@ Returns an init-container that prepares the Kafka configuration files for main c
           # Remove previously existing keystores and certificates, if any
           rm -f /certs/kafka.keystore.jks /certs/kafka.truststore.jks
           rm -f /certs/tls.crt /certs/tls.key /certs/ca.crt
-          find /certs -name "xx*" -exec rm {} \;
+          rm -f /certs/xx*
           if [[ "${KAFKA_TLS_TYPE}" = "PEM" ]]; then
               # Copy PEM certificate and key
               if [[ -f "/mounted-certs/kafka-${POD_ROLE}-${POD_ID}.crt" && "/mounted-certs/kafka-${POD_ROLE}-${POD_ID}.key" ]]; then
@@ -315,17 +352,17 @@ Returns an init-container that prepares the Kafka configuration files for main c
 
       # Configure node.id
       ID=$((POD_ID + KAFKA_MIN_ID))
-      [[ -f "/bitnami/kafka/data/meta.properties" ]] && ID="$(grep "node.id" /bitnami/kafka/data/meta.properties | awk -F '=' '{print $2}')"
+      [[ -f "/var/lib/kafka/data/meta.properties" ]] && ID="$(grep "node.id" /var/lib/kafka/data/meta.properties | cut -d'=' -f2)"
       kafka_server_conf_set "node.id" "$ID"
       # Configure initial controllers
       if [[ "controller" =~ "$POD_ROLE" ]]; then
           INITIAL_CONTROLLERS=()
           for ((i = 0; i < {{ int .context.Values.controller.replicaCount }}; i++)); do
               var="KAFKA_CONTROLLER_${i}_DIR_ID"; DIR_ID="${!var}"
-              [[ $i -eq $POD_ID ]] && [[ -f "/bitnami/kafka/data/meta.properties" ]] && DIR_ID="$(grep "directory.id" /bitnami/kafka/data/meta.properties | awk -F '=' '{print $2}')"
+              [[ $i -eq $POD_ID ]] && [[ -f "/var/lib/kafka/data/meta.properties" ]] && DIR_ID="$(grep "directory.id" /var/lib/kafka/data/meta.properties | cut -d'=' -f2)"
               INITIAL_CONTROLLERS+=("${i}@${KAFKA_FULLNAME}-${POD_ROLE}-${i}.${KAFKA_CONTROLLER_SVC_NAME}.${MY_POD_NAMESPACE}.svc.${CLUSTER_DOMAIN}:${KAFKA_CONTROLLER_PORT}:${DIR_ID}")
           done
-          echo "${INITIAL_CONTROLLERS[*]}" | awk -v OFS=',' '{$1=$1}1' > /shared/initial-controllers.txt
+          (IFS=,; echo "${INITIAL_CONTROLLERS[*]}") > /shared/initial-controllers.txt
       fi
       {{- if not .context.Values.listeners.advertisedListeners }}
       replace_in_file "$KAFKA_CONF_FILE" "advertised-address-placeholder" "${MY_POD_NAME}.${KAFKA_FULLNAME}-${POD_ROLE}-headless.${MY_POD_NAMESPACE}.svc.${CLUSTER_DOMAIN}"
@@ -484,7 +521,7 @@ Returns an init-container that prepares the Kafka configuration files for main c
     {{- end }}
   volumeMounts:
     - name: data
-      mountPath: /bitnami/kafka
+      mountPath: /var/lib/kafka
     - name: kafka-config
       mountPath: /config
     - name: kafka-configmaps
@@ -506,7 +543,7 @@ Returns an init-container that prepares the Kafka configuration files for main c
     {{- end }}
     {{- if and .context.Values.usePasswordFiles (include "kafka.saslEnabled" .context) }}
     - name: kafka-sasl
-      mountPath: /opt/bitnami/kafka/config/secrets
+      mountPath: /opt/kafka/config/secrets
       readOnly: true
     {{- end }}
 {{- end -}}
