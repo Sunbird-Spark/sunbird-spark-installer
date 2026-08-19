@@ -43,7 +43,7 @@ images:
 
   player: &player
     repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "spark-v1.0.2_dccfcf4"
+    tag: "spark-v1.1.0_ce97ee1"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -63,7 +63,7 @@ images:
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "spark-v1.0.3_61d7904_16"
+    tag: "spark-v1.1.0_dbad626_19"
     
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -75,7 +75,7 @@ images:
 
   adminutil: &adminutil
     repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
-    tag: "spark-v1.0.0_b8f4778_3"
+    tag: "spark-v1.1.0_a7d8c3f_6"
 
   cert: &cert
     repository: "ghcr.io/sunbird-lern/cert-service"
@@ -103,7 +103,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v1.0.2_d25f276_27"
+    tag: "spark-v1.1.0_1426176_76"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -111,21 +111,23 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.3-captions-beta37_978c7e0"
+    tag: "spark-v1.1.0_4a35a67"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.0.3-captions-beta37_978c7e0"
+    tag: "spark-v1.1.0_4a35a67"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
-    tag: "spark-v0.1_8b8e877_5"
+    tag: "v8.1.3-rc1_c4cc359_18"
 
+  # superset's chart template only reads .image.repository + .image.tag,
+  # it never reads .image.registry — repository has to be the full combined
+  # path or every superset pod silently tries to pull from docker.io instead
+  # of sanketikahub (confirmed via templates/deployment*.yaml)
   superset: &superset
-    registry: sanketikahub
-    repository: "superset"
+    repository: "sanketikahub/superset"
     tag: "2.2.0"
-    digest: ""
 
   nlweb: &nlweb
     repository: "sanketikahub/nlweb"
@@ -142,14 +144,13 @@ images:
   janusgraph: &janusgraph
     registry: ghcr.io
     repository: sunbird-spark/janusgraph
-    tag: develop_8f2245e
+    tag: spark-v1.1.0_bf2dfd7
 
   # DHI-hardened secor (Dockerfiles/secor/Dockerfile.hardened; eclipse-temurin JDK11 DHI base)
+  # same registry-drop issue as superset above — repository must be combined
   secor: &secor
-    registry: sanketikahub
-    repository: "secor"
+    repository: "sanketikahub/secor"
     tag: "2.2.0"
-    digest: ""
 
   sync_tool: &sync_tool
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
@@ -157,7 +158,7 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "spark-v1.0.2_b8305ee"
+    tag: "spark-v1.1.0_fe7c786"
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
@@ -529,10 +530,23 @@ reloader:
     deployment:
       image: *reloader
 
+# CAUTION: velero/janusgraph/knowledgemw are ALSO keys inside internal:
+# (merged to root via <<: *internal above). YAML merge-key semantics mean an
+# explicit key at the same name completely REPLACES the merged-in one — it
+# does NOT deep-merge — so every block below must re-include that internal:
+# entry's image/imagePullSecrets alongside whatever new field it's adding, or
+# it silently deletes the working override that internal: already provided.
+# (Found by testing: after adding these blocks, all three's *main* image
+# silently reverted to the vendored chart's own default — velero's shows the
+# same as intended only because upstream's own default happens to match.)
+
 # velero.initContainers is a list, which Helm replaces wholesale rather than
 # merging by key — replicated in full (unchanged apart from the image alias)
 # rather than partially, to avoid silently dropping the other required fields
 velero:
+  image: *velero
+  imagePullSecrets:
+    - name: "registry-secret-name"
   initContainers:
     - name: velero-plugin-for-azure
       image: *velero_plugin_azure
@@ -542,6 +556,39 @@ velero:
           name: plugins
   kubectl:
     image: *velero_kubectl
+
+# janusgraph.sidecars is a list, same reasoning as velero.initContainers
+# above — replicated in full rather than partially
+janusgraph:
+  image: *janusgraph
+  imagePullSecrets:
+    - name: "registry-secret-name"
+  sidecars:
+    - name: logstash
+      image: *janusgraph_logstash
+      imagePullPolicy: Always
+      env:
+        - name: PIPELINE_WORKERS
+          value: "1"
+        - name: PIPELINE_BATCH_SIZE
+          value: "1"
+        - name: LS_JAVA_OPTS
+          value: "-Dnetworkaddress.cache.ttl=30 -Dnetworkaddress.cache.negative.ttl=10"
+      livenessProbe:
+        httpGet:
+          path: /
+          port: 9600
+        initialDelaySeconds: 60
+        periodSeconds: 30
+        timeoutSeconds: 5
+        failureThreshold: 3
+      volumeMounts:
+        - name: janusgraph-configs
+          mountPath: /usr/share/logstash/pipeline/logstash.conf
+          subPath: logstash.conf
+        - name: empty-dir
+          mountPath: /opt/bitnami/janusgraph/logs
+          subPath: app-logs-dir
 
 # Flat keys read directly off each building block's own root values (these
 # umbrella-level templates were reading a hardcoded literal until now, see
@@ -555,6 +602,9 @@ opensearch_migration_image: *opensearch_migration_image
 # template, so .Values there resolves against edbb.knowledgemw.*, not
 # edbb's own root — has to be nested here, unlike the three flat keys above
 knowledgemw:
+  image: *knowledge_mw
+  imagePullSecrets:
+    - name: "registry-secret-name"
   envoy_image: *envoy_image
   opa_image: *opa_image
   proxy_init_image: *proxy_init_image
@@ -571,12 +621,12 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.0.2_964957e"
+    tag: "spark-v1.1.0_dec74d7"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v1.0.2_cbe9e07"
+    tag: "spark-v1.1.0_f36189f"
 
   # ai-pipeline (PyFlink 1.20) jobs, deployed via the consolidated
   # `py-flink` chart's py_flink_jobs map (helmcharts/knowledgebb/charts/
@@ -593,7 +643,7 @@ global:
   enrichment_router:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/enrichment-router"
-    tag: "spark-v1.0.3-captions-beta46_64dd2a3"
+    tag: "spark-v1.1.0_93887dd"
 
   caption_generator:
     registry: "ghcr.io"
