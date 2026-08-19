@@ -54,7 +54,7 @@ spec:
       serviceAccountName: {{ .Chart.Name }}-job-deleter
       containers:
       - name: kubectl-container
-        image: sunbirded.azurecr.io/kubectl:1.28.4
+        image: "{{ .Values.job_cleaner_kubectl_image.registry }}/{{ .Values.job_cleaner_kubectl_image.repository }}:{{ .Values.job_cleaner_kubectl_image.tag }}"
         imagePullPolicy: IfNotPresent
         command: ["bash", "-c"]
         args:

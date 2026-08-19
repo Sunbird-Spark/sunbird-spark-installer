@@ -135,10 +135,9 @@ images:
     repository: "sunbirded.azurecr.io/flink-nlweb-job"
     tag: "0.0.3"
 
-  yugabyte: &yugabyte  
-    registry: yugabytedb
-    repository: yugabyte
-    tag: 2025.2.0.0-b131 
+  yugabyte: &yugabyte
+    repository: "yugabytedb/yugabyte"
+    tag: "2025.2.0.0-b131"
 
   janusgraph: &janusgraph
     registry: ghcr.io
@@ -163,6 +162,132 @@ images:
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
     tag: "2.0.3"
+
+  # kube-prometheus-stack's own bundled images — previously entirely
+  # untracked here, running whatever that chart's own defaults were.
+  prometheus_operator: &prometheus_operator
+    registry: "quay.io"
+    repository: "prometheus-operator/prometheus-operator"
+    tag: "v0.68.0"
+
+  kube_webhook_certgen: &kube_webhook_certgen
+    registry: "registry.k8s.io"
+    repository: "ingress-nginx/kube-webhook-certgen"
+    tag: "v20221220-controller-v1.5.1-58-g787ea74b6"
+
+  prometheus: &prometheus
+    registry: "quay.io"
+    repository: "prometheus/prometheus"
+    tag: "v2.47.1"
+
+  alertmanager: &alertmanager
+    registry: "quay.io"
+    repository: "prometheus/alertmanager"
+    tag: "v0.26.0"
+
+  blackbox_exporter: &blackbox_exporter
+    registry: "quay.io"
+    repository: "prometheus/blackbox-exporter"
+    tag: "v0.24.0"
+
+  kube_state_metrics: &kube_state_metrics
+    registry: "registry.k8s.io"
+    repository: "kube-state-metrics/kube-state-metrics"
+    tag: "v2.10.0"
+
+  node_exporter: &node_exporter
+    registry: "quay.io"
+    repository: "prometheus/node-exporter"
+    tag: "v1.6.1"
+
+  # this subchart's own image field is repository (combined) + imageTag,
+  # not registry/repository/tag like the others above
+  statsd_exporter: &statsd_exporter
+    repository: "quay.io/prometheus/statsd-exporter"
+    imageTag: "v0.17.0"
+
+  k8s_sidecar: &k8s_sidecar
+    repository: "quay.io/kiwigrid/k8s-sidecar"
+    tag: "1.24.3"
+
+  # kubernetes-dashboard — separate top-level dependency under monitoring,
+  # not part of kube-prometheus-stack
+  dashboard_api: &dashboard_api
+    repository: "docker.io/kubernetesui/dashboard-api"
+    tag: "v1.0.0"
+
+  dashboard_web: &dashboard_web
+    repository: "docker.io/kubernetesui/dashboard-web"
+    tag: "v1.0.0"
+
+  dashboard_metrics_scraper: &dashboard_metrics_scraper
+    repository: "docker.io/kubernetesui/metrics-scraper"
+    tag: "v1.0.9"
+
+  # this initContainer's image field is a plain "repo:tag" string, not a map
+  velero_plugin_azure: &velero_plugin_azure "velero/velero-plugin-for-microsoft-azure:v1.2.0"
+
+  velero_kubectl: &velero_kubectl
+    repository: "sunbirded.azurecr.io/kubectl"
+    tag: "1.26.14-debian-11-r6"
+
+  loki: &loki
+    registry: "docker.io"
+    repository: "grafana/loki"
+    tag: "2.9.3"
+
+  loki_gateway: &loki_gateway
+    registry: "docker.io"
+    repository: "nginxinc/nginx-unprivileged"
+    tag: "1.24-alpine"
+
+  # this subchart's own image field is name (combined) + tag, not repository
+  reloader: &reloader
+    name: "ghcr.io/stakater/reloader"
+    tag: "v1.0.60"
+
+  # this sidecar's image field is also a plain "repo:tag" string
+  janusgraph_logstash: &janusgraph_logstash "docker.elastic.co/logstash/logstash-oss:7.10.2"
+
+  # these seven were hardcoded literals directly in template source (no
+  # values.yaml field existed at all) until they were templatized alongside
+  # this same commit — see templates/provision/job-cleaner.yaml (x3 bbs),
+  # templates/provision/ysql.yaml, templates/provision/opensearch-migration.yaml,
+  # and knowledgemw/templates/deployment.yaml
+  job_cleaner_kubectl_image: &job_cleaner_kubectl_image
+    registry: "sunbirded.azurecr.io"
+    repository: "kubectl"
+    tag: "1.28.4"
+
+  job_wait_image: &job_wait_image
+    registry: "docker.io"
+    repository: "busybox"
+    tag: "latest"
+
+  yugabyte_migration_image: &yugabyte_migration_image
+    registry: "docker.io"
+    repository: "yugabytedb/yugabyte"
+    tag: "latest"
+
+  opensearch_migration_image: &opensearch_migration_image
+    registry: "docker.io"
+    repository: "curlimages/curl"
+    tag: "latest"
+
+  envoy_image: &envoy_image
+    registry: "docker.io"
+    repository: "envoyproxy/envoy"
+    tag: "v1.20.0"
+
+  opa_image: &opa_image
+    registry: "sunbirded.azurecr.io"
+    repository: "opa"
+    tag: "0.34.2-envoy"
+
+  proxy_init_image: &proxy_init_image
+    registry: "docker.io"
+    repository: "openpolicyagent/proxy_init"
+    tag: "v5"
 
 # Internal block with pull secrets
 internal: &internal
@@ -322,7 +447,7 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
   yugabyte:
-    image: *yugabyte
+    Image: *yugabyte
     imagePullSecrets:
       - name: "registry-secret-name"
   yugabytecql:
@@ -353,8 +478,88 @@ internal: &internal
 # Merge internal into root for direct access
 <<: *internal
 
+# grafana's real image path — the root-level `grafana:` key above never reaches it
+kube-prometheus-stack:
+  grafana:
+    image: *grafana
+    sidecar:
+      image: *k8s_sidecar
+  prometheusOperator:
+    image: *prometheus_operator
+    admissionWebhooks:
+      patch:
+        image: *kube_webhook_certgen
+  prometheus:
+    prometheusSpec:
+      image: *prometheus
+  alertmanager:
+    alertmanagerSpec:
+      image: *alertmanager
+  prometheus-blackbox-exporter:
+    image: *blackbox_exporter
+  kube-state-metrics:
+    image: *kube_state_metrics
+  prometheus-node-exporter:
+    image: *node_exporter
+  statsd-exporter:
+    image: *statsd_exporter
+
+kubernetes-dashboard:
+  api:
+    image: *dashboard_api
+  web:
+    image: *dashboard_web
+  metricsScraper:
+    image: *dashboard_metrics_scraper
+
+loki:
+  image: *loki
+  gateway:
+    image: *loki_gateway
+
+reloader:
+  reloader:
+    image: *reloader
+
+# velero.initContainers is a list, which Helm replaces wholesale rather than
+# merging by key — replicated in full (unchanged apart from the image alias)
+# rather than partially, to avoid silently dropping the other required fields
+velero:
+  initContainers:
+    - name: velero-plugin-for-azure
+      image: *velero_plugin_azure
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+  kubectl:
+    image: *velero_kubectl
+
+# Flat keys read directly off each building block's own root values (these
+# umbrella-level templates were reading a hardcoded literal until now, see
+# the anchors' comment above)
+job_cleaner_kubectl_image: *job_cleaner_kubectl_image
+job_wait_image: *job_wait_image
+yugabyte_migration_image: *yugabyte_migration_image
+opensearch_migration_image: *opensearch_migration_image
+
+# envoy/opa/proxy_init are read inside the knowledgemw SUBCHART's own
+# template, so .Values there resolves against edbb.knowledgemw.*, not
+# edbb's own root — has to be nested here, unlike the three flat keys above
+knowledgemw:
+  envoy_image: *envoy_image
+  opa_image: *opa_image
+  proxy_init_image: *proxy_init_image
+
 # Flink images
 global:
+  # learnbb/knowledgebb/obsrvbb's templates/provision/kafka.yaml Job reads
+  # global.kafka.image directly (a frozen snapshot of each bb's own local
+  # kafka: anchor) instead of kafka.image above, so it never picked up the
+  # override either
+  kafka:
+    image: *kafka
+
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
