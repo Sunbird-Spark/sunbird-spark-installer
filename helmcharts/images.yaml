@@ -230,6 +230,31 @@ images:
     repository: "docker.io/kubernetesui/metrics-scraper"
     tag: "v1.0.9"
 
+  # this initContainer's image field is a plain "repo:tag" string, not a map
+  velero_plugin_azure: &velero_plugin_azure "velero/velero-plugin-for-microsoft-azure:v1.2.0"
+
+  velero_kubectl: &velero_kubectl
+    repository: "sunbirded.azurecr.io/kubectl"
+    tag: "1.26.14-debian-11-r6"
+
+  loki: &loki
+    registry: "docker.io"
+    repository: "grafana/loki"
+    tag: "2.9.3"
+
+  loki_gateway: &loki_gateway
+    registry: "docker.io"
+    repository: "nginxinc/nginx-unprivileged"
+    tag: "1.24-alpine"
+
+  # this subchart's own image field is name (combined) + tag, not repository
+  reloader: &reloader
+    name: "ghcr.io/stakater/reloader"
+    tag: "v1.0.60"
+
+  # this sidecar's image field is also a plain "repo:tag" string
+  janusgraph_logstash: &janusgraph_logstash "docker.elastic.co/logstash/logstash-oss:7.10.2"
+
 # Internal block with pull secrets
 internal: &internal
   velero:
@@ -452,6 +477,29 @@ kubernetes-dashboard:
     image: *dashboard_web
   metricsScraper:
     image: *dashboard_metrics_scraper
+
+loki:
+  image: *loki
+  gateway:
+    image: *loki_gateway
+
+reloader:
+  reloader:
+    image: *reloader
+
+# velero.initContainers is a list, which Helm replaces wholesale rather than
+# merging by key — replicated in full (unchanged apart from the image alias)
+# rather than partially, to avoid silently dropping the other required fields
+velero:
+  initContainers:
+    - name: velero-plugin-for-azure
+      image: *velero_plugin_azure
+      imagePullPolicy: IfNotPresent
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+  kubectl:
+    image: *velero_kubectl
 
 # Flink images
 global:
