@@ -100,12 +100,12 @@ SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{env('DB_USER')}:{env('DB_PASS
 # YugabyteDB's YSQL layer defaults new sessions to REPEATABLE READ, which
 # aborts under write conflicts with "current transaction is expired or
 # aborted" (YB001) — the exact failure Alembic's migrations hit here.
-# Forcing READ COMMITTED per-connection avoids it. Passed via connect_args
-# (not the URI's querystring) since "read committed" has a space in it and
-# a prior attempt at URL-encoding that inside the URI silently mangled it
-# down to just "read", confirmed live against yb-tserver-0.
+# Forcing READ COMMITTED per-connection avoids it. libpq's own "options"
+# parser (independent of any URL encoding) splits on whitespace unless
+# escaped, so the space in "read committed" needs a backslash or it gets
+# truncated to just "read" — confirmed live against yb-tserver-0 both ways.
 SQLALCHEMY_ENGINE_OPTIONS = {
-    "connect_args": {"options": "-c default_transaction_isolation=read committed"}
+    "connect_args": {"options": r"-c default_transaction_isolation=read\ committed"}
 }
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
