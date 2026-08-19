@@ -527,10 +527,23 @@ reloader:
   reloader:
     image: *reloader
 
+# CAUTION: velero/janusgraph/knowledgemw are ALSO keys inside internal:
+# (merged to root via <<: *internal above). YAML merge-key semantics mean an
+# explicit key at the same name completely REPLACES the merged-in one — it
+# does NOT deep-merge — so every block below must re-include that internal:
+# entry's image/imagePullSecrets alongside whatever new field it's adding, or
+# it silently deletes the working override that internal: already provided.
+# (Found by testing: after adding these blocks, all three's *main* image
+# silently reverted to the vendored chart's own default — velero's shows the
+# same as intended only because upstream's own default happens to match.)
+
 # velero.initContainers is a list, which Helm replaces wholesale rather than
 # merging by key — replicated in full (unchanged apart from the image alias)
 # rather than partially, to avoid silently dropping the other required fields
 velero:
+  image: *velero
+  imagePullSecrets:
+    - name: "registry-secret-name"
   initContainers:
     - name: velero-plugin-for-azure
       image: *velero_plugin_azure
@@ -544,6 +557,9 @@ velero:
 # janusgraph.sidecars is a list, same reasoning as velero.initContainers
 # above — replicated in full rather than partially
 janusgraph:
+  image: *janusgraph
+  imagePullSecrets:
+    - name: "registry-secret-name"
   sidecars:
     - name: logstash
       image: *janusgraph_logstash
@@ -583,6 +599,9 @@ opensearch_migration_image: *opensearch_migration_image
 # template, so .Values there resolves against edbb.knowledgemw.*, not
 # edbb's own root — has to be nested here, unlike the three flat keys above
 knowledgemw:
+  image: *knowledge_mw
+  imagePullSecrets:
+    - name: "registry-secret-name"
   envoy_image: *envoy_image
   opa_image: *opa_image
   proxy_init_image: *proxy_init_image
