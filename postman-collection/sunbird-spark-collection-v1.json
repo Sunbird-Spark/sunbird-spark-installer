@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "30de7f3c-6124-41dc-a85e-bf228e594e39",
+		"_postman_id": "e83de2f7-8dc3-4c1e-858a-37b401043620",
 		"name": "Oneclick Installer - Sunbird Spark - Daylight Release",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "37164806"
@@ -3012,36 +3012,36 @@
 									"request": {
 										"method": "POST",
 										"header": [
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											},
-											{
-												"key": "Authorization",
-												"value": "Bearer {{apikey}}",
-												"type": "text"
-											}
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										},
+										{
+											"key": "Authorization",
+											"value": "Bearer {{apikey}}",
+											"type": "text"
+										}
 										],
 										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Boolean Question\",\n            \"description\": \"Boolean Question\"\n        }\n    }\n}"
+										"mode": "raw",
+										"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Boolean Question\",\n            \"description\": \"Boolean Question\"\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/object/category/v1/create",
-											"host": [
-												"{{host}}"
-											],
-											"path": [
-												"api",
-												"object",
-												"category",
-												"v1",
-												"create"
-											]
+										"raw": "{{host}}/api/object/category/v1/create",
+										"host": [
+											"{{host}}"
+										],
+										"path": [
+											"api",
+											"object",
+											"category",
+											"v1",
+											"create"
+										]
 										}
 									},
 									"response": []
-								},
+          					    },
 								{
 									"name": "ObjectCategory - Subjective Question",
 									"request": {
@@ -4013,32 +4013,32 @@
 									"request": {
 										"method": "POST",
 										"header": [
-											{
-												"key": "Authorization",
-												"value": "Bearer {{apikey}}"
-											},
-											{
-												"key": "Content-Type",
-												"value": "application/json"
-											}
+										{
+											"key": "Authorization",
+											"value": "Bearer {{apikey}}"
+										},
+										{
+											"key": "Content-Type",
+											"value": "application/json"
+										}
 										],
 										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:boolean-question\",\n            \"targetObjectType\": \"Question\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.sunbird.question\"\n                            ]\n                        },\n                        \"interactionTypes\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"choice\"\n                                ]\n                            }\n                        }\n                    }\n                }\n            },\n            \"forms\": {}\n        }\n    }\n}"
+										"mode": "raw",
+										"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:boolean-question\",\n            \"targetObjectType\": \"Question\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.sunbird.question\"\n                            ]\n                        },\n                        \"interactionTypes\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"choice\"\n                                ]\n                            }\n                        }\n                    }\n                }\n            },\n            \"forms\": {}\n        }\n    }\n}"
 										},
 										"url": {
-											"raw": "{{host}}/api/object/category/definition/v1/create",
-											"host": [
-												"{{host}}"
-											],
-											"path": [
-												"api",
-												"object",
-												"category",
-												"definition",
-												"v1",
-												"create"
-											]
+										"raw": "{{host}}/api/object/category/definition/v1/create",
+										"host": [
+											"{{host}}"
+										],
+										"path": [
+											"api",
+											"object",
+											"category",
+											"definition",
+											"v1",
+											"create"
+										]
 										}
 									},
 									"response": []
@@ -4349,9 +4349,9 @@
 											}
 										],
 										"body": {
-											"mode": "raw",
-											"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            },\n            \"maxAttempts\": {\n              \"type\": \"number\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
-										},
+						                      		"mode": "raw",
+						                      		"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            },\n            \"maxAttempts\": {\n              \"type\": \"number\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+						                       },
 										"url": {
 											"raw": "{{host}}/api/object/category/definition/v1/create",
 											"host": [
