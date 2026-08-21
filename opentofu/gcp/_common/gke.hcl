@@ -20,6 +20,7 @@ locals {
   # reachable from within the VPC (or an authorized network).
   enable_private_nodes    = local.global_vars.global.enable_private_gke_nodes
   disable_public_endpoint = local.global_vars.global.disable_public_gke_endpoint
+  master_ipv4_cidr_block  = local.global_vars.global.master_ipv4_cidr_block
 }
 
 # For local development
@@ -33,6 +34,7 @@ dependency "network" {
     network = "sunbird-vpc"
     public_subnetwork = "dummy"
     subnetwork = "dummy"
+    public_subnetwork_secondary_range_name = "dummy"
     public_services_secondary_range_name = "dummy"
     public_subnetwork_cidr_block = "10.0.0.0/20"
     }
@@ -43,7 +45,13 @@ inputs = {
   building_block                     = local.building_block
   network                            = dependency.network.outputs.network
   subnetwork                         = dependency.network.outputs.public_subnetwork
-  cluster_secondary_range_name      = dependency.network.outputs.public_services_secondary_range_name
+  # cluster_secondary_range_name is the PODS range (GKE's own naming, not
+  # "cluster" in the network-module sense) — was pointed at the services
+  # range name instead, with services_secondary_range_name left unset
+  # entirely. Pre-existing bug, unrelated to the private-cluster wiring
+  # above, but it would have broken `terraform apply` on GKE regardless.
+  cluster_secondary_range_name       = dependency.network.outputs.public_subnetwork_secondary_range_name
+  services_secondary_range_name      = dependency.network.outputs.public_services_secondary_range_name
   project                            = local.project
   zone                               = local.zone
   region                             = local.region
@@ -55,6 +63,7 @@ inputs = {
 
   enable_private_nodes    = local.enable_private_nodes
   disable_public_endpoint = local.disable_public_endpoint
+  master_ipv4_cidr_block  = local.master_ipv4_cidr_block
   # The runner VM (and anything else in this VPC's public subnetwork) needs
   # to reach the private control-plane endpoint — authorize the subnet it
   # lives in explicitly rather than relying on same-VPC access alone, since

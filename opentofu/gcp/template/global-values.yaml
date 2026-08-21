@@ -32,6 +32,7 @@ global:
   subnetwork: ""      # required when create_network: false — name of existing public subnetwork (e.g. "ed-dev-subnetwork-public")
   enable_private_gke_nodes: true    # true = GKE nodes get internal IPs only; false = nodes get public IPs too
   disable_public_gke_endpoint: true # true = GKE API server is private (requires being inside the VPC, e.g. via the runner VM's VPN/IAP access); false = GKE API server is public
+  master_ipv4_cidr_block: "10.2.0.0/28" # required by GCP whenever enable_private_gke_nodes is true — must not overlap the subnetwork's primary (10.0.0.0/20) or secondary (10.1.0.0/20, 10.1.32.0/20) ranges
   sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
   knowledge_platform_ref: "master"  # git branch or tag for knowledge-platform (schemas/local upload)
   building_block: ""
