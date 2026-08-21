@@ -129,9 +129,6 @@ includedPermissions:
 - iam.serviceAccounts.delete
 - iam.serviceAccounts.list
 - iam.serviceAccounts.actAs
-- iam.serviceAccountKeys.get
-- iam.serviceAccountKeys.create
-- iam.serviceAccountKeys.delete
 - iam.roles.get
 - iam.roles.create
 - iam.roles.update
