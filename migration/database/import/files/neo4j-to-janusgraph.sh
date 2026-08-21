@@ -114,12 +114,14 @@ if [ -n "$POD_NAME" ]; then
     kubectl cp /tmp/relationships.csv "$NS/$POD_NAME:/tmp/relationships.csv" -c "$CONTAINER"
     kubectl cp /scripts/import_data.groovy "$NS/$POD_NAME:/tmp/import_data.groovy" -c "$CONTAINER"
     kubectl cp /scripts/set_graphid.groovy "$NS/$POD_NAME:/tmp/set_graphid.groovy" -c "$CONTAINER"
+    kubectl cp /scripts/remove_node_id.groovy "$NS/$POD_NAME:/tmp/remove_node_id.groovy" -c "$CONTAINER"
 
     GREMLIN_BIN="/opt/bitnami/janusgraph/bin/gremlin.sh"
     # Match db-migration: default replaceExisting=false. Existing vertices skipped (no dupes),
     # new vertices get graphId via set_graphid. Source data static for migration → no refresh needed.
     kubectl exec -n "$NS" "$POD_NAME" -c "$CONTAINER" -- $GREMLIN_BIN -e /tmp/import_data.groovy
     kubectl exec -n "$NS" "$POD_NAME" -c "$CONTAINER" -- $GREMLIN_BIN -e /tmp/set_graphid.groovy
+    kubectl exec -n "$NS" "$POD_NAME" -c "$CONTAINER" -- $GREMLIN_BIN -e /tmp/remove_node_id.groovy
     echo "Groovy bulk import completed."
 else
     echo "WARNING: No JanusGraph pod found. Skipping Groovy bulk import."

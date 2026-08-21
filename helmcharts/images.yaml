@@ -50,7 +50,7 @@ images:
 
   player: &player
     repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "v.1.0.2.beta11_70c74cb"
+    tag: "spark-v1.1.0_ce97ee1"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -71,7 +71,7 @@ images:
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "spark-v1.0.3_61d7904_16"
+    tag: "spark-v1.1.0_dbad626_19"
     
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
@@ -83,7 +83,7 @@ images:
 
   adminutil: &adminutil
     repository: "ghcr.io/sunbird-lern/sunbird-apimanager-util"
-    tag: "spark-v1.0.0_b8f4778_3"
+    tag: "spark-v1.1.0_a7d8c3f_6"
 
   cert: &cert
     repository: "ghcr.io/sunbird-lern/cert-service"
@@ -111,7 +111,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v1.0.2_d25f276_27"
+    tag: "spark-v1.1.0_1426176_76"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -119,15 +119,15 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.0.1_b23d1ee"
+    tag: "spark-v1.1.0_4a35a67"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.0.2_e234cae"
+    tag: "spark-v1.1.0_4a35a67"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
-    tag: "spark-v0.1_8b8e877_5"
+    tag: "v8.1.3-rc1_c4cc359_18"
 
   superset: &superset
     repository: sanketikahub/superset
@@ -149,15 +149,23 @@ images:
   janusgraph: &janusgraph
     registry: ghcr.io
     repository: sunbird-spark/janusgraph
-    tag: develop_8f2245e
+    tag: spark-v1.1.0_bf2dfd7
 
   secor: &secor
     repository: "sunbirded.azurecr.io/secor"
     tag: "spark"
 
+  sync_tool: &sync_tool
+    repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
+    tag: "spark-v1.0.2_448714d"
+
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "develop_eb2384f"
+    tag: "spark-v1.1.0_fe7c786"
+
+  yugabyte_backup: &yugabyte_backup
+    repository: "ghcr.io/sunbird-spark/yugabyte-backup"
+    tag: "2.0.3"
 
 # Internal block with pull secrets
 internal: &internal
@@ -330,8 +338,18 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"
 
+  sync-tool:
+    image: *sync_tool
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
   secor:
     image: *secor
+    imagePullSecrets:
+      - name: "registry-secret-name"
+
+  yugabyte-backup:
+    image: *yugabyte_backup
     imagePullSecrets:
       - name: "registry-secret-name"
 
@@ -343,9 +361,31 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "v.1.0.2-beta1_964957e"
+    tag: "spark-v1.1.0_dec74d7"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v1.0.2_cbe9e07"
+    tag: "spark-v1.1.0_f36189f"
+
+  # ai-pipeline (PyFlink 1.20) jobs, deployed via the consolidated
+  # `py-flink` chart's py_flink_jobs map (helmcharts/knowledgebb/charts/
+  # py-flink) — each job entry there points at one of these anchors via
+  # its own `globalImageKey`, since (unlike knowledgeflink/learnflink
+  # above, which are one shared JVM image per building block selected via
+  # --job-classname) each PyFlink job ships its own dedicated image. See
+  # ai-pipeline/docker/Dockerfile.enrichment-router and
+  # Dockerfile.caption-generator.
+  #
+  # Built and pushed by ai-pipeline's .github/workflows/build.yaml on tag
+  # push — tag format is <git-tag>_<short-sha> (see knowlg-service.yml for
+  # the same convention).
+  enrichment_router:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/enrichment-router"
+    tag: "spark-v1.1.0_93887dd"
+
+  caption_generator:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/caption-generator"
+    tag: "spark-v1.1.0_93887dd"

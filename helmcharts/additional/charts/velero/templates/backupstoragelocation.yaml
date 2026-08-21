@@ -50,6 +50,8 @@ spec:
 {{- range $key, $value := . }}
 {{- $key | nindent 4 }}: {{ $value | quote }}
 {{- end }}
+    subscriptionId: {{ $.Values.global.subscription_id | quote }}
+    resourceGroup: {{ $.Values.global.resource_group_name | quote }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -80,5 +82,7 @@ spec:
 {{- range $key, $value := . }}
 {{- $key | nindent 4 }}: {{ $value | quote }}
 {{- end }}
+    subscriptionId: {{ $.Values.global.subscription_id | quote }}
+    resourceGroup: {{ $.Values.global.resource_group_name | quote }}
   {{- end }}
 {{- end }}
