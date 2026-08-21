@@ -77,7 +77,7 @@ spec:
           env:
           - name: ENVOY_UID
             value: "1111"
-          image: envoyproxy/envoy:v1.20.0
+          image: "{{ .Values.envoy_image.registry }}/{{ .Values.envoy_image.repository }}:{{ .Values.envoy_image.tag }}"
           imagePullPolicy: IfNotPresent
           name: envoy
           livenessProbe:
@@ -107,7 +107,7 @@ spec:
               --set=plugins.print_decision_logs_on_failure.stdout=true \
               --log-level=error \
               --ignore=.*
-          image: sunbirded.azurecr.io/opa:0.34.2-envoy
+          image: "{{ .Values.opa_image.registry }}/{{ .Values.opa_image.repository }}:{{ .Values.opa_image.tag }}"
           imagePullPolicy: IfNotPresent
           name: opa
           livenessProbe:
@@ -130,7 +130,7 @@ spec:
           - "1111"
           - -w
           - "8282,10000"
-          image: openpolicyagent/proxy_init:v5
+          image: "{{ .Values.proxy_init_image.registry }}/{{ .Values.proxy_init_image.repository }}:{{ .Values.proxy_init_image.tag }}"
           imagePullPolicy: IfNotPresent
           name: proxy-init
           resources:
