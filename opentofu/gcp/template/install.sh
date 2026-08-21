@@ -31,7 +31,7 @@ function deploy_tf_module() {
     echo -e "\nDeploying module: $module"
     cd $module
     terragrunt init --reconfigure
-    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    terragrunt apply --auto-approve --queue-ignore-errors
     cd ..
 }
 
@@ -269,7 +269,7 @@ function generate_postman_env() {
         cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
-    blob_store_path=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
+    blob_store_path=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$||')
     public_container_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_content_cloud_storage_container}')
     api_key=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_authorization}')
     keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
@@ -298,8 +298,8 @@ function generate_postman_env() {
 
 function restart_workloads_using_keys() {
     echo -e "\nRestart workloads using keycloak keys and wait for them to start..."
-    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
-    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
+    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry registry
+    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry registry
     echo -e "\nWaiting for all pods to start"
 }
 
@@ -387,6 +387,7 @@ function check_pod_status() {
     echo "All pods are running successfully."
 }
 
+RELEASE="release700"  # used by create_client_forms() for the postman-collection/ED-${RELEASE} path
 
 if [ $# -eq 0 ]; then
     create_tf_backend
