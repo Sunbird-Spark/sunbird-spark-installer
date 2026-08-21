@@ -183,6 +183,40 @@ bash $INSTALLER_PATH/private-repo-setup/scripts/setup-installer-vm.sh
 
 **Owner's job is done. All subsequent steps run via GitHub Actions.**
 
+### GCP equivalent
+
+Same idea, GCP-native primitives: `gcp-setup-installer-vm.sh` creates a GCE VM with a dedicated **service account** (attached directly to the instance — GCP's equivalent of Azure's user-assigned managed identity) instead of a VNet+subnet+managed-identity trio. The VM lives in the project's **default network**, deliberately kept separate from whatever the OpenTofu network module creates for GKE later.
+
+**Requires:** `gcloud` CLI installed + `roles/owner` (or an equivalent broad role) on the GCP project.
+
+Edit the variables at the top of the script:
+
+```bash
+PROJECT_ID=""             # gcloud config get-value project
+BUILDING_BLOCK=""         # Must match global.building_block in global-values.yaml
+ENVIRONMENT=""            # Must match your configs/ folder name (e.g. "demo")
+ZONE=""                   # GCP zone (e.g. "asia-south1-a") — must match global.zone
+GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
+GITHUB_REPO=""            # Leave empty for org-level runner
+GITHUB_RUNNER_TOKEN=""    # GitHub → Settings → Actions → Runners → New runner → copy token
+```
+
+Then run:
+
+```bash
+bash $INSTALLER_PATH/private-repo-setup/scripts/gcp-setup-installer-vm.sh
+```
+
+**What it creates:**
+- Ubuntu 22.04 VM (`e2-small`) with an attached dedicated service account
+- Least-privilege custom IAM role, project-scoped
+- `roles/container.admin` on the project (GCP's equivalent of Azure's AKS Cluster Admin role)
+- Firewall rules: UDP 1194 (VPN) + TCP 443 (Pritunl UI), tagged to the VM
+
+**startup-script runs automatically on VM boot (~5 min)** — same install list as Azure (Pritunl, WireGuard, kubectl, helm, opentofu, terragrunt, gcloud CLI, jq, yq, rclone, Docker), same GitHub Actions runner registration flow.
+
+When `VPN_ENABLED=false`, the VM gets no public IP — connect via `gcloud compute ssh <vm> --zone <zone>` (uses an IAP tunnel automatically if the VM has no external IP), GCP's equivalent of Azure Bastion.
+
 ---
 
 ## Step 6 — Configure GitHub Secrets
