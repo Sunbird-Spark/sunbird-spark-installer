@@ -27,6 +27,11 @@ sync-tool:
 
 global:
   skip_storage_module: false  # set to true to reuse buckets from an existing global-cloud-values.yaml; false creates new buckets
+  create_network: "true"  # true = network module creates the VPC/subnetwork; false = reuse an existing one (set network/subnetwork below — e.g. pre-created by gcp-setup-installer-vm.sh so the runner VM shares GKE's VPC)
+  network: ""        # required when create_network: false — name of existing VPC (e.g. "ed-dev-network")
+  subnetwork: ""      # required when create_network: false — name of existing public subnetwork (e.g. "ed-dev-subnetwork-public")
+  enable_private_gke_nodes: true    # true = GKE nodes get internal IPs only; false = nodes get public IPs too
+  disable_public_gke_endpoint: true # true = GKE API server is private (requires being inside the VPC, e.g. via the runner VM's VPN/IAP access); false = GKE API server is public
   sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
   knowledge_platform_ref: "master"  # git branch or tag for knowledge-platform (schemas/local upload)
   building_block: ""
@@ -35,7 +40,6 @@ global:
   release_version: "release-7.0.0"
   # Cluster-level variables for GKE setup and networking
   gke_node_pool_instance_type: "n2d-standard-16"
-  create_network: "true"
   gke_node_default_disk_size_gb: 100
   object_storage_endpoint: storage.googleapis.com
   checkpoint_store_type: "gcs"

@@ -5,21 +5,26 @@ set -euo pipefail
 # GCP VM Setup - Sunbird Spark Installer VM
 #
 # GCP equivalent of setup-installer-vm.sh (Azure). This script:
-# 1. Creates a GCE VM with an attached (dedicated) service account
-# 2. Creates a custom least-privilege IAM role and binds it, project-scoped
-# 3. If VPN_ENABLED=true: installs Pritunl VPN + WireGuard via startup-script
+# 1. Pre-creates the VPC/subnetwork/router/NAT that GKE will later use —
+#    matching names + CIDRs the OpenTofu network module defaults to — then
+#    places the runner VM in that same subnetwork
+# 2. Creates a GCE VM with an attached (dedicated) service account
+# 3. Creates a custom least-privilege IAM role and binds it, project-scoped
+# 4. If VPN_ENABLED=true: installs Pritunl VPN + WireGuard via startup-script
 #    If VPN_ENABLED=false: skips VPN (use Identity-Aware Proxy / `gcloud compute ssh`
 #    for private access instead — GCP's equivalent of Azure Bastion)
-# 4. Registers GitHub Actions self-hosted runner via startup-script
+# 5. Registers GitHub Actions self-hosted runner via startup-script
 #
 # Run ONCE per environment from owner's laptop.
 # After this, all infra + deployments run via GitHub Actions.
 #
-# NOTE: the VM lives in the project's default VPC network, deliberately kept
-# separate from whatever the OpenTofu network module creates for GKE later —
-# that module always creates its VPC unconditionally (create_network isn't
-# actually wired to a conditional yet), so reusing its intended name here
-# would collide with `create_tf_resources` on first apply.
+# IMPORTANT: after this script finishes, set `create_network: false` and
+# `network`/`subnetwork` in global-values.yaml (see the printed values at
+# the end) so the OpenTofu network module adopts what this script created
+# via data source instead of trying to create a duplicate — same idea as
+# Azure's `skip_network_module: true` path. This is what lets the runner VM
+# actually reach a private GKE control-plane endpoint later: that endpoint
+# is only reachable from within the same VPC.
 ###############################################################
 
 # ── CONFIGURE THESE BEFORE RUNNING ──────────────────────────────────────────
@@ -55,6 +60,24 @@ SA_EMAIL="${SA_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 CUSTOM_ROLE_ID=$(echo "${BUILDING_BLOCK}_${ENVIRONMENT}_runner_role" | tr '-' '_')
 FIREWALL_TAG="${VM_NAME}"
 
+# ── Network config ──────────────────────────────────────────────────────────
+# Names + CIDRs match opentofu/gcp/modules/network's own defaults exactly
+# (vpc_cidr_block=10.0.0.0/16, vpc_secondary_cidr_block=10.1.0.0/16,
+# secondary_cidr_subnetwork_width_delta=4) so `create_network: false` in
+# global-values.yaml lets that module adopt this via data source cleanly.
+# If you've overridden any of those in global-values.yaml, adjust the CIDRs
+# below to match before running this script.
+ENVIRONMENT_NAME="${BUILDING_BLOCK}-${ENVIRONMENT}"
+NETWORK_NAME="${ENVIRONMENT_NAME}-network"
+SUBNETWORK_NAME="${ENVIRONMENT_NAME}-subnetwork-public"
+ROUTER_NAME="${ENVIRONMENT_NAME}-router"
+NAT_NAME="${ENVIRONMENT_NAME}-nat"
+SUBNETWORK_PRIMARY_CIDR="10.0.0.0/20"
+SUBNETWORK_PODS_RANGE_NAME="public-cluster"
+SUBNETWORK_PODS_CIDR="10.1.0.0/20"
+SUBNETWORK_SERVICES_RANGE_NAME="public-services"
+SUBNETWORK_SERVICES_CIDR="10.1.32.0/20"
+
 # ── Step 1: Set project ────────────────────────────────────────────────────
 gcloud config set project "$PROJECT_ID" >/dev/null
 echo "✓ Project: $PROJECT_ID"
@@ -64,7 +87,48 @@ gcloud services enable compute.googleapis.com iam.googleapis.com \
   container.googleapis.com cloudresourcemanager.googleapis.com >/dev/null
 echo "✓ Required APIs enabled"
 
-# ── Step 3: Create dedicated service account for the runner VM ────────────
+# ── Step 3: Create VPC/subnetwork/router/NAT for GKE + the runner to share ─
+if gcloud compute networks describe "$NETWORK_NAME" &>/dev/null; then
+  echo "✓ Network already exists: $NETWORK_NAME"
+else
+  gcloud compute networks create "$NETWORK_NAME" \
+    --subnet-mode=custom --bgp-routing-mode=regional >/dev/null
+  echo "✓ Network created: $NETWORK_NAME"
+fi
+
+if gcloud compute networks subnets describe "$SUBNETWORK_NAME" --region "$REGION" &>/dev/null; then
+  echo "✓ Subnetwork already exists: $SUBNETWORK_NAME"
+else
+  gcloud compute networks subnets create "$SUBNETWORK_NAME" \
+    --network "$NETWORK_NAME" --region "$REGION" \
+    --range "$SUBNETWORK_PRIMARY_CIDR" \
+    --secondary-range "${SUBNETWORK_PODS_RANGE_NAME}=${SUBNETWORK_PODS_CIDR}" \
+    --secondary-range "${SUBNETWORK_SERVICES_RANGE_NAME}=${SUBNETWORK_SERVICES_CIDR}" \
+    --enable-private-ip-google-access >/dev/null
+  echo "✓ Subnetwork created: $SUBNETWORK_NAME ($SUBNETWORK_PRIMARY_CIDR)"
+fi
+
+if gcloud compute routers describe "$ROUTER_NAME" --region "$REGION" &>/dev/null; then
+  echo "✓ Router already exists: $ROUTER_NAME"
+else
+  gcloud compute routers create "$ROUTER_NAME" \
+    --network "$NETWORK_NAME" --region "$REGION" >/dev/null
+  echo "✓ Router created: $ROUTER_NAME"
+fi
+
+# Without Cloud NAT, private GKE nodes (no external IP) have zero internet
+# egress — can't pull any container image at all.
+if gcloud compute routers nats describe "$NAT_NAME" --router "$ROUTER_NAME" --region "$REGION" &>/dev/null; then
+  echo "✓ Cloud NAT already exists: $NAT_NAME"
+else
+  gcloud compute routers nats create "$NAT_NAME" \
+    --router "$ROUTER_NAME" --region "$REGION" \
+    --auto-allocate-nat-external-ips \
+    --nat-all-subnet-ip-ranges >/dev/null
+  echo "✓ Cloud NAT created: $NAT_NAME"
+fi
+
+# ── Step 4: Create dedicated service account for the runner VM ────────────
 if gcloud iam service-accounts describe "$SA_EMAIL" &>/dev/null; then
   echo "✓ Service account already exists: $SA_EMAIL"
 else
@@ -75,7 +139,7 @@ else
   sleep 10
 fi
 
-# ── Step 4: Create least-privilege custom role ─────────────────────────────
+# ── Step 5: Create least-privilege custom role ─────────────────────────────
 ROLE_YAML_FILE=$(mktemp)
 cat > "$ROLE_YAML_FILE" <<EOF
 title: "${BUILDING_BLOCK}-${ENVIRONMENT} runner role"
@@ -161,14 +225,14 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID" \
   --condition=None >/dev/null
 echo "✓ roles/container.admin bound to service account"
 
-# ── Step 5: Build GitHub runner URL ─────────────────────────────────────────
+# ── Step 6: Build GitHub runner URL ─────────────────────────────────────────
 if [ -n "$GITHUB_REPO" ]; then
   GITHUB_URL="https://github.com/${GITHUB_ORG}/${GITHUB_REPO}"
 else
   GITHUB_URL="https://github.com/${GITHUB_ORG}"
 fi
 
-# ── Step 6: Generate setup script ───────────────────────────────────────────
+# ── Step 7: Generate setup script ───────────────────────────────────────────
 # Generated once; used for both new VM (startup-script) and existing VM
 # (re-run over `gcloud compute ssh`).
 SETUP_SCRIPT=$(mktemp)
@@ -283,15 +347,15 @@ echo "=== Setup complete \$(date) ==="
 echo "SUCCESS" > /tmp/setup-status
 SETUPSCRIPT
 
-# ── Step 7: Create firewall rules (VPN only) ────────────────────────────────
+# ── Step 8: Create firewall rules (VPN only) ────────────────────────────────
 if [ "$VPN_ENABLED" = "true" ]; then
   gcloud compute firewall-rules create "${FIREWALL_TAG}-allow-pritunl-vpn" \
-    --network default --direction INGRESS --action ALLOW \
+    --network "$NETWORK_NAME" --direction INGRESS --action ALLOW \
     --rules udp:1194 --target-tags "$FIREWALL_TAG" --source-ranges 0.0.0.0/0 \
     2>/dev/null || echo "✓ Firewall rule allow-pritunl-vpn already exists (skipped)"
 
   gcloud compute firewall-rules create "${FIREWALL_TAG}-allow-pritunl-ui" \
-    --network default --direction INGRESS --action ALLOW \
+    --network "$NETWORK_NAME" --direction INGRESS --action ALLOW \
     --rules tcp:443 --target-tags "$FIREWALL_TAG" --source-ranges 0.0.0.0/0 \
     2>/dev/null || echo "✓ Firewall rule allow-pritunl-ui already exists (skipped)"
 
@@ -300,7 +364,7 @@ else
   echo "✓ VPN disabled - no firewall rules added (access via \`gcloud compute ssh\` / IAP tunnel)"
 fi
 
-# ── Step 8: Create VM or run setup on existing VM ──────────────────────────
+# ── Step 9: Create VM or run setup on existing VM ──────────────────────────
 VM_EXISTED="false"
 if gcloud compute instances describe "$VM_NAME" --zone "$ZONE" &>/dev/null; then
   VM_EXISTED="true"
@@ -334,6 +398,8 @@ else
     --service-account "$SA_EMAIL" \
     --scopes "cloud-platform" \
     --tags "$FIREWALL_TAG" \
+    --network "$NETWORK_NAME" \
+    --subnet "$SUBNETWORK_NAME" \
     --metadata-from-file startup-script="$SETUP_SCRIPT" \
     "${NETWORK_TIER_ARGS[@]}" >/dev/null
 
@@ -352,6 +418,13 @@ if [ "$VPN_ENABLED" = "true" ]; then
 else
   echo "Public IP: none (private VM, access via \`gcloud compute ssh\` over IAP tunnel)"
 fi
+
+echo ""
+echo "IMPORTANT — before running create_tf_resources, set in global-values.yaml:"
+echo "  create_network: false"
+echo "  network: \"${NETWORK_NAME}\""
+echo "  subnetwork: \"${SUBNETWORK_NAME}\""
+echo "so the network module adopts this VPC/subnetwork instead of trying to create a duplicate."
 
 if [ "$VM_EXISTED" = "true" ]; then
   echo "Setup complete. Runner and VPN are ready."

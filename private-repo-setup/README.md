@@ -185,7 +185,15 @@ bash $INSTALLER_PATH/private-repo-setup/scripts/setup-installer-vm.sh
 
 ### GCP equivalent
 
-Same idea, GCP-native primitives: `gcp-setup-installer-vm.sh` creates a GCE VM with a dedicated **service account** (attached directly to the instance — GCP's equivalent of Azure's user-assigned managed identity) instead of a VNet+subnet+managed-identity trio. The VM lives in the project's **default network**, deliberately kept separate from whatever the OpenTofu network module creates for GKE later.
+Same idea, GCP-native primitives: `gcp-setup-installer-vm.sh` creates a GCE VM with a dedicated **service account** (attached directly to the instance — GCP's equivalent of Azure's user-assigned managed identity) instead of a VNet+subnet+managed-identity trio. The script also pre-creates the VPC/subnetwork/router/Cloud NAT that the OpenTofu network module will later adopt (matching names + CIDRs its own defaults use), and places the runner VM in that same subnetwork — this is what lets the runner reach GKE's private control-plane endpoint later, since that endpoint is only reachable from within the same VPC.
+
+**After the script finishes**, set in `global-values.yaml` (it prints the exact values to use):
+```yaml
+create_network: false
+network: "<building_block>-<environment>-network"
+subnetwork: "<building_block>-<environment>-subnetwork-public"
+```
+so the network module adopts the existing VPC/subnetwork via data source instead of trying to create a duplicate — same idea as Azure's `skip_network_module: true` path.
 
 **Requires:** `gcloud` CLI installed + `roles/owner` (or an equivalent broad role) on the GCP project.
 
@@ -208,7 +216,8 @@ bash $INSTALLER_PATH/private-repo-setup/scripts/gcp-setup-installer-vm.sh
 ```
 
 **What it creates:**
-- Ubuntu 22.04 VM (`e2-small`) with an attached dedicated service account
+- VPC + subnetwork (with GKE's pod/service secondary ranges) + Cloud Router + Cloud NAT
+- Ubuntu 22.04 VM (`e2-small`) with an attached dedicated service account, in that subnetwork
 - Least-privilege custom IAM role, project-scoped
 - `roles/container.admin` on the project (GCP's equivalent of Azure's AKS Cluster Admin role)
 - Firewall rules: UDP 1194 (VPN) + TCP 443 (Pritunl UI), tagged to the VM
