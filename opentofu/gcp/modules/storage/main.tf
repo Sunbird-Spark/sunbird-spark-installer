@@ -10,9 +10,9 @@ locals {
   unique_uuid = random_id.bucket_id.hex
 
   common_tags = {
-    environment    = var.environment
-    BuildingBlock  = var.building_block
-    unique_uuid    = local.unique_uuid
+    environment   = var.environment
+    BuildingBlock = var.building_block
+    unique_uuid   = local.unique_uuid
   }
 
   environment_name = "${var.building_block}-${var.environment}"
@@ -29,7 +29,7 @@ resource "google_storage_bucket" "storage_container_public" {
   }
 
   uniform_bucket_level_access = false
-  public_access_prevention = "unspecified"
+  public_access_prevention    = "unspecified"
 
   cors {
     origin          = ["https://${var.domain}"]
@@ -41,7 +41,7 @@ resource "google_storage_bucket" "storage_container_public" {
 
 resource "google_storage_bucket_iam_member" "read_write_public" {
   bucket = google_storage_bucket.storage_container_public.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectViewer"
   member = "allUsers"
 }
 
@@ -57,6 +57,7 @@ resource "google_storage_bucket" "storage_container_private" {
   }
 
   uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
 }
 
 resource "google_storage_bucket" "dial_state_container_public" {
@@ -81,7 +82,7 @@ resource "google_storage_bucket" "dial_state_container_public" {
 
 resource "google_storage_bucket_iam_member" "full_access_dial" {
   bucket = google_storage_bucket.dial_state_container_public.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectViewer"
   member = "allUsers"
 }
 
@@ -97,5 +98,6 @@ resource "google_storage_bucket" "velero_storage_container_private" {
   }
 
   uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
 }
 

@@ -13,14 +13,34 @@ keycloak:
   keycloak_password: *keycloak-password
 keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
+# ── Sync Tool (on-demand JanusGraph → OpenSearch sync) ──────────────────────
+# NOT deployed during normal install.
+# To run: set enabled: true + syncMode below, then deploy via:
+#   ./install.sh install_service knowledgebb sync-tool
+# Or in GitHub Actions: check knowledgebb + type "sync-tool" in specific_charts
+sync-tool:
+  enabled: false
+  syncMode: full     # full | objectType | identifiers | days | file
+  objectType: ""     # used when syncMode=objectType (e.g. "Content")
+  identifiers: ""    # used when syncMode=identifiers (e.g. "do_123,do_456")
+  days: ""           # used when syncMode=days (e.g. "5")
+
 global:
-  building_block: "" 
-  env: "" 
+  skip_storage_module: false  # set to true to reuse buckets from an existing global-cloud-values.yaml; false creates new buckets
+  create_network: "true"  # true = network module creates the VPC/subnetwork; false = reuse an existing one (set network/subnetwork below — e.g. pre-created by gcp-setup-installer-vm.sh so the runner VM shares GKE's VPC)
+  network: ""        # required when create_network: false — name of existing VPC (e.g. "ed-dev-network")
+  subnetwork: ""      # required when create_network: false — name of existing public subnetwork (e.g. "ed-dev-subnetwork-public")
+  enable_private_gke_nodes: true    # true = GKE nodes get internal IPs only; false = nodes get public IPs too
+  disable_public_gke_endpoint: true # true = GKE API server is private (requires being inside the VPC, e.g. via the runner VM's VPN/IAP access); false = GKE API server is public
+  master_ipv4_cidr_block: "10.2.0.0/28" # required by GCP whenever enable_private_gke_nodes is true — must not overlap the subnetwork's primary (10.0.0.0/20) or secondary (10.1.0.0/20, 10.1.32.0/20) ranges
+  sunbird_player_editor_ref: "master"  # git branch or tag for sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player
+  knowledge_platform_ref: "master"  # git branch or tag for knowledge-platform (schemas/local upload)
+  building_block: ""
+  env: ""
   environment: "" # environment name
   release_version: "release-7.0.0"
   # Cluster-level variables for GKE setup and networking
   gke_node_pool_instance_type: "n2d-standard-16"
-  create_network: "true"
   gke_node_default_disk_size_gb: 100
   object_storage_endpoint: storage.googleapis.com
   checkpoint_store_type: "gcs"
@@ -34,9 +54,10 @@ global:
   # Example: sunbird.com
   domain: "REPLACE_ME"
   lets_encrypt_ssl: false #enable this if you are using  let's encrypt ssl certificate
+  cert_notifications:
+    email: "" # provide the email address for certificate renewal notifications/alerts
   play_http:
-     secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
-    # cloud_private_storage_secret: "{{ .Values.global.gcp_storage_account_key | default "gcp-credentials"}}"
+     secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms"
   # Provide values for the following variables
   sunbird_google_captcha_site_key: 
   google_captcha_private_key: 
@@ -51,7 +72,10 @@ global:
   sunbird_msg_sender: ""
   youtube_apikey: ""
   mail_from_certbot_notifications: ""  #The "from" email address used by the Certbot renewal job for sending SSL renewal status notifications via SendGrid SMTP
-  youtube_apikey: ""
+  # openai_azure_endpoint/openai_azure_deployment/openai_azure_api_version are
+  # Azure OpenAI Service-specific (see opentofu/azure/template/global-values.yaml)
+  # and intentionally omitted here — the embedding job falls back to plain
+  # OpenAI when they're unset, which is what a GCP deployment wants.
   openai_api_key: "REPLACE_WITH_OPENAI_API_KEY"
   superset:
       init:
