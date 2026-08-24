@@ -30,6 +30,12 @@ provider "azurerm" {
     private_dns_zone_id       = var.private_cluster_enabled ? "System" : null
     oidc_issuer_enabled       = true
     workload_identity_enabled = true
+    # Azure Policy Add-on (OPA Gatekeeper-based). On its own this enforces
+    # nothing — no initiative is assigned here — it just makes the cluster
+    # capable of having policies (e.g. the built-in "Kubernetes cluster pod
+    # security baseline" initiative) assigned later without a cluster
+    # change. In-place toggle, not ForceNew.
+    azure_policy_enabled = true
     default_node_pool {
       name           = var.big_nodepool_name
       node_count     = var.big_node_count
