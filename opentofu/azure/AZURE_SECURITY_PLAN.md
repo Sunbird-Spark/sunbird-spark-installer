@@ -113,6 +113,25 @@ reads too, even on a container explicitly set to public. Applying this as
 originally scoped would take down public content delivery for every real
 end user — the opposite of "low risk, stage the rollout."
 
+It's not just reads, either. `knowlg`'s `/asset/v4/upload/url` endpoint
+(`uploadUrlAsset` permission, `cloud_storage_upload_url_ttl: "54000"` in
+`configs/application.conf`) mints a time-limited **user-delegation SAS**
+(Azure access here is keyless — `cloud_storage_secret=""` for the azure
+provider — so there's no access key to hand out, only a signed URL) and
+returns it to the content creator's browser, which then uploads the asset
+directly to blob storage, bypassing the backend for the actual transfer.
+Those uploads originate from arbitrary internet IPs (wherever the content
+creator is), not from the AKS/runner subnets. A network firewall blocks a
+request at the network layer before it ever checks whether the SAS
+signature is valid, so this write path would break the same way the public
+reads would — meaning an account firewall here would take down content
+*creation*, not just content delivery. This also makes #4's per-container
+RBAC scoping directly load-bearing rather than theoretical: since the
+identity minting these upload SAS tokens now only has `Storage Blob Data
+Contributor` on the specific containers it's meant for, any given
+upload-SAS is bounded to that one container — a leaked or overly-long-lived
+upload URL can't reach the secrets or Velero containers.
+
 **What's actually true today:** this storage account has no network-level
 restriction, by necessity, not oversight. Access control for the private/
 Velero containers is IAM-only: `shared_access_key_enabled = false`
