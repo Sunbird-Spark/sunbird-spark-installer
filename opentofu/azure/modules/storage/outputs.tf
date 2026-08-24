@@ -17,3 +17,11 @@ output "azurerm_velero_container_name" {
 output "azurerm_storage_account_resource_id" {
   value = azurerm_storage_account.storage_account.id
 }
+
+output "azurerm_private_storage_account_name" {
+  value = azurerm_storage_account.private_storage_account.name
+}
+
+output "azurerm_private_storage_account_resource_id" {
+  value = azurerm_storage_account.private_storage_account.id
+}

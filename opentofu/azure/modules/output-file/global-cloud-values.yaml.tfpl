@@ -3,6 +3,7 @@ global:
   environment: ${environment}
   building_block: ${building_block}
   cloud_storage_access_key: ${azure_storage_account_name}
+  private_cloud_storage_access_key: ${azure_private_storage_account_name}
   public_container_name: ${azure_public_container_name}
   private_container_name: ${azure_private_container_name}
   velero_storage_container_private: ${azure_velero_container_name}
@@ -13,6 +14,7 @@ global:
   # When empty, learn-service falls back to `random_string` (fresh install default).
   sunbird_encryption_key: "${sunbird_encryption_key}"
   object_storage_endpoint: ${azure_storage_account_name}.blob.core.windows.net
+  private_object_storage_endpoint: ${azure_private_storage_account_name}.blob.core.windows.net
   storage_class: managed-premium
   cloud_storage_provider:  ${cloud_storage_provider}
   %{ if cloud_storage_provider == "azure" }cloud_storage_auth_type: "OIDC"%{ endif }
@@ -33,7 +35,7 @@ velero:
           bucket: "${azure_velero_container_name}"
           prefix:
           config:
-            storageAccount: ${azure_storage_account_name}
+            storageAccount: ${azure_private_storage_account_name}
             useAAD: "true"
       dbbackupStorageLocation:
         - name: dbbackup
@@ -41,7 +43,7 @@ velero:
           bucket: "${azure_velero_container_name}"
           prefix:
           config:
-            storageAccount: ${azure_storage_account_name}
+            storageAccount: ${azure_private_storage_account_name}
             useAAD: "true"
       volumeSnapshotLocation:
         - name: default

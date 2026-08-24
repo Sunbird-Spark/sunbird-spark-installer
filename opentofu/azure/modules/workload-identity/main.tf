@@ -29,14 +29,17 @@ locals {
   environment_name     = "${var.building_block}-${var.environment}"
   storage_account_name = reverse(split("/", var.storage_account_id))[0]
 
-  # Containers this workload identity actually needs blob data access to.
-  # Scoping the role assignment per-container (instead of the whole storage
-  # account) limits the blast radius of any SAS token minted with the
-  # generateUserDelegationKey permission below to just these containers.
+  # Containers this workload identity actually needs blob data access to,
+  # paired with the storage account each one actually lives in. Public
+  # lives in var.storage_account_id (unrestricted); private + velero live
+  # in var.private_storage_account_id (firewalled to AKS + runner subnets,
+  # AZURE_SECURITY_PLAN.md #2). Scoping the role assignment per-container
+  # (instead of the whole account) also limits the blast radius of any SAS
+  # minted with the generateUserDelegationKey permission below.
   storage_containers = {
-    private = var.storage_container_private_name
-    public  = var.storage_container_public_name
-    velero  = var.storage_container_velero_name
+    private = { account_id = var.private_storage_account_id, name = var.storage_container_private_name }
+    public  = { account_id = var.storage_account_id, name = var.storage_container_public_name }
+    velero  = { account_id = var.private_storage_account_id, name = var.storage_container_velero_name }
   }
 }
 
@@ -94,7 +97,7 @@ resource "azurerm_role_assignment" "workload_identity_user_delegation_key" {
 resource "azurerm_role_assignment" "workload_identity_storage_blob_contributor" {
   for_each             = local.storage_containers
   principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
-  scope                = "${var.storage_account_id}/blobServices/default/containers/${each.value}"
+  scope                = "${each.value.account_id}/blobServices/default/containers/${each.value.name}"
   role_definition_name = "Storage Blob Data Contributor"
 }
 
@@ -102,10 +105,17 @@ resource "azurerm_role_assignment" "workload_identity_storage_blob_contributor" 
 # (account properties/endpoint discovery, e.g. for the Velero Azure plugin),
 # not a data-plane grant — it does not expose blob content, only resource
 # metadata, so the broader scope here is much lower risk than the Blob Data
-# Contributor split above.
+# Contributor split above. Granted on both accounts since Velero's container
+# now lives on the private one.
 resource "azurerm_role_assignment" "workload_identity_storage_reader" {
   principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
   scope                = var.storage_account_id
+  role_definition_name = "Reader"
+}
+
+resource "azurerm_role_assignment" "workload_identity_private_storage_reader" {
+  principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
+  scope                = var.private_storage_account_id
   role_definition_name = "Reader"
 }
 

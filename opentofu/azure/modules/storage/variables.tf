@@ -42,3 +42,13 @@ variable "subscription_id" {
   type        = string
 }
 
+variable "aks_subnet_id" {
+  type        = string
+  description = "AKS subnet resource ID — allow-listed on the private/Velero storage account's firewall."
+}
+
+variable "runner_subnet_id" {
+  type        = string
+  description = "Runner VM subnet resource ID — allow-listed on the private/Velero storage account's firewall."
+}
+
