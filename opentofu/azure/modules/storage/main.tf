@@ -50,6 +50,24 @@ resource "azurerm_storage_account" "storage_account" {
       allowed_headers    = ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Origin", "x-ms-meta-qq", "x-ms-blob-type", "x-ms-blob-content-type", "Content-Type"]
 
     }
+
+    # This account has no network firewall (it also serves the public
+    # content container — an account-wide firewall would block anonymous
+    # public reads too, see AZURE_SECURITY_PLAN.md #2) — soft delete +
+    # versioning is the recovery layer instead: an authorized-but-buggy or
+    # compromised identity that overwrites/deletes a blob (JWT/RSA keys,
+    # Velero backups, public content) leaves a recoverable version rather
+    # than a silent, permanent loss. Doesn't affect anonymous reads on the
+    # public container, no access-control change.
+    versioning_enabled = true
+
+    delete_retention_policy {
+      days = 30
+    }
+
+    container_delete_retention_policy {
+      days = 30
+    }
   }
   tags = merge(
     local.common_tags,
