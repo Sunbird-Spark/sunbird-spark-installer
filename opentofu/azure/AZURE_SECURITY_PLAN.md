@@ -122,9 +122,20 @@ firewall isn't an option here.
 
 **The real fix**, if this is worth doing: split the private/Velero
 containers into their own storage account with its own firewall, leaving
-the public container's account unrestricted. That's a genuine migration —
-new account, moving existing blobs, updating every reference to the private
-container's account — not a flag flip, and not done here.
+the public container's account unrestricted.
+
+**Reconfirmed, not just deferred:** that split isn't a pure-Terraform change
+either — `global-cloud-values.yaml`'s `cloud_storage_access_key` is a single
+field, read by `cert`, both `flink` charts, `secor`, and `knowledge-mw` for
+private-container blob access, and by Velero's `backupStorageLocation`
+config, all assuming one storage account. Splitting means adding a second
+account-name field to that value file and updating every chart/job that
+touches the private or Velero containers to use it instead — a change to the
+Helm-consumed value contract, not just the OpenTofu module, and one this
+plan's own stated scope (cloud-provisioning layer, not chart config)
+excludes. Confirmed as out of scope for this pass rather than attempted
+blind; needs its own tested follow-up with a live cluster to verify each
+consumer.
 
 ---
 
@@ -259,39 +270,37 @@ az role definition list --custom-role-only true --output table
 ---
 
 ## 6. No subnet-level NSGs on the AKS/runner subnets (only the VM has one)
-**Severity: Low — flag and document, not necessarily fix** — **Status:
-Accepted as-is, decision recorded below (not implemented)**
+**Severity: Low** — **Status: Implemented, partially** (`modules/network/main.tf`)
+— `aks_subnet` only; `runner_subnet` deliberately excluded, see below.
 
-**Where:** `modules/network/main.tf` — `aks_subnet` and `runner_subnet` have
+**Where:** `modules/network/main.tf` — `aks_subnet` and `runner_subnet` had
 no `azurerm_network_security_group` attached. The only NSG anywhere in the
-Azure infra is the one Azure auto-creates for the runner VM's NIC
+Azure infra was the one Azure auto-creates for the runner VM's NIC
 (`private-repo-setup/scripts/setup-installer-vm.sh`), scoped to just that
 VM's two VPN ports.
 
 **Why:** This is common for AKS (pod/node traffic needs to flow relatively
 freely, and public exposure is already gated by the LB/ingress + private
 control plane), but "common" isn't the same as "evaluated for this specific
-setup." Right now it's an absence, not a documented decision.
+setup." It was an absence, not a documented decision.
 
-**What:** Either (a) explicitly decide this is acceptable given the private
-cluster + Bastion/VPN + Kong-gateway-level controls already in place and
-record that reasoning here, or (b) add a baseline NSG on `aks_subnet` that
-allows only what AKS itself requires (this is a well-documented Microsoft
-list of required ports/tags) plus intra-VNet traffic, deny everything else.
+**What was actually done:** Added a defaults-only
+`azurerm_network_security_group` (no custom rules — just Azure's own
+`AllowVnetInBound`/`AllowAzureLoadBalancerInBound`/`DenyAllInBound`,
+unrestricted outbound) to `aks_subnet`. No hand-written AKS required-ports
+allow-list — AKS nodes have no public IPs, so the defaults already match
+real traffic here, and a hand-written list can't be validated without a live
+cluster.
 
-**Impact:** If added, needs careful testing — an overly strict NSG on the
-AKS subnet is a classic way to silently break node-to-control-plane or
-node-to-node traffic. Lower urgency than #1-#4; safe to defer.
-
-**Decision:** left as-is for this pass — this is option (a) from the two
-above, made explicit rather than staying a silent gap. Reasoning: the actual
-gates on this environment are the private control plane, Bastion/VPN-only
-access to the runner subnet, and the Kong gateway sitting in front of
-application traffic — a subnet NSG would be a fourth, redundant layer, and
-the real risk of getting AKS's own required-ports list wrong and silently
-breaking node-to-control-plane traffic (with no live cluster here to catch
-it) outweighs that marginal benefit right now. Revisit if a real test
-cluster becomes available to validate against.
+**Why `runner_subnet` was deliberately left out:** When `vpn_enabled = true`
+(the default), the runner VM has a public IP with UDP 1194 + TCP 443 open to
+the internet at the NIC level, for the VPN server that's the only way into
+this environment. Azure's default NSG rules have no internet-inbound allow
+(only VirtualNetwork/AzureLoadBalancer) — a subnet-level NSG here would sit
+alongside the existing NIC-level one, and since both must permit traffic, the
+subnet-level deny would silently block all VPN connections. This was caught
+before applying it, not after. The NIC-level NSG already scopes this VM
+correctly on its own; a redundant subnet-level NSG isn't worth that risk.
 
 ---
 
@@ -327,8 +336,10 @@ until they age out at 30 days).
 ---
 
 ## 8. AKS has no NetworkPolicy engine — the charts' NetworkPolicy resources are inert
-**Severity: High — found, NOT implemented (see Impact)** — **Status: Flagged,
-needs a staged rollout against a test cluster before it's safe to apply**
+**Severity: High — found, NOT implemented (see Impact)** — **Status: Rejected
+for this pass by explicit decision, re-confirmed given the auto-approve risk
+below — needs a staged rollout against a test cluster before it's ever safe
+to apply**
 
 **Where:** `modules/aks/main.tf` — `network_profile` sets `network_plugin`,
 `network_plugin_mode = "overlay"`, `service_cidr`, and `dns_service_ip`, but
@@ -365,10 +376,16 @@ enforcement?). Not safe to apply blind.
 environment (announce a maintenance window, recreate the cluster with
 `network_policy = "calico"` set from the start, verify every building block
 still functions against the newly-enforced policies) rather than a
-`tofu apply` surprise. Worth doing for new environments immediately — set
-`network_policy = "calico"` before the first `apply` for any environment
-that hasn't been created yet, since there's no ForceNew cost if the cluster
-doesn't exist yet.
+`tofu apply` surprise.
+
+**Reconfirmed, not just deferred:** `install.sh` runs
+`terragrunt apply --auto-approve` — so setting this in the shared module
+now, even to only affect *new* environments, means the very next
+`create_tf_resources` run against any **existing** environment would
+silently plan (and auto-apply, no human sees the plan first) a destroy +
+recreate of that environment's AKS cluster. Given that, this stays
+unimplemented in the module itself, not just documented as a future
+migration — explicit decision, re-confirmed, same category as #3.
 
 ---
 
@@ -414,26 +431,32 @@ Not all of these are equally safe to do in one pass:
    deferred to Phase 2 and why).
 5. **#9 (Azure Policy add-on)** — **implemented**, in-place toggle, no
    policy initiative assigned yet.
-6. **#2 (storage network ACL)** — **evaluated, rejected as originally
-   scoped** — this account has a legitimately public container, an
-   account-wide firewall breaks public content delivery. #7 covers the
-   recovery angle instead; see #2 for the real (much bigger) fix.
-7. **#3 (AAD RBAC on AKS, disable local accounts)** — **rejected by explicit
+6. **#6 (subnet NSGs)** — **implemented, partially** — `aks_subnet` gets a
+   defaults-only NSG; `runner_subnet` deliberately excluded (would have
+   silently blocked the VPN's internet-facing inbound — caught before
+   applying it).
+7. **#2 (storage network ACL)** — **rejected, re-confirmed** — this account
+   has a legitimately public container, an account-wide firewall breaks
+   public content delivery; the real fix (splitting accounts) also touches
+   the Helm value contract, not just Terraform. #7 covers the recovery
+   angle instead.
+8. **#3 (AAD RBAC on AKS, disable local accounts)** — **rejected by explicit
    decision**: it would mean everyone needing cluster access has to go
    through Azure AD/console role assignment, which isn't a tradeoff this
    team wants right now.
-8. **#6 (subnet NSGs)** — **accepted as-is**, decision recorded above; not
-   implemented.
-9. **#8 (AKS NetworkPolicy engine)** — **found, not implemented** — the
-   fix is `ForceNew` (destroys/recreates the cluster), needs a planned
-   migration window per environment, not a blind `apply`. Set it on any
-   *new* environment immediately (no ForceNew cost pre-creation).
+9. **#8 (AKS NetworkPolicy engine)** — **found, rejected for this pass,
+   re-confirmed** — the fix is `ForceNew` (destroys/recreates the cluster),
+   and `install.sh` runs `terragrunt apply --auto-approve`, so setting it
+   now would silently destroy any existing environment's AKS cluster on the
+   next `create_tf_resources` run. Needs a planned, human-supervised
+   migration window per environment instead.
 
-**Net:** #1, #4, #7, #9 are implemented in this branch's code (none
-apply-tested — no Azure CLI/credentials in this environment). #2, #3, #6 are
-explicit, documented decisions not to act. #5 needs a manual run against the
-live subscription. #8 is a real, newly-found gap that needs a staged
-migration, not a code change here.
+**Net:** #1, #4, #6 (partial), #7, #9 are implemented in this branch's code
+(none apply-tested — no Azure CLI/credentials in this environment). #2, #3,
+#8 are explicit, re-confirmed decisions not to act. #5 needs a manual run
+against the live subscription — genuinely can't be done from this
+environment at all (no Azure CLI, no credentials, no network access to
+Azure), not a risk tradeoff.
 
 ## Explicitly out of scope of this plan
 
