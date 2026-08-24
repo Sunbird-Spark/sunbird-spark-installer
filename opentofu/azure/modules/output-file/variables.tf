@@ -15,12 +15,7 @@ variable "building_block" {
 
 variable "storage_account_name" {
   type        = string
-  description = "Storage account holding the public container."
-}
-
-variable "private_storage_account_name" {
-  type        = string
-  description = "Storage account holding the private + Velero containers."
+  description = "Storage account name."
 }
 
 variable "storage_container_public" {

@@ -1,6 +1,6 @@
 locals {
   global_vars  = yamldecode(file(find_in_parent_folders("global-values.yaml")))
-  _cloud_defaults = {cloud_storage_access_key: "", private_cloud_storage_access_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: "", sunbird_encryption_key: ""}
+  _cloud_defaults = {cloud_storage_access_key: "", public_container_name: "", private_container_name: "", velero_storage_container_private: "", sunbird_encryption_key: ""}
   _cloud_raw      = try(yamldecode(file("${dirname(find_in_parent_folders("global-values.yaml"))}/global-cloud-values.yaml")), {})
   cloud_vars      = {global: merge(local._cloud_defaults, try(local._cloud_raw.global, {}))}
   env                    = local.global_vars.global.env
@@ -9,13 +9,6 @@ locals {
   subscription_id        = local.global_vars.global.subscription_id
   cloud_storage_provider = local.global_vars.global.cloud_storage_provider
   storage_account_name      = local.cloud_vars.global.cloud_storage_access_key
-  # Plain passthrough, same pattern as storage_account_name above — the
-  # actual empty-value fallback (to the dependency's real output) happens
-  # once, in the coalesce() calls in `inputs` below. Nesting a second
-  # coalesce here would error on the very first apply, when both this and
-  # cloud_storage_access_key are still "" (global-cloud-values.yaml doesn't
-  # exist yet) — coalesce requires at least one non-empty argument.
-  private_storage_account_name = local.cloud_vars.global.private_cloud_storage_access_key
   storage_container_public  = local.cloud_vars.global.public_container_name
   storage_container_private = local.cloud_vars.global.private_container_name
   velero_container_name     = local.cloud_vars.global.velero_storage_container_private
@@ -34,11 +27,10 @@ dependency "aks" {
 dependency "storage" {
     config_path = "../storage"
     mock_outputs = {
-      azurerm_storage_account_name         = "dummy-storage"
-      azurerm_private_storage_account_name = "dummy-storage-priv"
-      azurerm_storage_container_private    = "dummy-private"
-      azurerm_storage_container_public     = "dummy-public"
-      azurerm_velero_container_name        = "dummy-velero"
+      azurerm_storage_account_name      = "dummy-storage"
+      azurerm_storage_container_private = "dummy-private"
+      azurerm_storage_container_public  = "dummy-public"
+      azurerm_velero_container_name     = "dummy-velero"
     }
     mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
     mock_outputs_merge_strategy_with_state  = "shallow"
@@ -70,7 +62,6 @@ inputs = {
   subscription_id                    = local.subscription_id
   private_ingressgateway_ip          = dependency.aks.outputs.private_ingressgateway_ip
   storage_account_name               = coalesce(local.storage_account_name, dependency.storage.outputs.azurerm_storage_account_name)
-  private_storage_account_name       = coalesce(local.private_storage_account_name, dependency.storage.outputs.azurerm_private_storage_account_name)
   storage_container_public           = coalesce(local.storage_container_public, dependency.storage.outputs.azurerm_storage_container_public)
   storage_container_private          = coalesce(local.storage_container_private, dependency.storage.outputs.azurerm_storage_container_private)
   random_string                      = dependency.keys.outputs.random_string

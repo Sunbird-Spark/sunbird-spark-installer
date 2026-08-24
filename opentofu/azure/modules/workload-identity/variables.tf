@@ -31,12 +31,7 @@ variable "oidc_issuer_url" {
 
 variable "storage_account_id" {
   type        = string
-  description = "Resource ID of the storage account holding the public container."
-}
-
-variable "private_storage_account_id" {
-  type        = string
-  description = "Resource ID of the storage account holding the private + Velero containers."
+  description = "Resource ID of the storage account to grant blob access on."
 }
 
 variable "storage_container_private_name" {

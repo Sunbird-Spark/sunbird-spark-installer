@@ -28,7 +28,6 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
     environment                     = var.environment,
     building_block                  = var.building_block,
     azure_storage_account_name      = var.storage_account_name,
-    azure_private_storage_account_name = var.private_storage_account_name,
     azure_public_container_name     = var.storage_container_public,
     azure_private_container_name    = var.storage_container_private,
     azure_velero_container_name     = var.velero_container_name,
@@ -43,15 +42,12 @@ resource "local_sensitive_file" "global_cloud_values_yaml" {
   filename = local.global_values_cloud_file
 }
 
-# This file itself is uploaded to the private container — which now lives
-# on the private (firewalled) account, not the public one var.storage_account_name
-# points at.
 resource "null_resource" "upload_global_cloud_values_yaml" {
   triggers = {
     command = "${timestamp()}"
   }
   provisioner "local-exec" {
-    command = "az storage blob upload --account-name ${var.private_storage_account_name} --auth-mode login --container-name ${var.storage_container_private} --file ${local.global_values_cloud_file} --name ${var.environment}-global-cloud-values.yaml --overwrite"
+    command = "az storage blob upload --account-name ${var.storage_account_name} --auth-mode login --container-name ${var.storage_container_private} --file ${local.global_values_cloud_file} --name ${var.environment}-global-cloud-values.yaml --overwrite"
   }
   depends_on = [local_sensitive_file.global_cloud_values_yaml]
 }

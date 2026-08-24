@@ -10,7 +10,7 @@ variable "building_block" {
 
 variable "storage_account_name" {
     type        = string
-    description = "Storage account holding storage_container_private — this module only ever uploads to the private container."
+    description = "Storage account name."
 }
 
 variable "storage_container_public" {

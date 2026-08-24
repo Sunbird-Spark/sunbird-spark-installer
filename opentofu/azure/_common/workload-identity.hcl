@@ -34,11 +34,10 @@ dependency "storage" {
   config_path  = "../storage"
   skip_outputs = local.skip_storage_module
   mock_outputs = {
-    azurerm_storage_account_resource_id         = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dummy-rg/providers/Microsoft.Storage/storageAccounts/dummy"
-    azurerm_private_storage_account_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dummy-rg/providers/Microsoft.Storage/storageAccounts/dummypriv"
-    azurerm_storage_container_public            = "dummy-public"
-    azurerm_storage_container_private           = "dummy-private"
-    azurerm_velero_container_name               = "dummy-velero"
+    azurerm_storage_account_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dummy-rg/providers/Microsoft.Storage/storageAccounts/dummy"
+    azurerm_storage_container_public    = "dummy-public"
+    azurerm_storage_container_private   = "dummy-private"
+    azurerm_velero_container_name       = "dummy-velero"
   }
   mock_outputs_merge_strategy_with_state = "shallow"
 }
@@ -58,11 +57,6 @@ inputs = {
   resource_group_name                = dependency.network.outputs.resource_group_name
   oidc_issuer_url                    = dependency.aks.outputs.oidc_issuer_url
   storage_account_id                 = local.skip_storage_module ? "/subscriptions/${local.subscription_id}/resourceGroups/${dependency.network.outputs.resource_group_name}/providers/Microsoft.Storage/storageAccounts/${local.cloud_vars.global.cloud_storage_access_key}" : dependency.storage.outputs.azurerm_storage_account_resource_id
-  # skip_storage_module fallback defaults to the same (public) account when
-  # the operator hasn't set private_cloud_storage_access_key explicitly —
-  # preserves today's single-account behavior for BYO storage setups that
-  # haven't opted into the split.
-  private_storage_account_id         = local.skip_storage_module ? "/subscriptions/${local.subscription_id}/resourceGroups/${dependency.network.outputs.resource_group_name}/providers/Microsoft.Storage/storageAccounts/${try(local.cloud_vars.global.private_cloud_storage_access_key, local.cloud_vars.global.cloud_storage_access_key)}" : dependency.storage.outputs.azurerm_private_storage_account_resource_id
   storage_container_private_name     = local.skip_storage_module ? local.cloud_vars.global.private_container_name : dependency.storage.outputs.azurerm_storage_container_private
   storage_container_public_name      = local.skip_storage_module ? local.cloud_vars.global.public_container_name : dependency.storage.outputs.azurerm_storage_container_public
   storage_container_velero_name      = local.skip_storage_module ? local.cloud_vars.global.velero_storage_container_private : dependency.storage.outputs.azurerm_velero_container_name
