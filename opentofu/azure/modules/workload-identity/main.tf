@@ -98,10 +98,24 @@ resource "azurerm_role_assignment" "workload_identity_storage_blob_contributor" 
   role_definition_name = "Storage Blob Data Contributor"
 }
 
+# Kept account-scoped deliberately: "Reader" is an ARM management-plane role
+# (account properties/endpoint discovery, e.g. for the Velero Azure plugin),
+# not a data-plane grant — it does not expose blob content, only resource
+# metadata, so the broader scope here is much lower risk than the Blob Data
+# Contributor split above.
 resource "azurerm_role_assignment" "workload_identity_storage_reader" {
   principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
   scope                = var.storage_account_id
   role_definition_name = "Reader"
+}
+
+# Read-only — pods use this identity to pull secrets via the Key Vault CSI
+# driver / SDK. Secret write access stays with whoever runs `tofu apply`
+# (granted inside the keys module, scoped to the vault it creates).
+resource "azurerm_role_assignment" "workload_identity_key_vault_secrets_user" {
+  principal_id         = azurerm_user_assigned_identity.workload_identity.principal_id
+  scope                = var.key_vault_id
+  role_definition_name = "Key Vault Secrets User"
 }
 
 resource "kubernetes_service_account" "workload_identity" {

@@ -42,6 +42,13 @@ dependency "storage" {
   mock_outputs_merge_strategy_with_state = "shallow"
 }
 
+dependency "keys" {
+  config_path = "../keys"
+  mock_outputs = {
+    key_vault_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/dummy-rg/providers/Microsoft.KeyVault/vaults/dummy"
+  }
+}
+
 inputs = {
   environment                        = local.environment
   building_block                     = local.building_block
@@ -53,6 +60,7 @@ inputs = {
   storage_container_private_name     = local.skip_storage_module ? local.cloud_vars.global.private_container_name : dependency.storage.outputs.azurerm_storage_container_private
   storage_container_public_name      = local.skip_storage_module ? local.cloud_vars.global.public_container_name : dependency.storage.outputs.azurerm_storage_container_public
   storage_container_velero_name      = local.skip_storage_module ? local.cloud_vars.global.velero_storage_container_private : dependency.storage.outputs.azurerm_velero_container_name
+  key_vault_id                       = dependency.keys.outputs.key_vault_id
   kubernetes_host                    = dependency.aks.outputs.kubernetes_host
   kubernetes_client_certificate      = dependency.aks.outputs.client_certificate
   kubernetes_client_key              = dependency.aks.outputs.client_key

@@ -49,6 +49,11 @@ variable "storage_container_velero_name" {
   description = "Name of the velero storage container to scope the Storage Blob Data Contributor role assignment to."
 }
 
+variable "key_vault_id" {
+  type        = string
+  description = "Resource ID of the Key Vault (from the keys module) to grant read access to secrets on."
+}
+
 variable "kubernetes_host" {
   type        = string
   description = "Kubernetes API server host."
