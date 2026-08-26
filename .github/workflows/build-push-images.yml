@@ -16,7 +16,6 @@ jobs:
           - kong-api-scripts
           - sunbird-yugabyte-migrations
           - janusgraph
-          - yugabyte-backup
     permissions:
       contents: read
       packages: write
@@ -25,9 +24,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -35,21 +31,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Lowercase repository owner and generate tag
-        id: prep
+      - name: Prepare Docker image name and tag
         run: |
-          echo "OWNER_LOWERCASE=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
-          # Format: spark-v<tag>_<short-sha> e.g. spark-v1.0.2_abc1234
-          GIT_TAG="${GITHUB_REF_NAME}"
-          RAW_TAG="${GIT_TAG}_${GITHUB_SHA::7}"
-          echo "IMAGE_TAG=$(echo $RAW_TAG | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+          OWNER_LOWERCASE=$(echo "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          TAG_NAME=$(echo "${GITHUB_REF_NAME}" | tr '[:upper:]' '[:lower:]')
+          COMMIT_HASH="${GITHUB_SHA::7}"
+          BUILD_TAG="${TAG_NAME}_${COMMIT_HASH}_${GITHUB_RUN_NUMBER}"
 
-      - name: Build and Push
-        uses: docker/build-push-action@v6
-        with:
-          context: ./scripts/${{ matrix.directory }}
-          file: ./scripts/${{ matrix.directory }}/Dockerfile
-          push: true
-          tags: |
-            ghcr.io/${{ steps.prep.outputs.OWNER_LOWERCASE }}/${{ matrix.directory }}:${{ steps.prep.outputs.IMAGE_TAG }}
-            ghcr.io/${{ steps.prep.outputs.OWNER_LOWERCASE }}/${{ matrix.directory }}:latest
+          echo "IMAGE_NAME=ghcr.io/${OWNER_LOWERCASE}/${{ matrix.directory }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${BUILD_TAG}" >> $GITHUB_ENV
+
+      - name: Build Docker image
+        run: docker build -t $IMAGE_NAME:$IMAGE_TAG -f ./scripts/${{ matrix.directory }}/Dockerfile ./scripts/${{ matrix.directory }}
+
+      - name: Push Docker image
+        run: docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: Tag and push latest
+        run: |
+          docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:latest
