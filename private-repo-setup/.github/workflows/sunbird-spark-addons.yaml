@@ -96,23 +96,27 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
       - name: Azure Login (Infra)
-        uses: azure/login@v1
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
         with:
           client-id: ${{ secrets.AZURE_INFRA_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install ansible
+          pip install --only-binary :all: ansible
 
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -127,8 +131,16 @@ jobs:
           rm /tmp/vault_pass.txt
 
       - name: Install Terraform Tools
+        env:
+          TOFU_VERSION: "1.11.4"
         run: |
-          curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
+          # Download + verify against OpenTofu's published SHA256SUMS instead
+          # of piping the install script straight into `sudo sh`.
+          curl -fsSL -o tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL -o tofu_SHA256SUMS "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
+          grep " tofu_${TOFU_VERSION}_linux_amd64.tar.gz\$" tofu_SHA256SUMS | sha256sum -c -
+          sudo tar -xzf tofu.tar.gz -C /usr/local/bin tofu
+          rm -f tofu.tar.gz tofu_SHA256SUMS
           sudo wget -qO /usr/local/bin/terragrunt \
             https://github.com/gruntwork-io/terragrunt/releases/download/v1.0.3/terragrunt_linux_amd64
           sudo chmod +x /usr/local/bin/terragrunt
@@ -169,8 +181,10 @@ jobs:
           echo "✅ DIAL addon OpenTofu completed"
 
       - name: Encrypt and Commit Addon Configs
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ADDON_CLOUD="sunbird-spark-installer/addons/global-cloud-values.yaml"
           if [ -f "$ADDON_CLOUD" ]; then
@@ -218,23 +232,27 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
       - name: Azure Login (Deploy)
-        uses: azure/login@v1
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
         with:
           client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install ansible
+          pip install --only-binary :all: ansible
 
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -277,10 +295,19 @@ jobs:
           echo "✅ Environment folder ready: $ENV_FOLDER"
 
       - name: Install Deploy Tools
+        env:
+          HELM_VERSION: "3.21.4"
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          # Download + verify against Helm's own published checksum instead
+          # of piping the install script straight into `bash`.
+          curl -fsSL -o helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+          curl -fsSL -o helm.tar.gz.sha256sum "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+          sha256sum -c helm.tar.gz.sha256sum
+          tar -xzf helm.tar.gz linux-amd64/helm
+          sudo mv linux-amd64/helm /usr/local/bin/helm
+          rm -rf helm.tar.gz helm.tar.gz.sha256sum linux-amd64
           sudo wget -qO /usr/local/bin/yq \
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
@@ -355,23 +382,27 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
       - name: Azure Login (Uninstall)
-        uses: azure/login@v1
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
         with:
           client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install ansible
+          pip install --only-binary :all: ansible
 
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -397,10 +428,19 @@ jobs:
           echo "✅ Environment folder ready: $ENV_FOLDER"
 
       - name: Install Deploy Tools
+        env:
+          HELM_VERSION: "3.21.4"
         run: |
           curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          # Download + verify against Helm's own published checksum instead
+          # of piping the install script straight into `bash`.
+          curl -fsSL -o helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+          curl -fsSL -o helm.tar.gz.sha256sum "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+          sha256sum -c helm.tar.gz.sha256sum
+          tar -xzf helm.tar.gz linux-amd64/helm
+          sudo mv linux-amd64/helm /usr/local/bin/helm
+          rm -rf helm.tar.gz helm.tar.gz.sha256sum linux-amd64
           sudo wget -qO /usr/local/bin/yq \
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
