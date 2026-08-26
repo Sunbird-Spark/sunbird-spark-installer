@@ -72,8 +72,7 @@ on:
         default: false
 
 permissions:
-  id-token: write
-  contents: write
+  contents: read
 
 env:
   CONFIG_PATH: "configs/${{ inputs.environment }}"
@@ -88,6 +87,9 @@ jobs:
     if: ${{ inputs.run_dial_infra }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write   # azure/login
+      contents: write   # Encrypt and Commit Addon Configs pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
@@ -114,7 +116,7 @@ jobs:
         env:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install --only-binary :all: ansible
+          pip install --only-binary :all: ansible==14.3.1
 
           echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
@@ -136,15 +138,15 @@ jobs:
         run: |
           # Download + verify against OpenTofu's published SHA256SUMS instead
           # of piping the install script straight into `sudo sh`.
-          curl -fsSL -o tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz"
-          curl -fsSL -o tofu_SHA256SUMS "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
+          curl -fsSL --proto '=https' --tlsv1.2 -o tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL --proto '=https' --tlsv1.2 -o tofu_SHA256SUMS "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
           grep " tofu_${TOFU_VERSION}_linux_amd64.tar.gz\$" tofu_SHA256SUMS | sha256sum -c -
           sudo tar -xzf tofu.tar.gz -C /usr/local/bin tofu
           rm -f tofu.tar.gz tofu_SHA256SUMS
-          sudo wget -qO /usr/local/bin/terragrunt \
+          sudo wget --https-only -qO /usr/local/bin/terragrunt \
             https://github.com/gruntwork-io/terragrunt/releases/download/v1.0.3/terragrunt_linux_amd64
           sudo chmod +x /usr/local/bin/terragrunt
-          sudo wget -qO /usr/local/bin/yq \
+          sudo wget --https-only -qO /usr/local/bin/yq \
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
           tofu --version && terragrunt --version && yq --version
@@ -224,6 +226,8 @@ jobs:
     needs: [infra-addons]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write   # azure/login
 
     steps:
       - name: Checkout Configuration Repository
@@ -250,7 +254,7 @@ jobs:
         env:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install --only-binary :all: ansible
+          pip install --only-binary :all: ansible==14.3.1
 
           echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
@@ -298,17 +302,17 @@ jobs:
         env:
           HELM_VERSION: "3.21.4"
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          curl -LO --proto '=https' --tlsv1.2 "https://dl.k8s.io/release/$(curl -L -s --proto '=https' --tlsv1.2 https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl && sudo mv kubectl /usr/local/bin/
           # Download + verify against Helm's own published checksum instead
           # of piping the install script straight into `bash`.
-          curl -fsSL -o helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
-          curl -fsSL -o helm.tar.gz.sha256sum "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+          curl -fsSL --proto '=https' --tlsv1.2 -o helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+          curl -fsSL --proto '=https' --tlsv1.2 -o helm.tar.gz.sha256sum "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
           sha256sum -c helm.tar.gz.sha256sum
           tar -xzf helm.tar.gz linux-amd64/helm
           sudo mv linux-amd64/helm /usr/local/bin/helm
           rm -rf helm.tar.gz helm.tar.gz.sha256sum linux-amd64
-          sudo wget -qO /usr/local/bin/yq \
+          sudo wget --https-only -qO /usr/local/bin/yq \
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
           kubectl version --client && helm version && yq --version
@@ -374,6 +378,8 @@ jobs:
     needs: [deploy-addons]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write   # azure/login
 
     steps:
       - name: Checkout Configuration Repository
@@ -400,7 +406,7 @@ jobs:
         env:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install --only-binary :all: ansible
+          pip install --only-binary :all: ansible==14.3.1
 
           echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
@@ -431,17 +437,17 @@ jobs:
         env:
           HELM_VERSION: "3.21.4"
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          curl -LO --proto '=https' --tlsv1.2 "https://dl.k8s.io/release/$(curl -L -s --proto '=https' --tlsv1.2 https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
           chmod +x kubectl && sudo mv kubectl /usr/local/bin/
           # Download + verify against Helm's own published checksum instead
           # of piping the install script straight into `bash`.
-          curl -fsSL -o helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
-          curl -fsSL -o helm.tar.gz.sha256sum "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+          curl -fsSL --proto '=https' --tlsv1.2 -o helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+          curl -fsSL --proto '=https' --tlsv1.2 -o helm.tar.gz.sha256sum "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
           sha256sum -c helm.tar.gz.sha256sum
           tar -xzf helm.tar.gz linux-amd64/helm
           sudo mv linux-amd64/helm /usr/local/bin/helm
           rm -rf helm.tar.gz helm.tar.gz.sha256sum linux-amd64
-          sudo wget -qO /usr/local/bin/yq \
+          sudo wget --https-only -qO /usr/local/bin/yq \
             https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
           kubectl version --client && helm version && yq --version

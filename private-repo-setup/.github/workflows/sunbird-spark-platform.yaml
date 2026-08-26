@@ -109,7 +109,7 @@ on:
         default: false
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   CONFIG_PATH: "configs/${{ inputs.environment }}"
@@ -126,6 +126,8 @@ jobs:
     if: ${{ inputs.create_tf_backend || inputs.backup_configs || inputs.create_tf_resources }}
     runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: write   # Encrypt and Commit Updated Configs pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
@@ -179,18 +181,18 @@ jobs:
             sudo apt-get install -y unzip -q
             # Download + verify against OpenTofu's published SHA256SUMS
             # instead of piping the install script straight into `sudo sh`.
-            curl -fsSL -o tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz"
-            curl -fsSL -o tofu_SHA256SUMS "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
+            curl -fsSL --proto '=https' --tlsv1.2 -o tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz"
+            curl -fsSL --proto '=https' --tlsv1.2 -o tofu_SHA256SUMS "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
             grep " tofu_${TOFU_VERSION}_linux_amd64.tar.gz\$" tofu_SHA256SUMS | sha256sum -c -
             sudo tar -xzf tofu.tar.gz -C /usr/local/bin tofu
             rm -f tofu.tar.gz tofu_SHA256SUMS
           fi
           if ! command -v terragrunt &>/dev/null; then
-            sudo wget -qO /usr/local/bin/terragrunt               https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.21/terragrunt_linux_amd64
+            sudo wget --https-only -qO /usr/local/bin/terragrunt               https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.21/terragrunt_linux_amd64
             sudo chmod +x /usr/local/bin/terragrunt
           fi
           if ! command -v yq &>/dev/null; then
-            sudo wget -qO /usr/local/bin/yq               https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            sudo wget --https-only -qO /usr/local/bin/yq               https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
             sudo chmod +x /usr/local/bin/yq
           fi
           echo "/usr/local/bin" >> $GITHUB_PATH
@@ -305,6 +307,8 @@ jobs:
     needs: [infra]
     runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: write   # Commit certificate keys after learnbb pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
@@ -573,6 +577,8 @@ jobs:
     needs: [deploy]
     runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: write   # Encrypt and Commit env.json pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
@@ -647,7 +653,7 @@ jobs:
           POSTMAN_INSTALL_SHA256: "7d1f5f3d138ab09a656794a33c9ff1c2b7315c4cce2200b62ef49273e6cc823b"
         run: |
           if ! command -v postman &>/dev/null; then
-            curl -fsSL -o postman-install.sh "https://dl-cli.pstmn.io/install/linux64.sh"
+            curl -fsSL --proto '=https' --tlsv1.2 -o postman-install.sh "https://dl-cli.pstmn.io/install/linux64.sh"
             echo "${POSTMAN_INSTALL_SHA256}  postman-install.sh" | sha256sum -c -
             sh postman-install.sh
             rm -f postman-install.sh
