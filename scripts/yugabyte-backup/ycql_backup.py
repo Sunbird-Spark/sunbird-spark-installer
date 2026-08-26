@@ -25,8 +25,20 @@ def get_keyspaces(session, requested):
     return all_ks
 
 
+def safe_join(base_dir, *parts):
+    """os.path.join, but refuses to build a path that escapes base_dir --
+    keyspace/table names come from the DB's own schema catalog, not raw
+    user input, but nothing stops something with DB-schema access from
+    naming a keyspace/table with path-traversal characters."""
+    candidate = os.path.realpath(os.path.join(base_dir, *parts))
+    base = os.path.realpath(base_dir)
+    if os.path.commonpath([candidate, base]) != base:
+        raise ValueError(f"Refusing to write outside {base!r}: {candidate!r}")
+    return candidate
+
+
 def backup_keyspace(session, keyspace, output_dir):
-    ks_dir = os.path.join(output_dir, keyspace)
+    ks_dir = safe_join(output_dir, keyspace)
     os.makedirs(ks_dir, exist_ok=True)
 
     # Schema DDL — DESCRIBE is a cqlsh/ycqlsh shell meta-command, not real CQL,
@@ -46,7 +58,7 @@ def backup_keyspace(session, keyspace, output_dir):
 
     # Data CSV per table
     for table in tables:
-        csv_path = os.path.join(ks_dir, f"{table}.csv")
+        csv_path = safe_join(ks_dir, f"{table}.csv")
         rows = session.execute(f"SELECT * FROM {keyspace}.{table}")
         if rows.column_names:
             with open(csv_path, "w", newline="") as f:
