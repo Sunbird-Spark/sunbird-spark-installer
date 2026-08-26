@@ -129,15 +129,17 @@ jobs:
 
     steps:
       - name: Checkout Configuration Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
           echo "=== SOURCE COMMIT ==="
           git -C sunbird-spark-installer log --oneline -1
 
@@ -147,10 +149,12 @@ jobs:
           echo "✅ Logged in via VM managed identity"
 
       - name: Decrypt Config Files
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           sudo apt-get install -y ansible -q
 
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -168,10 +172,18 @@ jobs:
 
       - name: Verify Tools
         if: ${{ inputs.create_tf_backend || inputs.create_tf_resources }}
+        env:
+          TOFU_VERSION: "1.11.4"
         run: |
           if ! command -v tofu &>/dev/null; then
             sudo apt-get install -y unzip -q
-            curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
+            # Download + verify against OpenTofu's published SHA256SUMS
+            # instead of piping the install script straight into `sudo sh`.
+            curl -fsSL -o tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz"
+            curl -fsSL -o tofu_SHA256SUMS "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
+            grep " tofu_${TOFU_VERSION}_linux_amd64.tar.gz\$" tofu_SHA256SUMS | sha256sum -c -
+            sudo tar -xzf tofu.tar.gz -C /usr/local/bin tofu
+            rm -f tofu.tar.gz tofu_SHA256SUMS
           fi
           if ! command -v terragrunt &>/dev/null; then
             sudo wget -qO /usr/local/bin/terragrunt               https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.21/terragrunt_linux_amd64
@@ -226,8 +238,10 @@ jobs:
 
       - name: Encrypt and Commit Updated Configs
         if: ${{ inputs.create_tf_backend || inputs.create_tf_resources }}
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
                     # Save cert keys before rsync (yq operations in keys module can corrupt/remove them)
           grep -E "^\s*CERTIFICATE(SIGN)?_(PRIVATE|PUBLIC)_KEY:" \
@@ -294,17 +308,19 @@ jobs:
 
     steps:
       - name: Checkout Configuration Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
           echo "=== SOURCE BRANCH + COMMIT ==="
-          echo "input source_branch: ${{ inputs.source_branch }}"
+          echo "input source_branch: $SOURCE_BRANCH"
           git -C sunbird-spark-installer log --oneline -1
           git -C sunbird-spark-installer rev-parse HEAD
 
@@ -314,10 +330,12 @@ jobs:
           echo "✅ Logged in via VM managed identity"
 
       - name: Decrypt Config Files
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           sudo apt-get install -y ansible -q
 
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -368,10 +386,13 @@ jobs:
 
       - name: 🔍 debug-source-state
         if: ${{ inputs.install_helm && (inputs.edbb || inputs.helm_mode == 'all') }}
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
+          ENVIRONMENT: ${{ inputs.environment }}
         run: |
           echo "=== INPUTS ==="
-          echo "source_branch input : ${{ inputs.source_branch }}"
-          echo "environment         : ${{ inputs.environment }}"
+          echo "source_branch input : $SOURCE_BRANCH"
+          echo "environment         : $ENVIRONMENT"
           echo ""
           echo "=== CLONED REPO ==="
           cd sunbird-spark-installer
@@ -409,9 +430,11 @@ jobs:
 
       - name: 5️⃣ install_helm — edbb
         if: ${{ inputs.install_helm && inputs.helm_mode == 'selective' && inputs.edbb && inputs.specific_charts == '' }}
+        env:
+          PLAYER_IMAGE_TAG: ${{ inputs.player_image_tag }}
         run: |
-          if [ -n "${{ inputs.player_image_tag }}" ]; then
-            yq e '.player.tag = "${{ inputs.player_image_tag }}"' -i $HELMCHARTS_DIR/images.yaml
+          if [ -n "$PLAYER_IMAGE_TAG" ]; then
+            yq e ".player.tag = strenv(PLAYER_IMAGE_TAG)" -i $HELMCHARTS_DIR/images.yaml
           fi
           cd $ENV_FOLDER && bash install.sh install_component edbb
           echo "✅ edbb installed"
@@ -424,8 +447,10 @@ jobs:
 
       - name: 5️⃣ Commit certificate keys after learnbb
         if: ${{ inputs.install_helm && (inputs.learnbb || inputs.helm_mode == 'all') && inputs.specific_charts == '' }}
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           # Copy back global-values.yaml (may have cert keys appended)
           cp $ENV_FOLDER/global-values.yaml $CONFIG_PATH/global-values.yaml
@@ -486,6 +511,8 @@ jobs:
 
       - name: 5️⃣ install_helm — specific charts
         if: ${{ inputs.specific_charts != '' }}
+        env:
+          SPECIFIC_CHARTS: ${{ inputs.specific_charts }}
         run: |
           cd $ENV_FOLDER
           bundle=""
@@ -499,11 +526,13 @@ jobs:
             echo "❌ No bundle selected — check one bundle checkbox alongside specific_charts"
             exit 1
           fi
-          bash install.sh install_service "$bundle" ${{ inputs.specific_charts }}
-          echo "✅ specific charts (${{ inputs.specific_charts }}) installed in bundle: $bundle"
+          bash install.sh install_service "$bundle" $SPECIFIC_CHARTS
+          echo "✅ specific charts ($SPECIFIC_CHARTS) installed in bundle: $bundle"
 
       - name: Deploy Summary
         if: always()
+        env:
+          SPECIFIC_CHARTS: ${{ inputs.specific_charts }}
         run: |
           echo "================================================"
           echo "     DEPLOY JOB SUMMARY"
@@ -522,7 +551,7 @@ jobs:
           else
             echo "  ⏭️  5️⃣  install_helm (skipped)"
           fi
-          if [ -n "${{ inputs.specific_charts }}" ]; then
+          if [ -n "$SPECIFIC_CHARTS" ]; then
             bundle=""
             [ "${{ inputs.monitoring }}"  == "true" ] && bundle="monitoring"
             [ "${{ inputs.edbb }}"        == "true" ] && bundle="edbb"
@@ -530,7 +559,7 @@ jobs:
             [ "${{ inputs.knowledgebb }}" == "true" ] && bundle="knowledgebb"
             [ "${{ inputs.obsrvbb }}"     == "true" ] && bundle="obsrvbb"
             [ "${{ inputs.additional }}"  == "true" ] && bundle="additional"
-            echo "  ✅ 5️⃣  specific charts in ${bundle:-<no bundle>}: ${{ inputs.specific_charts }}"
+            echo "  ✅ 5️⃣  specific charts in ${bundle:-<no bundle>}: $SPECIFIC_CHARTS"
           fi
           echo "================================================"
 
@@ -547,15 +576,17 @@ jobs:
 
     steps:
       - name: Checkout Configuration Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
       - name: Azure Login (Managed Identity)
         run: |
@@ -563,10 +594,12 @@ jobs:
           echo "✅ Logged in via VM managed identity"
 
       - name: Decrypt Config Files
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           sudo apt-get install -y ansible -q
 
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -605,9 +638,19 @@ jobs:
           echo "✅ Environment folder ready: $ENV_FOLDER"
 
       - name: Install Platform Tools
+        env:
+          # Postman doesn't publish an official checksum for this script (no
+          # .sha256 sibling file at the same URL). Pinned to the checksum of
+          # the version reviewed while fixing this -- if the script's
+          # legitimately changed upstream, re-review it and update this
+          # value; don't just drop the check.
+          POSTMAN_INSTALL_SHA256: "7d1f5f3d138ab09a656794a33c9ff1c2b7315c4cce2200b62ef49273e6cc823b"
         run: |
           if ! command -v postman &>/dev/null; then
-            curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+            curl -fsSL -o postman-install.sh "https://dl-cli.pstmn.io/install/linux64.sh"
+            echo "${POSTMAN_INSTALL_SHA256}  postman-install.sh" | sha256sum -c -
+            sh postman-install.sh
+            rm -f postman-install.sh
           fi
           kubectl version --client && helm version && yq --version && openssl version && postman --version
           echo "✅ Platform tools ready"
@@ -649,11 +692,13 @@ jobs:
 
       - name: Encrypt and Commit env.json
         if: ${{ inputs.generate_postman_env }}
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           cp $ENV_FOLDER/env.json $CONFIG_PATH/env.json
 
           ansible-vault encrypt $CONFIG_PATH/env.json \
-            --vault-password-file=<(echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}")
+            --vault-password-file=<(echo "$ANSIBLE_VAULT_PASSWORD")
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
