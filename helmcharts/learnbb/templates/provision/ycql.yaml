@@ -15,6 +15,8 @@ spec:
         app: {{ .Chart.Name }}-yugabytecql-migration
     spec:
       restartPolicy: Never
+      # No kubectl/K8s-API calls in this job -- YCQL migration only.
+      automountServiceAccountToken: false
       volumes:
       - name: shared-volume
         emptyDir: {}
@@ -22,6 +24,13 @@ spec:
       - name: wait-for-yugabyte
         image: busybox
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 64Mi
         command: ["/bin/sh", "-c"]
         args:
         - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z  {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte; sleep 10; done'"
@@ -32,6 +41,14 @@ spec:
       - name: migration
         image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+            ephemeral-storage: 512Mi
         command: ['bash', '-c']
         args:
         - |

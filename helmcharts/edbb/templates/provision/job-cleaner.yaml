@@ -52,10 +52,21 @@ spec:
   template:
     spec:
       serviceAccountName: {{ .Chart.Name }}-job-deleter
+      # This job genuinely calls the K8s API (kubectl get/delete against the
+      # RBAC role bound above) -- explicit true, not the usual false default.
+      automountServiceAccountToken: true
       containers:
       - name: kubectl-container
         image: "{{ .Values.job_cleaner_kubectl_image.registry }}/{{ .Values.job_cleaner_kubectl_image.repository }}:{{ .Values.job_cleaner_kubectl_image.tag }}"
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 500m
+            memory: 256Mi
+            ephemeral-storage: 256Mi
         command: ["bash", "-c"]
         args:
           - |
