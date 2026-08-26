@@ -65,7 +65,7 @@ premium_consumer_medium_rate_limit_per_hour: 10000
 premium_consumer_large_rate_limit_per_hour: 100000
 
 # External URL's
-freshDesk_url: "http://dummy.freshDesk.url"
+freshDesk_url: "https://dummy.freshDesk.url"
 
 # Default service prefixes
 learner_private_route_prefix: /private
