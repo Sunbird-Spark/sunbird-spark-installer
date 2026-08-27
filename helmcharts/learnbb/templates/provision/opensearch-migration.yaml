@@ -40,9 +40,9 @@ spec:
             cpu: 100m
             memory: 64Mi
           limits:
-            cpu: 500m
-            memory: 256Mi
-            ephemeral-storage: 256Mi
+            cpu: 200m
+            memory: 128Mi
+            ephemeral-storage: 128Mi
         command: ['sh', '-c']
         args:
         - |
