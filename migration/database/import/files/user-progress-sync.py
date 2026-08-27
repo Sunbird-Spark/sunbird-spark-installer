@@ -3,7 +3,7 @@
 Migration script: Sync user course progress for all enrollments.
 
 Steps:
-  1. Get DOMAIN_URL + client secret from sunbird/player-env ConfigMap
+  1. Get DOMAIN_URL from sunbird/player-env ConfigMap and client secret from sunbird/player-secrets Secret
   2. Request admin user token from Keycloak (password grant)
   3. Exchange refresh token at Sunbird /auth/v1/refresh/token endpoint
   4. Query YugabyteDB for all user enrollments (userid, courseid, batchid)
@@ -31,6 +31,7 @@ Optional env vars:
   DRY_RUN                   (default: false) — if "true", skip API calls
 """
 
+import base64
 import os
 import subprocess
 import sys
@@ -102,8 +103,8 @@ def enable_enrollment_filter():
 
 
 def step_1_get_config_from_configmap():
-    """Fetch DOMAIN_URL + client secret from ConfigMap."""
-    print("\n[Step 1/6] Fetching config from sunbird/player-env ConfigMap...")
+    """Fetch DOMAIN_URL from ConfigMap and client secret from Secret."""
+    print("\n[Step 1/6] Fetching config from sunbird/player-env ConfigMap and sunbird/player-secrets Secret...")
 
     cmd = [
         "kubectl", "get", "cm", "-n", "sunbird", "player-env",
@@ -120,7 +121,7 @@ def step_1_get_config_from_configmap():
         sys.exit(1)
 
     cmd2 = [
-        "kubectl", "get", "cm", "-n", "sunbird", "player-env",
+        "kubectl", "get", "secret", "-n", "sunbird", "player-secrets",
         "-ojsonpath={.data.SUNBIRD_SESSION_SECRET}"
     ]
     result2 = subprocess.run(cmd2, capture_output=True, text=True)
@@ -128,10 +129,12 @@ def step_1_get_config_from_configmap():
         print(f"  FAILED: {result2.stderr.strip()}")
         sys.exit(1)
 
-    session_secret = result2.stdout.strip()
-    if not session_secret:
-        print(f"  FAILED: ConfigMap key SUNBIRD_SESSION_SECRET not found or empty")
+    session_secret_b64 = result2.stdout.strip()
+    if not session_secret_b64:
+        print(f"  FAILED: Secret key SUNBIRD_SESSION_SECRET not found or empty")
         sys.exit(1)
+
+    session_secret = base64.b64decode(session_secret_b64).decode("utf-8")
 
     client_secret = f"lms{session_secret}"
     print(f"  DOMAIN_URL: {domain_url}")
