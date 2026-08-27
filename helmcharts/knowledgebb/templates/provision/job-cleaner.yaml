@@ -59,14 +59,16 @@ spec:
       - name: kubectl-container
         image: "{{ .Values.job_cleaner_kubectl_image.registry }}/{{ .Values.job_cleaner_kubectl_image.repository }}:{{ .Values.job_cleaner_kubectl_image.tag }}"
         imagePullPolicy: IfNotPresent
+        # Trivial: a handful of `kubectl delete` calls against a label
+        # selector, runs once per install/upgrade and exits in seconds.
         resources:
           requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
             cpu: 100m
             memory: 100Mi
-          limits:
-            cpu: 500m
-            memory: 256Mi
-            ephemeral-storage: 256Mi
+            ephemeral-storage: 64Mi
         command: ["bash", "-c"]
         args:
           - |
