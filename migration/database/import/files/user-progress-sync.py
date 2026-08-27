@@ -36,6 +36,7 @@ import subprocess
 import sys
 import time
 import json
+import uuid
 from datetime import datetime
 
 # ========== CONFIGURATION ==========
@@ -58,7 +59,10 @@ ACTIVITY_API_TIMEOUT_SECONDS = int(os.environ.get("ACTIVITY_API_TIMEOUT_SECONDS"
 PROGRESS_EVERY = int(os.environ.get("PROGRESS_EVERY", "100"))
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
 
-REMOTE_CSV = "/tmp/user_enrollments.csv"
+# Randomized filename (instead of a fixed, predictable one) so a symlink
+# can't be pre-planted at this path inside the YugaByte pod's shared /tmp
+# ahead of the ycqlsh COPY TO write below.
+REMOTE_CSV = f"/tmp/user_enrollments_{uuid.uuid4().hex}.csv"
 
 
 def yb_exec(command, timeout=3600):
