@@ -57,11 +57,11 @@ images:
 
   kong_apis: &kong_apis
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_b599482"
+    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
 
   kong_consumers: &kong_consumers
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "develop_b599482"
+    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -97,11 +97,11 @@ images:
 
   keycloak: &keycloak
     repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "develop_eb2384f"
+    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
-    tag: "develop_499032f"
+    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
@@ -146,7 +146,7 @@ images:
   janusgraph: &janusgraph
     registry: ghcr.io
     repository: sunbird-spark/janusgraph
-    tag: spark-v1.1.0_bf2dfd7
+    tag: spark-v1.1.1-sbcoss1183_ea78f78
 
   secor: &secor
     repository: "sunbirded.azurecr.io/secor"
@@ -158,7 +158,7 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "spark-v1.1.0_fe7c786"
+    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
