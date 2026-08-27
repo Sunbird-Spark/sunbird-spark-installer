@@ -17,7 +17,16 @@
             <img src="${url.resourcesPath}/img/google-icon.svg" alt="Google" class="google-icon" />
             <span>${msg("signIn")} ${msg("doSignWithGoogle")}</span>
         </a>
-            
+        <script>
+        (function() {
+          var enabled = window.__enabledSsoProviders || ['google'];
+          if (enabled.indexOf('google') === -1) {
+            var btn = document.getElementById('googleSignInBtn');
+            if (btn) { btn.style.display = 'none'; }
+          }
+        })();
+        </script>
+
         <#-- OR Divider -->
         <div class="or-divider">
             <span>${msg("orDivider")}</span>
