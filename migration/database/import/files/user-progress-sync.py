@@ -36,7 +36,6 @@ import subprocess
 import sys
 import time
 import json
-import uuid
 from datetime import datetime
 
 # ========== CONFIGURATION ==========
@@ -59,10 +58,7 @@ ACTIVITY_API_TIMEOUT_SECONDS = int(os.environ.get("ACTIVITY_API_TIMEOUT_SECONDS"
 PROGRESS_EVERY = int(os.environ.get("PROGRESS_EVERY", "100"))
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
 
-# Randomized filename (instead of a fixed, predictable one) so a symlink
-# can't be pre-planted at this path inside the YugaByte pod's shared /tmp
-# ahead of the ycqlsh COPY TO write below.
-REMOTE_CSV = f"/tmp/user_enrollments_{uuid.uuid4().hex}.csv"
+_remote_csv_path = None
 
 
 def yb_exec(command, timeout=3600):
@@ -72,6 +68,25 @@ def yb_exec(command, timeout=3600):
     if result.returncode != 0:
         print(f"  STDERR: {result.stderr.strip()}")
     return result
+
+
+def remote_csv_path():
+    """Path of the export CSV inside the YugaByte pod, created on first use.
+
+    Rather than composing a /tmp path here (python:S5443 -- a hardcoded
+    publicly-writable directory, and even a uuid-randomized name is still
+    just a guess from the client side), ask the remote pod's own `mktemp`
+    to create it: that gets race-free O_EXCL-style creation from the
+    system that actually owns /tmp, for free.
+    """
+    global _remote_csv_path
+    if _remote_csv_path is None:
+        result = yb_exec(["mktemp", "--suffix=.csv"])
+        if result.returncode != 0:
+            print(f"  FAILED to create remote temp file: {result.stderr.strip()}")
+            sys.exit(1)
+        _remote_csv_path = result.stdout.strip()
+    return _remote_csv_path
 
 
 def disable_enrollment_filter():
@@ -225,7 +240,7 @@ def step_4_export_enrollments():
 
     copy_cmd = (
         f"COPY {KEYSPACE}.{TABLE} (userid, courseid, batchid) "
-        f"TO '{REMOTE_CSV}' WITH HEADER=false AND PAGESIZE=5000;"
+        f"TO '{remote_csv_path()}' WITH HEADER=false AND PAGESIZE=5000;"
     )
     result = yb_exec(["ycqlsh", "-e", copy_cmd])
     if result.returncode != 0:
@@ -242,7 +257,7 @@ def step_4_export_enrollments():
 def step_5_read_enrollments():
     """Read enrollments from CSV inside YugabyteDB pod."""
     print("\n[Step 5/6] Reading exported enrollments...")
-    result = yb_exec(["cat", REMOTE_CSV])
+    result = yb_exec(["cat", remote_csv_path()])
     if result.returncode != 0:
         print(f"  FAILED: {result.stderr.strip()}")
         sys.exit(1)
