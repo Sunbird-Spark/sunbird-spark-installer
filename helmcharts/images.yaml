@@ -162,7 +162,7 @@ images:
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
-    tag: "2.0.3"
+    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
 
   # kube-prometheus-stack's own bundled images — previously entirely
   # untracked here, running whatever that chart's own defaults were.
