@@ -96,8 +96,8 @@ images:
     tag: "release-5.1.0_2bc7760_9"
 
   keycloak: &keycloak
-    repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    repository: "ghcr.io/naveenhiremath28/keycloak-21.1.2:latest"
+    tag: "develop_eb2384f"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
