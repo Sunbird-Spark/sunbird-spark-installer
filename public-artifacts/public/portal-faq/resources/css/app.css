@@ -1,6 +1,6 @@
 body{
     background-color: #edf4f9;
-    font-family: 'Noto Sans', sans-serif;
+    font-family: 'Noto Sans';
 }
 
 .rotate{
@@ -23,12 +23,14 @@ P{
     padding: 16px;
 }
 .help-header>h4,.help-header-send-email>h4{
+    margin: 0;
     padding:0;
     font-weight: 700;
     max-width: 1024px;
     margin: 0 auto;
 }
 .help-header>p,.help-header-send-email>p{
+    margin: 0;
     font-weight: 100;
     max-width: 1024px;
     margin: 0 auto;
@@ -44,6 +46,7 @@ P{
 @media only screen and (max-width : 1024px) {
 
     .info-msg-send-email>p,.info-msg>p{
+        margin: 0;
         padding: 8px 16px;
         max-width: 1024px;
         margin: 0 auto;
@@ -53,6 +56,7 @@ P{
 @media only screen and (min-width : 1025px) {
 
     .info-msg-send-email>p,.info-msg>p{
+        margin: 0;
         padding: 16px 0px;
         max-width: 1024px;
         margin: 0 auto;
