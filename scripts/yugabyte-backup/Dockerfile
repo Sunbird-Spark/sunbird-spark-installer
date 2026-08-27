@@ -51,16 +51,19 @@ RUN curl -fsSL --proto '=https' --tlsv1.2 "https://awscli.amazonaws.com/awscli-e
 # Python cassandra-driver for YCQL backup
 RUN pip3 install --only-binary :all: cassandra-driver==3.30.1
 
-RUN useradd --uid 1001 --home-dir /home/backup backup
+# No explicit --uid: one of the CLI installs above (postgres/azure/gcp/aws)
+# already claims uid 1001 on this image, so let useradd pick a free one and
+# reference the user by name instead of guessing a number.
+RUN useradd --home-dir /home/backup backup
 
 # Owned by root, not the runtime user (docker:S6504) -- these scripts
 # shouldn't be writable by the process that runs them. World-readable is
-# enough for user 1001 to read/execute; chmod +x below covers execute.
+# enough for the backup user to read/execute; chmod +x below covers execute.
 COPY ./backup.sh /backup.sh
 COPY ./ycql_backup.py /ycql_backup.py
 
 RUN chmod +x /backup.sh /ycql_backup.py
 
-USER 1001
+USER backup
 
 ENTRYPOINT ["bash", "/backup.sh"]
