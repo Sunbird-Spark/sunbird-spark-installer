@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1
+# ^ pins the Dockerfile frontend so `ADD --checksum` below (needs 1.4+) works
+# on any builder, not just whatever buildx happens to default to.
 FROM --platform=linux/amd64 ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -33,7 +36,7 @@ RUN mkdir -p /etc/apt/keyrings && \
       gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg && \
     chmod go+r /etc/apt/keyrings/microsoft.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list && \
-    apt-get update && apt-get install -y azure-cli && \
+    apt-get update && apt-get install -y --no-install-recommends azure-cli && \
     rm -rf /var/lib/apt/lists/*
 
 # Google Cloud CLI
@@ -42,9 +45,14 @@ RUN curl -fsSL --proto '=https' --tlsv1.2 https://packages.cloud.google.com/apt/
     apt-get update && apt-get install -y google-cloud-cli && \
     rm -rf /var/lib/apt/lists/*
 
-# AWS CLI
-RUN curl -fsSL --proto '=https' --tlsv1.2 "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip && \
-    unzip -q /tmp/awscliv2.zip -d /tmp && \
+# AWS CLI -- ADD instead of curl (docker:S7026), checksum-pinned so a
+# corrupted/tampered download fails the build instead of silently installing.
+# NOTE: this URL always serves the latest release, no version in the path --
+# when AWS ships a new build the checksum below will stop matching and the
+# build will fail; re-run `shasum -a 256` on the zip and update it then.
+ADD --checksum=sha256:ddd7a5aabf363f5b82085ef732c806d4fe73ad0d10e35cffedd5c3560f56a641 \
+    https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip /tmp/awscliv2.zip
+RUN unzip -q /tmp/awscliv2.zip -d /tmp && \
     /tmp/aws/install && \
     rm -rf /tmp/awscliv2.zip /tmp/aws
 

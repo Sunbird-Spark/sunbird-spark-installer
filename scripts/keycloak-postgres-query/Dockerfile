@@ -16,13 +16,12 @@ RUN dnf install -y curl jq && \
 # Copy the SQL script and shell script into the container
 COPY execute_query.sh /usr/local/bin/execute_query.sh
 
-# Make the script executable
-RUN chmod +x /usr/local/bin/execute_query.sh
-
-# Drop back to non-root for the runtime -- root was only needed above to
-# install kubectl/jq. This image (AlmaLinux-based, per the yugabyte base)
-# has no pre-existing non-root user, so create one explicitly.
-RUN useradd --uid 1001 --home-dir /home/queryrunner queryrunner
+# Make the script executable, then drop back to non-root for the runtime --
+# root was only needed above to install kubectl/jq. This image (AlmaLinux-
+# based, per the yugabyte base) has no pre-existing non-root user, so create
+# one explicitly. Merged into one RUN to avoid an extra layer.
+RUN chmod +x /usr/local/bin/execute_query.sh && \
+    useradd --uid 1001 --home-dir /home/queryrunner queryrunner
 USER 1001
 
 # Execute the script when the container starts
