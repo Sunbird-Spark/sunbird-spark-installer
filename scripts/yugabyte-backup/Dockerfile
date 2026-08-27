@@ -56,15 +56,15 @@ RUN unzip -q /tmp/awscliv2.zip -d /tmp && \
     /tmp/aws/install && \
     rm -rf /tmp/awscliv2.zip /tmp/aws
 
-# Python cassandra-driver for YCQL backup
-RUN pip3 install --only-binary :all: cassandra-driver==3.30.1
-
+# Python cassandra-driver for YCQL backup, then create the runtime user.
 # "backup" collides with Ubuntu's own standard system account
 # (backup:x:34:34:backup:/var/backups:/usr/sbin/nologin, from base-passwd) --
 # useradd fails with exit 9 either way, whether or not --uid is given, since
 # the name itself is taken. Also skip an explicit --uid: one of the
 # postgres/azure/gcp/aws CLI installs above already claims uid 1001 here.
-RUN useradd --home-dir /home/ycqlbackup ycqlbackup
+# Merged into one RUN to avoid an extra layer.
+RUN pip3 install --only-binary :all: cassandra-driver==3.30.1 && \
+    useradd --home-dir /home/ycqlbackup ycqlbackup
 
 # Owned by root, not the runtime user (docker:S6504) -- these scripts
 # shouldn't be writable by the process that runs them. World-readable is
