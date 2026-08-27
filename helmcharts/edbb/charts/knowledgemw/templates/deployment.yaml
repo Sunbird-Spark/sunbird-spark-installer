@@ -37,6 +37,8 @@ spec:
           envFrom:
           - configMapRef:
               name: {{ include "common.names.fullname" . }}-env
+          - secretRef:
+              name: {{ include "common.names.fullname" . }}-secrets
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
