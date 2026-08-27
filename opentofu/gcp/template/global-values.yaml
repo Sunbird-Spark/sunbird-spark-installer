@@ -53,6 +53,7 @@ global:
   mail_from_certbot_notifications: ""  #The "from" email address used by the Certbot renewal job for sending SSL renewal status notifications via SendGrid SMTP
   youtube_apikey: ""
   openai_api_key: "REPLACE_WITH_OPENAI_API_KEY"
+  openai_model: "text-embedding-3-small-coss"  # used by both search's semantic query path and flink's content-embedding job -- must match, or query-time and index-time vectors won't share a space
   superset:
       init:
         adminUser:
