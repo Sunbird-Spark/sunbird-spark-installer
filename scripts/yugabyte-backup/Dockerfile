@@ -53,10 +53,13 @@ RUN pip3 install --only-binary :all: cassandra-driver==3.30.1
 
 RUN useradd --uid 1001 --home-dir /home/backup backup
 
-COPY --chown=1001:1001 ./backup.sh /backup.sh
-COPY --chown=1001:1001 ./ycql_backup.py /ycql_backup.py
+# Owned by root, not the runtime user (docker:S6504) -- these scripts
+# shouldn't be writable by the process that runs them. World-readable is
+# enough for user 1001 to read/execute; chmod +x below covers execute.
+COPY ./backup.sh /backup.sh
+COPY ./ycql_backup.py /ycql_backup.py
 
-RUN chmod +x /backup.sh
+RUN chmod +x /backup.sh /ycql_backup.py
 
 USER 1001
 
