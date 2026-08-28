@@ -44,7 +44,7 @@ images:
 
   player: &player
     repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "spark-v1.1.1-beta1_61ac1ad"
+    tag: "spark-v1.1.1-beta9_634611b"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
