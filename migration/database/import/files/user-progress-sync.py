@@ -103,8 +103,8 @@ def enable_enrollment_filter():
 
 
 def step_1_get_config_from_configmap():
-    """Fetch DOMAIN_URL from ConfigMap and client secret from Secret."""
-    print("\n[Step 1/6] Fetching config from sunbird/player-env ConfigMap and sunbird/player-secrets Secret...")
+    """Fetch DOMAIN_URL + client secret from ConfigMap."""
+    print("\n[Step 1/6] Fetching config from sunbird/player-env ConfigMap...")
 
     cmd = [
         "kubectl", "get", "cm", "-n", "sunbird", "player-env",
@@ -117,11 +117,11 @@ def step_1_get_config_from_configmap():
 
     domain_url = result.stdout.strip()
     if not domain_url:
-        print(f"  FAILED: ConfigMap key DOMAIN_URL not found or empty")
+        print("  FAILED: ConfigMap key DOMAIN_URL not found or empty")
         sys.exit(1)
 
     cmd2 = [
-        "kubectl", "get", "secret", "-n", "sunbird", "player-secrets",
+        "kubectl", "get", "cm", "-n", "sunbird", "player-env",
         "-ojsonpath={.data.SUNBIRD_SESSION_SECRET}"
     ]
     result2 = subprocess.run(cmd2, capture_output=True, text=True)
@@ -129,12 +129,10 @@ def step_1_get_config_from_configmap():
         print(f"  FAILED: {result2.stderr.strip()}")
         sys.exit(1)
 
-    session_secret_b64 = result2.stdout.strip()
-    if not session_secret_b64:
-        print(f"  FAILED: Secret key SUNBIRD_SESSION_SECRET not found or empty")
+    session_secret = result2.stdout.strip()
+    if not session_secret:
+        print("  FAILED: ConfigMap key SUNBIRD_SESSION_SECRET not found or empty")
         sys.exit(1)
-
-    session_secret = base64.b64decode(session_secret_b64).decode("utf-8")
 
     client_secret = f"lms{session_secret}"
     print(f"  DOMAIN_URL: {domain_url}")
