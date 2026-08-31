@@ -129,16 +129,7 @@ resource "azurerm_key_vault" "vault" {
   sku_name            = "standard"
 
   rbac_authorization_enabled = true
-
-  # Not purge-protected on purpose: install.sh's destroy_tf_resources runs
-  # `tofu destroy`, which soft-deletes this vault. Purge protection would
-  # keep the name reserved for the full soft-delete retention window (up to
-  # 90 days) with no way to force it, so re-running create_tf_resources for
-  # the same env name would fail on a name collision. Soft-delete alone
-  # (default retention, can't be turned off in this provider version) still
-  # protects against accidental deletes; `az keyvault purge` stays available
-  # for an intentional same-name recreate.
-  purge_protection_enabled = false
+  purge_protection_enabled   = true
 
   # Selected-networks, not Private Link — matches the storage account's
   # firewall approach (network_rules in the storage module) rather than
