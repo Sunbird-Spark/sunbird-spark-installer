@@ -37,6 +37,27 @@ metadata:
 data:
   {{- $var := .Files.Get "configs/env.yaml" }}
   {{- include "common.tplvalues.render" (dict "value" $var "context" $) | nindent 2 }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "common.names.fullname" . }}-secrets
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+{{ include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
+  {{- end }}
+type: Opaque
+stringData:
+  # Named to match the ${?ENV_VAR} substitution keys read directly by
+  # Typesafe Config in configs/application.conf -- unlike the plain env.yaml/
+  # ConfigMap split used elsewhere in this repo, knowlg reads a compiled
+  # application.conf file, not process env vars by key name, so the Secret
+  # has to supply the exact env var names the HOCON substitution expects.
+  CLOUD_STORAGE_SECRET: "{{ .Values.global.cloud_storage_secret_key }}"
+  YOUTUBE_APIKEY: "{{ .Values.global.youtube_apikey }}"
 
 {{- if .Values.opa.enabled }}
 ---
