@@ -57,11 +57,11 @@ images:
 
   kong_apis: &kong_apis
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
+    tag: "spark-v1.1.1-test-sbcoss1183-2_a10b600"
 
   kong_consumers: &kong_consumers
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
+    tag: "spark-v1.1.1-test-sbcoss1183-2_a10b600"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -101,7 +101,7 @@ images:
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
-    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
+    tag: "spark-v1.1.1-test-sbcoss1183-2_a10b600"
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
@@ -158,11 +158,11 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
+    tag: "spark-v1.1.1-test-sbcoss1183-2_a10b600"
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
-    tag: "spark-v1.1.1-sbcoss1183_ea78f78"
+    tag: "spark-v1.1.1-test-sbcoss1183-2_a10b600"
 
   # kube-prometheus-stack's own bundled images — previously entirely
   # untracked here, running whatever that chart's own defaults were.
