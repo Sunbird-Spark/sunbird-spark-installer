@@ -72,6 +72,8 @@ spec:
           envFrom:
           - configMapRef:
               name: {{ include "common.names.fullname" . }}-env
+          - secretRef:
+              name: {{ include "common.names.fullname" . }}-secrets
           volumeMounts:
           {{- if .Values.configmap.enabled }}
           - name: config
@@ -96,15 +98,15 @@ spec:
       - name: keys
         projected:
           sources:
-          - configMap:
+          - secret:
               name: access-private-keys
-          - configMap:
+          - secret:
               name: mobile-devicev2-private-keys
-          - configMap:
+          - secret:
               name: desktop-devicev2-private-keys
-          - configMap:
+          - secret:
               name: portal-anonymous-private-keys
-          - configMap:
+          - secret:
               name: portal-loggedin-private-keys
       - name: keycloak-key
         configMap:

@@ -11,7 +11,7 @@ if ! command -v cqlsh >/dev/null 2>&1; then
     python3 -m pip install --no-cache-dir --quiet cqlsh
 fi
 
-curl -fL --connect-timeout 30 --max-time 180 --retry 3 --retry-delay 5 \
+curl -fL --proto '=https' --tlsv1.2 --connect-timeout 30 --max-time 180 --retry 3 --retry-delay 5 \
     -o /usr/local/bin/kubectl \
     "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
 chmod +x /usr/local/bin/kubectl

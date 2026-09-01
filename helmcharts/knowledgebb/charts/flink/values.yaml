@@ -680,7 +680,7 @@ flink_jobs:
         openai {
           api_key = ""
           api_key = ${?OPENAI_API_KEY}
-          model = "text-embedding-3-small-coss"
+          model = "{{ .Values.global.openai_model | default "text-embedding-3-small" }}"
           dimensions = 1536
           timeout = 30
           azure_endpoint = "{{ .Values.global.openai_azure_endpoint | default "" }}"

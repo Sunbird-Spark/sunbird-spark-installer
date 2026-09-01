@@ -24,6 +24,21 @@ migration:
 
 postgres_migration_image: sunbirded.azurecr.io/postgresql:11.14.0
 
+job_cleaner_kubectl_image:
+  registry: "sunbirded.azurecr.io"
+  repository: "kubectl"
+  tag: "1.28.4"
+
+job_wait_image:
+  registry: "docker.io"
+  repository: "busybox"
+  tag: "latest"
+
+opensearch_migration_image:
+  registry: "docker.io"
+  repository: "curlimages/curl"
+  tag: "latest"
+
 kafka: &kafka
   enabled: true
   fullnameOverride: "kafka"

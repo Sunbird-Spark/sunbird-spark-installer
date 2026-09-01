@@ -258,7 +258,7 @@ function generate_postman_env() {
     fi
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
     blob_store_path=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
-    api_key=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_authorization}')
+    api_key=$(kubectl get secret -n sunbird lern-secrets -ojsonpath='{.data.sunbird_authorization}' | base64 -d)
     keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
     keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
     keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
@@ -369,10 +369,6 @@ function check_pod_status() {
     echo "All pods are running successfully."
 }
 
-RELEASE="release700"
-POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/5338608-e28d5510-20d5-466e-a9ad-3fcf59ea9f96?access_key=PMAT-01HMV5SB2ZPXCGNKD74J7ARKRQ"
-CERTPUBLICKEY=""
-CERTPRIVATEKEY=""
 
 
 if [ $# -eq 0 ]; then

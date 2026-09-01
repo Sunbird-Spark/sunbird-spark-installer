@@ -33,9 +33,13 @@ import urllib.request
 import urllib.parse
 import ssl
 
+# Secure defaults (hostname + cert verification on). This only actually
+# matters if --keycloak-url is ever changed to https:// -- urllib ignores
+# the ssl context entirely for http:// connections, which is what this
+# script's own usage example uses today. Previously this disabled
+# verification unconditionally, which was a no-op today but a silent
+# landmine for any future https:// usage.
 ctx = ssl.create_default_context()
-ctx.check_hostname = False
-ctx.verify_mode = ssl.CERT_NONE
 
 
 def req(method, url, token=None, data=None):
