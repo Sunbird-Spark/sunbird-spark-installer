@@ -264,7 +264,7 @@ function generate_postman_env() {
     blob_store_path=$(kubectl get cm -n sunbird lern-env -o jsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$||')
     public_container_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_content_cloud_storage_container}') 
     api_key=$(kubectl get secret -n sunbird lern-secrets -ojsonpath='{.data.sunbird_authorization}' | base64 -d)
-    keycloak_secret=$(kubectl get secret -n sunbird player-secrets -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}' | base64 -d)
+    keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
     keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
     keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
     google_oauth_client_id=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.GOOGLE_OAUTH_CLIENT_ID}')

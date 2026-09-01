@@ -3,7 +3,7 @@
 Migration script: Sync user course progress for all enrollments.
 
 Steps:
-  1. Get DOMAIN_URL from sunbird/player-env ConfigMap and client secret from sunbird/player-secrets Secret
+  1. Get DOMAIN_URL and client secret from sunbird/player-env ConfigMap
   2. Request admin user token from Keycloak (password grant)
   3. Exchange refresh token at Sunbird /auth/v1/refresh/token endpoint
   4. Query YugabyteDB for all user enrollments (userid, courseid, batchid)
@@ -31,7 +31,6 @@ Optional env vars:
   DRY_RUN                   (default: false) — if "true", skip API calls
 """
 
-import base64
 import os
 import subprocess
 import sys
