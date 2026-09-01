@@ -28,10 +28,19 @@
         </script>
 
         <#-- OR Divider -->
-        <div class="or-divider">
+        <div class="or-divider" id="ssoOrDivider">
             <span>${msg("orDivider")}</span>
         </div>
-        
+        <script>
+        (function() {
+          var enabled = window.__enabledSsoProviders || ['google'];
+          if (enabled.length === 0) {
+            var divider = document.getElementById('ssoOrDivider');
+            if (divider) { divider.style.display = 'none'; }
+          }
+        })();
+        </script>
+
         <#if realm.password>
             <form id="kc-form-login" onsubmit="login.disabled = true; return true;" action="${url.loginAction}" method="post">
                 <div class="${properties.kcFormGroupClass!}">
