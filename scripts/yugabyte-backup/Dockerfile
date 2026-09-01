@@ -50,7 +50,7 @@ RUN curl -fsSL --proto '=https' --tlsv1.2 https://packages.cloud.google.com/apt/
 # NOTE: this URL always serves the latest release, no version in the path --
 # when AWS ships a new build the checksum below will stop matching and the
 # build will fail; re-run `shasum -a 256` on the zip and update it then.
-ADD --checksum=sha256:ddd7a5aabf363f5b82085ef732c806d4fe73ad0d10e35cffedd5c3560f56a641 \
+ADD --checksum=sha256:ac07f6cb7beffd1e8af3b373de5b192062ca6c486596203e6961d01e6de14b0e \
     https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip /tmp/awscliv2.zip
 RUN unzip -q /tmp/awscliv2.zip -d /tmp && \
     /tmp/aws/install && \
