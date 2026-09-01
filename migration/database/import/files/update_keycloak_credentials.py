@@ -24,7 +24,7 @@ KC_NEW_SECRET = os.environ.get("KC_NEW_SECRET", "")
 YB_HOST       = os.environ.get("YB_HOST", "yb-tserver-service")
 YB_PORT       = int(os.environ.get("YB_PORT", "5433"))
 YB_USER       = os.environ.get("YB_USER", "yugabyte")
-YB_PASSWORD   = os.environ.get("YB_PASSWORD", "yugabyte")
+YB_PASSWORD   = os.environ.get("YB_PASSWORD", "")
 YB_DB         = os.environ.get("YB_DB", "keycloak")
 
 
@@ -80,6 +80,13 @@ def main():
 
     if not KC_PASSWORD:
         print("ERROR: KC_PASSWORD env var not set.")
+        sys.exit(1)
+
+    if not YB_PASSWORD:
+        print("ERROR: YB_PASSWORD env var not set. Set "
+              "databases.ysql.databases[name=keycloak].password in "
+              "migration/database/import/values.yaml before enabling "
+              "dbFixups.keycloakCredentials.")
         sys.exit(1)
 
     print(f"\n  Username : {KC_USERNAME}")

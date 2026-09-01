@@ -15,10 +15,19 @@ spec:
         app: {{ .Chart.Name }}-opensearch-migration
     spec:
       restartPolicy: Never
+      # No kubectl/K8s-API calls in this job -- OpenSearch index setup only.
+      automountServiceAccountToken: false
       initContainers:
       - name: wait-for-opensearch
         image: "{{ .Values.job_wait_image.registry }}/{{ .Values.job_wait_image.repository }}:{{ .Values.job_wait_image.tag }}"
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 64Mi
         command: ["/bin/sh", "-c"]
         args:
         - "timeout {{ .Values.migration.opensearch.waitTime }} sh -c 'until nc -z {{ .Values.global.opensearch.host }} {{ .Values.global.opensearch.port }}; do echo waiting for opensearch; sleep 10; done'"
@@ -26,6 +35,14 @@ spec:
       - name: migration
         image: "{{ .Values.opensearch_migration_image.registry }}/{{ .Values.opensearch_migration_image.repository }}:{{ .Values.opensearch_migration_image.tag }}"
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+            ephemeral-storage: 128Mi
         command: ['sh', '-c']
         args:
         - |

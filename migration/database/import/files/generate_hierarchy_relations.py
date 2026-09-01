@@ -34,6 +34,8 @@ import sys
 import time
 from datetime import datetime
 
+from remote_temp import remote_csv_path
+
 # ========== CONFIGURATION ==========
 YB_POD = os.environ.get("YB_POD", "yb-tserver-0")
 YB_NAMESPACE = os.environ.get("YB_NAMESPACE", "sunbird")
@@ -49,8 +51,6 @@ API_DELAY_SECONDS = float(os.environ.get("API_DELAY_SECONDS", "0.1"))
 API_TIMEOUT_SECONDS = int(os.environ.get("API_TIMEOUT_SECONDS", "30"))
 PROGRESS_EVERY = int(os.environ.get("PROGRESS_EVERY", "100"))
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
-
-REMOTE_CSV = "/tmp/hierarchy_identifiers.csv"
 
 
 def yb_exec(command, timeout=3600):
@@ -76,7 +76,7 @@ def step_1_export_identifiers():
 
     copy_cmd = (
         f"COPY {KEYSPACE}.{TABLE} (identifier) "
-        f"TO '{REMOTE_CSV}' WITH HEADER=false AND PAGESIZE=5000;"
+        f"TO '{remote_csv_path(yb_exec)}' WITH HEADER=false AND PAGESIZE=5000;"
     )
     result = yb_exec(["ycqlsh", "-e", copy_cmd])
     if result.returncode != 0:
@@ -94,7 +94,7 @@ def step_1_export_identifiers():
 def step_2_read_identifiers():
     """Read identifiers from the CSV inside the YugaByte pod."""
     print("\n[Step 2/4] Reading exported identifiers...")
-    result = yb_exec(["cat", REMOTE_CSV])
+    result = yb_exec(["cat", remote_csv_path(yb_exec)])
     if result.returncode != 0:
         print(f"  FAILED: {result.stderr.strip()}")
         sys.exit(1)

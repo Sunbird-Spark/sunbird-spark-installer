@@ -34,7 +34,15 @@ ingress: {}
   #     paths:
   #     - /
 
-resources: {}
+# Was unbounded (empty {}) -- execute_query.sh does a handful of curl calls
+# + kubectl apply against a small configmap, small and short-lived.
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 100Mi
 
 autoscaling: {}
   # enabled: false
