@@ -3,7 +3,7 @@
 Migration script: Sync user course progress for all enrollments.
 
 Steps:
-  1. Get DOMAIN_URL + client secret from sunbird/player-env ConfigMap
+  1. Get DOMAIN_URL and client secret from sunbird/player-env ConfigMap
   2. Request admin user token from Keycloak (password grant)
   3. Exchange refresh token at Sunbird /auth/v1/refresh/token endpoint
   4. Query YugabyteDB for all user enrollments (userid, courseid, batchid)
@@ -116,7 +116,7 @@ def step_1_get_config_from_configmap():
 
     domain_url = result.stdout.strip()
     if not domain_url:
-        print(f"  FAILED: ConfigMap key DOMAIN_URL not found or empty")
+        print("  FAILED: ConfigMap key DOMAIN_URL not found or empty")
         sys.exit(1)
 
     cmd2 = [
@@ -130,7 +130,7 @@ def step_1_get_config_from_configmap():
 
     session_secret = result2.stdout.strip()
     if not session_secret:
-        print(f"  FAILED: ConfigMap key SUNBIRD_SESSION_SECRET not found or empty")
+        print("  FAILED: ConfigMap key SUNBIRD_SESSION_SECRET not found or empty")
         sys.exit(1)
 
     client_secret = f"lms{session_secret}"

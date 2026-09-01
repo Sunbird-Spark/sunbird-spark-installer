@@ -49,7 +49,6 @@ global:
   mail_server_username: apikey
   sunbird_msg_91_auth: ""
   sunbird_msg_sender: ""
-  youtube_apikey: ""
   mail_from_certbot_notifications: ""  #The "from" email address used by the Certbot renewal job for sending SSL renewal status notifications via SendGrid SMTP
   youtube_apikey: ""
   openai_api_key: "REPLACE_WITH_OPENAI_API_KEY"
