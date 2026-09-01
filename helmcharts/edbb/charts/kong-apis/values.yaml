@@ -15,7 +15,7 @@ resources:
     memory: 64Mi
   limits:
     cpu: 100m
-    memory: 100Mi
+    memory: 256Mi
 
 # wait-for-kong initContainer: just a netcat/wget readiness loop.
 waitForKongResources:

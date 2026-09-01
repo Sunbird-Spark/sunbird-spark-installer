@@ -137,6 +137,9 @@ def main():
     except FileNotFoundError:
         print(f"ERROR: env file not found: {args.env}")
         sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"ERROR: {args.env} is not valid JSON: {e}")
+        sys.exit(1)
     except ValueError as e:
         print(f"ERROR: {e}")
         sys.exit(1)
@@ -153,6 +156,9 @@ def main():
             collection = json.load(f)
     except FileNotFoundError:
         print(f"ERROR: collection file not found: {args.collection}")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"ERROR: {args.collection} is not valid JSON: {e}")
         sys.exit(1)
     except ValueError as e:
         print(f"ERROR: {e}")

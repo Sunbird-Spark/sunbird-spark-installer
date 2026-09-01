@@ -140,7 +140,7 @@ jobs:
           # of piping the install script straight into `sudo sh`.
           curl -fsSL --proto '=https' --tlsv1.2 -o tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz"
           curl -fsSL --proto '=https' --tlsv1.2 -o tofu_SHA256SUMS "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
-          grep " tofu_${TOFU_VERSION}_linux_amd64.tar.gz\$" tofu_SHA256SUMS | sha256sum -c -
+          echo "$(grep " tofu_${TOFU_VERSION}_linux_amd64.tar.gz\$" tofu_SHA256SUMS | cut -d' ' -f1)  tofu.tar.gz" | sha256sum -c -
           sudo tar -xzf tofu.tar.gz -C /usr/local/bin tofu
           rm -f tofu.tar.gz tofu_SHA256SUMS
           sudo wget --https-only -qO /usr/local/bin/terragrunt \
@@ -227,6 +227,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
+      contents: read
       id-token: write   # azure/login
 
     steps:
@@ -308,7 +309,7 @@ jobs:
           # of piping the install script straight into `bash`.
           curl -fsSL --proto '=https' --tlsv1.2 -o helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
           curl -fsSL --proto '=https' --tlsv1.2 -o helm.tar.gz.sha256sum "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
-          sha256sum -c helm.tar.gz.sha256sum
+          echo "$(cut -d' ' -f1 helm.tar.gz.sha256sum)  helm.tar.gz" | sha256sum -c -
           tar -xzf helm.tar.gz linux-amd64/helm
           sudo mv linux-amd64/helm /usr/local/bin/helm
           rm -rf helm.tar.gz helm.tar.gz.sha256sum linux-amd64
@@ -379,6 +380,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     permissions:
+      contents: read
       id-token: write   # azure/login
 
     steps:
@@ -443,7 +445,7 @@ jobs:
           # of piping the install script straight into `bash`.
           curl -fsSL --proto '=https' --tlsv1.2 -o helm.tar.gz "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
           curl -fsSL --proto '=https' --tlsv1.2 -o helm.tar.gz.sha256sum "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
-          sha256sum -c helm.tar.gz.sha256sum
+          echo "$(cut -d' ' -f1 helm.tar.gz.sha256sum)  helm.tar.gz" | sha256sum -c -
           tar -xzf helm.tar.gz linux-amd64/helm
           sudo mv linux-amd64/helm /usr/local/bin/helm
           rm -rf helm.tar.gz helm.tar.gz.sha256sum linux-amd64

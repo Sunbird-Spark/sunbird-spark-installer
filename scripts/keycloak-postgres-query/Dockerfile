@@ -21,7 +21,8 @@ COPY execute_query.sh /usr/local/bin/execute_query.sh
 # based, per the yugabyte base) has no pre-existing non-root user, so create
 # one explicitly. Merged into one RUN to avoid an extra layer.
 RUN chmod +x /usr/local/bin/execute_query.sh && \
-    useradd --uid 1001 --home-dir /home/queryrunner queryrunner
+    useradd --uid 1001 --create-home --home-dir /home/queryrunner queryrunner
+WORKDIR /home/queryrunner
 USER 1001
 
 # Execute the script when the container starts

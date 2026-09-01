@@ -83,7 +83,10 @@ def main():
         sys.exit(1)
 
     if not YB_PASSWORD:
-        print("ERROR: YB_PASSWORD env var not set.")
+        print("ERROR: YB_PASSWORD env var not set. Set "
+              "databases.ysql.databases[name=keycloak].password in "
+              "migration/database/import/values.yaml before enabling "
+              "dbFixups.keycloakCredentials.")
         sys.exit(1)
 
     print(f"\n  Username : {KC_USERNAME}")

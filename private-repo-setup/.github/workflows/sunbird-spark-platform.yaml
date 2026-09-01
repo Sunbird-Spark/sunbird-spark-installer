@@ -183,7 +183,7 @@ jobs:
             # instead of piping the install script straight into `sudo sh`.
             curl -fsSL --proto '=https' --tlsv1.2 -o tofu.tar.gz "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz"
             curl -fsSL --proto '=https' --tlsv1.2 -o tofu_SHA256SUMS "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
-            grep " tofu_${TOFU_VERSION}_linux_amd64.tar.gz\$" tofu_SHA256SUMS | sha256sum -c -
+            echo "$(grep " tofu_${TOFU_VERSION}_linux_amd64.tar.gz\$" tofu_SHA256SUMS | cut -d' ' -f1)  tofu.tar.gz" | sha256sum -c -
             sudo tar -xzf tofu.tar.gz -C /usr/local/bin tofu
             rm -f tofu.tar.gz tofu_SHA256SUMS
           fi

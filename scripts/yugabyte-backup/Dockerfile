@@ -64,7 +64,7 @@ RUN unzip -q /tmp/awscliv2.zip -d /tmp && \
 # postgres/azure/gcp/aws CLI installs above already claims uid 1001 here.
 # Merged into one RUN to avoid an extra layer.
 RUN pip3 install --only-binary :all: cassandra-driver==3.30.1 && \
-    useradd --home-dir /home/ycqlbackup ycqlbackup
+    useradd --create-home --home-dir /home/ycqlbackup ycqlbackup
 
 # Owned by root, not the runtime user (docker:S6504) -- these scripts
 # shouldn't be writable by the process that runs them. World-readable is
