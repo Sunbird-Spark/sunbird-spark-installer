@@ -30,6 +30,12 @@ provider "azurerm" {
     private_dns_zone_id       = var.private_cluster_enabled ? "System" : null
     oidc_issuer_enabled       = true
     workload_identity_enabled = true
+    # Azure Policy Add-on (OPA Gatekeeper-based). On its own this enforces
+    # nothing — no initiative is assigned here — it just makes the cluster
+    # capable of having policies (e.g. the built-in "Kubernetes cluster pod
+    # security baseline" initiative) assigned later without a cluster
+    # change. In-place toggle, not ForceNew.
+    azure_policy_enabled = true
     default_node_pool {
       name           = var.big_nodepool_name
       node_count     = var.big_node_count
@@ -59,12 +65,32 @@ provider "azurerm" {
         )
   }
 
-  # Grant Network Contributor role to AKS System-Assigned Identity
+  # AKS only needs to join its node pool to this pre-existing subnet — the
+  # built-in Network Contributor role also grants write/delete on every NSG,
+  # route table, and public IP in the same scope, none of which this cluster
+  # needs (subnet is BYO, node pool has no public IPs). Custom role limited to
+  # Microsoft's own documented minimum for the "existing subnet" AKS scenario.
+  resource "azurerm_role_definition" "aks_subnet_join" {
+    name        = "${local.environment_name}-aks-subnet-join"
+    scope       = var.vnet_subnet_id
+    description = "Minimal permission for the AKS cluster identity to join its node pool to a pre-existing subnet."
+
+    assignable_scopes = [var.vnet_subnet_id]
+
+    permissions {
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+        "Microsoft.Network/virtualNetworks/subnets/read",
+      ]
+      data_actions = []
+    }
+  }
+
   resource "azurerm_role_assignment" "aks_network_contributor" {
-    principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
-    scope                = var.vnet_subnet_id
-    role_definition_name = "Network Contributor"
-    
+    principal_id       = azurerm_kubernetes_cluster.aks.identity[0].principal_id
+    scope              = var.vnet_subnet_id
+    role_definition_id = azurerm_role_definition.aks_subnet_join.role_definition_resource_id
+
     depends_on = [azurerm_kubernetes_cluster.aks]
   }
 
