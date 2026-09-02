@@ -15,17 +15,34 @@ spec:
         app: {{ .Chart.Name }}-yugabyte-postgres-migration
     spec:
       restartPolicy: Never
+      # No kubectl/K8s-API calls in this job -- pure YSQL setup.
+      automountServiceAccountToken: false
       initContainers:
       - name: wait-for-yugabyte-postgres
-        image: busybox
+        image: "{{ .Values.job_wait_image.registry }}/{{ .Values.job_wait_image.repository }}:{{ .Values.job_wait_image.tag }}"
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 64Mi
         command: ['sh', '-c']
         args:
         - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'"
       containers:
       - name: migration
-        image: yugabytedb/yugabyte:latest
+        image: "{{ .Values.yugabyte_migration_image.registry }}/{{ .Values.yugabyte_migration_image.repository }}:{{ .Values.yugabyte_migration_image.tag }}"
         imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+            ephemeral-storage: 512Mi
         command: ['bash', '-c']
         securityContext:
           runAsUser: 0

@@ -39,6 +39,12 @@ resource "google_storage_bucket" "storage_container_public" {
   }
 }
 
+# Read-only for allUsers -- this bucket serves public content to anonymous
+# browsers, it doesn't need public *write* access. The real writer is the
+# service account, already granted roles/storage.admin separately (see
+# modules/service-account/main.tf) -- objectAdmin here would let literally
+# anyone on the internet, unauthenticated, upload/overwrite/delete objects
+# in this bucket.
 resource "google_storage_bucket_iam_member" "read_write_public" {
   bucket = google_storage_bucket.storage_container_public.name
   role   = "roles/storage.objectViewer"
@@ -80,6 +86,11 @@ resource "google_storage_bucket" "dial_state_container_public" {
   }
 }
 
+# Read-only for allUsers, same reasoning as read_write_public above.
+# roles/storage.admin is already granted project-wide to the real service
+# account (modules/service-account/main.tf), which covers this bucket too --
+# objectAdmin + allUsers would let anyone anonymously overwrite DIAL
+# QR-code-to-content mappings, not just read them.
 resource "google_storage_bucket_iam_member" "full_access_dial" {
   bucket = google_storage_bucket.dial_state_container_public.name
   role   = "roles/storage.objectViewer"
