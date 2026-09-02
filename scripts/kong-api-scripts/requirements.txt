@@ -1,15 +1,6 @@
 # Kong 3.9.1 API Scripts - Python 3.11+ Requirements
 # Last updated: September 2, 2026
-#
-# Hashes are pinned (SonarCloud docker:S8544 - Python dependencies should be
-# locked to verified versions) so `pip install --require-hashes` refuses to
-# install anything whose downloaded file doesn't match what was verified
-# here, even if a package with the same name/version were ever substituted
-# in transit or on the index. Only linux/amd64 wheel hashes are listed —
-# QEMU-based cross-compilation was removed from
-# .github/workflows/build-push-images.yml, so the image is only built for
-# linux/amd64 now.
-#
+
 # HTTP requests
 requests==2.34.2 \
     --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0
