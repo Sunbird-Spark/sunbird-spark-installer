@@ -38,7 +38,9 @@ def get_apis(kong_admin_api_url, managed_by=None):
 def get_routes(kong_admin_api_url, service_name):
     """Fetch routes for a service in Kong 3.9.1"""
     max_page_size = 100
-    routes_url = "{}/services/{}/routes?size={}".format(kong_admin_api_url, service_name, max_page_size)
+    # URL encode service name to handle special characters (same as get_api_plugins below)
+    encoded_service_name = urllib.parse.quote(service_name, safe='')
+    routes_url = "{}/services/{}/routes?size={}".format(kong_admin_api_url, encoded_service_name, max_page_size)
     routes_response = json.loads(retrying_urlopen(routes_url).read().decode('utf-8'))
     return routes_response["data"]
 

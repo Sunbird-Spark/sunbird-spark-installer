@@ -18,3 +18,7 @@ FROM bitnamilegacy/janusgraph:1.1.0-debian-12-r21
 
 # Copy the built JAR from builder stage
 COPY --from=builder /build/knowledge-platform-db-extensions/janusgraph-cdc-extension/target/janusgraph-cdc-extension-*.jar /opt/bitnami/janusgraph/lib/
+
+# Bitnami images ship a pre-created non-root user/group (1001:1001) that
+# already owns /opt/bitnami -- switch to it instead of running as root.
+USER 1001

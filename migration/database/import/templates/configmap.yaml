@@ -34,6 +34,8 @@ data:
 {{ .Files.Get "files/user-progress-sync.sh" | indent 4 }}
   user-progress-sync.py: |
 {{ .Files.Get "files/user-progress-sync.py" | indent 4 }}
+  remote_temp.py: |
+{{ .Files.Get "files/remote_temp.py" | indent 4 }}
   import_data.groovy: |
 {{ .Files.Get "files/import_data.groovy" | indent 4 }}
   set_graphid.groovy: |
