@@ -76,15 +76,17 @@ resource "google_storage_bucket_iam_member" "bucket_access" {
 }
 
 # ── Workload Identity binding: K8s SA -> GCP SA ──────────────────────────
+# Keyed off var.k8s_service_accounts directly (the same map that creates the
+# K8s SAs below) rather than a separate service_account_bindings map -- a
+# caller that overrides one without the other used to end up with a K8s SA
+# silently missing its workloadIdentityUser binding, no error, just broken
+# auth at pod runtime.
 resource "google_service_account_iam_member" "workload_identity_binding" {
-  for_each = {
-    for k, v in var.service_account_bindings : k => v
-    if v == true
-  }
+  for_each = var.k8s_service_accounts
 
   service_account_id = google_service_account.service_account.name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "serviceAccount:${var.project}.svc.id.goog[${each.key}]"
+  member             = "serviceAccount:${var.project}.svc.id.goog[${each.value.namespace}/${each.value.name}]"
 }
 
 # ── K8s namespaces ───────────────────────────────────────────────────────

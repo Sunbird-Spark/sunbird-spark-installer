@@ -1,8 +1,16 @@
 terraform {
   required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 5.0"
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.5"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
     }
   }
 }
@@ -40,6 +48,7 @@ resource "null_resource" "patch_global_values" {
 
   triggers = {
     patch_file_sha = sha256(local_file.patch_passwords_file.content)
+    always_run     = timestamp()
   }
 
   provisioner "local-exec" {
@@ -48,7 +57,7 @@ echo "🔄 Starting merge process..."
 
 REPO_ROOT=$(cd ../../../../../ && pwd)
 GLOBAL_FILE="$REPO_ROOT/global-values.yaml"
-PATCH_FILE="$REPO_ROOT/patch-passwords.yaml"
+PATCH_FILE="${local_file.patch_passwords_file.filename}"
 TMP_FILE="$REPO_ROOT/global-values.tmp"
 
 echo " REPO_ROOT = $REPO_ROOT"
@@ -59,10 +68,10 @@ if [ ! -f "$GLOBAL_FILE" ]; then
   exit 1
 fi
 
-echo " Creating patch file at $PATCH_FILE"
-cat <<EOF > "$PATCH_FILE"
-${local_file.patch_passwords_file.content}
-EOF
+if [ ! -f "$PATCH_FILE" ]; then
+  echo " Missing patch file at $PATCH_FILE"
+  exit 1
+fi
 
 ls -l "$GLOBAL_FILE"
 ls -l "$PATCH_FILE"

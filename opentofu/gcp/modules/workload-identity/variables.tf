@@ -52,15 +52,6 @@ variable "service_account_roles" {
   ]
 }
 
-variable "service_account_bindings" {
-  type        = map(bool)
-  description = "Map of '<namespace>/<k8s-sa-name>' -> bool. true entries get a workloadIdentityUser binding."
-  default = {
-    "sunbird/sunbird-sa" = true
-    "velero/velero-sa"   = true
-  }
-}
-
 variable "k8s_namespaces" {
   type        = list(string)
   description = "Kubernetes namespaces to create."

@@ -5,10 +5,10 @@
 # ---------------------------------------------------------------------------------------------------------------------
 
 locals {
-    common_tags = {
-      environment = "${var.environment}"
-      BuildingBlock = "${var.building_block}"
-    }
+    # No common_tags/labels here -- none of google_compute_network,
+    # google_compute_subnetwork, google_compute_router, or
+    # google_compute_firewall support a labels attribute (verified against
+    # the real provider schema), unlike GCP's storage/gke modules.
     environment_name = "${var.building_block}-${var.environment}"
 
     # create_network = true:  OpenTofu creates the VPC/subnetwork via resource blocks below
@@ -45,10 +45,6 @@ resource "google_compute_network" "vpc" {
 
   # A global routing mode can have an unexpected impact on load balancers; always use a regional mode
   routing_mode = "REGIONAL"
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "google_compute_router" "vpc_router" {
@@ -128,19 +124,25 @@ resource "google_compute_subnetwork" "vpc_subnetwork_public" {
 # Attach Firewall Rules to allow inbound traffic to tagged instances
 # ---------------------------------------------------------------------------------------------------------------------
 
-resource "google_compute_firewall" "allow_http_https" {
-  name    = "${local.environment_name}-allow-http-https"
+# IAP (Identity-Aware Proxy) tunneling range -- this is what makes
+# `gcloud compute ssh --tunnel-through-iap` work against the runner VM when
+# vpn_enabled=false. IAP itself is the real access-control layer (requires
+# roles/iap.tunnelResourceAccessor on the caller); this rule only opens the
+# path, it doesn't grant access on its own. Mirrors Azure's Bastion path
+# (modules/network/main.tf's azurerm_bastion_host), which needs no equivalent
+# firewall rule since Azure's default NSG already allows Bastion->VNet.
+resource "google_compute_firewall" "allow_iap_ssh" {
+  name    = "${local.environment_name}-allow-iap-ssh"
   network = local.active_network_name
   project = var.project
 
   allow {
     protocol = "tcp"
-    ports    = ["80", "443"]
+    ports    = ["22"]
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = ["35.235.240.0/20"]
   direction     = "INGRESS"
-  target_tags   = ["http-server", "https-server"]
 }
 
 # Note: Pritunl VPN firewall rules (UDP 1194, TCP 443) for the runner VM are

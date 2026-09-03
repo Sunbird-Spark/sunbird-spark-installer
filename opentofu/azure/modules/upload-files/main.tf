@@ -43,6 +43,7 @@ resource "null_resource" "clone_and_upload_content_plugins" {
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
       git clone --depth 1 --branch ${var.sunbird_player_editor_ref} https://github.com/Sunbird-Knowlg/sunbird-content-plugins.git "$tmpdir/content-plugins"
+      rm -rf "$tmpdir/content-plugins/.git"
       az storage blob upload-batch \
         --account-name ${var.storage_account_name} \
         --destination ${var.storage_container_public}/content-plugins \

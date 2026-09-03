@@ -51,7 +51,7 @@ resource "azurerm_virtual_network" "vnet" {
   name                = "${local.environment_name}"
   location            = var.location
   resource_group_name = local.resource_group_name
-  address_space       = ["10.0.0.0/16"]
+  address_space       = var.vnet_address_space
   tags                = merge(local.common_tags, var.additional_tags)
 }
 
@@ -60,7 +60,7 @@ resource "azurerm_subnet" "aks_subnet" {
   name                 = "${local.environment_name}-aks"
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet[0].name
-  address_prefixes     = ["10.0.0.0/20"]
+  address_prefixes     = var.aks_subnet_cidr
   service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
 }
 
@@ -69,7 +69,7 @@ resource "azurerm_subnet" "runner_subnet" {
   name                 = "${local.environment_name}-runner"
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet[0].name
-  address_prefixes     = ["10.0.16.0/28"]
+  address_prefixes     = var.runner_subnet_cidr
 }
 
 # Azure Bastion — only when vpn_enabled = false
@@ -83,7 +83,7 @@ resource "azurerm_subnet" "bastion_subnet" {
   name                 = "AzureBastionSubnet"
   resource_group_name  = local.resource_group_name
   virtual_network_name = local.active_vnet_name
-  address_prefixes     = ["10.0.17.0/26"]
+  address_prefixes     = var.bastion_subnet_cidr
 }
 
 resource "azurerm_public_ip" "bastion_pip" {
