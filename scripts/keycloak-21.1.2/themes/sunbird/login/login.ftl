@@ -13,30 +13,24 @@
       <div id="kc-form-wrapper">
         
         <#-- Google Sign In Button -->
-        <a href="#" id="googleSignInBtn" class="google-signin-btn" onclick="navigate('google'); return false;" aria-label="${msg('signIn')} ${msg('doSignWithGoogle')}">
+        <a href="#" id="googleSignInBtn" class="google-signin-btn" style="display:none" onclick="navigate('google'); return false;" aria-label="${msg('signIn')} ${msg('doSignWithGoogle')}">
             <img src="${url.resourcesPath}/img/google-icon.svg" alt="Google" class="google-icon" />
             <span>${msg("signIn")} ${msg("doSignWithGoogle")}</span>
         </a>
-        <script>
-        (function() {
-          var enabled = window.__enabledSsoProviders || ['google'];
-          if (enabled.indexOf('google') === -1) {
-            var btn = document.getElementById('googleSignInBtn');
-            if (btn) { btn.style.display = 'none'; }
-          }
-        })();
-        </script>
 
         <#-- OR Divider -->
-        <div class="or-divider" id="ssoOrDivider">
+        <div class="or-divider" id="ssoOrDivider" style="display:none">
             <span>${msg("orDivider")}</span>
         </div>
         <script>
         (function() {
           var enabled = window.__enabledSsoProviders || ['google'];
-          if (enabled.length === 0) {
+          var googleEnabled = enabled.indexOf('google') !== -1;
+          if (googleEnabled) {
+            var btn = document.getElementById('googleSignInBtn');
             var divider = document.getElementById('ssoOrDivider');
-            if (divider) { divider.style.display = 'none'; }
+            if (btn) { btn.style.display = ''; }
+            if (divider) { divider.style.display = ''; }
           }
         })();
         </script>
