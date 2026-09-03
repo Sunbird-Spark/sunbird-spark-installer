@@ -50,6 +50,7 @@ jobs:
           context: ./scripts/${{ matrix.directory }}
           file: ./scripts/${{ matrix.directory }}/Dockerfile
           push: true
+          platforms: linux/amd64
           tags: |
             ghcr.io/${{ steps.prep.outputs.OWNER_LOWERCASE }}/${{ matrix.directory }}:${{ steps.prep.outputs.IMAGE_TAG }}
             ghcr.io/${{ steps.prep.outputs.OWNER_LOWERCASE }}/${{ matrix.directory }}:latest
