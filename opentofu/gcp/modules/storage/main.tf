@@ -23,6 +23,7 @@ resource "google_storage_bucket" "storage_container_public" {
   name          = "${local.environment_name}-public-${local.unique_uuid}"
   location      = var.region
   force_destroy = true
+  labels        = merge(local.common_tags, var.additional_tags)
 
   versioning {
     enabled = true
@@ -57,6 +58,7 @@ resource "google_storage_bucket" "storage_container_private" {
   name          = "${local.environment_name}-private-${local.unique_uuid}"
   location      = var.region
   force_destroy = true
+  labels        = merge(local.common_tags, var.additional_tags)
 
   versioning {
     enabled = true
@@ -71,12 +73,14 @@ resource "google_storage_bucket" "dial_state_container_public" {
   project       = var.project
   location      = var.region
   force_destroy = true
+  labels        = merge(local.common_tags, var.additional_tags)
 
   versioning {
     enabled = true
   }
 
   uniform_bucket_level_access = false
+  public_access_prevention    = "unspecified"
 
   cors {
     origin          = ["https://${var.domain}"]
@@ -103,6 +107,7 @@ resource "google_storage_bucket" "velero_storage_container_private" {
   name          = "${local.environment_name}-velero-private-${local.unique_uuid}"
   location      = var.region
   force_destroy = true
+  labels        = merge(local.common_tags, var.additional_tags)
 
   versioning {
     enabled = true
