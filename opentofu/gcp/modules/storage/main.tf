@@ -10,9 +10,9 @@ locals {
   unique_uuid = random_id.bucket_id.hex
 
   common_tags = {
-    environment    = var.environment
-    BuildingBlock  = var.building_block
-    unique_uuid    = local.unique_uuid
+    environment   = var.environment
+    BuildingBlock = var.building_block
+    unique_uuid   = local.unique_uuid
   }
 
   environment_name = "${var.building_block}-${var.environment}"
@@ -23,13 +23,14 @@ resource "google_storage_bucket" "storage_container_public" {
   name          = "${local.environment_name}-public-${local.unique_uuid}"
   location      = var.region
   force_destroy = true
+  labels        = merge(local.common_tags, var.additional_tags)
 
   versioning {
     enabled = true
   }
 
   uniform_bucket_level_access = false
-  public_access_prevention = "unspecified"
+  public_access_prevention    = "unspecified"
 
   cors {
     origin          = ["https://${var.domain}"]
@@ -39,9 +40,15 @@ resource "google_storage_bucket" "storage_container_public" {
   }
 }
 
+# Read-only for allUsers -- this bucket serves public content to anonymous
+# browsers, it doesn't need public *write* access. The real writer is the
+# service account, already granted roles/storage.admin separately (see
+# modules/service-account/main.tf) -- objectAdmin here would let literally
+# anyone on the internet, unauthenticated, upload/overwrite/delete objects
+# in this bucket.
 resource "google_storage_bucket_iam_member" "read_write_public" {
   bucket = google_storage_bucket.storage_container_public.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectViewer"
   member = "allUsers"
 }
 
@@ -51,12 +58,14 @@ resource "google_storage_bucket" "storage_container_private" {
   name          = "${local.environment_name}-private-${local.unique_uuid}"
   location      = var.region
   force_destroy = true
+  labels        = merge(local.common_tags, var.additional_tags)
 
   versioning {
     enabled = true
   }
 
   uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
 }
 
 resource "google_storage_bucket" "dial_state_container_public" {
@@ -64,12 +73,14 @@ resource "google_storage_bucket" "dial_state_container_public" {
   project       = var.project
   location      = var.region
   force_destroy = true
+  labels        = merge(local.common_tags, var.additional_tags)
 
   versioning {
     enabled = true
   }
 
   uniform_bucket_level_access = false
+  public_access_prevention    = "unspecified"
 
   cors {
     origin          = ["https://${var.domain}"]
@@ -79,9 +90,14 @@ resource "google_storage_bucket" "dial_state_container_public" {
   }
 }
 
+# Read-only for allUsers, same reasoning as read_write_public above.
+# roles/storage.admin is already granted project-wide to the real service
+# account (modules/service-account/main.tf), which covers this bucket too --
+# objectAdmin + allUsers would let anyone anonymously overwrite DIAL
+# QR-code-to-content mappings, not just read them.
 resource "google_storage_bucket_iam_member" "full_access_dial" {
   bucket = google_storage_bucket.dial_state_container_public.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectViewer"
   member = "allUsers"
 }
 
@@ -91,11 +107,13 @@ resource "google_storage_bucket" "velero_storage_container_private" {
   name          = "${local.environment_name}-velero-private-${local.unique_uuid}"
   location      = var.region
   force_destroy = true
+  labels        = merge(local.common_tags, var.additional_tags)
 
   versioning {
     enabled = true
   }
 
   uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
 }
 

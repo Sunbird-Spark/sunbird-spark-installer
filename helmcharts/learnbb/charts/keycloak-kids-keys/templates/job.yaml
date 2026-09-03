@@ -21,6 +21,8 @@ spec:
             /usr/local/bin/execute_query.sh
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           envFrom:
           - configMapRef:
               name: {{ include "common.names.fullname" . }}-env

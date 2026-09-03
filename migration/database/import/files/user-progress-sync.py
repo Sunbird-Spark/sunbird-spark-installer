@@ -3,7 +3,7 @@
 Migration script: Sync user course progress for all enrollments.
 
 Steps:
-  1. Get DOMAIN_URL + client secret from sunbird/player-env ConfigMap
+  1. Get DOMAIN_URL and client secret from sunbird/player-env ConfigMap
   2. Request admin user token from Keycloak (password grant)
   3. Exchange refresh token at Sunbird /auth/v1/refresh/token endpoint
   4. Query YugabyteDB for all user enrollments (userid, courseid, batchid)
@@ -38,6 +38,8 @@ import time
 import json
 from datetime import datetime
 
+from remote_temp import remote_csv_path
+
 # ========== CONFIGURATION ==========
 YB_POD = os.environ.get("YB_POD", "yb-tserver-0")
 YB_NAMESPACE = os.environ.get("YB_NAMESPACE", "sunbird")
@@ -57,8 +59,6 @@ ACTIVITY_API_DELAY_SECONDS = float(os.environ.get("ACTIVITY_API_DELAY_SECONDS", 
 ACTIVITY_API_TIMEOUT_SECONDS = int(os.environ.get("ACTIVITY_API_TIMEOUT_SECONDS", "30"))
 PROGRESS_EVERY = int(os.environ.get("PROGRESS_EVERY", "100"))
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
-
-REMOTE_CSV = "/tmp/user_enrollments.csv"
 
 
 def yb_exec(command, timeout=3600):
@@ -116,7 +116,7 @@ def step_1_get_config_from_configmap():
 
     domain_url = result.stdout.strip()
     if not domain_url:
-        print(f"  FAILED: ConfigMap key DOMAIN_URL not found or empty")
+        print("  FAILED: ConfigMap key DOMAIN_URL not found or empty")
         sys.exit(1)
 
     cmd2 = [
@@ -130,7 +130,7 @@ def step_1_get_config_from_configmap():
 
     session_secret = result2.stdout.strip()
     if not session_secret:
-        print(f"  FAILED: ConfigMap key SUNBIRD_SESSION_SECRET not found or empty")
+        print("  FAILED: ConfigMap key SUNBIRD_SESSION_SECRET not found or empty")
         sys.exit(1)
 
     client_secret = f"lms{session_secret}"
@@ -221,7 +221,7 @@ def step_4_export_enrollments():
 
     copy_cmd = (
         f"COPY {KEYSPACE}.{TABLE} (userid, courseid, batchid) "
-        f"TO '{REMOTE_CSV}' WITH HEADER=false AND PAGESIZE=5000;"
+        f"TO '{remote_csv_path(yb_exec)}' WITH HEADER=false AND PAGESIZE=5000;"
     )
     result = yb_exec(["ycqlsh", "-e", copy_cmd])
     if result.returncode != 0:
@@ -238,7 +238,7 @@ def step_4_export_enrollments():
 def step_5_read_enrollments():
     """Read enrollments from CSV inside YugabyteDB pod."""
     print("\n[Step 5/6] Reading exported enrollments...")
-    result = yb_exec(["cat", REMOTE_CSV])
+    result = yb_exec(["cat", remote_csv_path(yb_exec)])
     if result.returncode != 0:
         print(f"  FAILED: {result.stderr.strip()}")
         sys.exit(1)

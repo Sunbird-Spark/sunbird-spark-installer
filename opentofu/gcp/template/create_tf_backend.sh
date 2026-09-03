@@ -70,7 +70,8 @@ else
   gcloud storage buckets create "gs://$BUCKET_NAME" \
     --project="$GCP_PROJECT" \
     --location="$region" \
-    --uniform-bucket-level-access
+    --uniform-bucket-level-access \
+    --public-access-prevention
 
   # Enable versioning
   gcloud storage buckets update "gs://$BUCKET_NAME" --versioning

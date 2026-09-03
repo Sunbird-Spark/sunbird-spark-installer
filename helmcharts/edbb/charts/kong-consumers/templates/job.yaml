@@ -13,6 +13,8 @@ spec:
       - name: wait-for-kong
         image: busybox
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          {{- toYaml .Values.waitForKongResources | nindent 10 }}
         command: ["/bin/sh", "-c"]
         args:
         - |
@@ -30,6 +32,8 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           command:
           - /bin/sh
           - -c
@@ -43,8 +47,8 @@ spec:
       volumes:
       {{- if .Values.configmap.enabled }}
       - name: config
-        configMap:
-          name: {{ include "common.names.fullname" . }}
+        secret:
+          secretName: {{ include "common.names.fullname" . }}
       {{- end }}
       restartPolicy: Never
   backoffLimit: 30
