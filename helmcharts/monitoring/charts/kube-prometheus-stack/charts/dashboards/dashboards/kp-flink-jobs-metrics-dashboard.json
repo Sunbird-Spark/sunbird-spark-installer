@@ -4888,188 +4888,6 @@
             "x": 6,
             "y": 66
           },
-          "id": 39568,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_batch_generate_embeddings_embedding_api_call_count[$__range]))",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "content-embedding \u2014 Batch Embedding \u2014 API Calls",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Flink-Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 6,
-            "x": 12,
-            "y": 66
-          },
-          "id": 39569,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_batch_generate_embeddings_embedding_slow_call_count[$__range]))",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "content-embedding \u2014 Batch Embedding \u2014 Slow API Calls",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Flink-Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 6,
-            "x": 18,
-            "y": 66
-          },
           "id": 39570,
           "interval": null,
           "links": [],
@@ -5158,8 +4976,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 71
+            "x": 12,
+            "y": 66
           },
           "id": 39571,
           "interval": null,
@@ -5249,8 +5067,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 71
+            "x": 18,
+            "y": 66
           },
           "id": 39572,
           "interval": null,
@@ -5340,7 +5158,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
+            "x": 0,
             "y": 71
           },
           "id": 39573,
@@ -5421,7 +5239,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
+            "x": 6,
             "y": 71
           },
           "hiddenSeries": false,
@@ -5516,8 +5334,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 76
+            "x": 12,
+            "y": 71
           },
           "hiddenSeries": false,
           "id": 19491,
@@ -5611,8 +5429,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 76
+            "x": 18,
+            "y": 71
           },
           "hiddenSeries": false,
           "id": 19493,
