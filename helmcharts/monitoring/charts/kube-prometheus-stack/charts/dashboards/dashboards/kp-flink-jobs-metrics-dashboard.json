@@ -18,34 +18,34 @@
   "links": [],
   "panels": [
     {
-      "collapsed": true,
+      "id": 200008,
+      "type": "text",
+      "title": "\ud83d\udce6 KNOWLEDGEBB (KP) \u2014 Flink Jobs",
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "id": 40075,
+      "options": {
+        "mode": "markdown",
+        "content": ""
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 200000,
       "panels": [
-        {
-          "id": 40574,
-          "type": "text",
-          "title": "transaction-event-processor",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 0
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
         {
           "cacheTimeout": null,
           "colorBackground": false,
@@ -2051,26 +2051,21 @@
             "align": false,
             "alignLevel": null
           }
-        },
-        {
-          "id": 40575,
-          "type": "text",
-          "title": "knowlg-publish",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 31
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
+        }
+      ],
+      "title": "transaction-event-processor",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 200001,
+      "panels": [
         {
           "cacheTimeout": null,
           "colorBackground": false,
@@ -2099,7 +2094,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 32
+            "y": 1
           },
           "id": 39532,
           "interval": null,
@@ -2190,7 +2185,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 32
+            "y": 1
           },
           "id": 39534,
           "interval": null,
@@ -2281,7 +2276,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 32
+            "y": 1
           },
           "id": 39535,
           "interval": null,
@@ -2372,7 +2367,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 32
+            "y": 1
           },
           "id": 39536,
           "interval": null,
@@ -2463,7 +2458,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 37
+            "y": 6
           },
           "id": 39537,
           "interval": null,
@@ -2554,7 +2549,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 37
+            "y": 6
           },
           "id": 39539,
           "interval": null,
@@ -2645,7 +2640,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 37
+            "y": 6
           },
           "id": 39540,
           "interval": null,
@@ -2736,7 +2731,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 37
+            "y": 6
           },
           "id": 39541,
           "interval": null,
@@ -2827,7 +2822,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 42
+            "y": 11
           },
           "id": 39542,
           "interval": null,
@@ -2918,7 +2913,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 42
+            "y": 11
           },
           "id": 39543,
           "interval": null,
@@ -3009,7 +3004,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 42
+            "y": 11
           },
           "id": 39545,
           "interval": null,
@@ -3100,7 +3095,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 42
+            "y": 11
           },
           "id": 39546,
           "interval": null,
@@ -3191,7 +3186,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 47
+            "y": 16
           },
           "id": 39547,
           "interval": null,
@@ -3282,7 +3277,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 47
+            "y": 16
           },
           "id": 39548,
           "interval": null,
@@ -3373,7 +3368,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 47
+            "y": 16
           },
           "id": 39549,
           "interval": null,
@@ -3464,7 +3459,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 47
+            "y": 16
           },
           "id": 39550,
           "interval": null,
@@ -3555,7 +3550,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 52
+            "y": 21
           },
           "id": 39551,
           "interval": null,
@@ -3646,7 +3641,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 52
+            "y": 21
           },
           "id": 39552,
           "interval": null,
@@ -3737,7 +3732,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 52
+            "y": 21
           },
           "id": 39553,
           "interval": null,
@@ -3828,7 +3823,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 52
+            "y": 21
           },
           "id": 39554,
           "interval": null,
@@ -3919,7 +3914,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 57
+            "y": 26
           },
           "id": 39555,
           "interval": null,
@@ -4010,7 +4005,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 57
+            "y": 26
           },
           "id": 39556,
           "interval": null,
@@ -4101,7 +4096,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 57
+            "y": 26
           },
           "id": 39557,
           "interval": null,
@@ -4182,7 +4177,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 57
+            "y": 26
           },
           "hiddenSeries": false,
           "id": 39559,
@@ -4258,26 +4253,21 @@
             "align": false,
             "alignLevel": null
           }
-        },
-        {
-          "id": 40576,
-          "type": "text",
-          "title": "content-embedding",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 62
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
+        }
+      ],
+      "title": "knowlg-publish",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 200002,
+      "panels": [
         {
           "cacheTimeout": null,
           "colorBackground": false,
@@ -4306,7 +4296,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 63
+            "y": 1
           },
           "id": 39561,
           "interval": null,
@@ -4397,7 +4387,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 63
+            "y": 1
           },
           "id": 39562,
           "interval": null,
@@ -4488,7 +4478,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 63
+            "y": 1
           },
           "id": 39563,
           "interval": null,
@@ -4579,7 +4569,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 63
+            "y": 1
           },
           "id": 39564,
           "interval": null,
@@ -4670,7 +4660,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 68
+            "y": 6
           },
           "id": 39565,
           "interval": null,
@@ -4761,7 +4751,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 68
+            "y": 6
           },
           "id": 39566,
           "interval": null,
@@ -4852,7 +4842,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 68
+            "y": 6
           },
           "id": 39567,
           "interval": null,
@@ -4943,7 +4933,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 68
+            "y": 6
           },
           "id": 39568,
           "interval": null,
@@ -5034,7 +5024,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 73
+            "y": 11
           },
           "id": 39569,
           "interval": null,
@@ -5125,7 +5115,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 73
+            "y": 11
           },
           "id": 39570,
           "interval": null,
@@ -5216,7 +5206,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 73
+            "y": 11
           },
           "id": 39571,
           "interval": null,
@@ -5307,7 +5297,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 73
+            "y": 11
           },
           "id": 39572,
           "interval": null,
@@ -5398,7 +5388,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 78
+            "y": 16
           },
           "id": 39573,
           "interval": null,
@@ -5479,7 +5469,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 78
+            "y": 16
           },
           "hiddenSeries": false,
           "id": 39574,
@@ -5555,26 +5545,21 @@
             "align": false,
             "alignLevel": null
           }
-        },
-        {
-          "id": 40577,
-          "type": "text",
-          "title": "enrichment-router (metrics not verified \u2014 Lag only)",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 83
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
+        }
+      ],
+      "title": "content-embedding",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 200003,
+      "panels": [
         {
           "aliasColors": {},
           "bars": false,
@@ -5593,7 +5578,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 84
+            "y": 1
           },
           "hiddenSeries": false,
           "id": 19491,
@@ -5669,26 +5654,21 @@
             "align": false,
             "alignLevel": null
           }
-        },
-        {
-          "id": 40578,
-          "type": "text",
-          "title": "caption-generator (metrics not verified \u2014 Lag only)",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 89
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
+        }
+      ],
+      "title": "enrichment-router (metrics not verified \u2014 Lag only)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 200004,
+      "panels": [
         {
           "aliasColors": {},
           "bars": false,
@@ -5707,7 +5687,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 90
+            "y": 1
           },
           "hiddenSeries": false,
           "id": 19493,
@@ -5785,8 +5765,27 @@
           }
         }
       ],
-      "title": "\ud83d\udce6 KNOWLEDGEBB (KP) \u2014 Flink Jobs",
+      "title": "caption-generator (metrics not verified \u2014 Lag only)",
       "type": "row"
+    },
+    {
+      "id": 200009,
+      "type": "text",
+      "title": "\ud83d\udce6 LEARNBB (LP) \u2014 Flink Jobs",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "options": {
+        "mode": "markdown",
+        "content": ""
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
     },
     {
       "collapsed": true,
@@ -5794,29 +5793,10 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 1
+        "y": 7
       },
-      "id": 40076,
+      "id": 200005,
       "panels": [
-        {
-          "id": 20497,
-          "type": "text",
-          "title": "notification-job (metrics not verified \u2014 Lag only)",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 0
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
         {
           "aliasColors": {},
           "bars": false,
@@ -5911,26 +5891,21 @@
             "align": false,
             "alignLevel": null
           }
-        },
-        {
-          "id": 20498,
-          "type": "text",
-          "title": "user-deletion-cleanup (metrics not verified \u2014 Lag only)",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 6
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
+        }
+      ],
+      "title": "notification-job (metrics not verified \u2014 Lag only)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 200006,
+      "panels": [
         {
           "aliasColors": {},
           "bars": false,
@@ -5949,7 +5924,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 7
+            "y": 1
           },
           "hiddenSeries": false,
           "id": 19497,
@@ -6025,26 +6000,21 @@
             "align": false,
             "alignLevel": null
           }
-        },
-        {
-          "id": 20499,
-          "type": "text",
-          "title": "Collection Certificate Generator",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 12
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
+        }
+      ],
+      "title": "user-deletion-cleanup (metrics not verified \u2014 Lag only)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "id": 200007,
+      "panels": [
         {
           "cacheTimeout": null,
           "colorBackground": false,
@@ -6073,7 +6043,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 13
+            "y": 1
           },
           "id": 209,
           "interval": null,
@@ -6164,7 +6134,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 13
+            "y": 1
           },
           "id": 226,
           "interval": null,
@@ -6255,7 +6225,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 13
+            "y": 1
           },
           "id": 221,
           "interval": null,
@@ -6346,7 +6316,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 13
+            "y": 1
           },
           "id": 220,
           "interval": null,
@@ -6437,7 +6407,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 18
+            "y": 6
           },
           "id": 219,
           "interval": null,
@@ -6528,7 +6498,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 18
+            "y": 6
           },
           "id": 227,
           "interval": null,
@@ -6619,7 +6589,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 18
+            "y": 6
           },
           "id": 228,
           "interval": null,
@@ -6710,7 +6680,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 18
+            "y": 6
           },
           "id": 230,
           "interval": null,
@@ -6801,7 +6771,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 23
+            "y": 11
           },
           "id": 229,
           "interval": null,
@@ -6892,7 +6862,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 23
+            "y": 11
           },
           "id": 231,
           "interval": null,
@@ -6978,7 +6948,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 23
+            "y": 11
           },
           "hiddenSeries": false,
           "id": 224,
@@ -7137,7 +7107,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 23
+            "y": 11
           },
           "hiddenSeries": false,
           "id": 225,
@@ -7215,7 +7185,7 @@
           }
         }
       ],
-      "title": "\ud83d\udce6 LEARNBB (LP) \u2014 Flink Jobs",
+      "title": "Collection Certificate Generator",
       "type": "row"
     }
   ],
