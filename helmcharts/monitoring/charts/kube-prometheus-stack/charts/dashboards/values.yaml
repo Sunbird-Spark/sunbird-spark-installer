@@ -355,10 +355,6 @@ dashboards:
        file: dashboards/secor-consumarlag-kafka.json
      dashboard20:
        file: dashboards/weekly-report.json
-     dashboard25:
-       file: dashboards/kp-flink-jobs-metrics-dashboard.json
-     dashboard26:
-       file: dashboards/yugabytedb.json
      dashboard27:
        file: dashboards/opensearch.json
      dashboard28:
@@ -384,6 +380,21 @@ dashboards2:
    lokilogs:
      logs:
        file: dashboards/loki-logs.json
+   yugabyte:
+     yugabytedb:
+       file: dashboards/yugabytedb.json
+
+# Kept as its own ConfigMap -- kp-flink-jobs-metrics-dashboard.json alone is
+# ~740KB after the pass-5/6 merges (8 real Flink jobs + all the folded-in
+# LP/KP content), which is already close to Kubernetes' 1MB-per-ConfigMap
+# etcd limit on its own. Sharing a ConfigMap with anything else in
+# dashboards/dashboards1/dashboards2 pushed the total past 1048576 bytes and
+# broke `helm upgrade` in the real cluster (ConfigMap "...-dashboards-default"
+# is invalid: []: Too long). See templates/dashboards-json-configmap-3.yaml.
+dashboards3:
+   large:
+     kpflinkjobsmetrics:
+       file: dashboards/kp-flink-jobs-metrics-dashboard.json
 
   #   prometheus-stats:
   #     gnetId: 2
