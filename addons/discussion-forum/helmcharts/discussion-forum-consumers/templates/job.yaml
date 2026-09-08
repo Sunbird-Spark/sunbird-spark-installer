@@ -8,6 +8,9 @@ metadata:
     {{- .Values.provisioningAnnotations | toYaml | nindent 4 }}
 spec:
   template:
+    metadata:
+      labels:
+        kong-admin-client: "true"
     spec:
       initContainers:
       - name: wait-for-kong
