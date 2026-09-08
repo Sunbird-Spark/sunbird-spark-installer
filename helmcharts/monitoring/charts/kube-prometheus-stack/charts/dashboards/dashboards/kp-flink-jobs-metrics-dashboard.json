@@ -18,33 +18,14 @@
   "links": [],
   "panels": [
     {
-      "id": 200008,
-      "type": "text",
-      "title": "\ud83d\udce6 KNOWLEDGEBB (KP) \u2014 Flink Jobs",
+      "collapsed": true,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
-      "options": {
-        "mode": "markdown",
-        "content": ""
-      },
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      }
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 1
-      },
-      "id": 200000,
+      "id": 200008,
       "panels": [
         {
           "cacheTimeout": null,
@@ -125,7 +106,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "transaction-event-processor \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -216,7 +197,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "transaction-event-processor \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -307,7 +288,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "transaction-event-processor \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -398,7 +379,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Audit Event Generator \u2014 Total",
+          "title": "transaction-event-processor \u2014 Audit Event Generator \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -489,7 +470,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Audit Event Generator \u2014 Success",
+          "title": "transaction-event-processor \u2014 Audit Event Generator \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -580,7 +561,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Audit Event Generator \u2014 Failed",
+          "title": "transaction-event-processor \u2014 Audit Event Generator \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -671,7 +652,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Audit History Indexer \u2014 Total",
+          "title": "transaction-event-processor \u2014 Audit History Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -762,7 +743,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Audit History Indexer \u2014 Success",
+          "title": "transaction-event-processor \u2014 Audit History Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -853,7 +834,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Audit History Indexer \u2014 Failed",
+          "title": "transaction-event-processor \u2014 Audit History Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -944,7 +925,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Composite Search Indexer \u2014 Total",
+          "title": "transaction-event-processor \u2014 Composite Search Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1035,7 +1016,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Composite Search Indexer \u2014 Success",
+          "title": "transaction-event-processor \u2014 Composite Search Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1126,7 +1107,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Composite Search Indexer \u2014 Failed",
+          "title": "transaction-event-processor \u2014 Composite Search Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1217,7 +1198,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Obsrv MetaData Generator \u2014 Total",
+          "title": "transaction-event-processor \u2014 Obsrv MetaData Generator \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1308,7 +1289,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Obsrv MetaData Generator \u2014 Success",
+          "title": "transaction-event-processor \u2014 Obsrv MetaData Generator \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1399,7 +1380,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Obsrv MetaData Generator \u2014 Failed",
+          "title": "transaction-event-processor \u2014 Obsrv MetaData Generator \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1490,7 +1471,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "DIALCode External Indexer \u2014 Total",
+          "title": "transaction-event-processor \u2014 DIALCode External Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1581,7 +1562,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "DIALCode External Indexer \u2014 Success",
+          "title": "transaction-event-processor \u2014 DIALCode External Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1672,7 +1653,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "DIALCode External Indexer \u2014 Failed",
+          "title": "transaction-event-processor \u2014 DIALCode External Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1763,7 +1744,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "DIALCode Metric Indexer \u2014 Total",
+          "title": "transaction-event-processor \u2014 DIALCode Metric Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1854,7 +1835,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "DIALCode Metric Indexer \u2014 Success",
+          "title": "transaction-event-processor \u2014 DIALCode Metric Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1945,7 +1926,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "DIALCode Metric Indexer \u2014 Failed",
+          "title": "transaction-event-processor \u2014 DIALCode Metric Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2015,7 +1996,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "DIALCode Metric Indexer \u2014 Lag",
+          "title": "transaction-event-processor \u2014 DIALCode Metric Indexer \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -2051,21 +2032,7 @@
             "align": false,
             "alignLevel": null
           }
-        }
-      ],
-      "title": "transaction-event-processor",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 2
-      },
-      "id": 200001,
-      "panels": [
+        },
         {
           "cacheTimeout": null,
           "colorBackground": false,
@@ -2093,8 +2060,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 1
+            "x": 12,
+            "y": 26
           },
           "id": 39532,
           "interval": null,
@@ -2145,7 +2112,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "knowlg-publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2184,8 +2151,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 1
+            "x": 18,
+            "y": 26
           },
           "id": 39534,
           "interval": null,
@@ -2236,7 +2203,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Content Publish \u2014 Total",
+          "title": "knowlg-publish \u2014 Content Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2275,8 +2242,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 1
+            "x": 0,
+            "y": 31
           },
           "id": 39535,
           "interval": null,
@@ -2327,7 +2294,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Content Publish \u2014 Success",
+          "title": "knowlg-publish \u2014 Content Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2366,8 +2333,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 1
+            "x": 6,
+            "y": 31
           },
           "id": 39536,
           "interval": null,
@@ -2418,7 +2385,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Content Publish \u2014 Failed",
+          "title": "knowlg-publish \u2014 Content Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2457,8 +2424,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 6
+            "x": 12,
+            "y": 31
           },
           "id": 39537,
           "interval": null,
@@ -2509,7 +2476,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Content Publish \u2014 Video Streaming",
+          "title": "knowlg-publish \u2014 Content Publish \u2014 Video Streaming",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2548,8 +2515,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 6
+            "x": 18,
+            "y": 31
           },
           "id": 39539,
           "interval": null,
@@ -2600,7 +2567,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Content Publish \u2014 MVC Processor",
+          "title": "knowlg-publish \u2014 Content Publish \u2014 MVC Processor",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2639,8 +2606,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 6
+            "x": 0,
+            "y": 36
           },
           "id": 39540,
           "interval": null,
@@ -2691,7 +2658,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Content Publish \u2014 Enriched Metadata",
+          "title": "knowlg-publish \u2014 Content Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2730,8 +2697,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 6
+            "x": 6,
+            "y": 36
           },
           "id": 39541,
           "interval": null,
@@ -2782,7 +2749,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Collection Publish \u2014 Total",
+          "title": "knowlg-publish \u2014 Collection Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2821,8 +2788,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 11
+            "x": 12,
+            "y": 36
           },
           "id": 39542,
           "interval": null,
@@ -2873,7 +2840,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Collection Publish \u2014 Success",
+          "title": "knowlg-publish \u2014 Collection Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2912,8 +2879,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 11
+            "x": 18,
+            "y": 36
           },
           "id": 39543,
           "interval": null,
@@ -2964,7 +2931,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Collection Publish \u2014 Failed",
+          "title": "knowlg-publish \u2014 Collection Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3003,8 +2970,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 11
+            "x": 0,
+            "y": 41
           },
           "id": 39545,
           "interval": null,
@@ -3055,7 +3022,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Collection Publish \u2014 Post-Publish Process",
+          "title": "knowlg-publish \u2014 Collection Publish \u2014 Post-Publish Process",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3094,8 +3061,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 11
+            "x": 6,
+            "y": 41
           },
           "id": 39546,
           "interval": null,
@@ -3146,7 +3113,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Collection Publish \u2014 Enriched Metadata",
+          "title": "knowlg-publish \u2014 Collection Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3185,8 +3152,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 16
+            "x": 12,
+            "y": 41
           },
           "id": 39547,
           "interval": null,
@@ -3237,7 +3204,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Question Publish \u2014 Total",
+          "title": "knowlg-publish \u2014 Question Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3276,8 +3243,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 16
+            "x": 18,
+            "y": 41
           },
           "id": 39548,
           "interval": null,
@@ -3328,7 +3295,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Question Publish \u2014 Success",
+          "title": "knowlg-publish \u2014 Question Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3367,8 +3334,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 16
+            "x": 0,
+            "y": 46
           },
           "id": 39549,
           "interval": null,
@@ -3419,7 +3386,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Question Publish \u2014 Failed",
+          "title": "knowlg-publish \u2014 Question Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3458,8 +3425,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 16
+            "x": 6,
+            "y": 46
           },
           "id": 39550,
           "interval": null,
@@ -3510,7 +3477,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Question Publish \u2014 Enriched Metadata",
+          "title": "knowlg-publish \u2014 Question Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3549,8 +3516,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 21
+            "x": 12,
+            "y": 46
           },
           "id": 39551,
           "interval": null,
@@ -3601,7 +3568,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "QuestionSet Publish \u2014 Total",
+          "title": "knowlg-publish \u2014 QuestionSet Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3640,8 +3607,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 21
+            "x": 18,
+            "y": 46
           },
           "id": 39552,
           "interval": null,
@@ -3692,7 +3659,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "QuestionSet Publish \u2014 Success",
+          "title": "knowlg-publish \u2014 QuestionSet Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3731,8 +3698,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 21
+            "x": 0,
+            "y": 51
           },
           "id": 39553,
           "interval": null,
@@ -3783,7 +3750,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "QuestionSet Publish \u2014 Failed",
+          "title": "knowlg-publish \u2014 QuestionSet Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3822,8 +3789,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 21
+            "x": 6,
+            "y": 51
           },
           "id": 39554,
           "interval": null,
@@ -3874,7 +3841,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "QuestionSet Publish \u2014 Enriched Metadata",
+          "title": "knowlg-publish \u2014 QuestionSet Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3913,8 +3880,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 26
+            "x": 12,
+            "y": 51
           },
           "id": 39555,
           "interval": null,
@@ -3965,7 +3932,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enrich Only \u2014 Total",
+          "title": "knowlg-publish \u2014 Enrich Only \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4004,8 +3971,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 26
+            "x": 18,
+            "y": 51
           },
           "id": 39556,
           "interval": null,
@@ -4056,7 +4023,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enrich Only \u2014 Success",
+          "title": "knowlg-publish \u2014 Enrich Only \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4095,8 +4062,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 26
+            "x": 0,
+            "y": 56
           },
           "id": 39557,
           "interval": null,
@@ -4147,7 +4114,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enrich Only \u2014 Failed",
+          "title": "knowlg-publish \u2014 Enrich Only \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4176,8 +4143,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 26
+            "x": 6,
+            "y": 56
           },
           "hiddenSeries": false,
           "id": 39559,
@@ -4217,7 +4184,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Enrich Only \u2014 Lag",
+          "title": "knowlg-publish \u2014 Enrich Only \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -4253,21 +4220,7 @@
             "align": false,
             "alignLevel": null
           }
-        }
-      ],
-      "title": "knowlg-publish",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 3
-      },
-      "id": 200002,
-      "panels": [
+        },
         {
           "cacheTimeout": null,
           "colorBackground": false,
@@ -4295,8 +4248,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 1
+            "x": 12,
+            "y": 56
           },
           "id": 39561,
           "interval": null,
@@ -4347,7 +4300,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Extract \u2014 Extracted",
+          "title": "content-embedding \u2014 Extract \u2014 Extracted",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4386,8 +4339,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 1
+            "x": 18,
+            "y": 56
           },
           "id": 39562,
           "interval": null,
@@ -4438,7 +4391,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Extract \u2014 Failed",
+          "title": "content-embedding \u2014 Extract \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4477,8 +4430,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 1
+            "x": 0,
+            "y": 61
           },
           "id": 39563,
           "interval": null,
@@ -4529,7 +4482,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Chunking \u2014 Chunked",
+          "title": "content-embedding \u2014 Chunking \u2014 Chunked",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4568,8 +4521,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 1
+            "x": 6,
+            "y": 61
           },
           "id": 39564,
           "interval": null,
@@ -4620,7 +4573,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Chunking \u2014 Filtered",
+          "title": "content-embedding \u2014 Chunking \u2014 Filtered",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4659,8 +4612,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 6
+            "x": 12,
+            "y": 61
           },
           "id": 39565,
           "interval": null,
@@ -4711,7 +4664,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Chunking \u2014 Failed",
+          "title": "content-embedding \u2014 Chunking \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4750,8 +4703,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 6
+            "x": 18,
+            "y": 61
           },
           "id": 39566,
           "interval": null,
@@ -4802,7 +4755,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Batch Embedding \u2014 Embedded",
+          "title": "content-embedding \u2014 Batch Embedding \u2014 Embedded",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4841,8 +4794,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 6
+            "x": 0,
+            "y": 66
           },
           "id": 39567,
           "interval": null,
@@ -4893,7 +4846,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Batch Embedding \u2014 Failed",
+          "title": "content-embedding \u2014 Batch Embedding \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4932,8 +4885,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 6
+            "x": 6,
+            "y": 66
           },
           "id": 39568,
           "interval": null,
@@ -4984,7 +4937,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Batch Embedding \u2014 API Calls",
+          "title": "content-embedding \u2014 Batch Embedding \u2014 API Calls",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5023,8 +4976,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 11
+            "x": 12,
+            "y": 66
           },
           "id": 39569,
           "interval": null,
@@ -5075,7 +5028,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Batch Embedding \u2014 Slow API Calls",
+          "title": "content-embedding \u2014 Batch Embedding \u2014 Slow API Calls",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5114,8 +5067,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 11
+            "x": 18,
+            "y": 66
           },
           "id": 39570,
           "interval": null,
@@ -5166,7 +5119,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Quantization \u2014 Quantized",
+          "title": "content-embedding \u2014 Quantization \u2014 Quantized",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5205,8 +5158,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 11
+            "x": 0,
+            "y": 71
           },
           "id": 39571,
           "interval": null,
@@ -5257,7 +5210,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Quantization \u2014 Failed",
+          "title": "content-embedding \u2014 Quantization \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5296,8 +5249,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 11
+            "x": 6,
+            "y": 71
           },
           "id": 39572,
           "interval": null,
@@ -5348,7 +5301,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "OpenSearch Sink \u2014 Success",
+          "title": "content-embedding \u2014 OpenSearch Sink \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5387,8 +5340,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 16
+            "x": 12,
+            "y": 71
           },
           "id": 39573,
           "interval": null,
@@ -5439,7 +5392,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "OpenSearch Sink \u2014 Failed",
+          "title": "content-embedding \u2014 OpenSearch Sink \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5468,8 +5421,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 16
+            "x": 18,
+            "y": 71
           },
           "hiddenSeries": false,
           "id": 39574,
@@ -5509,7 +5462,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "OpenSearch Sink \u2014 Lag",
+          "title": "content-embedding \u2014 OpenSearch Sink \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -5545,21 +5498,7 @@
             "align": false,
             "alignLevel": null
           }
-        }
-      ],
-      "title": "content-embedding",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 4
-      },
-      "id": 200003,
-      "panels": [
+        },
         {
           "aliasColors": {},
           "bars": false,
@@ -5578,7 +5517,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 1
+            "y": 76
           },
           "hiddenSeries": false,
           "id": 19491,
@@ -5618,7 +5557,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Lag",
+          "title": "enrichment-router (metrics not verified \u2014 Lag only) \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -5654,21 +5593,7 @@
             "align": false,
             "alignLevel": null
           }
-        }
-      ],
-      "title": "enrichment-router (metrics not verified \u2014 Lag only)",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 5
-      },
-      "id": 200004,
-      "panels": [
+        },
         {
           "aliasColors": {},
           "bars": false,
@@ -5686,8 +5611,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 1
+            "x": 6,
+            "y": 76
           },
           "hiddenSeries": false,
           "id": 19493,
@@ -5727,7 +5652,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Lag",
+          "title": "caption-generator (metrics not verified \u2014 Lag only) \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -5765,27 +5690,8 @@
           }
         }
       ],
-      "title": "caption-generator (metrics not verified \u2014 Lag only)",
+      "title": "\ud83d\udce6 KNOWLEDGEBB (KP) \u2014 Flink Jobs",
       "type": "row"
-    },
-    {
-      "id": 200009,
-      "type": "text",
-      "title": "\ud83d\udce6 LEARNBB (LP) \u2014 Flink Jobs",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 6
-      },
-      "options": {
-        "mode": "markdown",
-        "content": ""
-      },
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      }
     },
     {
       "collapsed": true,
@@ -5793,9 +5699,9 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 7
+        "y": 1
       },
-      "id": 200005,
+      "id": 200009,
       "panels": [
         {
           "aliasColors": {},
@@ -5855,7 +5761,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Lag",
+          "title": "notification-job (metrics not verified \u2014 Lag only) \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -5891,21 +5797,7 @@
             "align": false,
             "alignLevel": null
           }
-        }
-      ],
-      "title": "notification-job (metrics not verified \u2014 Lag only)",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 8
-      },
-      "id": 200006,
-      "panels": [
+        },
         {
           "aliasColors": {},
           "bars": false,
@@ -5923,7 +5815,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
+            "x": 6,
             "y": 1
           },
           "hiddenSeries": false,
@@ -5964,7 +5856,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Lag",
+          "title": "user-deletion-cleanup (metrics not verified \u2014 Lag only) \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -6000,21 +5892,7 @@
             "align": false,
             "alignLevel": null
           }
-        }
-      ],
-      "title": "user-deletion-cleanup (metrics not verified \u2014 Lag only)",
-      "type": "row"
-    },
-    {
-      "collapsed": true,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 9
-      },
-      "id": 200007,
-      "panels": [
+        },
         {
           "cacheTimeout": null,
           "colorBackground": false,
@@ -6042,7 +5920,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
+            "x": 12,
             "y": 1
           },
           "id": 209,
@@ -6094,7 +5972,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total Events",
+          "title": "Collection Certificate Generator \u2014 Total Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6133,7 +6011,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
+            "x": 18,
             "y": 1
           },
           "id": 226,
@@ -6185,7 +6063,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success Events",
+          "title": "Collection Certificate Generator \u2014 Success Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6224,8 +6102,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 1
+            "x": 0,
+            "y": 6
           },
           "id": 221,
           "interval": null,
@@ -6276,7 +6154,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Skipped Events",
+          "title": "Collection Certificate Generator \u2014 Skipped Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6315,8 +6193,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 1
+            "x": 6,
+            "y": 6
           },
           "id": 220,
           "interval": null,
@@ -6367,7 +6245,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed Events",
+          "title": "Collection Certificate Generator \u2014 Failed Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6406,7 +6284,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
+            "x": 12,
             "y": 6
           },
           "id": 219,
@@ -6458,7 +6336,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enrolment DB Read",
+          "title": "Collection Certificate Generator \u2014 Enrolment DB Read",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6497,7 +6375,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
+            "x": 18,
             "y": 6
           },
           "id": 227,
@@ -6549,7 +6427,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enrolment DB Update",
+          "title": "Collection Certificate Generator \u2014 Enrolment DB Update",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6588,8 +6466,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 6
+            "x": 0,
+            "y": 11
           },
           "id": 228,
           "interval": null,
@@ -6640,7 +6518,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Course Batch DB Read",
+          "title": "Collection Certificate Generator \u2014 Course Batch DB Read",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6679,8 +6557,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 6
+            "x": 6,
+            "y": 11
           },
           "id": 230,
           "interval": null,
@@ -6731,7 +6609,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Notification User ",
+          "title": "Collection Certificate Generator \u2014 Notification User ",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6770,7 +6648,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
+            "x": 12,
             "y": 11
           },
           "id": 229,
@@ -6822,7 +6700,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Skip Notification Us",
+          "title": "Collection Certificate Generator \u2014 Skip Notification Us",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6861,7 +6739,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
+            "x": 18,
             "y": 11
           },
           "id": 231,
@@ -6913,7 +6791,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "User Feed",
+          "title": "Collection Certificate Generator \u2014 User Feed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6947,8 +6825,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 11
+            "x": 0,
+            "y": 16
           },
           "hiddenSeries": false,
           "id": 224,
@@ -7052,7 +6930,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Collection Cert Gene",
+          "title": "Collection Certificate Generator \u2014 Collection Cert Gene",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -7106,8 +6984,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 11
+            "x": 6,
+            "y": 16
           },
           "hiddenSeries": false,
           "id": 225,
@@ -7147,7 +7025,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Lag",
+          "title": "Collection Certificate Generator \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -7185,7 +7063,7 @@
           }
         }
       ],
-      "title": "Collection Certificate Generator",
+      "title": "\ud83d\udce6 LEARNBB (LP) \u2014 Flink Jobs",
       "type": "row"
     }
   ],
