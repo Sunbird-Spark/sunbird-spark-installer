@@ -26,5 +26,7 @@ spec:
           envFrom:
           - configMapRef:
               name: {{ include "common.names.fullname" . }}-env
+          - secretRef:
+              name: {{ include "common.names.fullname" . }}-secrets
       restartPolicy: Never
   backoffLimit: 30
