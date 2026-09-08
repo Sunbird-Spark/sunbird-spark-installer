@@ -5091,7 +5091,7 @@
           }
         }
       ],
-      "title": "enrichment-router (metrics not verified \u2014 Lag only)",
+      "title": "enrichment-router (no custom metrics in source \u2014 Lag only)",
       "type": "row"
     },
     {
@@ -5200,7 +5200,7 @@
           }
         }
       ],
-      "title": "caption-generator (metrics not verified \u2014 Lag only)",
+      "title": "caption-generator (no custom metrics in source \u2014 Lag only)",
       "type": "row"
     },
     {
@@ -7384,5 +7384,5 @@
   "title": "Flink Processing",
   "uid": "YngLt0kG1",
   "version": 1,
-  "description": "Real Flink jobs only, confirmed against the actual chart config and live cluster pods. KP = knowledgebb (5 jobs), LP = learnbb (3 jobs), 8 total. 6 of 8 jobs have fully verified per-operator metrics, read directly from real source: transaction-event-processor, knowlg-publish, content-embedding (github.com/Sunbird-Knowlg/knowledge-platform-jobs), and Collection Certificate Generator, notification-job, user-deletion-cleanup (github.com/Sunbird-Lern/data-pipeline). DIALCode panels on transaction-event-processor only report data if the DIAL addon is deployed -- confirmed not deployed in this cluster today. enrichment-router and caption-generator are the only 2 jobs still unverified -- they're Python py-flink jobs and their source repo wasn't located. Only the universal Flink Kafka-consumer Lag metric is shown for these 2; didn't guess at their business metrics."
+  "description": "Real Flink jobs only, confirmed against the actual chart config and live cluster pods. KP = knowledgebb (5 jobs), LP = learnbb (3 jobs), 8 total. 6 of 8 jobs have fully verified per-operator metrics, read directly from real source: transaction-event-processor, knowlg-publish, content-embedding (github.com/Sunbird-Knowlg/knowledge-platform-jobs), and Collection Certificate Generator, notification-job, user-deletion-cleanup (github.com/Sunbird-Lern/data-pipeline). DIALCode panels on transaction-event-processor only report data if the DIAL addon is deployed -- confirmed not deployed in this cluster today. enrichment-router and caption-generator (github.com/Sunbird-Knowlg/ai-pipeline, PyFlink jobs) genuinely have no custom Prometheus/Flink metrics in their source code -- checked every function, only time.perf_counter() duration logging to application logs, nothing exported as a metric. Lag-only is the complete, correct picture for these 2, not a gap in verification."
 }
