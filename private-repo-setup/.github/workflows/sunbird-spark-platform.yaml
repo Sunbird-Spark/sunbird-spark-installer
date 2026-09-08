@@ -171,15 +171,30 @@ jobs:
         run: |
           if ! command -v tofu &>/dev/null; then
             sudo apt-get install -y unzip -q
-            curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
+            TOFU_VERSION="1.11.4"
+            curl -sLO "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
+            curl -sLO "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
+            grep " tofu_${TOFU_VERSION}_linux_amd64.zip$" "tofu_${TOFU_VERSION}_SHA256SUMS" | sha256sum -c -
+            sudo unzip -qo tofu_${TOFU_VERSION}_linux_amd64.zip -d /usr/local/bin/
+            rm tofu_${TOFU_VERSION}_linux_amd64.zip tofu_${TOFU_VERSION}_SHA256SUMS
           fi
           if ! command -v terragrunt &>/dev/null; then
-            sudo wget -qO /usr/local/bin/terragrunt               https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.21/terragrunt_linux_amd64
-            sudo chmod +x /usr/local/bin/terragrunt
+            TERRAGRUNT_VERSION="0.77.5"
+            curl -sLO "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_amd64"
+            curl -sLO "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/SHA256SUMS"
+            grep " terragrunt_linux_amd64$" SHA256SUMS | sha256sum -c -
+            sudo install -m 0755 terragrunt_linux_amd64 /usr/local/bin/terragrunt
+            rm terragrunt_linux_amd64 SHA256SUMS
           fi
           if ! command -v yq &>/dev/null; then
-            sudo wget -qO /usr/local/bin/yq               https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-            sudo chmod +x /usr/local/bin/yq
+            YQ_VERSION="4.44.1"
+            curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
+            curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums"
+            curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums_hashes_order"
+            YQ_SHA256_FIELD=$(($(grep -n '^SHA-256$' checksums_hashes_order | cut -d: -f1) + 1))
+            grep '^yq_linux_amd64 ' checksums | awk -v f="$YQ_SHA256_FIELD" '{print $f"  yq_linux_amd64"}' | sha256sum -c -
+            sudo install -m 0755 yq_linux_amd64 /usr/local/bin/yq
+            rm yq_linux_amd64 checksums checksums_hashes_order
           fi
           echo "/usr/local/bin" >> $GITHUB_PATH
           export PATH="/usr/local/bin:$PATH"

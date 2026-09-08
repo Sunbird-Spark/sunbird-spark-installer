@@ -128,13 +128,26 @@ jobs:
 
       - name: Install Terraform Tools
         run: |
-          curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
-          sudo wget -qO /usr/local/bin/terragrunt \
-            https://github.com/gruntwork-io/terragrunt/releases/download/v1.0.3/terragrunt_linux_amd64
-          sudo chmod +x /usr/local/bin/terragrunt
-          sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+          TOFU_VERSION="1.11.4"
+          curl -sLO "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
+          curl -sLO "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
+          grep " tofu_${TOFU_VERSION}_linux_amd64.zip$" "tofu_${TOFU_VERSION}_SHA256SUMS" | sha256sum -c -
+          sudo unzip -qo tofu_${TOFU_VERSION}_linux_amd64.zip -d /usr/local/bin/
+          rm tofu_${TOFU_VERSION}_linux_amd64.zip tofu_${TOFU_VERSION}_SHA256SUMS
+          TERRAGRUNT_VERSION="0.77.5"
+          curl -sLO "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_amd64"
+          curl -sLO "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/SHA256SUMS"
+          grep " terragrunt_linux_amd64$" SHA256SUMS | sha256sum -c -
+          sudo install -m 0755 terragrunt_linux_amd64 /usr/local/bin/terragrunt
+          rm terragrunt_linux_amd64 SHA256SUMS
+          YQ_VERSION="4.44.1"
+          curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
+          curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums"
+          curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums_hashes_order"
+          YQ_SHA256_FIELD=$(($(grep -n '^SHA-256$' checksums_hashes_order | cut -d: -f1) + 1))
+          grep '^yq_linux_amd64 ' checksums | awk -v f="$YQ_SHA256_FIELD" '{print $f"  yq_linux_amd64"}' | sha256sum -c -
+          sudo install -m 0755 yq_linux_amd64 /usr/local/bin/yq
+          rm yq_linux_amd64 checksums checksums_hashes_order
           tofu --version && terragrunt --version && yq --version
 
       - name: Setup Environment Folder
@@ -278,12 +291,26 @@ jobs:
 
       - name: Install Deploy Tools
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+          KUBECTL_VER=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+          curl -sLO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
+          curl -sLO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl.sha256"
+          echo "$(cat kubectl.sha256)  kubectl" | sha256sum -c -
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/ && rm kubectl.sha256
+          HELM_VERSION="3.21.4"
+          curl -sLO "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+          curl -sLO "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+          sha256sum -c "helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+          tar -xzf "helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+          sudo install -m 0755 linux-amd64/helm /usr/local/bin/helm
+          rm -rf helm-v${HELM_VERSION}-linux-amd64.tar.gz helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum linux-amd64
+          YQ_VERSION="4.44.1"
+          curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
+          curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums"
+          curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums_hashes_order"
+          YQ_SHA256_FIELD=$(($(grep -n '^SHA-256$' checksums_hashes_order | cut -d: -f1) + 1))
+          grep '^yq_linux_amd64 ' checksums | awk -v f="$YQ_SHA256_FIELD" '{print $f"  yq_linux_amd64"}' | sha256sum -c -
+          sudo install -m 0755 yq_linux_amd64 /usr/local/bin/yq
+          rm yq_linux_amd64 checksums checksums_hashes_order
           kubectl version --client && helm version && yq --version
 
       - name: Get AKS Credentials
@@ -398,12 +425,26 @@ jobs:
 
       - name: Install Deploy Tools
         run: |
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          sudo wget -qO /usr/local/bin/yq \
-            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+          KUBECTL_VER=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+          curl -sLO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
+          curl -sLO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl.sha256"
+          echo "$(cat kubectl.sha256)  kubectl" | sha256sum -c -
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/ && rm kubectl.sha256
+          HELM_VERSION="3.21.4"
+          curl -sLO "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+          curl -sLO "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+          sha256sum -c "helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+          tar -xzf "helm-v${HELM_VERSION}-linux-amd64.tar.gz"
+          sudo install -m 0755 linux-amd64/helm /usr/local/bin/helm
+          rm -rf helm-v${HELM_VERSION}-linux-amd64.tar.gz helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum linux-amd64
+          YQ_VERSION="4.44.1"
+          curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
+          curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums"
+          curl -sLO "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums_hashes_order"
+          YQ_SHA256_FIELD=$(($(grep -n '^SHA-256$' checksums_hashes_order | cut -d: -f1) + 1))
+          grep '^yq_linux_amd64 ' checksums | awk -v f="$YQ_SHA256_FIELD" '{print $f"  yq_linux_amd64"}' | sha256sum -c -
+          sudo install -m 0755 yq_linux_amd64 /usr/local/bin/yq
+          rm yq_linux_amd64 checksums checksums_hashes_order
           kubectl version --client && helm version && yq --version
 
       - name: Get AKS Credentials
