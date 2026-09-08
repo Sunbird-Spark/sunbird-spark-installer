@@ -2609,97 +2609,6 @@
             "x": 0,
             "y": 36
           },
-          "id": 39540,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_process_enriched_metadata_event_count[$__range]))",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "knowlg-publish \u2014 Content Publish \u2014 Enriched Metadata",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Flink-Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 6,
-            "x": 6,
-            "y": 36
-          },
           "id": 39541,
           "interval": null,
           "links": [],
@@ -2788,7 +2697,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
+            "x": 6,
             "y": 36
           },
           "id": 39542,
@@ -2879,7 +2788,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
+            "x": 12,
             "y": 36
           },
           "id": 39543,
@@ -2970,8 +2879,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 41
+            "x": 18,
+            "y": 36
           },
           "id": 39545,
           "interval": null,
@@ -3061,98 +2970,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 41
-          },
-          "id": 39546,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_publish_process_enriched_metadata_event_count[$__range]))",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "knowlg-publish \u2014 Collection Publish \u2014 Enriched Metadata",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Flink-Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 6,
-            "x": 12,
+            "x": 0,
             "y": 41
           },
           "id": 39547,
@@ -3243,7 +3061,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
+            "x": 6,
             "y": 41
           },
           "id": 39548,
@@ -3334,8 +3152,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 46
+            "x": 12,
+            "y": 41
           },
           "id": 39549,
           "interval": null,
@@ -3425,99 +3243,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 46
-          },
-          "id": 39550,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_question_publish_process_enriched_metadata_event_count[$__range]))",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "knowlg-publish \u2014 Question Publish \u2014 Enriched Metadata",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Flink-Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 6,
-            "x": 12,
-            "y": 46
+            "x": 18,
+            "y": 41
           },
           "id": 39551,
           "interval": null,
@@ -3607,7 +3334,7 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
+            "x": 0,
             "y": 46
           },
           "id": 39552,
@@ -3698,8 +3425,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 51
+            "x": 6,
+            "y": 46
           },
           "id": 39553,
           "interval": null,
@@ -3789,99 +3516,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 51
-          },
-          "id": 39554,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_questionset_publish_process_enriched_metadata_event_count[$__range]))",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "knowlg-publish \u2014 QuestionSet Publish \u2014 Enriched Metadata",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Flink-Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 6,
             "x": 12,
-            "y": 51
+            "y": 46
           },
           "id": 39555,
           "interval": null,
@@ -3972,7 +3608,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 51
+            "y": 46
           },
           "id": 39556,
           "interval": null,
@@ -4063,7 +3699,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 56
+            "y": 51
           },
           "id": 39557,
           "interval": null,
@@ -4144,7 +3780,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 56
+            "y": 51
           },
           "hiddenSeries": false,
           "id": 39559,
@@ -4249,7 +3885,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 56
+            "y": 51
           },
           "id": 39561,
           "interval": null,
@@ -4340,7 +3976,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 56
+            "y": 51
           },
           "id": 39562,
           "interval": null,
@@ -4431,7 +4067,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 61
+            "y": 56
           },
           "id": 39563,
           "interval": null,
@@ -4522,7 +4158,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 61
+            "y": 56
           },
           "id": 39564,
           "interval": null,
@@ -4613,7 +4249,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 61
+            "y": 56
           },
           "id": 39565,
           "interval": null,
@@ -4704,7 +4340,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 61
+            "y": 56
           },
           "id": 39566,
           "interval": null,
@@ -4795,7 +4431,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 66
+            "y": 61
           },
           "id": 39567,
           "interval": null,
@@ -4886,7 +4522,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 66
+            "y": 61
           },
           "id": 39570,
           "interval": null,
@@ -4977,7 +4613,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 66
+            "y": 61
           },
           "id": 39571,
           "interval": null,
@@ -5068,7 +4704,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 66
+            "y": 61
           },
           "id": 39572,
           "interval": null,
@@ -5159,7 +4795,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 71
+            "y": 66
           },
           "id": 39573,
           "interval": null,
@@ -5240,7 +4876,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 71
+            "y": 66
           },
           "hiddenSeries": false,
           "id": 39574,
@@ -5335,7 +4971,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 71
+            "y": 66
           },
           "hiddenSeries": false,
           "id": 19491,
@@ -5430,7 +5066,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 71
+            "y": 66
           },
           "hiddenSeries": false,
           "id": 19493,
