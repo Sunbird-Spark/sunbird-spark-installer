@@ -5234,7 +5234,283 @@
             "y": 1
           },
           "hiddenSeries": false,
-          "id": 500061,
+          "id": 900000,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_total_events_count[$__range]))",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Total",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "singlestat",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 900001,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_success_event_count[$__range]))",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Success",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "singlestat",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 900002,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_failed_event_count[$__range]))",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Failed",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "singlestat",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 6
+          },
+          "hiddenSeries": false,
+          "id": 900003,
           "legend": {
             "avg": false,
             "current": true,
@@ -5309,7 +5585,7 @@
           }
         }
       ],
-      "title": "notification-job (metrics not verified \u2014 Lag only)",
+      "title": "notification-job",
       "type": "row"
     },
     {
@@ -5343,7 +5619,559 @@
             "y": 1
           },
           "hiddenSeries": false,
-          "id": 500062,
+          "id": 900004,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_total_delete_events_count[$__range]))",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Total",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "singlestat",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 900005,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_success_message_count[$__range]))",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Success",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "singlestat",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 900006,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_skipped_message_count[$__range]))",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Skipped",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "singlestat",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 18,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 900007,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_api_read_success_count[$__range]))",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "API Read Success",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "singlestat",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 6
+          },
+          "hiddenSeries": false,
+          "id": 900008,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_api_read_miss_count[$__range]))",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "API Read Miss",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "singlestat",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 6
+          },
+          "hiddenSeries": false,
+          "id": 900009,
+          "legend": {
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_db_update_success_count[$__range]))",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "DB Update",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "singlestat",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 11
+          },
+          "hiddenSeries": false,
+          "id": 900010,
           "legend": {
             "avg": false,
             "current": true,
@@ -5418,7 +6246,7 @@
           }
         }
       ],
-      "title": "user-deletion-cleanup (metrics not verified \u2014 Lag only)",
+      "title": "user-deletion-cleanup",
       "type": "row"
     },
     {
@@ -5461,7 +6289,7 @@
             "x": 0,
             "y": 1
           },
-          "id": 500063,
+          "id": 501074,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -5510,7 +6338,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total Events",
+          "title": "Certificate Generator \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5552,7 +6380,7 @@
             "x": 6,
             "y": 1
           },
-          "id": 500064,
+          "id": 501075,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -5601,7 +6429,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success Events",
+          "title": "Certificate Generator \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5643,98 +6471,7 @@
             "x": 12,
             "y": 1
           },
-          "id": 500065,
-          "interval": null,
-          "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "",
-          "targets": [
-            {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_skipped_event_count[$__range]))",
-              "instant": true,
-              "interval": "",
-              "legendFormat": "",
-              "refId": "A"
-            }
-          ],
-          "thresholds": "",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Skipped Events",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#d44a3a",
-            "rgba(237, 129, 40, 0.89)",
-            "#73BF69"
-          ],
-          "datasource": "Flink-Prometheus",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
-          "gridPos": {
-            "h": 5,
-            "w": 6,
-            "x": 18,
-            "y": 1
-          },
-          "id": 500066,
+          "id": 501076,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -5783,7 +6520,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed Events",
+          "title": "Certificate Generator \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5822,10 +6559,10 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 6
+            "x": 18,
+            "y": 1
           },
-          "id": 500067,
+          "id": 501077,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -5874,7 +6611,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enrolment DB Read",
+          "title": "Certificate Generator \u2014 Enrolment DB Read",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5913,10 +6650,10 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
+            "x": 0,
             "y": 6
           },
-          "id": 500068,
+          "id": 501078,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -5965,7 +6702,98 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enrolment DB Update",
+          "title": "Certificate Generator \u2014 DB Update",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
+            }
+          ],
+          "valueName": "current"
+        },
+        {
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#73BF69",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
+          "datasource": "Flink-Prometheus",
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 6
+          },
+          "id": 501079,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false,
+            "ymax": null,
+            "ymin": null
+          },
+          "tableColumn": "",
+          "targets": [
+            {
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notifier_notified_user_count[$__range]))",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "A"
+            }
+          ],
+          "thresholds": "",
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Notifier \u2014 Notified User",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6007,7 +6835,7 @@
             "x": 12,
             "y": 6
           },
-          "id": 500069,
+          "id": 501080,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -6046,7 +6874,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_db_course_batch_read_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notifier_skipped_notify_user_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -6056,7 +6884,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Course Batch DB Read",
+          "title": "Notifier \u2014 Skip Notify User",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6098,7 +6926,7 @@
             "x": 18,
             "y": 6
           },
-          "id": 500070,
+          "id": 501081,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -6137,7 +6965,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_notified_user_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notifier_db_course_batch_read_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -6147,7 +6975,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Notification User ",
+          "title": "Notifier \u2014 Course Batch DB Read",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6189,7 +7017,7 @@
             "x": 0,
             "y": 11
           },
-          "id": 500071,
+          "id": 501082,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -6228,7 +7056,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_skipped_notify_user_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notifier_failed_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -6238,7 +7066,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Skip Notification Us",
+          "title": "Notifier \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6280,7 +7108,7 @@
             "x": 6,
             "y": 11
           },
-          "id": 500072,
+          "id": 501083,
           "interval": null,
           "links": [],
           "mappingType": 1,
@@ -6319,7 +7147,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_user_feed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_feed_user_feed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -6329,7 +7157,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "User Feed",
+          "title": "User Feed \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6342,15 +7170,14 @@
           "valueName": "current"
         },
         {
-          "aliasColors": {
-            "Failed Events": "red",
-            "Skipped Events": "dark-purple",
-            "Success Events": "yellow",
-            "Total Events": "green"
-          },
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
+          "cacheTimeout": null,
+          "colorBackground": false,
+          "colorValue": true,
+          "colors": [
+            "#73BF69",
+            "rgba(237, 129, 40, 0.89)",
+            "#d44a3a"
+          ],
           "datasource": "Flink-Prometheus",
           "fieldConfig": {
             "defaults": {
@@ -6358,152 +7185,80 @@
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "format": "none",
+          "gauge": {
+            "maxValue": 100,
+            "minValue": 0,
+            "show": false,
+            "thresholdLabels": false,
+            "thresholdMarkers": true
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 12,
             "y": 11
           },
-          "hiddenSeries": false,
-          "id": 500073,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": true,
-            "values": true
+          "id": 501084,
+          "interval": null,
+          "links": [],
+          "mappingType": 1,
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "maxDataPoints": 100,
+          "nullPointMode": "connected",
+          "nullText": null,
+          "postfix": "",
+          "postfixFontSize": "50%",
+          "prefix": "",
+          "prefixFontSize": "50%",
+          "rangeMaps": [
+            {
+              "from": "null",
+              "text": "N/A",
+              "to": "null"
+            }
+          ],
+          "sparkline": {
+            "fillColor": "rgba(31, 118, 189, 0.18)",
+            "full": false,
+            "lineColor": "rgb(31, 120, 193)",
+            "show": false,
+            "ymax": null,
+            "ymin": null
           },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_success_events_count)",
-              "instant": false,
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_feed_failed_events_count[$__range]))",
+              "instant": true,
               "interval": "",
-              "legendFormat": "Success Events",
+              "legendFormat": "",
               "refId": "A"
-            },
-            {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_skipped_event_count)",
-              "instant": false,
-              "interval": "",
-              "intervalFactor": 1,
-              "legendFormat": "Skipped Events",
-              "refId": "B"
-            },
-            {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_failed_events_count)",
-              "instant": false,
-              "interval": "",
-              "legendFormat": "Failed Events",
-              "refId": "C"
-            },
-            {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_total_events_count)",
-              "instant": false,
-              "interval": "",
-              "legendFormat": "Total Events",
-              "refId": "D"
-            },
-            {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_enrollment_db_read_count)",
-              "instant": false,
-              "interval": "",
-              "legendFormat": "Enrolment DB Read",
-              "refId": "E"
-            },
-            {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_db_update_user_enrollment_count)",
-              "instant": false,
-              "interval": "",
-              "legendFormat": "Enrolment DB Update",
-              "refId": "F"
-            },
-            {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_db_course_batch_read_count)",
-              "instant": false,
-              "interval": "",
-              "legendFormat": "Course Batch DB Read",
-              "refId": "G"
-            },
-            {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_notified_user_count)",
-              "instant": false,
-              "interval": "",
-              "legendFormat": "Notification User",
-              "refId": "H"
-            },
-            {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_skipped_notify_user_count)",
-              "instant": false,
-              "interval": "",
-              "legendFormat": "Skip Notification User",
-              "refId": "I"
-            },
-            {
-              "expr": "sum(flink_taskmanager_job_task_operator_collection_certificate_generator_user_feed_count)",
-              "instant": false,
-              "interval": "",
-              "legendFormat": "User Feed",
-              "refId": "J"
             }
           ],
-          "thresholds": [],
+          "thresholds": "",
           "timeFrom": null,
-          "timeRegions": [],
           "timeShift": null,
-          "title": "Collection Cert Gene",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
+          "title": "User Feed \u2014 Failed",
+          "type": "singlestat",
+          "valueFontSize": "80%",
+          "valueMaps": [
             {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+              "op": "=",
+              "text": "N/A",
+              "value": "null"
             }
           ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+          "valueName": "current"
         },
         {
           "aliasColors": {},
@@ -6520,13 +7275,13 @@
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
-            "h": 5,
-            "w": 6,
-            "x": 18,
-            "y": 11
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 16
           },
           "hiddenSeries": false,
-          "id": 500074,
+          "id": 501085,
           "legend": {
             "avg": false,
             "current": true,
@@ -6629,5 +7384,5 @@
   "title": "Flink Processing",
   "uid": "YngLt0kG1",
   "version": 1,
-  "description": "Real Flink jobs only, confirmed against the actual chart config and live cluster pods. KP = knowledgebb (5 jobs), LP = learnbb (3 jobs), 8 total. transaction-event-processor, knowlg-publish, content-embedding, and Collection Certificate Generator have fully verified per-operator metrics -- read directly from the real source (github.com/Sunbird-Knowlg/knowledge-platform-jobs) or, for Collection Certificate Generator, from this dashboard's own pre-existing working content. DIALCode panels on transaction-event-processor only report data if the DIAL addon is deployed (deployed_dial_addon=true). enrichment-router, caption-generator, notification-job, and user-deletion-cleanup only have the universal Flink Kafka-consumer Lag metric -- their business-metric source wasn't located (enrichment-router/caption-generator are Python jobs in a different, unidentified repo; notification-job/user-deletion-cleanup's Flink job source repo wasn't found either -- the notification-service GitHub repo is the API microservice, not the Flink job). Didn't guess at metric names for these 4 -- add real panels once their source is located."
+  "description": "Real Flink jobs only, confirmed against the actual chart config and live cluster pods. KP = knowledgebb (5 jobs), LP = learnbb (3 jobs), 8 total. 6 of 8 jobs have fully verified per-operator metrics, read directly from real source: transaction-event-processor, knowlg-publish, content-embedding (github.com/Sunbird-Knowlg/knowledge-platform-jobs), and Collection Certificate Generator, notification-job, user-deletion-cleanup (github.com/Sunbird-Lern/data-pipeline). DIALCode panels on transaction-event-processor only report data if the DIAL addon is deployed -- confirmed not deployed in this cluster today. enrichment-router and caption-generator are the only 2 jobs still unverified -- they're Python py-flink jobs and their source repo wasn't located. Only the universal Flink Kafka-consumer Lag metric is shown for these 2; didn't guess at their business metrics."
 }
