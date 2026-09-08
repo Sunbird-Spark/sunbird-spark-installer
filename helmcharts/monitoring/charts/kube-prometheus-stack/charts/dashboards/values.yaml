@@ -378,12 +378,7 @@ dashboards2:
        file: dashboards/nginx-detailed.json
      nginx:
        file: dashboards/nginx.json
-   opa:
-     opametrics:
-       file: dashboards/opa-metrics.json
    envoy:
-     envoymetrics:
-       file: dashboards/envoy-proxy.json
      envoyglobal:
        file: dashboards/envoy-global.json
    blackbox:
