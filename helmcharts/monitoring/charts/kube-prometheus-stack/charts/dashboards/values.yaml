@@ -351,99 +351,50 @@ dashboards:
        file: dashboards/api-manager.json
      dashboard2:
        file: dashboards/device-register-apimetrics.json
-     dashboard5:
-       file: dashboards/druid.json
-     dashboard6:
-       file: dashboards/elasticsearch.json
-     dashboard9:
-       file: dashboards/host-details.json
-     dashboard10:
-       file: dashboards/load-metrics.json
-     dashboard11:
-       file: dashboards/lp-pipline-metrics.json
-     dashboard12:
-       file: dashboards/lp-pipeline-metricsLag.json
-     dashboard13:
-       file: dashboards/lpa-metrics.json
-     dashboard14:
-       file: dashboards/master-dashboard.json
-     dashboard16:
-       file: dashboards/noc-dashboard1.json
-     dashboard17:
-       file: dashboards/prometheus-stats.json
-     dashboard18:
-       file: dashboards/redis.json
      dashboard19:
        file: dashboards/secor-consumarlag-kafka.json
      dashboard20:
        file: dashboards/weekly-report.json
-     dashboard21:
-       file: dashboards/process-exporter.json
-     dashboard24:
-       file: dashboards/cassandra.json
-     dashboard25:
-       file: dashboards/kp-flink-jobs-metrics-dashboard.json
+     dashboard27:
+       file: dashboards/opensearch.json
+     dashboard28:
+       file: dashboards/backup-and-recovery.json
+     dashboard29:
+       file: dashboards/volume-autoscaler.json
 
 dashboards1:
-   data-pipeline:
-     lag-dashboard:
-       file: dashboards/lag-dashboard.json
-     flink-jobs:
-       file: dashboards/data-pipeline-metrics-flink.json
    server:
-     service-memory:
-       file: dashboards/service-memory.json
      node-exporter:
        file: dashboards/node-exporter.json
-     health:
-       file: dashboards/health.json
 
 dashboards2:
-   kong:
-     dashboardkong1:
-       file: dashboards/api-manager-req-resp.json
-     dashboardkong2:
-       file: dashboards/api-manager-aggregated-beta.json
-     dashboardkong3:
-       file: dashboards/api-manager-old.json
-     dashboardkong4:
-       file: dashboards/api-manager-req-resp-aggregated-beta.json
-     dashboardkong5:
-       file: dashboards/api-manager-consumerlevel-dashboard.json
-   fluentbit:
-     fluent-bit:
-       file: dashboards/fluent-bit.json
    nginx:
-     nginxdetailed:
-       file: dashboards/nginx-detailed.json
      nginx:
        file: dashboards/nginx.json
-   hpa:
-     hpa:
-       file: dashboards/hpa.json
-   dashboardall:
-     dashboard-all:
-       file: dashboards/dashboard-all.json
-   opa:
-     opametrics:
-       file: dashboards/opa-metrics.json
    envoy:
-     envoymetrics:
-       file: dashboards/envoy-proxy.json
      envoyglobal:
        file: dashboards/envoy-global.json
-   graylog:
-     graylogmetrics:
-       file: dashboards/graylog-dashboard.json
    blackbox:
      blackboxmetrics:
        file: dashboards/blackbox-exporter.json
    lokilogs:
      logs:
        file: dashboards/loki-logs.json
-   lokidashboard:
-     dashboard:
-       file: dashboards/loki-dashboard.json
+   yugabyte:
+     yugabytedb:
+       file: dashboards/yugabytedb.json
+
+# Kept as its own ConfigMap -- kp-flink-jobs-metrics-dashboard.json alone is
+# ~740KB after the pass-5/6 merges (8 real Flink jobs + all the folded-in
+# LP/KP content), which is already close to Kubernetes' 1MB-per-ConfigMap
+# etcd limit on its own. Sharing a ConfigMap with anything else in
+# dashboards/dashboards1/dashboards2 pushed the total past 1048576 bytes and
+# broke `helm upgrade` in the real cluster (ConfigMap "...-dashboards-default"
+# is invalid: []: Too long). See templates/dashboards-json-configmap-3.yaml.
+dashboards3:
+   large:
+     kpflinkjobsmetrics:
+       file: dashboards/kp-flink-jobs-metrics-dashboard.json
 
   #   prometheus-stats:
   #     gnetId: 2
