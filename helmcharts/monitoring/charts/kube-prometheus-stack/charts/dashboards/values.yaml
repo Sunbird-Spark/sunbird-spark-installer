@@ -374,8 +374,6 @@ dashboards1:
 
 dashboards2:
    nginx:
-     nginxdetailed:
-       file: dashboards/nginx-detailed.json
      nginx:
        file: dashboards/nginx.json
    envoy:
