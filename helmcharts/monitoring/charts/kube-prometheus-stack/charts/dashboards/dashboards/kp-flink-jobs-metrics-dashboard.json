@@ -5352,7 +5352,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_success_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_success_events_count[$__range]))",
               "refId": "A"
             }
           ],
@@ -5444,7 +5444,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_failed_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_failed_events_count[$__range]))",
               "refId": "A"
             }
           ],
