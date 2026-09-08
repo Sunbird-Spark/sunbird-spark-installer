@@ -373,11 +373,6 @@ dashboards1:
        file: dashboards/node-exporter.json
 
 dashboards2:
-   kong:
-     dashboardkong1:
-       file: dashboards/api-manager-req-resp.json
-     dashboardkong5:
-       file: dashboards/api-manager-consumerlevel-dashboard.json
    nginx:
      nginxdetailed:
        file: dashboards/nginx-detailed.json
