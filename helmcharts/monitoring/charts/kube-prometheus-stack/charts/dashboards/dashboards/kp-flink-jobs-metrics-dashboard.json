@@ -320,25 +320,6 @@
           "valueName": "current"
         },
         {
-          "id": 140583,
-          "type": "text",
-          "title": "Audit Event Generator",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 6
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
-        {
           "cacheTimeout": null,
           "colorBackground": false,
           "colorValue": true,
@@ -365,8 +346,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 7
+            "x": 18,
+            "y": 1
           },
           "id": 39504,
           "interval": null,
@@ -417,7 +398,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "Audit Event Generator \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -456,8 +437,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 7
+            "x": 0,
+            "y": 6
           },
           "id": 39505,
           "interval": null,
@@ -508,7 +489,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "Audit Event Generator \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -547,8 +528,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 7
+            "x": 6,
+            "y": 6
           },
           "id": 39506,
           "interval": null,
@@ -599,7 +580,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Audit Event Generator \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -610,25 +591,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140588,
-          "type": "text",
-          "title": "Audit History Indexer",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 12
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -657,8 +619,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 13
+            "x": 12,
+            "y": 6
           },
           "id": 39510,
           "interval": null,
@@ -709,7 +671,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "Audit History Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -748,8 +710,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 13
+            "x": 18,
+            "y": 6
           },
           "id": 39511,
           "interval": null,
@@ -800,7 +762,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "Audit History Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -839,8 +801,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 13
+            "x": 0,
+            "y": 11
           },
           "id": 39512,
           "interval": null,
@@ -891,7 +853,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Audit History Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -902,25 +864,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140593,
-          "type": "text",
-          "title": "Composite Search Indexer",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 18
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -949,8 +892,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 19
+            "x": 6,
+            "y": 11
           },
           "id": 39515,
           "interval": null,
@@ -1001,7 +944,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "Composite Search Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1040,8 +983,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 19
+            "x": 12,
+            "y": 11
           },
           "id": 39516,
           "interval": null,
@@ -1092,7 +1035,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "Composite Search Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1131,8 +1074,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 19
+            "x": 18,
+            "y": 11
           },
           "id": 39517,
           "interval": null,
@@ -1183,7 +1126,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Composite Search Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1194,25 +1137,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140597,
-          "type": "text",
-          "title": "Obsrv MetaData Generator",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 24
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -1242,7 +1166,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 25
+            "y": 16
           },
           "id": 39518,
           "interval": null,
@@ -1293,7 +1217,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "Obsrv MetaData Generator \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1333,7 +1257,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 25
+            "y": 16
           },
           "id": 39519,
           "interval": null,
@@ -1384,7 +1308,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "Obsrv MetaData Generator \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1424,7 +1348,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 25
+            "y": 16
           },
           "id": 39520,
           "interval": null,
@@ -1475,7 +1399,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Obsrv MetaData Generator \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1486,25 +1410,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140602,
-          "type": "text",
-          "title": "DIALCode External Indexer",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 30
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -1533,8 +1438,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 31
+            "x": 18,
+            "y": 16
           },
           "id": 39524,
           "interval": null,
@@ -1585,7 +1490,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "DIALCode External Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1624,8 +1529,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 31
+            "x": 0,
+            "y": 21
           },
           "id": 39525,
           "interval": null,
@@ -1676,7 +1581,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "DIALCode External Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1715,8 +1620,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 31
+            "x": 6,
+            "y": 21
           },
           "id": 39526,
           "interval": null,
@@ -1767,7 +1672,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "DIALCode External Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1778,25 +1683,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140606,
-          "type": "text",
-          "title": "DIALCode Metric Indexer",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 36
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -1825,8 +1711,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 37
+            "x": 12,
+            "y": 21
           },
           "id": 39527,
           "interval": null,
@@ -1877,7 +1763,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "DIALCode Metric Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1916,8 +1802,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 37
+            "x": 18,
+            "y": 21
           },
           "id": 39528,
           "interval": null,
@@ -1968,7 +1854,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "DIALCode Metric Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2007,8 +1893,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 37
+            "x": 0,
+            "y": 26
           },
           "id": 39529,
           "interval": null,
@@ -2059,7 +1945,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "DIALCode Metric Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2088,8 +1974,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 37
+            "x": 6,
+            "y": 26
           },
           "hiddenSeries": false,
           "id": 39530,
@@ -2129,7 +2015,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Lag",
+          "title": "DIALCode Metric Indexer \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -2174,7 +2060,7 @@
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 42
+            "y": 31
           },
           "options": {
             "mode": "markdown",
@@ -2213,7 +2099,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 43
+            "y": 32
           },
           "id": 39532,
           "interval": null,
@@ -2277,25 +2163,6 @@
           "valueName": "current"
         },
         {
-          "id": 140614,
-          "type": "text",
-          "title": "Content Publish",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 48
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
-        {
           "cacheTimeout": null,
           "colorBackground": false,
           "colorValue": true,
@@ -2322,8 +2189,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 49
+            "x": 6,
+            "y": 32
           },
           "id": 39534,
           "interval": null,
@@ -2374,7 +2241,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "Content Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2413,8 +2280,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 49
+            "x": 12,
+            "y": 32
           },
           "id": 39535,
           "interval": null,
@@ -2465,7 +2332,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "Content Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2504,8 +2371,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 49
+            "x": 18,
+            "y": 32
           },
           "id": 39536,
           "interval": null,
@@ -2556,7 +2423,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Content Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2595,8 +2462,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 49
+            "x": 0,
+            "y": 37
           },
           "id": 39537,
           "interval": null,
@@ -2647,7 +2514,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Video Streaming",
+          "title": "Content Publish \u2014 Video Streaming",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2686,8 +2553,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 54
+            "x": 6,
+            "y": 37
           },
           "id": 39539,
           "interval": null,
@@ -2738,7 +2605,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "MVC Processor",
+          "title": "Content Publish \u2014 MVC Processor",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2777,8 +2644,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 54
+            "x": 12,
+            "y": 37
           },
           "id": 39540,
           "interval": null,
@@ -2829,7 +2696,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enriched Metadata",
+          "title": "Content Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2840,25 +2707,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140622,
-          "type": "text",
-          "title": "Collection Publish",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 59
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -2887,8 +2735,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 60
+            "x": 18,
+            "y": 37
           },
           "id": 39541,
           "interval": null,
@@ -2939,7 +2787,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "Collection Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2978,8 +2826,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 60
+            "x": 0,
+            "y": 42
           },
           "id": 39542,
           "interval": null,
@@ -3030,7 +2878,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "Collection Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3069,8 +2917,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 60
+            "x": 6,
+            "y": 42
           },
           "id": 39543,
           "interval": null,
@@ -3121,7 +2969,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Collection Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3160,8 +3008,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 60
+            "x": 12,
+            "y": 42
           },
           "id": 39545,
           "interval": null,
@@ -3212,7 +3060,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Post-Publish Process",
+          "title": "Collection Publish \u2014 Post-Publish Process",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3251,8 +3099,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 65
+            "x": 18,
+            "y": 42
           },
           "id": 39546,
           "interval": null,
@@ -3303,7 +3151,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enriched Metadata",
+          "title": "Collection Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3314,25 +3162,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140629,
-          "type": "text",
-          "title": "Question Publish",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 70
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -3362,7 +3191,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 71
+            "y": 47
           },
           "id": 39547,
           "interval": null,
@@ -3413,7 +3242,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "Question Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3453,7 +3282,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 71
+            "y": 47
           },
           "id": 39548,
           "interval": null,
@@ -3504,7 +3333,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "Question Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3544,7 +3373,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 71
+            "y": 47
           },
           "id": 39549,
           "interval": null,
@@ -3595,7 +3424,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Question Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3635,7 +3464,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 71
+            "y": 47
           },
           "id": 39550,
           "interval": null,
@@ -3686,7 +3515,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enriched Metadata",
+          "title": "Question Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3697,25 +3526,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140634,
-          "type": "text",
-          "title": "QuestionSet Publish",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 76
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -3745,7 +3555,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 77
+            "y": 52
           },
           "id": 39551,
           "interval": null,
@@ -3796,7 +3606,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "QuestionSet Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3836,7 +3646,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 77
+            "y": 52
           },
           "id": 39552,
           "interval": null,
@@ -3887,7 +3697,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "QuestionSet Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3927,7 +3737,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 77
+            "y": 52
           },
           "id": 39553,
           "interval": null,
@@ -3978,7 +3788,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "QuestionSet Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4018,7 +3828,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 77
+            "y": 52
           },
           "id": 39554,
           "interval": null,
@@ -4069,7 +3879,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Enriched Metadata",
+          "title": "QuestionSet Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4080,25 +3890,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140639,
-          "type": "text",
-          "title": "Enrich Only",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 82
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -4128,7 +3919,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 83
+            "y": 57
           },
           "id": 39555,
           "interval": null,
@@ -4179,7 +3970,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Total",
+          "title": "Enrich Only \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4219,7 +4010,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 83
+            "y": 57
           },
           "id": 39556,
           "interval": null,
@@ -4270,7 +4061,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "Enrich Only \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4310,7 +4101,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 83
+            "y": 57
           },
           "id": 39557,
           "interval": null,
@@ -4361,7 +4152,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Enrich Only \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4391,7 +4182,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 83
+            "y": 57
           },
           "hiddenSeries": false,
           "id": 39559,
@@ -4431,7 +4222,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Lag",
+          "title": "Enrich Only \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -4476,26 +4267,7 @@
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 88
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
-        },
-        {
-          "id": 140646,
-          "type": "text",
-          "title": "Extract",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 89
+            "y": 62
           },
           "options": {
             "mode": "markdown",
@@ -4534,7 +4306,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 90
+            "y": 63
           },
           "id": 39561,
           "interval": null,
@@ -4585,7 +4357,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Extracted",
+          "title": "Extract \u2014 Extracted",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4625,7 +4397,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 90
+            "y": 63
           },
           "id": 39562,
           "interval": null,
@@ -4676,7 +4448,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Extract \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4687,25 +4459,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140649,
-          "type": "text",
-          "title": "Chunking",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 95
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -4734,8 +4487,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 96
+            "x": 12,
+            "y": 63
           },
           "id": 39563,
           "interval": null,
@@ -4786,7 +4539,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Chunked",
+          "title": "Chunking \u2014 Chunked",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4825,8 +4578,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 96
+            "x": 18,
+            "y": 63
           },
           "id": 39564,
           "interval": null,
@@ -4877,7 +4630,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Filtered",
+          "title": "Chunking \u2014 Filtered",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4916,8 +4669,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 96
+            "x": 0,
+            "y": 68
           },
           "id": 39565,
           "interval": null,
@@ -4968,7 +4721,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Chunking \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4979,25 +4732,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140653,
-          "type": "text",
-          "title": "Batch Embedding",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 101
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -5026,8 +4760,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 102
+            "x": 6,
+            "y": 68
           },
           "id": 39566,
           "interval": null,
@@ -5078,7 +4812,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Embedded",
+          "title": "Batch Embedding \u2014 Embedded",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5117,8 +4851,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 102
+            "x": 12,
+            "y": 68
           },
           "id": 39567,
           "interval": null,
@@ -5169,7 +4903,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Batch Embedding \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5208,8 +4942,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 102
+            "x": 18,
+            "y": 68
           },
           "id": 39568,
           "interval": null,
@@ -5260,7 +4994,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "API Calls",
+          "title": "Batch Embedding \u2014 API Calls",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5299,8 +5033,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 102
+            "x": 0,
+            "y": 73
           },
           "id": 39569,
           "interval": null,
@@ -5351,7 +5085,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Slow API Calls",
+          "title": "Batch Embedding \u2014 Slow API Calls",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5362,25 +5096,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140658,
-          "type": "text",
-          "title": "Quantization",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 107
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -5409,8 +5124,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 108
+            "x": 6,
+            "y": 73
           },
           "id": 39570,
           "interval": null,
@@ -5461,7 +5176,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Quantized",
+          "title": "Quantization \u2014 Quantized",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5500,8 +5215,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 108
+            "x": 12,
+            "y": 73
           },
           "id": 39571,
           "interval": null,
@@ -5552,7 +5267,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "Quantization \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5563,25 +5278,6 @@
             }
           ],
           "valueName": "current"
-        },
-        {
-          "id": 140661,
-          "type": "text",
-          "title": "OpenSearch Sink",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 113
-          },
-          "options": {
-            "mode": "markdown",
-            "content": ""
-          },
-          "fieldConfig": {
-            "defaults": {},
-            "overrides": []
-          }
         },
         {
           "cacheTimeout": null,
@@ -5610,8 +5306,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 114
+            "x": 18,
+            "y": 73
           },
           "id": 39572,
           "interval": null,
@@ -5662,7 +5358,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Success",
+          "title": "OpenSearch Sink \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5701,8 +5397,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 114
+            "x": 0,
+            "y": 78
           },
           "id": 39573,
           "interval": null,
@@ -5753,7 +5449,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Failed",
+          "title": "OpenSearch Sink \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5782,8 +5478,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 114
+            "x": 6,
+            "y": 78
           },
           "hiddenSeries": false,
           "id": 39574,
@@ -5823,7 +5519,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Lag",
+          "title": "OpenSearch Sink \u2014 Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -5868,7 +5564,7 @@
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 119
+            "y": 83
           },
           "options": {
             "mode": "markdown",
@@ -5897,7 +5593,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 120
+            "y": 84
           },
           "hiddenSeries": false,
           "id": 19491,
@@ -5982,7 +5678,7 @@
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 125
+            "y": 89
           },
           "options": {
             "mode": "markdown",
@@ -6011,7 +5707,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 126
+            "y": 90
           },
           "hiddenSeries": false,
           "id": 19493,
