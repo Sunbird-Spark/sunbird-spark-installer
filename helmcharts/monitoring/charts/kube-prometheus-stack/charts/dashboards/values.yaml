@@ -357,6 +357,8 @@ dashboards:
        file: dashboards/weekly-report.json
      dashboard25:
        file: dashboards/kp-flink-jobs-metrics-dashboard.json
+     dashboard26:
+       file: dashboards/yugabytedb.json
 
 dashboards1:
    server:
