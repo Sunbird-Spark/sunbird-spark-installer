@@ -125,7 +125,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Router \u2014 Total",
+          "title": "Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -216,7 +216,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Router \u2014 Success",
+          "title": "Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -307,7 +307,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Router \u2014 Failed",
+          "title": "Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -398,7 +398,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Router \u2014 Skipped",
+          "title": "Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -489,7 +489,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Router \u2014 Empty Schema",
+          "title": "Empty Schema",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -580,7 +580,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Router \u2014 Empty Props",
+          "title": "Empty Props",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3151,7 +3151,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Router \u2014 Total",
+          "title": "Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3242,7 +3242,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "Router \u2014 Skipped",
+          "title": "Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
