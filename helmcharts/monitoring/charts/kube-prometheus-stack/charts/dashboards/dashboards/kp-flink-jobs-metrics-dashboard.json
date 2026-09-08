@@ -30,16 +30,16 @@
         {
           "id": 40574,
           "type": "text",
-          "title": "",
+          "title": "transaction-event-processor",
           "gridPos": {
-            "h": 2,
+            "h": 1,
             "w": 24,
             "x": 0,
             "y": 0
           },
           "options": {
             "mode": "markdown",
-            "content": "## transaction-event-processor"
+            "content": ""
           },
           "fieldConfig": {
             "defaults": {},
@@ -74,7 +74,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 2
+            "y": 1
           },
           "id": 39498,
           "interval": null,
@@ -165,7 +165,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 2
+            "y": 1
           },
           "id": 39499,
           "interval": null,
@@ -256,7 +256,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 2
+            "y": 1
           },
           "id": 39500,
           "interval": null,
@@ -347,7 +347,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 2
+            "y": 1
           },
           "id": 39501,
           "interval": null,
@@ -438,7 +438,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 7
+            "y": 6
           },
           "id": 39502,
           "interval": null,
@@ -529,7 +529,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 7
+            "y": 6
           },
           "id": 39503,
           "interval": null,
@@ -620,7 +620,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 7
+            "y": 6
           },
           "id": 39504,
           "interval": null,
@@ -711,7 +711,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 7
+            "y": 6
           },
           "id": 39505,
           "interval": null,
@@ -802,7 +802,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 12
+            "y": 11
           },
           "id": 39506,
           "interval": null,
@@ -893,7 +893,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 12
+            "y": 11
           },
           "id": 39507,
           "interval": null,
@@ -984,7 +984,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 12
+            "y": 11
           },
           "id": 39508,
           "interval": null,
@@ -1075,7 +1075,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 12
+            "y": 11
           },
           "id": 39509,
           "interval": null,
@@ -1166,7 +1166,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 17
+            "y": 16
           },
           "id": 39510,
           "interval": null,
@@ -1257,7 +1257,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 17
+            "y": 16
           },
           "id": 39511,
           "interval": null,
@@ -1348,7 +1348,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 17
+            "y": 16
           },
           "id": 39512,
           "interval": null,
@@ -1439,7 +1439,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 17
+            "y": 16
           },
           "id": 39513,
           "interval": null,
@@ -1530,7 +1530,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 22
+            "y": 21
           },
           "id": 39514,
           "interval": null,
@@ -1621,7 +1621,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 22
+            "y": 21
           },
           "id": 39515,
           "interval": null,
@@ -1712,7 +1712,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 22
+            "y": 21
           },
           "id": 39516,
           "interval": null,
@@ -1803,7 +1803,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 22
+            "y": 21
           },
           "id": 39517,
           "interval": null,
@@ -1894,7 +1894,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 27
+            "y": 26
           },
           "id": 39518,
           "interval": null,
@@ -1985,7 +1985,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 27
+            "y": 26
           },
           "id": 39519,
           "interval": null,
@@ -2076,7 +2076,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 27
+            "y": 26
           },
           "id": 39520,
           "interval": null,
@@ -2167,7 +2167,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 27
+            "y": 26
           },
           "id": 39521,
           "interval": null,
@@ -2258,7 +2258,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 32
+            "y": 31
           },
           "id": 39522,
           "interval": null,
@@ -2349,7 +2349,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 32
+            "y": 31
           },
           "id": 39523,
           "interval": null,
@@ -2440,7 +2440,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 32
+            "y": 31
           },
           "id": 39524,
           "interval": null,
@@ -2531,7 +2531,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 32
+            "y": 31
           },
           "id": 39525,
           "interval": null,
@@ -2622,7 +2622,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 37
+            "y": 36
           },
           "id": 39526,
           "interval": null,
@@ -2713,7 +2713,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 37
+            "y": 36
           },
           "id": 39527,
           "interval": null,
@@ -2804,7 +2804,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 37
+            "y": 36
           },
           "id": 39528,
           "interval": null,
@@ -2895,7 +2895,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 37
+            "y": 36
           },
           "id": 39529,
           "interval": null,
@@ -2976,7 +2976,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 42
+            "y": 41
           },
           "hiddenSeries": false,
           "id": 39530,
@@ -3056,16 +3056,16 @@
         {
           "id": 40575,
           "type": "text",
-          "title": "",
+          "title": "knowlg-publish",
           "gridPos": {
-            "h": 2,
+            "h": 1,
             "w": 24,
             "x": 0,
-            "y": 47
+            "y": 46
           },
           "options": {
             "mode": "markdown",
-            "content": "## knowlg-publish"
+            "content": ""
           },
           "fieldConfig": {
             "defaults": {},
@@ -3100,7 +3100,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 49
+            "y": 47
           },
           "id": 39532,
           "interval": null,
@@ -3191,7 +3191,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 49
+            "y": 47
           },
           "id": 39533,
           "interval": null,
@@ -3282,7 +3282,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 49
+            "y": 47
           },
           "id": 39534,
           "interval": null,
@@ -3373,7 +3373,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 49
+            "y": 47
           },
           "id": 39535,
           "interval": null,
@@ -3464,7 +3464,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 54
+            "y": 52
           },
           "id": 39536,
           "interval": null,
@@ -3555,7 +3555,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 54
+            "y": 52
           },
           "id": 39537,
           "interval": null,
@@ -3646,7 +3646,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 54
+            "y": 52
           },
           "id": 39538,
           "interval": null,
@@ -3737,7 +3737,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 54
+            "y": 52
           },
           "id": 39539,
           "interval": null,
@@ -3828,7 +3828,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 59
+            "y": 57
           },
           "id": 39540,
           "interval": null,
@@ -3919,7 +3919,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 59
+            "y": 57
           },
           "id": 39541,
           "interval": null,
@@ -4010,7 +4010,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 59
+            "y": 57
           },
           "id": 39542,
           "interval": null,
@@ -4101,7 +4101,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 59
+            "y": 57
           },
           "id": 39543,
           "interval": null,
@@ -4192,7 +4192,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 64
+            "y": 62
           },
           "id": 39544,
           "interval": null,
@@ -4283,7 +4283,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 64
+            "y": 62
           },
           "id": 39545,
           "interval": null,
@@ -4374,7 +4374,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 64
+            "y": 62
           },
           "id": 39546,
           "interval": null,
@@ -4465,7 +4465,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 64
+            "y": 62
           },
           "id": 39547,
           "interval": null,
@@ -4556,7 +4556,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 69
+            "y": 67
           },
           "id": 39548,
           "interval": null,
@@ -4647,7 +4647,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 69
+            "y": 67
           },
           "id": 39549,
           "interval": null,
@@ -4738,7 +4738,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 69
+            "y": 67
           },
           "id": 39550,
           "interval": null,
@@ -4829,7 +4829,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 69
+            "y": 67
           },
           "id": 39551,
           "interval": null,
@@ -4920,7 +4920,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 74
+            "y": 72
           },
           "id": 39552,
           "interval": null,
@@ -5011,7 +5011,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 74
+            "y": 72
           },
           "id": 39553,
           "interval": null,
@@ -5102,7 +5102,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 74
+            "y": 72
           },
           "id": 39554,
           "interval": null,
@@ -5193,7 +5193,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 74
+            "y": 72
           },
           "id": 39555,
           "interval": null,
@@ -5284,7 +5284,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 79
+            "y": 77
           },
           "id": 39556,
           "interval": null,
@@ -5375,7 +5375,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 79
+            "y": 77
           },
           "id": 39557,
           "interval": null,
@@ -5466,7 +5466,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 79
+            "y": 77
           },
           "id": 39558,
           "interval": null,
@@ -5547,7 +5547,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 79
+            "y": 77
           },
           "hiddenSeries": false,
           "id": 39559,
@@ -5627,16 +5627,16 @@
         {
           "id": 40576,
           "type": "text",
-          "title": "",
+          "title": "content-embedding",
           "gridPos": {
-            "h": 2,
+            "h": 1,
             "w": 24,
             "x": 0,
-            "y": 84
+            "y": 82
           },
           "options": {
             "mode": "markdown",
-            "content": "## content-embedding"
+            "content": ""
           },
           "fieldConfig": {
             "defaults": {},
@@ -5671,7 +5671,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 86
+            "y": 83
           },
           "id": 39561,
           "interval": null,
@@ -5762,7 +5762,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 86
+            "y": 83
           },
           "id": 39562,
           "interval": null,
@@ -5853,7 +5853,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 86
+            "y": 83
           },
           "id": 39563,
           "interval": null,
@@ -5944,7 +5944,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 86
+            "y": 83
           },
           "id": 39564,
           "interval": null,
@@ -6035,7 +6035,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 91
+            "y": 88
           },
           "id": 39565,
           "interval": null,
@@ -6126,7 +6126,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 91
+            "y": 88
           },
           "id": 39566,
           "interval": null,
@@ -6217,7 +6217,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 91
+            "y": 88
           },
           "id": 39567,
           "interval": null,
@@ -6308,7 +6308,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 91
+            "y": 88
           },
           "id": 39568,
           "interval": null,
@@ -6399,7 +6399,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 96
+            "y": 93
           },
           "id": 39569,
           "interval": null,
@@ -6490,7 +6490,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 96
+            "y": 93
           },
           "id": 39570,
           "interval": null,
@@ -6581,7 +6581,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 96
+            "y": 93
           },
           "id": 39571,
           "interval": null,
@@ -6672,7 +6672,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 96
+            "y": 93
           },
           "id": 39572,
           "interval": null,
@@ -6763,7 +6763,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 101
+            "y": 98
           },
           "id": 39573,
           "interval": null,
@@ -6844,7 +6844,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 101
+            "y": 98
           },
           "hiddenSeries": false,
           "id": 39574,
@@ -6924,16 +6924,16 @@
         {
           "id": 40577,
           "type": "text",
-          "title": "",
+          "title": "enrichment-router (metrics not verified \u2014 Lag only)",
           "gridPos": {
-            "h": 2,
+            "h": 1,
             "w": 24,
             "x": 0,
-            "y": 106
+            "y": 103
           },
           "options": {
             "mode": "markdown",
-            "content": "## enrichment-router (metrics not verified \u2014 Lag only)"
+            "content": ""
           },
           "fieldConfig": {
             "defaults": {},
@@ -6958,7 +6958,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 108
+            "y": 104
           },
           "hiddenSeries": false,
           "id": 19491,
@@ -7038,16 +7038,16 @@
         {
           "id": 40578,
           "type": "text",
-          "title": "",
+          "title": "caption-generator (metrics not verified \u2014 Lag only)",
           "gridPos": {
-            "h": 2,
+            "h": 1,
             "w": 24,
             "x": 0,
-            "y": 113
+            "y": 109
           },
           "options": {
             "mode": "markdown",
-            "content": "## caption-generator (metrics not verified \u2014 Lag only)"
+            "content": ""
           },
           "fieldConfig": {
             "defaults": {},
@@ -7072,7 +7072,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 115
+            "y": 110
           },
           "hiddenSeries": false,
           "id": 19493,
@@ -7166,16 +7166,16 @@
         {
           "id": 20497,
           "type": "text",
-          "title": "",
+          "title": "notification-job (metrics not verified \u2014 Lag only)",
           "gridPos": {
-            "h": 2,
+            "h": 1,
             "w": 24,
             "x": 0,
             "y": 0
           },
           "options": {
             "mode": "markdown",
-            "content": "## notification-job (metrics not verified \u2014 Lag only)"
+            "content": ""
           },
           "fieldConfig": {
             "defaults": {},
@@ -7200,7 +7200,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 2
+            "y": 1
           },
           "hiddenSeries": false,
           "id": 19495,
@@ -7280,16 +7280,16 @@
         {
           "id": 20498,
           "type": "text",
-          "title": "",
+          "title": "user-deletion-cleanup (metrics not verified \u2014 Lag only)",
           "gridPos": {
-            "h": 2,
+            "h": 1,
             "w": 24,
             "x": 0,
-            "y": 7
+            "y": 6
           },
           "options": {
             "mode": "markdown",
-            "content": "## user-deletion-cleanup (metrics not verified \u2014 Lag only)"
+            "content": ""
           },
           "fieldConfig": {
             "defaults": {},
@@ -7314,7 +7314,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 9
+            "y": 7
           },
           "hiddenSeries": false,
           "id": 19497,
@@ -7394,16 +7394,16 @@
         {
           "id": 20499,
           "type": "text",
-          "title": "",
+          "title": "Collection Certificate Generator",
           "gridPos": {
-            "h": 2,
+            "h": 1,
             "w": 24,
             "x": 0,
-            "y": 14
+            "y": 12
           },
           "options": {
             "mode": "markdown",
-            "content": "## Collection Certificate Generator"
+            "content": ""
           },
           "fieldConfig": {
             "defaults": {},
@@ -7438,7 +7438,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 16
+            "y": 13
           },
           "id": 209,
           "interval": null,
@@ -7529,7 +7529,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 16
+            "y": 13
           },
           "id": 226,
           "interval": null,
@@ -7620,7 +7620,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 16
+            "y": 13
           },
           "id": 221,
           "interval": null,
@@ -7711,7 +7711,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 16
+            "y": 13
           },
           "id": 220,
           "interval": null,
@@ -7802,7 +7802,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 21
+            "y": 18
           },
           "id": 219,
           "interval": null,
@@ -7893,7 +7893,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 21
+            "y": 18
           },
           "id": 227,
           "interval": null,
@@ -7984,7 +7984,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 21
+            "y": 18
           },
           "id": 228,
           "interval": null,
@@ -8075,7 +8075,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 21
+            "y": 18
           },
           "id": 230,
           "interval": null,
@@ -8166,7 +8166,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 26
+            "y": 23
           },
           "id": 229,
           "interval": null,
@@ -8257,7 +8257,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 26
+            "y": 23
           },
           "id": 231,
           "interval": null,
@@ -8343,7 +8343,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 26
+            "y": 23
           },
           "hiddenSeries": false,
           "id": 224,
@@ -8502,7 +8502,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 26
+            "y": 23
           },
           "hiddenSeries": false,
           "id": 225,
