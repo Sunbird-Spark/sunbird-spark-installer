@@ -361,6 +361,8 @@ dashboards:
        file: dashboards/yugabytedb.json
      dashboard27:
        file: dashboards/opensearch.json
+     dashboard28:
+       file: dashboards/backup-and-recovery.json
 
 dashboards1:
    server:
