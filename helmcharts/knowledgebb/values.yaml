@@ -24,7 +24,7 @@ opensearch: &opensearch
   singleNode: true
   extraEnvs:
     - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-      value: "REPLACE_WITH_OPENSEARCH_ADMIN_PASSWORD"
+      value: ""
   config:
     opensearch.yml: |
       plugins.security.disabled: true
