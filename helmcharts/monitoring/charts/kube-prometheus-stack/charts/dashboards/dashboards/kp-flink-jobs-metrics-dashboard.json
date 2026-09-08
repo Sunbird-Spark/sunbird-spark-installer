@@ -28,6 +28,25 @@
       "id": 40075,
       "panels": [
         {
+          "id": 40574,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "## transaction-event-processor"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          }
+        },
+        {
           "cacheTimeout": null,
           "colorBackground": false,
           "colorValue": true,
@@ -55,7 +74,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 1
+            "y": 2
           },
           "id": 39498,
           "interval": null,
@@ -106,7 +125,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7Router\u00b7Tot",
+          "title": "Router \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -146,7 +165,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 1
+            "y": 2
           },
           "id": 39499,
           "interval": null,
@@ -197,7 +216,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7Router\u00b7OK",
+          "title": "Router \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -237,7 +256,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 1
+            "y": 2
           },
           "id": 39500,
           "interval": null,
@@ -288,7 +307,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7Router\u00b7Fail",
+          "title": "Router \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -328,7 +347,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 1
+            "y": 2
           },
           "id": 39501,
           "interval": null,
@@ -379,7 +398,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7Router\u00b7Skip",
+          "title": "Router \u2014 Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -419,7 +438,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 6
+            "y": 7
           },
           "id": 39502,
           "interval": null,
@@ -470,7 +489,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7Router\u00b7EmptySchema",
+          "title": "Router \u2014 Empty Schema",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -510,7 +529,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 6
+            "y": 7
           },
           "id": 39503,
           "interval": null,
@@ -561,7 +580,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7Router\u00b7EmptyProps",
+          "title": "Router \u2014 Empty Props",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -601,7 +620,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 6
+            "y": 7
           },
           "id": 39504,
           "interval": null,
@@ -652,7 +671,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditEvtGen\u00b7Tot",
+          "title": "Audit Event Generator \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -692,7 +711,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 6
+            "y": 7
           },
           "id": 39505,
           "interval": null,
@@ -743,7 +762,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditEvtGen\u00b7OK",
+          "title": "Audit Event Generator \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -783,7 +802,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 11
+            "y": 12
           },
           "id": 39506,
           "interval": null,
@@ -834,7 +853,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditEvtGen\u00b7Fail",
+          "title": "Audit Event Generator \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -874,7 +893,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 11
+            "y": 12
           },
           "id": 39507,
           "interval": null,
@@ -925,7 +944,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditEvtGen\u00b7Skip",
+          "title": "Audit Event Generator \u2014 Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -965,7 +984,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 11
+            "y": 12
           },
           "id": 39508,
           "interval": null,
@@ -1016,7 +1035,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditEvtGen\u00b7EmptySchema",
+          "title": "Audit Event Generator \u2014 Empty Schema",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1056,7 +1075,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 11
+            "y": 12
           },
           "id": 39509,
           "interval": null,
@@ -1107,7 +1126,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditEvtGen\u00b7EmptyProps",
+          "title": "Audit Event Generator \u2014 Empty Props",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1147,7 +1166,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 16
+            "y": 17
           },
           "id": 39510,
           "interval": null,
@@ -1198,7 +1217,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditHistIdx\u00b7Tot",
+          "title": "Audit History Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1238,7 +1257,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 16
+            "y": 17
           },
           "id": 39511,
           "interval": null,
@@ -1289,7 +1308,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditHistIdx\u00b7OK",
+          "title": "Audit History Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1329,7 +1348,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 16
+            "y": 17
           },
           "id": 39512,
           "interval": null,
@@ -1380,7 +1399,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditHistIdx\u00b7Fail",
+          "title": "Audit History Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1420,7 +1439,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 16
+            "y": 17
           },
           "id": 39513,
           "interval": null,
@@ -1471,7 +1490,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditHistIdx\u00b7Skip",
+          "title": "Audit History Indexer \u2014 Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1511,7 +1530,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 21
+            "y": 22
           },
           "id": 39514,
           "interval": null,
@@ -1562,7 +1581,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7AuditHistIdx\u00b7ESFail",
+          "title": "Audit History Indexer \u2014 ES Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1602,7 +1621,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 21
+            "y": 22
           },
           "id": 39515,
           "interval": null,
@@ -1653,7 +1672,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7CompSearchIdx\u00b7Tot",
+          "title": "Composite Search Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1693,7 +1712,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 21
+            "y": 22
           },
           "id": 39516,
           "interval": null,
@@ -1744,7 +1763,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7CompSearchIdx\u00b7OK",
+          "title": "Composite Search Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1784,7 +1803,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 21
+            "y": 22
           },
           "id": 39517,
           "interval": null,
@@ -1835,7 +1854,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7CompSearchIdx\u00b7Fail",
+          "title": "Composite Search Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1875,7 +1894,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 26
+            "y": 27
           },
           "id": 39518,
           "interval": null,
@@ -1926,7 +1945,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7ObsrvMeta\u00b7Tot",
+          "title": "Obsrv MetaData Generator \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1966,7 +1985,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 26
+            "y": 27
           },
           "id": 39519,
           "interval": null,
@@ -2017,7 +2036,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7ObsrvMeta\u00b7OK",
+          "title": "Obsrv MetaData Generator \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2057,7 +2076,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 26
+            "y": 27
           },
           "id": 39520,
           "interval": null,
@@ -2108,7 +2127,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7ObsrvMeta\u00b7Fail",
+          "title": "Obsrv MetaData Generator \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2148,7 +2167,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 26
+            "y": 27
           },
           "id": 39521,
           "interval": null,
@@ -2199,7 +2218,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7ObsrvMeta\u00b7Skip",
+          "title": "Obsrv MetaData Generator \u2014 Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2239,7 +2258,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 31
+            "y": 32
           },
           "id": 39522,
           "interval": null,
@@ -2290,7 +2309,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7ObsrvMeta\u00b7EmptyProps",
+          "title": "Obsrv MetaData Generator \u2014 Empty Props",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2330,7 +2349,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 31
+            "y": 32
           },
           "id": 39523,
           "interval": null,
@@ -2381,7 +2400,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7ObsrvMeta\u00b7ESFail",
+          "title": "Obsrv MetaData Generator \u2014 ES Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2421,7 +2440,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 31
+            "y": 32
           },
           "id": 39524,
           "interval": null,
@@ -2472,7 +2491,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7DIALExt\u00b7Tot",
+          "title": "DIALCode External Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2512,7 +2531,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 31
+            "y": 32
           },
           "id": 39525,
           "interval": null,
@@ -2563,7 +2582,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7DIALExt\u00b7OK",
+          "title": "DIALCode External Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2603,7 +2622,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 36
+            "y": 37
           },
           "id": 39526,
           "interval": null,
@@ -2654,7 +2673,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7DIALExt\u00b7Fail",
+          "title": "DIALCode External Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2694,7 +2713,7 @@
             "h": 5,
             "w": 6,
             "x": 6,
-            "y": 36
+            "y": 37
           },
           "id": 39527,
           "interval": null,
@@ -2745,7 +2764,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7DIALMetric\u00b7Tot",
+          "title": "DIALCode Metric Indexer \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2785,7 +2804,7 @@
             "h": 5,
             "w": 6,
             "x": 12,
-            "y": 36
+            "y": 37
           },
           "id": 39528,
           "interval": null,
@@ -2836,7 +2855,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7DIALMetric\u00b7OK",
+          "title": "DIALCode Metric Indexer \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2876,7 +2895,7 @@
             "h": 5,
             "w": 6,
             "x": 18,
-            "y": 36
+            "y": 37
           },
           "id": 39529,
           "interval": null,
@@ -2927,7 +2946,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "TEP\u00b7DIALMetric\u00b7Fail",
+          "title": "DIALCode Metric Indexer \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2957,7 +2976,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 41
+            "y": 42
           },
           "hiddenSeries": false,
           "id": 39530,
@@ -2997,7 +3016,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "TEP\u00b7Lag",
+          "title": "Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -3035,6 +3054,25 @@
           }
         },
         {
+          "id": 40575,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 47
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "## knowlg-publish"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          }
+        },
+        {
           "cacheTimeout": null,
           "colorBackground": false,
           "colorValue": true,
@@ -3061,8 +3099,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 41
+            "x": 0,
+            "y": 49
           },
           "id": 39532,
           "interval": null,
@@ -3113,7 +3151,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7Router\u00b7Tot",
+          "title": "Router \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3152,8 +3190,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 41
+            "x": 6,
+            "y": 49
           },
           "id": 39533,
           "interval": null,
@@ -3204,7 +3242,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7Router\u00b7Skip",
+          "title": "Router \u2014 Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3243,8 +3281,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 41
+            "x": 12,
+            "y": 49
           },
           "id": 39534,
           "interval": null,
@@ -3295,7 +3333,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7ContentPub\u00b7Tot",
+          "title": "Content Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3334,8 +3372,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 46
+            "x": 18,
+            "y": 49
           },
           "id": 39535,
           "interval": null,
@@ -3386,7 +3424,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7ContentPub\u00b7OK",
+          "title": "Content Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3425,8 +3463,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 46
+            "x": 0,
+            "y": 54
           },
           "id": 39536,
           "interval": null,
@@ -3477,7 +3515,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7ContentPub\u00b7Fail",
+          "title": "Content Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3516,8 +3554,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 46
+            "x": 6,
+            "y": 54
           },
           "id": 39537,
           "interval": null,
@@ -3568,7 +3606,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7ContentPub\u00b7VidStream",
+          "title": "Content Publish \u2014 Video Streaming",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3607,8 +3645,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 46
+            "x": 12,
+            "y": 54
           },
           "id": 39538,
           "interval": null,
@@ -3659,7 +3697,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7ContentPub\u00b7Skip",
+          "title": "Content Publish \u2014 Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3698,8 +3736,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 51
+            "x": 18,
+            "y": 54
           },
           "id": 39539,
           "interval": null,
@@ -3750,7 +3788,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7ContentPub\u00b7MVC",
+          "title": "Content Publish \u2014 MVC Processor",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3789,8 +3827,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 51
+            "x": 0,
+            "y": 59
           },
           "id": 39540,
           "interval": null,
@@ -3841,7 +3879,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7ContentPub\u00b7EnrichMeta",
+          "title": "Content Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3880,8 +3918,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 51
+            "x": 6,
+            "y": 59
           },
           "id": 39541,
           "interval": null,
@@ -3932,7 +3970,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7CollPub\u00b7Tot",
+          "title": "Collection Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3971,8 +4009,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 51
+            "x": 12,
+            "y": 59
           },
           "id": 39542,
           "interval": null,
@@ -4023,7 +4061,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7CollPub\u00b7OK",
+          "title": "Collection Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4062,8 +4100,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 56
+            "x": 18,
+            "y": 59
           },
           "id": 39543,
           "interval": null,
@@ -4114,7 +4152,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7CollPub\u00b7Fail",
+          "title": "Collection Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4153,8 +4191,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 56
+            "x": 0,
+            "y": 64
           },
           "id": 39544,
           "interval": null,
@@ -4205,7 +4243,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7CollPub\u00b7Skip",
+          "title": "Collection Publish \u2014 Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4244,8 +4282,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 56
+            "x": 6,
+            "y": 64
           },
           "id": 39545,
           "interval": null,
@@ -4296,7 +4334,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7CollPub\u00b7PostPub",
+          "title": "Collection Publish \u2014 Post-Publish Process",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4335,8 +4373,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 56
+            "x": 12,
+            "y": 64
           },
           "id": 39546,
           "interval": null,
@@ -4387,7 +4425,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7CollPub\u00b7EnrichMeta",
+          "title": "Collection Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4426,8 +4464,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 61
+            "x": 18,
+            "y": 64
           },
           "id": 39547,
           "interval": null,
@@ -4478,7 +4516,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7QPub\u00b7Tot",
+          "title": "Question Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4517,8 +4555,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 61
+            "x": 0,
+            "y": 69
           },
           "id": 39548,
           "interval": null,
@@ -4569,7 +4607,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7QPub\u00b7OK",
+          "title": "Question Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4608,8 +4646,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 61
+            "x": 6,
+            "y": 69
           },
           "id": 39549,
           "interval": null,
@@ -4660,7 +4698,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7QPub\u00b7Fail",
+          "title": "Question Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4699,8 +4737,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 61
+            "x": 12,
+            "y": 69
           },
           "id": 39550,
           "interval": null,
@@ -4751,7 +4789,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7QPub\u00b7EnrichMeta",
+          "title": "Question Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4790,8 +4828,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 66
+            "x": 18,
+            "y": 69
           },
           "id": 39551,
           "interval": null,
@@ -4842,7 +4880,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7QSetPub\u00b7Tot",
+          "title": "QuestionSet Publish \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4881,8 +4919,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 66
+            "x": 0,
+            "y": 74
           },
           "id": 39552,
           "interval": null,
@@ -4933,7 +4971,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7QSetPub\u00b7OK",
+          "title": "QuestionSet Publish \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4972,8 +5010,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 66
+            "x": 6,
+            "y": 74
           },
           "id": 39553,
           "interval": null,
@@ -5024,7 +5062,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7QSetPub\u00b7Fail",
+          "title": "QuestionSet Publish \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5063,8 +5101,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 66
+            "x": 12,
+            "y": 74
           },
           "id": 39554,
           "interval": null,
@@ -5115,7 +5153,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7QSetPub\u00b7EnrichMeta",
+          "title": "QuestionSet Publish \u2014 Enriched Metadata",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5154,8 +5192,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 71
+            "x": 18,
+            "y": 74
           },
           "id": 39555,
           "interval": null,
@@ -5206,7 +5244,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7EnrichOnly\u00b7Tot",
+          "title": "Enrich Only \u2014 Total",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5245,8 +5283,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 71
+            "x": 0,
+            "y": 79
           },
           "id": 39556,
           "interval": null,
@@ -5297,7 +5335,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7EnrichOnly\u00b7OK",
+          "title": "Enrich Only \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5336,8 +5374,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 71
+            "x": 6,
+            "y": 79
           },
           "id": 39557,
           "interval": null,
@@ -5388,7 +5426,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7EnrichOnly\u00b7Fail",
+          "title": "Enrich Only \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5427,8 +5465,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 71
+            "x": 12,
+            "y": 79
           },
           "id": 39558,
           "interval": null,
@@ -5479,7 +5517,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "KPUB\u00b7EnrichOnly\u00b7Skip",
+          "title": "Enrich Only \u2014 Skipped",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5508,8 +5546,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 76
+            "x": 18,
+            "y": 79
           },
           "hiddenSeries": false,
           "id": 39559,
@@ -5549,7 +5587,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "KPUB\u00b7Lag",
+          "title": "Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -5587,6 +5625,25 @@
           }
         },
         {
+          "id": 40576,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 84
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "## content-embedding"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          }
+        },
+        {
           "cacheTimeout": null,
           "colorBackground": false,
           "colorValue": true,
@@ -5613,8 +5670,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 76
+            "x": 0,
+            "y": 86
           },
           "id": 39561,
           "interval": null,
@@ -5665,7 +5722,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7Extract\u00b7Extracted",
+          "title": "Extract \u2014 Extracted",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5704,8 +5761,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 76
+            "x": 6,
+            "y": 86
           },
           "id": 39562,
           "interval": null,
@@ -5756,7 +5813,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7Extract\u00b7Fail",
+          "title": "Extract \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5795,8 +5852,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 76
+            "x": 12,
+            "y": 86
           },
           "id": 39563,
           "interval": null,
@@ -5847,7 +5904,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7Chunk\u00b7Chunked",
+          "title": "Chunking \u2014 Chunked",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5886,8 +5943,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 81
+            "x": 18,
+            "y": 86
           },
           "id": 39564,
           "interval": null,
@@ -5938,7 +5995,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7Chunk\u00b7Filtered",
+          "title": "Chunking \u2014 Filtered",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5977,8 +6034,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 81
+            "x": 0,
+            "y": 91
           },
           "id": 39565,
           "interval": null,
@@ -6029,7 +6086,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7Chunk\u00b7Fail",
+          "title": "Chunking \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6068,8 +6125,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 81
+            "x": 6,
+            "y": 91
           },
           "id": 39566,
           "interval": null,
@@ -6120,7 +6177,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7BatchEmbed\u00b7Embedded",
+          "title": "Batch Embedding \u2014 Embedded",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6159,8 +6216,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 81
+            "x": 12,
+            "y": 91
           },
           "id": 39567,
           "interval": null,
@@ -6211,7 +6268,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7BatchEmbed\u00b7Fail",
+          "title": "Batch Embedding \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6250,8 +6307,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 86
+            "x": 18,
+            "y": 91
           },
           "id": 39568,
           "interval": null,
@@ -6302,7 +6359,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7BatchEmbed\u00b7APICalls",
+          "title": "Batch Embedding \u2014 API Calls",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6341,8 +6398,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 86
+            "x": 0,
+            "y": 96
           },
           "id": 39569,
           "interval": null,
@@ -6393,7 +6450,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7BatchEmbed\u00b7SlowAPI",
+          "title": "Batch Embedding \u2014 Slow API Calls",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6432,8 +6489,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 86
+            "x": 6,
+            "y": 96
           },
           "id": 39570,
           "interval": null,
@@ -6484,7 +6541,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7Quantize\u00b7Quantized",
+          "title": "Quantization \u2014 Quantized",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6523,8 +6580,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 86
+            "x": 12,
+            "y": 96
           },
           "id": 39571,
           "interval": null,
@@ -6575,7 +6632,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7Quantize\u00b7Fail",
+          "title": "Quantization \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6614,8 +6671,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 91
+            "x": 18,
+            "y": 96
           },
           "id": 39572,
           "interval": null,
@@ -6666,7 +6723,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7OSSink\u00b7OK",
+          "title": "OpenSearch Sink \u2014 Success",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6705,8 +6762,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 91
+            "x": 0,
+            "y": 101
           },
           "id": 39573,
           "interval": null,
@@ -6757,7 +6814,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CE\u00b7OSSink\u00b7Fail",
+          "title": "OpenSearch Sink \u2014 Failed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6786,8 +6843,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 91
+            "x": 6,
+            "y": 101
           },
           "hiddenSeries": false,
           "id": 39574,
@@ -6827,7 +6884,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "CE\u00b7Lag",
+          "title": "Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -6865,6 +6922,25 @@
           }
         },
         {
+          "id": 40577,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 106
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "## enrichment-router (metrics not verified \u2014 Lag only)"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          }
+        },
+        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
@@ -6881,8 +6957,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 91
+            "x": 0,
+            "y": 108
           },
           "hiddenSeries": false,
           "id": 19491,
@@ -6922,7 +6998,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "ER*\u00b7Lag",
+          "title": "Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -6960,6 +7036,25 @@
           }
         },
         {
+          "id": 40578,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 113
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "## caption-generator (metrics not verified \u2014 Lag only)"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          }
+        },
+        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
@@ -6977,7 +7072,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 96
+            "y": 115
           },
           "hiddenSeries": false,
           "id": 19493,
@@ -7017,7 +7112,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "CG*\u00b7Lag",
+          "title": "Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -7069,6 +7164,25 @@
       "id": 40076,
       "panels": [
         {
+          "id": 20497,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "## notification-job (metrics not verified \u2014 Lag only)"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          }
+        },
+        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
@@ -7086,7 +7200,7 @@
             "h": 5,
             "w": 6,
             "x": 0,
-            "y": 1
+            "y": 2
           },
           "hiddenSeries": false,
           "id": 19495,
@@ -7126,7 +7240,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "NJ*\u00b7Lag",
+          "title": "Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -7164,6 +7278,25 @@
           }
         },
         {
+          "id": 20498,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 7
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "## user-deletion-cleanup (metrics not verified \u2014 Lag only)"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          }
+        },
+        {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
@@ -7180,8 +7313,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 1
+            "x": 0,
+            "y": 9
           },
           "hiddenSeries": false,
           "id": 19497,
@@ -7221,7 +7354,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "UDC*\u00b7Lag",
+          "title": "Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -7259,6 +7392,25 @@
           }
         },
         {
+          "id": 20499,
+          "type": "text",
+          "title": "",
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "options": {
+            "mode": "markdown",
+            "content": "## Collection Certificate Generator"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          }
+        },
+        {
           "cacheTimeout": null,
           "colorBackground": false,
           "colorValue": true,
@@ -7285,8 +7437,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 1
+            "x": 0,
+            "y": 16
           },
           "id": 209,
           "interval": null,
@@ -7337,7 +7489,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7Total Events",
+          "title": "Total Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7376,8 +7528,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 1
+            "x": 6,
+            "y": 16
           },
           "id": 226,
           "interval": null,
@@ -7428,7 +7580,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7Success Events",
+          "title": "Success Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7467,8 +7619,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 6
+            "x": 12,
+            "y": 16
           },
           "id": 221,
           "interval": null,
@@ -7519,7 +7671,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7Skipped Events",
+          "title": "Skipped Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7558,8 +7710,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 6
+            "x": 18,
+            "y": 16
           },
           "id": 220,
           "interval": null,
@@ -7610,7 +7762,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7Failed Events",
+          "title": "Failed Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7649,8 +7801,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 6
+            "x": 0,
+            "y": 21
           },
           "id": 219,
           "interval": null,
@@ -7701,7 +7853,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7Enrolment DB Read",
+          "title": "Enrolment DB Read",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7740,8 +7892,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 6
+            "x": 6,
+            "y": 21
           },
           "id": 227,
           "interval": null,
@@ -7792,7 +7944,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7Enrolment DB Update",
+          "title": "Enrolment DB Update",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7831,8 +7983,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 11
+            "x": 12,
+            "y": 21
           },
           "id": 228,
           "interval": null,
@@ -7883,7 +8035,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7Course Batch DB Read",
+          "title": "Course Batch DB Read",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7922,8 +8074,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 11
+            "x": 18,
+            "y": 21
           },
           "id": 230,
           "interval": null,
@@ -7974,7 +8126,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7Notification User ",
+          "title": "Notification User ",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -8013,8 +8165,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 12,
-            "y": 11
+            "x": 0,
+            "y": 26
           },
           "id": 229,
           "interval": null,
@@ -8065,7 +8217,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7Skip Notification Us",
+          "title": "Skip Notification Us",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -8104,8 +8256,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 18,
-            "y": 11
+            "x": 6,
+            "y": 26
           },
           "id": 231,
           "interval": null,
@@ -8156,7 +8308,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "CCG\u00b7User Feed",
+          "title": "User Feed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -8190,8 +8342,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 0,
-            "y": 16
+            "x": 12,
+            "y": 26
           },
           "hiddenSeries": false,
           "id": 224,
@@ -8295,7 +8447,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "CCG\u00b7Collection Cert Gene",
+          "title": "Collection Cert Gene",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -8349,8 +8501,8 @@
           "gridPos": {
             "h": 5,
             "w": 6,
-            "x": 6,
-            "y": 16
+            "x": 18,
+            "y": 26
           },
           "hiddenSeries": false,
           "id": 225,
@@ -8390,7 +8542,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "CCG\u00b7Lag",
+          "title": "Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
