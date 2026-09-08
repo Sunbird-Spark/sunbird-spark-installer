@@ -359,9 +359,6 @@ dashboards:
        file: dashboards/kp-flink-jobs-metrics-dashboard.json
 
 dashboards1:
-   data-pipeline:
-     lag-dashboard:
-       file: dashboards/lag-dashboard.json
    server:
      node-exporter:
        file: dashboards/node-exporter.json
