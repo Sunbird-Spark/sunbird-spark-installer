@@ -351,10 +351,6 @@ dashboards:
        file: dashboards/api-manager.json
      dashboard2:
        file: dashboards/device-register-apimetrics.json
-     dashboard12:
-       file: dashboards/lp-pipeline-metricsLag.json
-     dashboard13:
-       file: dashboards/lpa-metrics.json
      dashboard19:
        file: dashboards/secor-consumarlag-kafka.json
      dashboard20:
@@ -366,8 +362,6 @@ dashboards1:
    data-pipeline:
      lag-dashboard:
        file: dashboards/lag-dashboard.json
-     flink-jobs:
-       file: dashboards/data-pipeline-metrics-flink.json
    server:
      node-exporter:
        file: dashboards/node-exporter.json
