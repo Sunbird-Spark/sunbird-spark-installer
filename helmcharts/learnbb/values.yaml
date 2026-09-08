@@ -115,6 +115,8 @@ redis: &redis
 
 yugabyte: &yugabyte
   enabled: true
+  serviceMonitor:
+    enabled: true
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 
