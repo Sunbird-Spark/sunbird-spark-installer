@@ -84,13 +84,14 @@ resources: {}
   #   memory: 512Mi
 
 # Resource requests/limits to specify for the upgradeCRDs job pod. Need to be adjusted by user accordingly.
-upgradeJobResources: {}
-# requests:
-#     cpu: 50m
-#     memory: 128Mi
-#   limits:
-#     cpu: 100m
-#     memory: 256Mi
+upgradeJobResources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 100m
+    memory: 256Mi
+    ephemeral-storage: 256Mi
 upgradeCRDsJob:
   # Extra volumes for the Upgrade CRDs Job. Optional.
   extraVolumes: []

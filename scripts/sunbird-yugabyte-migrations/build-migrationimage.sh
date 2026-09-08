@@ -4,13 +4,18 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 echo "Building migration Docker image..."
 
 # Build the migration image
+# Context is this directory, not the repo root -- the Dockerfile's `COPY .`
+# would otherwise bake the entire repo checkout (including any local,
+# git-ignored secrets a real checkout might have on disk -- tf.sh,
+# populated global-values.yaml, terraform state) into the image. Matches
+# the real CI build path (.github/workflows/build-push-images.yml), which
+# already scopes context to ./scripts/sunbird-yugabyte-migrations.
 cd "$SCRIPT_DIR"
-docker build -f Dockerfile -t ycqlmigrations:latest "$REPO_ROOT"
+docker build -f Dockerfile -t ycqlmigrations:latest "$SCRIPT_DIR"
 
 echo "Migration image built successfully: ycql-migrations:latest"
 

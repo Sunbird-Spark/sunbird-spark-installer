@@ -4,10 +4,12 @@ fullnameOverride: "kong"
 replicaCount: 1
 
 image:
-  repository: docker.io/kong
+  registry: "docker.io"
+  repository: kong
   tag: "3.9.1"
   pullPolicy: IfNotPresent
   pullSecrets: []
+
 
 podAnnotations: {}
 

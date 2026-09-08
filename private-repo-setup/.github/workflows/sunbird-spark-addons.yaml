@@ -72,8 +72,7 @@ on:
         default: false
 
 permissions:
-  id-token: write
-  contents: write
+  contents: read
 
 env:
   CONFIG_PATH: "configs/${{ inputs.environment }}"
@@ -88,6 +87,9 @@ jobs:
     if: ${{ inputs.run_dial_infra }}
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write   # azure/login
+      contents: write   # Encrypt and Commit Addon Configs pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
@@ -96,23 +98,27 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
       - name: Azure Login (Infra)
-        uses: azure/login@v1
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
         with:
           client-id: ${{ secrets.AZURE_INFRA_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install ansible
+          pip install --only-binary :all: ansible==14.3.1
 
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -127,6 +133,8 @@ jobs:
           rm /tmp/vault_pass.txt
 
       - name: Install Terraform Tools
+        env:
+          TOFU_VERSION: "1.11.4"
         run: |
           TOFU_VERSION="1.11.4"
           curl -sLO "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
@@ -182,8 +190,10 @@ jobs:
           echo "✅ DIAL addon OpenTofu completed"
 
       - name: Encrypt and Commit Addon Configs
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ADDON_CLOUD="sunbird-spark-installer/addons/global-cloud-values.yaml"
           if [ -f "$ADDON_CLOUD" ]; then
@@ -223,6 +233,9 @@ jobs:
     needs: [infra-addons]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+      id-token: write   # azure/login
 
     steps:
       - name: Checkout Configuration Repository
@@ -231,23 +244,27 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
       - name: Azure Login (Deploy)
-        uses: azure/login@v1
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
         with:
           client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install ansible
+          pip install --only-binary :all: ansible==14.3.1
 
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -290,6 +307,8 @@ jobs:
           echo "✅ Environment folder ready: $ENV_FOLDER"
 
       - name: Install Deploy Tools
+        env:
+          HELM_VERSION: "3.21.4"
         run: |
           KUBECTL_VER=$(curl -L -s https://dl.k8s.io/release/stable.txt)
           curl -sLO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
@@ -374,6 +393,9 @@ jobs:
     needs: [deploy-addons]
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+      id-token: write   # azure/login
 
     steps:
       - name: Checkout Configuration Repository
@@ -382,23 +404,27 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
       - name: Azure Login (Uninstall)
-        uses: azure/login@v1
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
         with:
           client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install ansible
+          pip install --only-binary :all: ansible==14.3.1
 
-          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
+          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -424,6 +450,8 @@ jobs:
           echo "✅ Environment folder ready: $ENV_FOLDER"
 
       - name: Install Deploy Tools
+        env:
+          HELM_VERSION: "3.21.4"
         run: |
           KUBECTL_VER=$(curl -L -s https://dl.k8s.io/release/stable.txt)
           curl -sLO "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"

@@ -160,5 +160,20 @@ init_container_resources:
 
 opa_enabled: false
 
+envoy_image:
+  registry: "docker.io"
+  repository: "envoyproxy/envoy"
+  tag: "v1.20.0"
+
+opa_image:
+  registry: "sunbirded.azurecr.io"
+  repository: "opa"
+  tag: "0.34.2-envoy"
+
+proxy_init_image:
+  registry: "docker.io"
+  repository: "openpolicyagent/proxy_init"
+  tag: "v5"
+
 commonAnnotations:
   reloader.stakater.com/auto: "true"

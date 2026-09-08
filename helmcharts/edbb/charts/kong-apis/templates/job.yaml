@@ -16,6 +16,8 @@ spec:
       - name: wait-for-kong
         image: busybox
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        resources:
+          {{- toYaml .Values.waitForKongResources | nindent 10 }}
         command: ["/bin/sh", "-c"]
         # Wait for Kong admin endpoint to be reachable (port 8001) before seeding APIs
         args:
@@ -34,6 +36,8 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           command:
           - /bin/sh
           - -c

@@ -9,6 +9,11 @@ knowlg:
   enabled: true
   opa_enabled: true
 
+job_cleaner_kubectl_image:
+  registry: "sunbirded.azurecr.io"
+  repository: "kubectl"
+  tag: "1.28.4"
+
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
 
