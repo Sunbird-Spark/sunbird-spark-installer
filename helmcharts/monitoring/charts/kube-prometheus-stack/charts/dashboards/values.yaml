@@ -363,6 +363,8 @@ dashboards:
        file: dashboards/opensearch.json
      dashboard28:
        file: dashboards/backup-and-recovery.json
+     dashboard29:
+       file: dashboards/volume-autoscaler.json
 
 dashboards1:
    server:
