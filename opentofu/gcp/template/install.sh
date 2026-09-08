@@ -76,8 +76,7 @@ function certificate_config() {
     if [ -z "$CERTKEY" ]; then
         echo "Certificate RSA public key not available"
         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        curl_data="curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw '{\"value\":\"$CERTPUBKEY\"}'"
-        echo "kubectl -n sunbird exec deploy/knowledge-mw -- $curl_data" | sh -
+        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
     fi
 }
 

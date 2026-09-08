@@ -154,7 +154,7 @@ opensearch: &opensearch
   singleNode: true
   extraEnvs:
     - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-      value: "Lern@Migr8#2026!"
+      value: ""
   config:
     opensearch.yml: |
       plugins.security.disabled: true
