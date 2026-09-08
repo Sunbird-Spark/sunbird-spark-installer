@@ -106,7 +106,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Transaction Event Router \u2014 Total",
+          "title": "TEP\u00b7Router\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -197,7 +197,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Transaction Event Router \u2014 Success",
+          "title": "TEP\u00b7Router\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -288,7 +288,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Transaction Event Router \u2014 Failed",
+          "title": "TEP\u00b7Router\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -379,7 +379,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Transaction Event Router \u2014 Skipped",
+          "title": "TEP\u00b7Router\u00b7Skip",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -470,7 +470,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Transaction Event Router \u2014 Empty Schema",
+          "title": "TEP\u00b7Router\u00b7EmptySchema",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -561,7 +561,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Transaction Event Router \u2014 Empty Props",
+          "title": "TEP\u00b7Router\u00b7EmptyProps",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -652,7 +652,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit Event Generator \u2014 Total",
+          "title": "TEP\u00b7AuditEvtGen\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -743,7 +743,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit Event Generator \u2014 Success",
+          "title": "TEP\u00b7AuditEvtGen\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -834,7 +834,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit Event Generator \u2014 Failed",
+          "title": "TEP\u00b7AuditEvtGen\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -925,7 +925,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit Event Generator \u2014 Skipped",
+          "title": "TEP\u00b7AuditEvtGen\u00b7Skip",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1016,7 +1016,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit Event Generator \u2014 Empty Schema",
+          "title": "TEP\u00b7AuditEvtGen\u00b7EmptySchema",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1107,7 +1107,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit Event Generator \u2014 Empty Props",
+          "title": "TEP\u00b7AuditEvtGen\u00b7EmptyProps",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1198,7 +1198,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit History Indexer \u2014 Total",
+          "title": "TEP\u00b7AuditHistIdx\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1289,7 +1289,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit History Indexer \u2014 Success",
+          "title": "TEP\u00b7AuditHistIdx\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1380,7 +1380,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit History Indexer \u2014 Failed",
+          "title": "TEP\u00b7AuditHistIdx\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1471,7 +1471,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit History Indexer \u2014 Skipped",
+          "title": "TEP\u00b7AuditHistIdx\u00b7Skip",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1562,7 +1562,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Audit History Indexer \u2014 ES Failed",
+          "title": "TEP\u00b7AuditHistIdx\u00b7ESFail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1653,7 +1653,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Composite Search Indexer \u2014 Total",
+          "title": "TEP\u00b7CompSearchIdx\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1744,7 +1744,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Composite Search Indexer \u2014 Success",
+          "title": "TEP\u00b7CompSearchIdx\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1835,7 +1835,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Composite Search Indexer \u2014 Failed",
+          "title": "TEP\u00b7CompSearchIdx\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -1926,7 +1926,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Obsrv MetaData Generator \u2014 Total",
+          "title": "TEP\u00b7ObsrvMeta\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2017,7 +2017,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Obsrv MetaData Generator \u2014 Success",
+          "title": "TEP\u00b7ObsrvMeta\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2108,7 +2108,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Obsrv MetaData Generator \u2014 Failed",
+          "title": "TEP\u00b7ObsrvMeta\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2199,7 +2199,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Obsrv MetaData Generator \u2014 Skipped",
+          "title": "TEP\u00b7ObsrvMeta\u00b7Skip",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2290,7 +2290,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Obsrv MetaData Generator \u2014 Empty Props",
+          "title": "TEP\u00b7ObsrvMeta\u00b7EmptyProps",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2381,7 +2381,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] Obsrv MetaData Generator \u2014 ES Failed",
+          "title": "TEP\u00b7ObsrvMeta\u00b7ESFail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2472,7 +2472,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] DIALCode External Indexer (only if DIAL addon deployed) \u2014 Total",
+          "title": "TEP\u00b7DIALExt\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2563,7 +2563,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] DIALCode External Indexer (only if DIAL addon deployed) \u2014 Success",
+          "title": "TEP\u00b7DIALExt\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2654,7 +2654,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] DIALCode External Indexer (only if DIAL addon deployed) \u2014 Failed",
+          "title": "TEP\u00b7DIALExt\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2745,7 +2745,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] DIALCode Metric Indexer (only if DIAL addon deployed) \u2014 Total",
+          "title": "TEP\u00b7DIALMetric\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2836,7 +2836,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] DIALCode Metric Indexer (only if DIAL addon deployed) \u2014 Success",
+          "title": "TEP\u00b7DIALMetric\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2927,7 +2927,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[transaction-event-processor] DIALCode Metric Indexer (only if DIAL addon deployed) \u2014 Failed",
+          "title": "TEP\u00b7DIALMetric\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -2997,7 +2997,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "[transaction-event-processor] transaction-event-processor Lag",
+          "title": "TEP\u00b7Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -3113,7 +3113,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Publish Event Router \u2014 Total",
+          "title": "KPUB\u00b7Router\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3204,7 +3204,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Publish Event Router \u2014 Skipped",
+          "title": "KPUB\u00b7Router\u00b7Skip",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3295,7 +3295,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Content Publish \u2014 Total",
+          "title": "KPUB\u00b7ContentPub\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3386,7 +3386,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Content Publish \u2014 Success",
+          "title": "KPUB\u00b7ContentPub\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3477,7 +3477,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Content Publish \u2014 Failed",
+          "title": "KPUB\u00b7ContentPub\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3568,7 +3568,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Content Publish \u2014 Video Streaming",
+          "title": "KPUB\u00b7ContentPub\u00b7VidStream",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3659,7 +3659,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Content Publish \u2014 Skipped",
+          "title": "KPUB\u00b7ContentPub\u00b7Skip",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3750,7 +3750,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Content Publish \u2014 MVC Processor",
+          "title": "KPUB\u00b7ContentPub\u00b7MVC",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3841,7 +3841,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Content Publish \u2014 Enriched Metadata",
+          "title": "KPUB\u00b7ContentPub\u00b7EnrichMeta",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -3932,7 +3932,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Collection Publish \u2014 Total",
+          "title": "KPUB\u00b7CollPub\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4023,7 +4023,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Collection Publish \u2014 Success",
+          "title": "KPUB\u00b7CollPub\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4114,7 +4114,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Collection Publish \u2014 Failed",
+          "title": "KPUB\u00b7CollPub\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4205,7 +4205,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Collection Publish \u2014 Skipped",
+          "title": "KPUB\u00b7CollPub\u00b7Skip",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4296,7 +4296,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Collection Publish \u2014 Post-Publish Process",
+          "title": "KPUB\u00b7CollPub\u00b7PostPub",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4387,7 +4387,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Collection Publish \u2014 Enriched Metadata",
+          "title": "KPUB\u00b7CollPub\u00b7EnrichMeta",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4478,7 +4478,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Question Publish \u2014 Total",
+          "title": "KPUB\u00b7QPub\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4569,7 +4569,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Question Publish \u2014 Success",
+          "title": "KPUB\u00b7QPub\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4660,7 +4660,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Question Publish \u2014 Failed",
+          "title": "KPUB\u00b7QPub\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4751,7 +4751,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Question Publish \u2014 Enriched Metadata",
+          "title": "KPUB\u00b7QPub\u00b7EnrichMeta",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4842,7 +4842,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] QuestionSet Publish \u2014 Total",
+          "title": "KPUB\u00b7QSetPub\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -4933,7 +4933,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] QuestionSet Publish \u2014 Success",
+          "title": "KPUB\u00b7QSetPub\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5024,7 +5024,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] QuestionSet Publish \u2014 Failed",
+          "title": "KPUB\u00b7QSetPub\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5115,7 +5115,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] QuestionSet Publish \u2014 Enriched Metadata",
+          "title": "KPUB\u00b7QSetPub\u00b7EnrichMeta",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5206,7 +5206,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Enrich Only \u2014 Total",
+          "title": "KPUB\u00b7EnrichOnly\u00b7Tot",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5297,7 +5297,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Enrich Only \u2014 Success",
+          "title": "KPUB\u00b7EnrichOnly\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5388,7 +5388,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Enrich Only \u2014 Failed",
+          "title": "KPUB\u00b7EnrichOnly\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5479,7 +5479,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[knowlg-publish] Enrich Only \u2014 Skipped",
+          "title": "KPUB\u00b7EnrichOnly\u00b7Skip",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5549,7 +5549,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "[knowlg-publish] knowlg-publish Lag",
+          "title": "KPUB\u00b7Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -5665,7 +5665,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Extract \u2014 Extracted",
+          "title": "CE\u00b7Extract\u00b7Extracted",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5756,7 +5756,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Extract \u2014 Failed",
+          "title": "CE\u00b7Extract\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5847,7 +5847,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Chunking \u2014 Chunked",
+          "title": "CE\u00b7Chunk\u00b7Chunked",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -5938,7 +5938,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Chunking \u2014 Filtered",
+          "title": "CE\u00b7Chunk\u00b7Filtered",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6029,7 +6029,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Chunking \u2014 Failed",
+          "title": "CE\u00b7Chunk\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6120,7 +6120,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Batch Embedding \u2014 Embedded",
+          "title": "CE\u00b7BatchEmbed\u00b7Embedded",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6211,7 +6211,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Batch Embedding \u2014 Failed",
+          "title": "CE\u00b7BatchEmbed\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6302,7 +6302,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Batch Embedding \u2014 API Calls",
+          "title": "CE\u00b7BatchEmbed\u00b7APICalls",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6393,7 +6393,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Batch Embedding \u2014 Slow API Calls",
+          "title": "CE\u00b7BatchEmbed\u00b7SlowAPI",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6484,7 +6484,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Quantization \u2014 Quantized",
+          "title": "CE\u00b7Quantize\u00b7Quantized",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6575,7 +6575,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] Quantization \u2014 Failed",
+          "title": "CE\u00b7Quantize\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6666,7 +6666,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] OpenSearch Sink \u2014 Success",
+          "title": "CE\u00b7OSSink\u00b7OK",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6757,7 +6757,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[content-embedding] OpenSearch Sink \u2014 Failed",
+          "title": "CE\u00b7OSSink\u00b7Fail",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -6827,7 +6827,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "[content-embedding] content-embedding Lag",
+          "title": "CE\u00b7Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -6922,7 +6922,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "[enrichment-router (metrics not verified -- Lag only)] enrichment-router Lag",
+          "title": "ER*\u00b7Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -7017,7 +7017,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "[caption-generator (metrics not verified -- Lag only)] caption-generator Lag",
+          "title": "CG*\u00b7Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -7126,7 +7126,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "[notification-job (metrics not verified -- Lag only)] notification-job Lag",
+          "title": "NJ*\u00b7Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -7221,7 +7221,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "[user-deletion-cleanup (metrics not verified -- Lag only)] user-deletion-cleanup Lag",
+          "title": "UDC*\u00b7Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -7337,7 +7337,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Total Events",
+          "title": "CCG\u00b7Total Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7428,7 +7428,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Success Events",
+          "title": "CCG\u00b7Success Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7519,7 +7519,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Skipped Events",
+          "title": "CCG\u00b7Skipped Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7610,7 +7610,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Failed Events",
+          "title": "CCG\u00b7Failed Events",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7701,7 +7701,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Enrolment DB Read",
+          "title": "CCG\u00b7Enrolment DB Read",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7792,7 +7792,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Enrolment DB Update",
+          "title": "CCG\u00b7Enrolment DB Update",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7883,7 +7883,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Course Batch DB Read",
+          "title": "CCG\u00b7Course Batch DB Read",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -7974,7 +7974,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Notification User ",
+          "title": "CCG\u00b7Notification User ",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -8065,7 +8065,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Skip Notification User ",
+          "title": "CCG\u00b7Skip Notification Us",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -8156,7 +8156,7 @@
           "thresholds": "",
           "timeFrom": null,
           "timeShift": null,
-          "title": "[Collection Certificate Generator] User Feed",
+          "title": "CCG\u00b7User Feed",
           "type": "singlestat",
           "valueFontSize": "80%",
           "valueMaps": [
@@ -8295,7 +8295,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Collection Cert Generator",
+          "title": "CCG\u00b7Collection Cert Gene",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -8390,7 +8390,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "[Collection Certificate Generator] Collection Cert Generator Lag",
+          "title": "CCG\u00b7Lag",
           "tooltip": {
             "shared": true,
             "sort": 0,
