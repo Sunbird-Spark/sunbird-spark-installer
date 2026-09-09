@@ -109,8 +109,8 @@ spec:
             subPath: log4j-console.properties
       volumes:
       - name: flink-config-volume
-        configMap:
-          name: {{ $jobName }}-config
+        secret:
+          secretName: {{ $jobName }}-config
           items:
           - key: flink-conf
             path: flink-conf.yaml
@@ -234,8 +234,8 @@ spec:
             subPath: log4j-console.properties
       volumes:
       - name: flink-config-volume
-        configMap:
-          name: {{ $jobName }}-config
+        secret:
+          secretName: {{ $jobName }}-config
           items:
           - key: flink-conf
             path: flink-conf.yaml
