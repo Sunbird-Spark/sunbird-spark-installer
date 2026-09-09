@@ -29,7 +29,7 @@ function deploy_tf_module() {
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
-    deploy_tf_module network
+    # deploy_tf_module network
     # deploy_tf_module storage
     # deploy_tf_module aks
     # deploy_tf_module workload-identity
