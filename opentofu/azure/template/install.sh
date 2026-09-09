@@ -40,6 +40,12 @@ function create_tf_resources() {
     [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
 }
 
+function create_random_passwords() {
+    source tf.sh
+    echo -e "\nGenerating random passwords"
+    deploy_tf_module random_passwords
+}
+
 
 function certificate_keys() {
     #  # If keys already present in global-values.yaml → skip writing
