@@ -1,6 +1,6 @@
 {{- if .Values.configmap.enabled }}
 apiVersion: v1
-kind: Secret
+kind: ConfigMap
 metadata:
   name: {{ include "common.names.fullname" . }}
   namespace: {{ .Release.Namespace }}
@@ -10,8 +10,7 @@ metadata:
   annotations:
 {{ include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
   {{- end }}
-type: Opaque
-stringData:
+data:
 {{- $currentScope := .}}
 {{- range $path, $_ := .Files.Glob "configs/*" }} # Take only root level files (configs/*) for configmaps
   {{- if and (ne $path "configs/env.yaml") (ne $path "configs/secrets.yaml") }} # Skip env.yaml/secrets.yaml as configmap, as they're env files
