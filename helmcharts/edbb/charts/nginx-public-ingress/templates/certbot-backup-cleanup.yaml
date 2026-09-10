@@ -1,0 +1,83 @@
+# One-shot cleanup: on every environment where the old certbot cronjob ran
+# at least once (before the ConfigMap -> Secret migration), a
+# certbot-certs-backup ConfigMap holding the TLS private key in cleartext
+# was left behind. Nothing in the regular chart manifest owns/prunes it, so
+# this hook deletes it (if present) on every install/upgrade.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: certbot-backup-cleanup
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: hook-succeeded
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: certbot-backup-cleanup
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: hook-succeeded
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["certbot-certs-backup"]
+    verbs: ["get", "delete"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: certbot-backup-cleanup
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook-weight: "-5"
+    helm.sh/hook-delete-policy: hook-succeeded
+subjects:
+  - kind: ServiceAccount
+    name: certbot-backup-cleanup
+roleRef:
+  kind: Role
+  name: certbot-backup-cleanup
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: certbot-backup-cleanup
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook: "pre-install,pre-upgrade"
+    helm.sh/hook-weight: "-3"
+    helm.sh/hook-delete-policy: hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      serviceAccountName: certbot-backup-cleanup
+      automountServiceAccountToken: true
+      restartPolicy: Never
+      containers:
+        - name: kubectl-container
+          image: alpine:3.20
+          command: ["/bin/sh"]
+          args:
+            - -c
+            - |
+              apk add --no-cache kubectl
+              kubectl delete configmap certbot-certs-backup -n {{ .Release.Namespace }} --ignore-not-found
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
+              ephemeral-storage: 64Mi
