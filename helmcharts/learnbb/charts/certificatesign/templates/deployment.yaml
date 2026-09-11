@@ -72,6 +72,6 @@ spec:
           name: {{ include "common.names.fullname" . }}-env
       {{- if .Values.configmap.enabled }}
       - name: config
-        configMap:
-          name: {{ include "common.names.fullname" . }}
+        secret:
+          secretName: {{ include "common.names.fullname" . }}
       {{- end }}
