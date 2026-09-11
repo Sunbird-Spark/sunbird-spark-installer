@@ -1,7 +1,8 @@
 # OpenSSF Scorecard — supply-chain security posture of this repository.
 # Results are uploaded to the Security > Code scanning tab on every run.
-# publish_results only takes effect on the default branch (badge / api.scorecard.dev);
-# on other branches the analysis still runs and the SARIF is still uploaded.
+# publish_results (badge / api.scorecard.dev) is only allowed on the default branch —
+# the action refuses to run with it set elsewhere — so it is enabled conditionally.
+# On v* branches the analysis still runs and the SARIF is still uploaded.
 name: OpenSSF Scorecard
 
 on:
@@ -42,7 +43,9 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
-          publish_results: true
+          # Must be false on non-default branches or the action aborts:
+          # "Only the default branch main is supported."
+          publish_results: ${{ github.ref_name == github.event.repository.default_branch }}
 
       - name: Upload SARIF artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
