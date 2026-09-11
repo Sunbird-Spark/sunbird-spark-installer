@@ -14,7 +14,12 @@ type: Opaque
 stringData:
 {{- $currentScope := .}}
 {{- range $path, $_ := .Files.Glob "configs/*" }}
-  {{- if ne $path "configs/env.yaml" }}
+  {{- $skip := eq $path "configs/env.yaml" }}
+  {{- if and $.Values.global.cert_manager_ssl (or (eq $path "configs/tls.crt") (eq $path "configs/tls.key")) }}
+    {{- /* cert-manager owns tls.crt/tls.key exclusively -- see cert-manager-issuer.yaml */}}
+    {{- $skip = true }}
+  {{- end }}
+  {{- if not $skip }}
     {{ base $path | nindent 2 }}: |-
       {{- with $currentScope }}
       {{- $var := .Files.Get $path }}

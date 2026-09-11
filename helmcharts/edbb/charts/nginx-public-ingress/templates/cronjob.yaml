@@ -1,4 +1,4 @@
-{{- if .Values.global.lets_encrypt_ssl }}
+{{- if and .Values.global.lets_encrypt_ssl (not .Values.global.cert_manager_ssl) }}
 ---
 apiVersion: batch/v1
 kind: CronJob

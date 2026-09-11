@@ -161,6 +161,45 @@ yugabyte: &yugabyte
 nginx-public-ingress:
   enabled: true
 
+# cert-manager and ingress-nginx are only needed when
+# global.cert_manager_ssl is true (see nginx-public-ingress's
+# cert-manager-issuer.yaml). ingress-nginx here is *not* the platform's
+# public entrypoint -- nginx-public-ingress stays that -- it exists solely
+# so cert-manager's HTTP-01 solver has a real controller to reconcile its
+# per-challenge Ingress objects against. Kept ClusterIP-only, never
+# internet-facing on its own.
+cert-manager:
+  enabled: false
+  crds:
+    enabled: true
+
+ingress-nginx:
+  enabled: false
+  fullnameOverride: ingress-nginx
+  controller:
+    ingressClassResource:
+      name: acme-http01-solver
+      enabled: true
+      default: false
+    ingressClass: acme-http01-solver
+    watchIngressWithoutClass: false
+    service:
+      type: ClusterIP
+    admissionWebhooks:
+      enabled: false
+    metrics:
+      enabled: false
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 90Mi
+      limits:
+        cpu: 200m
+        memory: 200Mi
+  defaultBackend:
+    enabled: false
+
 echo:
   enabled: true
 
