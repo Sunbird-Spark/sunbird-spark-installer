@@ -13,7 +13,7 @@ metadata:
 data:
 {{- $currentScope := .}}
 {{- range $path, $_ := .Files.Glob "configs/*" }} # Take only root level files (configs/*) for configmaps
-  {{- if ne $path "configs/env.yaml" }} # Skip env.yaml as configmap, as it's env file
+  {{- if and (ne $path "configs/env.yaml") (ne $path "configs/secrets.yaml") }} # Skip env.yaml/secrets.yaml as configmap, as they're env files
     {{ base $path | nindent 2 }}: |-
       {{- with $currentScope }}
       {{- $var := .Files.Get $path }}
@@ -36,6 +36,22 @@ metadata:
   {{- end }}
 data:
   {{- $var := .Files.Get "configs/env.yaml" }}
+  {{- include "common.tplvalues.render" (dict "value" $var "context" $) | nindent 2 }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "common.names.fullname" . }}-secrets
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "common.labels.standard" (dict "customLabels" .Values.commonLabels "context" $) | nindent 4 }}
+  {{- if .Values.commonAnnotations }}
+  annotations:
+{{ include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
+  {{- end }}
+type: Opaque
+stringData:
+  {{- $var := .Files.Get "configs/secrets.yaml" }}
   {{- include "common.tplvalues.render" (dict "value" $var "context" $) | nindent 2 }}
 
 {{- if .Values.opa_enabled }}

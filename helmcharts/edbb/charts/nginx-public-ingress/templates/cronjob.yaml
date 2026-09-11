@@ -111,35 +111,24 @@ data:
     if [ -f "$CERT_DIR/fullchain.pem" ] && [ -f "$CERT_DIR/privkey.pem" ]; then
       echo "✅ Certificate files exist"
 
-      # 👉 NEW BLOCK ADDED HERE: create backup ConfigMap with renewed certs
-      echo ">>> Creating backup ConfigMap with renewed certs..."
-      kubectl create configmap certbot-certs-backup \
-        --from-file=fullchain.pem="$CERT_DIR/fullchain.pem" \
-        --from-file=privkey.pem="$CERT_DIR/privkey.pem" \
+      echo ">>> Creating backup Secret with renewed certs..."
+      kubectl create secret tls certbot-certs-backup \
+        --cert="$CERT_DIR/fullchain.pem" \
+        --key="$CERT_DIR/privkey.pem" \
         -n {{ .Release.Namespace }} \
         --dry-run=client -o yaml | kubectl apply -f -
-      echo "✅ Backup ConfigMap 'certbot-certs-backup' created/updated successfully"
-      # 👆 END OF NEW BLOCK
+      echo "✅ Backup Secret 'certbot-certs-backup' created/updated successfully"
 
-      kubectl get configmap nginx-public-ingress -n {{ .Release.Namespace }} -o yaml > /tmp/cm.yaml
+      echo ">>> Patching nginx-public-ingress Secret with renewed cert/key..."
+      TLS_CRT_B64=$(base64 < "$CERT_DIR/fullchain.pem" | tr -d '\n')
+      TLS_KEY_B64=$(base64 < "$CERT_DIR/privkey.pem" | tr -d '\n')
 
-      echo "  tls.crt: |-" > /tmp/new_tls.yaml
-      sed 's/^/    /' "$CERT_DIR/fullchain.pem" >> /tmp/new_tls.yaml
-      echo "  tls.key: |-" >> /tmp/new_tls.yaml
-      sed 's/^/    /' "$CERT_DIR/privkey.pem" >> /tmp/new_tls.yaml
-
-      awk '
-        BEGIN {skip=0}
-        /^  tls.crt:/ {system("cat /tmp/new_tls.yaml"); skip=1; next}
-        /^  tls.key:/ {skip=1; next}
-        skip && /^[^ ]/ {skip=0}
-        !skip {print}
-      ' /tmp/cm.yaml > /tmp/updated-cm.yaml
-
-      if kubectl apply -f /tmp/updated-cm.yaml -n {{ .Release.Namespace }}; then
-        echo "✅ ConfigMap updated"
+      if kubectl patch secret nginx-public-ingress -n {{ .Release.Namespace }} \
+        --type=merge \
+        -p="{\"data\":{\"tls.crt\":\"$TLS_CRT_B64\",\"tls.key\":\"$TLS_KEY_B64\"}}"; then
+        echo "✅ Secret updated"
       else
-        echo "❌ Failed to update ConfigMap"
+        echo "❌ Failed to update Secret"
       fi
 
       if kubectl rollout restart deployment nginx-public-ingress -n {{ .Release.Namespace }}; then
@@ -186,8 +175,15 @@ rules:
     resources: ["deployments"]
     verbs: ["get", "list", "watch", "patch", "update"]
   - apiGroups: [""]
-    resources: ["configmaps", "services"]
-    verbs: ["get", "list", "watch", "patch", "update", "create"]
+    resources: ["secrets"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["nginx-public-ingress", "certbot-certs-backup"]
+    verbs: ["get", "patch", "update"]
+  - apiGroups: [""]
+    resources: ["services"]
+    verbs: ["get", "list", "watch", "patch", "update"]
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

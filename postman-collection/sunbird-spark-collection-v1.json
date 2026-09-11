@@ -9230,7 +9230,7 @@
 									"formdata": [
 										{
 											"key": "fileUrl",
-											"value": "https://downloadableartifacts.blob.core.windows.net/release600/certificate_template.svg",
+											"value": "{{blob_store_path}}/{{public_container_name}}/certificate_template.svg",
 											"type": "text"
 										}
 									]
@@ -9279,7 +9279,7 @@
 									"formdata": [
 										{
 											"key": "fileUrl",
-											"value": "https://downloadableartifacts.blob.core.windows.net/release600/certificate_template.svg",
+											"value": "{{blob_store_path}}/{{public_container_name}}/certificate_template.svg",
 											"type": "text"
 										}
 									]

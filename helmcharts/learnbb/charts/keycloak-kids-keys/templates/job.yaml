@@ -5,8 +5,10 @@ metadata:
   name: {{ include "common.names.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
+    "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "-2"
 spec:
+  ttlSecondsAfterFinished: 100
   template:
     spec:
       serviceAccountName: {{ include "common.names.fullname" . }}
@@ -21,8 +23,12 @@ spec:
             /usr/local/bin/execute_query.sh
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           envFrom:
           - configMapRef:
               name: {{ include "common.names.fullname" . }}-env
+          - secretRef:
+              name: {{ include "common.names.fullname" . }}-secrets
       restartPolicy: Never
   backoffLimit: 30
