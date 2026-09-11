@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 # ^ pins the Dockerfile frontend so `ADD --checksum` below (needs 1.4+) works
 # on any builder, not just whatever buildx happens to default to.
-FROM --platform=linux/amd64 ubuntu:22.04@sha256:829f6df217bcbae2b371026e81711d1a787c61b2967ad09d015063663ebafbf7
+FROM --platform=linux/amd64 ubuntu:26.04@sha256:513c074113a871b51a8d16ab445c88779d6452d937a164fb5cc479f32668a41d
 
 ENV DEBIAN_FRONTEND=noninteractive
 
