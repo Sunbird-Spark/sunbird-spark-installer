@@ -27,6 +27,8 @@ dependencies:
   - name: common
     repository: https://nimbushubin.github.io/helmcharts
     version: 0.1.0
+  - name: telemetry
+    version: 0.1.0
   - name: kafka
     repository: oci://registry-1.docker.io/bitnamicharts
     version: 32.2.15

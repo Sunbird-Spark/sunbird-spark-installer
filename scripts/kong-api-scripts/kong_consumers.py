@@ -228,7 +228,7 @@ def _get_first_or_create_jwt_credential(kong_admin_api_url, consumer, stats):
             jwt_token = jwt.encode({'iss': jwt_credential['key']}, jwt_credential['secret'], algorithm='HS256')
             print("JWT token for {} is : {}".format(username, jwt_token))
         if 'print_credentials' in consumer:
-            print("Credentials for consumer {}, key: {}, secret: {}".format(username, jwt_credential['key'], jwt_credential['secret']))
+            print("Credentials for consumer {}, key: {}".format(username, jwt_credential['key']))
             
         return jwt_credential
     else:
