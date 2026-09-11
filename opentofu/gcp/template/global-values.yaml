@@ -39,6 +39,14 @@ global:
   # Example: sunbird.com
   domain: "REPLACE_ME"
   lets_encrypt_ssl: false #enable this if you are using  let's encrypt ssl certificate
+  # Set to true instead of lets_encrypt_ssl for fully automated issuance +
+  # renewal via cert-manager (no more manual DNS-01/TXT record, no more
+  # pasting cert/key below into proxy_certificate/proxy_private_key -- ever,
+  # not even the first time). Requires cert-manager.enabled and
+  # ingress-nginx.enabled in helmcharts/edbb/values.yaml. Mutually exclusive
+  # with lets_encrypt_ssl -- if both are true, cert_manager_ssl wins and the
+  # old certbot cronjob is skipped.
+  cert_manager_ssl: false
   play_http:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
     # cloud_private_storage_secret: "{{ .Values.global.gcp_storage_account_key | default "gcp-credentials"}}"
@@ -79,6 +87,8 @@ global:
   merge_domain_status: "false"
   merge_domain: ""
   # Add the domain SSL key and certificate
+  # Not needed at all if cert_manager_ssl is true above -- cert-manager owns
+  # the TLS Secret directly, no static value here, ever (not even first-time).
   # Example below:
   # proxy_private_key: |
   #   -----BEGIN PRIVATE KEY-----

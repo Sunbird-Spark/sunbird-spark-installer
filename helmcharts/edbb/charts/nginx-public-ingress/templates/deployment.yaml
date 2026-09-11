@@ -19,7 +19,7 @@ spec:
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
     spec:
-      {{- if .Values.serviceAccount.create }}
+      {{- if or .Values.serviceAccount.create .Values.global.cert_manager_ssl }}
       serviceAccountName: {{ include "common.names.fullname" . }}
       {{- end }}
       securityContext:
@@ -28,9 +28,35 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.initContainers }}
+      {{- if or .Values.global.cert_manager_ssl .Values.initContainers }}
       initContainers:
+      {{- if .Values.global.cert_manager_ssl }}
+        # tls.crt/tls.key are subPath-mounted below, which requires both keys
+        # to already exist in the Secret -- on a brand new domain, cert-manager
+        # hasn't issued anything yet at first install, so this pod would
+        # otherwise crash-loop before it can even serve the ACME challenge that
+        # cert-manager needs routed through it. Block here until both keys show
+        # up instead.
+        - name: wait-for-cert
+          image: bitnami/kubectl:1.31
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              until kubectl get secret {{ include "common.names.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.tls\.crt}{.data.tls\.key}' | grep -q .; do
+                echo "Waiting for cert-manager to issue the TLS certificate into the {{ include "common.names.fullname" . }} Secret..."
+                sleep 5
+              done
+          resources:
+            requests:
+              cpu: 20m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+      {{- end }}
+      {{- with .Values.initContainers }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}

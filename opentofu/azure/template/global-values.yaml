@@ -46,6 +46,14 @@ global:
   release_version: release-7.0.0
   domain: ""
   lets_encrypt_ssl: false  #enable this if you are using  let's encrypt ssl certificate
+  # Set to true instead of lets_encrypt_ssl for fully automated issuance +
+  # renewal via cert-manager (no more manual DNS-01/TXT record, no more
+  # pasting cert/key below into proxy_certificate/proxy_private_key -- ever,
+  # not even the first time). Requires cert-manager.enabled and
+  # ingress-nginx.enabled in helmcharts/edbb/values.yaml. Mutually exclusive
+  # with lets_encrypt_ssl -- if both are true, cert_manager_ssl wins and the
+  # old certbot cronjob is skipped.
+  cert_manager_ssl: false
   cert_notifications:
     email: "" # provide the email address for certificate renewal notifications/alerts
   play_http:
@@ -97,6 +105,8 @@ global:
   merge_domain_status: "false"
   merge_domain: ""
   # Add the domain SSL key and certificate
+  # Not needed at all if cert_manager_ssl is true above -- cert-manager owns
+  # the TLS Secret directly, no static value here, ever (not even first-time).
   # Example below:
   # proxy_private_key: |
   #   -----BEGIN PRIVATE KEY-----
