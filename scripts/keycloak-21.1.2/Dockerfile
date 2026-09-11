@@ -1,6 +1,6 @@
 
 # Stage 1: Get the official Keycloak image
-FROM quay.io/keycloak/keycloak:21.1.2@sha256:3408c186dde4a95c2b99ef1290721bf1d253d64ba3a1de0a46c667b8288051f0 AS source
+FROM quay.io/keycloak/keycloak:26.7.3@sha256:ff4257d0d64efbe99ed1ddfaf07765cc3c36dc7518bf8324d41961327f441c54 AS source
 
 # Stage 2: Create a patched base image using UBI 9 Minimal (pinned to a stable version)
 FROM registry.access.redhat.com/ubi9/ubi-minimal:9.4@sha256:c0e70387664f30cd9cf2795b547e4a9a51002c44a4a86aa9335ab030134bf392 AS patched_base
