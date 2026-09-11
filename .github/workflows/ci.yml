@@ -1,0 +1,121 @@
+# Static checks on every pull request. Nothing here touches a cloud account or a cluster.
+# Blocking jobs: actionlint, shellcheck, hadolint (errors only), OpenTofu validate.
+# Advisory: helm lint and tofu fmt — neither is clean today; they report but do not fail
+# the run. Make them blocking once the charts lint and the modules are formatted.
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - "v*"   # v1.x.x development branches
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  actionlint:
+    name: Workflow lint
+    runs-on: ubuntu-latest
+    env:
+      ACTIONLINT_VERSION: "1.7.12"
+      ACTIONLINT_SHA256: "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Install actionlint (pinned, checksum-verified)
+        run: |
+          curl -fsSL --proto '=https' --tlsv1.2 -o actionlint.tar.gz \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          echo "${ACTIONLINT_SHA256}  actionlint.tar.gz" | sha256sum -c -
+          tar -xzf actionlint.tar.gz actionlint
+          rm -f actionlint.tar.gz
+      - name: Run actionlint
+        run: ./actionlint -no-color
+
+  shellcheck:
+    name: Shell lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Run shellcheck (errors only; skips Helm-templated scripts)
+        # Scripts under migration/**/files contain Go-template markup ({{ … }}) and are
+        # rendered by Helm before execution, so they are not valid shell as committed.
+        run: |
+          shellcheck --version | head -2
+          git ls-files '*.sh' | xargs grep -L '{{' | tee /dev/stderr | xargs shellcheck -S error -f gcc
+
+  hadolint:
+    name: Dockerfile lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Run hadolint on every Dockerfile
+        uses: hadolint/hadolint-action@06be81baf89a55ffd0e24b8f04a4185738dd3387 # v3.5.0
+        with:
+          recursive: true
+          failure-threshold: error
+
+  opentofu:
+    name: OpenTofu fmt & validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with:
+          tofu_version: "1.11.4"
+          tofu_wrapper: false
+      - name: tofu fmt -check (advisory)
+        # 30 module files are not fmt-clean today; whitespace-only. Run
+        # `tofu fmt -recursive opentofu` in its own PR, then drop continue-on-error.
+        continue-on-error: true
+        run: tofu fmt -check -recursive -list=true opentofu
+      - name: tofu validate (every module)
+        run: |
+          set -euo pipefail
+          status=0
+          for dir in opentofu/azure/modules/*/ opentofu/gcp/modules/*/; do
+            echo "::group::${dir}"
+            if (cd "$dir" && tofu init -backend=false -input=false >/dev/null && tofu validate -no-color); then
+              echo "OK ${dir}"
+            else
+              echo "::error::validate failed in ${dir}"; status=1
+            fi
+            echo "::endgroup::"
+          done
+          exit $status
+
+  helm:
+    name: Helm lint (advisory)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: helm lint umbrella charts with the install-time value layering
+        run: |
+          helm version --short
+          status=0
+          for chart in helmcharts/monitoring helmcharts/edbb helmcharts/learnbb helmcharts/knowledgebb helmcharts/obsrvbb helmcharts/additional; do
+            echo "::group::${chart}"
+            args=(-f "${chart}/values.yaml")
+            [ -f "${chart}/ed-values.yaml" ] && args+=(-f "${chart}/ed-values.yaml")
+            args+=(-f helmcharts/images.yaml -f helmcharts/global-resources.yaml -f opentofu/azure/template/global-values.yaml)
+            helm lint "${chart}" "${args[@]}" || status=1
+            echo "::endgroup::"
+          done
+          exit $status
