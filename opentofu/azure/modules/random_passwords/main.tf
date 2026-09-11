@@ -30,11 +30,26 @@ resource "random_password" "keycloak" {
   override_special = true
 }
 
+# OpenSearch 2.12+ refuses to boot unless OPENSEARCH_INITIAL_ADMIN_PASSWORD meets
+# its complexity check (>=8 chars, upper, lower, digit, special), so min_* are set
+# explicitly rather than left to chance. override_special avoids quote/backslash/`$`
+# characters that would break the double-quoted YAML this gets patched into below,
+# or the shell heredoc the gcp variant of this module writes it through.
+resource "random_password" "opensearch_admin" {
+  length           = 20
+  override_special = "!@#%^&*()-_=+"
+  min_upper        = 1
+  min_lower        = 1
+  min_numeric      = 1
+  min_special      = 1
+}
+
 locals {
   patch_passwords_yaml = templatefile("${path.module}/patch-passwords.yaml.tpl", {
-    grafana_admin_password  = random_password.grafana_admin.result
-    superset_admin_password = random_password.superset_admin.result
-    keycloak_password       = random_password.keycloak.result
+    grafana_admin_password    = random_password.grafana_admin.result
+    superset_admin_password   = random_password.superset_admin.result
+    keycloak_password         = random_password.keycloak.result
+    opensearch_admin_password = random_password.opensearch_admin.result
   })
 }
 

@@ -11,6 +11,9 @@ spec:
   backoffLimit: 30
   ttlSecondsAfterFinished: 100  # Auto-cleanup job after completion
   template:
+    metadata:
+      labels:
+        kong-admin-client: "true"
     spec:
       initContainers:
       - name: wait-for-kong

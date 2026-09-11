@@ -49,7 +49,7 @@ databases:
     databases:
       - name: "keycloak"
         username: "yugabyte"
-        password: ""
+        password: ""            # required if dbFixups.keycloakCredentials.enabled is true
       - name: "registry"
         username: "yugabyte"
         password: ""

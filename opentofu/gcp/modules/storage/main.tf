@@ -28,7 +28,7 @@ resource "google_storage_bucket" "storage_container_public" {
     enabled = true
   }
 
-  uniform_bucket_level_access = false
+  uniform_bucket_level_access = true
   public_access_prevention = "unspecified"
 
   cors {
@@ -39,9 +39,9 @@ resource "google_storage_bucket" "storage_container_public" {
   }
 }
 
-resource "google_storage_bucket_iam_member" "read_write_public" {
+resource "google_storage_bucket_iam_member" "public_read" {
   bucket = google_storage_bucket.storage_container_public.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectViewer"
   member = "allUsers"
 }
 
@@ -69,7 +69,7 @@ resource "google_storage_bucket" "dial_state_container_public" {
     enabled = true
   }
 
-  uniform_bucket_level_access = false
+  uniform_bucket_level_access = true
 
   cors {
     origin          = ["https://${var.domain}"]
@@ -79,9 +79,9 @@ resource "google_storage_bucket" "dial_state_container_public" {
   }
 }
 
-resource "google_storage_bucket_iam_member" "full_access_dial" {
+resource "google_storage_bucket_iam_member" "dial_public_read" {
   bucket = google_storage_bucket.dial_state_container_public.name
-  role   = "roles/storage.objectAdmin"
+  role   = "roles/storage.objectViewer"
   member = "allUsers"
 }
 

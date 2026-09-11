@@ -1,7 +1,18 @@
 import argparse, sys
 from collections import OrderedDict
 import csv
+import os
 import yaml
+
+def safe_join(base_dir, *parts):
+    """os.path.join, but refuses to build a path that escapes base_dir --
+    guards apis_csv_file_path against a faulty or malicious CLI argument
+    walking the read outside the directory this script is run from."""
+    candidate = os.path.realpath(os.path.join(base_dir, *parts))
+    base = os.path.realpath(base_dir)
+    if os.path.commonpath([candidate, base]) != base:
+        raise ValueError(f"Refusing to access outside {base!r}: {candidate!r}")
+    return candidate
 
 def setup_yaml():
   """ https://stackoverflow.com/a/31609484/69362 """
@@ -46,5 +57,5 @@ if  __name__ == "__main__":
     parser.add_argument('apis_csv_file_path', help='Path of the csv file containing apis data')
     args = parser.parse_args()
     setup_yaml()
-    with open(args.apis_csv_file_path) as apis_csv_file:
+    with open(safe_join(os.getcwd(), args.apis_csv_file_path)) as apis_csv_file:
         convert_csv_to_yaml(apis_csv_file)

@@ -1,0 +1,28 @@
+{{- if .Values.networkPolicy.enabled }}
+kind: NetworkPolicy
+apiVersion: {{ include "common.capabilities.networkPolicy.apiVersion" . }}
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+  policyTypes:
+    - Ingress
+  ingress:
+    # Proxy traffic (8000): open to everyone — this is the real request path,
+    # reached via nginx-public-ingress/nginx-private-ingress and in-cluster callers.
+    - ports:
+        - port: 8000
+    # Admin API (8001): only the seed jobs that provision routes/consumers/plugins
+    # may reach it. Nothing else — no ingress controller, no other service pod —
+    # gets a route to Kong's unauthenticated admin endpoint.
+    - ports:
+        - port: 8001
+      from:
+        - podSelector:
+            matchLabels:
+              kong-admin-client: "true"
+{{- end }}

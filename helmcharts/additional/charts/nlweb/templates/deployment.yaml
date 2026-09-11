@@ -13,6 +13,8 @@ spec:
       labels:
         app: nlweb
     spec:
+      # Neither container talks to the K8s API.
+      automountServiceAccountToken: false
       initContainers:
         - name: install-qdrant-client
           image: python:3.10-slim   # ✅ reliable base image with /bin/sh
@@ -20,6 +22,14 @@ spec:
           args: ["pip install --no-cache-dir -t /vendor qdrant-client"]
           securityContext:
             runAsUser: 0
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+              ephemeral-storage: 512Mi
           volumeMounts:
             - name: vendor
               mountPath: /vendor
@@ -31,6 +41,14 @@ spec:
       containers:
         - name: nlweb
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 2Gi
+              ephemeral-storage: 1Gi
           ports:
             - containerPort: {{ .Values.port }}
           readinessProbe:
@@ -114,9 +132,19 @@ spec:
       labels:
         app: qdrant
     spec:
+      # Doesn't talk to the K8s API.
+      automountServiceAccountToken: false
       containers:
         - name: qdrant
           image: {{ .Values.qdrant.image }}
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 2Gi
+              ephemeral-storage: 2Gi
           ports:
             - containerPort: {{ .Values.qdrant.port }}
           volumeMounts:
