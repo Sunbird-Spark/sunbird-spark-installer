@@ -38,10 +38,11 @@ spec:
         # cert-manager needs routed through it. Block here until both keys show
         # up instead.
         - name: wait-for-cert
-          image: bitnami/kubectl:1.31
+          image: alpine:3.20
           command: ["/bin/sh", "-c"]
           args:
             - |
+              apk add --no-cache kubectl
               until kubectl get secret {{ include "common.names.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.tls\.crt}{.data.tls\.key}' | grep -q .; do
                 echo "Waiting for cert-manager to issue the TLS certificate into the {{ include "common.names.fullname" . }} Secret..."
                 sleep 5
