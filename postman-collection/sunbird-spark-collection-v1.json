@@ -3356,6 +3356,92 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "ObjectCategory - Learning Path",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "X-Authenticated-User-token",
+												"value": "{{access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Learning Path\",\n            \"description\":\"Learning Path\"\n        }\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategory - Level",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "X-Authenticated-User-token",
+												"value": "{{access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Level\",\n            \"description\":\"Level\"\n        }\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
 								}
 							],
 							"description": "[https://github.com/project-sunbird/knowledge-platform/blob/master/scripts/definition-scripts/master_category_create](https://github.com/project-sunbird/knowledge-platform/blob/master/scripts/definition-scripts/master_category_create)"
@@ -4266,6 +4352,86 @@
 						                      		"mode": "raw",
 						                      		"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            },\n            \"maxAttempts\": {\n              \"type\": \"number\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
 						                       },
+										"url": {
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - Learning Path",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:learning-path\",\n            \"targetObjectType\": \"Collection\",\n            \"objectMetadata\": {\n                \"config\": {\n                    \"frameworkMetadata\": {\n                        \"orgFWType\": [\n                            \"K-12\",\n                            \"TPD\"\n                        ],\n                        \"targetFWType\": []\n                    },\n                    \"sourcingSettings\": {\n                        \"collection\": {\n                            \"maxDepth\": 1,\n                            \"objectType\": \"Collection\",\n                            \"primaryCategory\": \"Learning Path\",\n                            \"isRoot\": true,\n                            \"iconClass\": \"fa fa-road\",\n                            \"children\": {},\n                            \"hierarchy\": {\n                                \"level1\": {\n                                    \"name\": \"Level\",\n                                    \"type\": \"Unit\",\n                                    \"mimeType\": \"application/vnd.ekstep.content-collection\",\n                                    \"contentType\": \"Level\",\n                                    \"primaryCategory\": \"Level\",\n                                    \"iconClass\": \"fa fa-layer-group\",\n                                    \"children\": {\n                                        \"Content\": [\n                                            \"Course\"\n                                        ]\n                                    }\n                                }\n                            }\n                        }\n                    }\n                },\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.ekstep.content-collection\"\n                            ]\n                        },\n                        \"policy\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"strict\",\n                                \"adaptive\",\n                                \"priorLearning\"\n                            ],\n                            \"default\": \"strict\"\n                        },\n                        \"trackable\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"enabled\": {\n                                    \"type\": \"string\",\n                                    \"enum\": [\n                                        \"Yes\",\n                                        \"No\"\n                                    ],\n                                    \"default\": \"Yes\"\n                                },\n                                \"autoBatch\": {\n                                    \"type\": \"string\",\n                                    \"enum\": [\n                                        \"Yes\",\n                                        \"No\"\n                                    ],\n                                    \"default\": \"No\"\n                                }\n                            },\n                            \"default\": {\n                                \"enabled\": \"Yes\",\n                                \"autoBatch\": \"No\"\n                            },\n                            \"additionalProperties\": false\n                        },\n                        \"credentials\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"enabled\": {\n                                    \"type\": \"string\",\n                                    \"enum\": [\n                                        \"Yes\",\n                                        \"No\"\n                                    ],\n                                    \"default\": \"Yes\"\n                                }\n                            },\n                            \"default\": {\n                                \"enabled\": \"Yes\"\n                            },\n                            \"additionalProperties\": false\n                        },\n                        \"monitorable\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"progress-report\",\n                                    \"score-report\"\n                                ]\n                            }\n                        },\n                        \"userConsent\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"Yes\",\n                                \"No\"\n                            ],\n                            \"default\": \"Yes\"\n                        },\n                        \"audience\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"Student\",\n                                    \"Teacher\",\n                                    \"Administrator\",\n                                    \"Parent\",\n                                    \"Other\"\n                                ]\n                            },\n                            \"default\": [\n                                \"Student\"\n                            ]\n                        }\n                    }\n                }\n            },\n            \"forms\": {\n                \"create\": {\n                    \"templateName\": \"\",\n                    \"required\": [],\n                    \"properties\": [\n                        {\n                            \"name\": \"First Section\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"name\",\n                                    \"dataType\": \"text\",\n                                    \"description\": \"Name of the learning path\",\n                                    \"editable\": true,\n                                    \"inputType\": \"text\",\n                                    \"label\": \"Title\",\n                                    \"name\": \"Name\",\n                                    \"placeholder\": \"Title\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"maxLength\",\n                                            \"value\": \"120\",\n                                            \"message\": \"Input is Exceeded\"\n                                        },\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"Title is required\"\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"code\": \"description\",\n                                    \"dataType\": \"text\",\n                                    \"description\": \"Description of the learning path\",\n                                    \"editable\": true,\n                                    \"inputType\": \"textarea\",\n                                    \"label\": \"Description\",\n                                    \"name\": \"Description\",\n                                    \"placeholder\": \"A path from starting skill to demonstrated outcome.\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true,\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"maxLength\",\n                                            \"value\": \"256\",\n                                            \"message\": \"Input is Exceeded\"\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"code\": \"keywords\",\n                                    \"dataType\": \"list\",\n                                    \"description\": \"Keywords for the learning path\",\n                                    \"editable\": true,\n                                    \"inputType\": \"keywords\",\n                                    \"label\": \"Keywords\",\n                                    \"name\": \"Keywords\",\n                                    \"placeholder\": \"Enter keywords\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true\n                                },\n                                {\n                                    \"code\": \"policy\",\n                                    \"dataType\": \"text\",\n                                    \"description\": \"How learners move through the levels of this path\",\n                                    \"editable\": true,\n                                    \"inputType\": \"select\",\n                                    \"label\": \"Consumption policy\",\n                                    \"name\": \"Policy\",\n                                    \"placeholder\": \"Select…\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"range\": [\n                                        \"strict\",\n                                        \"adaptive\",\n                                        \"priorLearning\"\n                                    ],\n                                    \"default\": \"strict\",\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"Consumption policy is required\"\n                                        }\n                                    ]\n                                }\n                            ]\n                        }\n                    ]\n                },\n                \"update\": {\n                    \"templateName\": \"\",\n                    \"required\": [],\n                    \"properties\": [\n                        {\n                            \"name\": \"Basic information\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"name\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": true,\n                                    \"inputType\": \"text\",\n                                    \"label\": \"Title\",\n                                    \"name\": \"Name\",\n                                    \"placeholder\": \"Title\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"maxLength\",\n                                            \"value\": \"120\",\n                                            \"message\": \"Input is Exceeded\"\n                                        },\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"Title is required\"\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"code\": \"description\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": true,\n                                    \"inputType\": \"textarea\",\n                                    \"label\": \"Description\",\n                                    \"name\": \"Description\",\n                                    \"placeholder\": \"A path from starting skill to demonstrated outcome.\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true\n                                },\n                                {\n                                    \"code\": \"appIcon\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": true,\n                                    \"inputType\": \"appIcon\",\n                                    \"label\": \"Icon\",\n                                    \"name\": \"Icon\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true\n                                }\n                            ]\n                        },\n                        {\n                            \"name\": \"Consumption policy\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"policy\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": true,\n                                    \"inputType\": \"select\",\n                                    \"label\": \"Consumption policy\",\n                                    \"name\": \"Policy\",\n                                    \"placeholder\": \"Select…\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"range\": [\n                                        \"strict\",\n                                        \"adaptive\",\n                                        \"priorLearning\"\n                                    ],\n                                    \"default\": \"strict\"\n                                }\n                            ]\n                        },\n                        {\n                            \"name\": \"Audience and licensing\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"audience\",\n                                    \"dataType\": \"list\",\n                                    \"editable\": true,\n                                    \"inputType\": \"nestedselect\",\n                                    \"label\": \"Audience\",\n                                    \"name\": \"Audience\",\n                                    \"placeholder\": \"Select audience\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true,\n                                    \"range\": [\n                                        \"Student\",\n                                        \"Teacher\",\n                                        \"Administrator\",\n                                        \"Parent\",\n                                        \"Other\"\n                                    ]\n                                },\n                                {\n                                    \"code\": \"author\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": true,\n                                    \"inputType\": \"text\",\n                                    \"label\": \"Author\",\n                                    \"name\": \"Author\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true\n                                },\n                                {\n                                    \"code\": \"copyright\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": true,\n                                    \"inputType\": \"text\",\n                                    \"label\": \"Copyright\",\n                                    \"name\": \"Copyright\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true\n                                },\n                                {\n                                    \"code\": \"copyrightYear\",\n                                    \"dataType\": \"number\",\n                                    \"editable\": true,\n                                    \"inputType\": \"text\",\n                                    \"label\": \"Copyright year\",\n                                    \"name\": \"CopyrightYear\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true\n                                },\n                                {\n                                    \"code\": \"license\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": true,\n                                    \"inputType\": \"select\",\n                                    \"label\": \"License\",\n                                    \"name\": \"License\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true\n                                }\n                            ]\n                        }\n                    ]\n                },\n                \"unitMetadata\": {\n                    \"templateName\": \"\",\n                    \"required\": [],\n                    \"properties\": [\n                        {\n                            \"name\": \"Level information\",\n                            \"description\": \"Title and description shown to learners for this level.\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"name\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": true,\n                                    \"inputType\": \"text\",\n                                    \"label\": \"Title\",\n                                    \"name\": \"Name\",\n                                    \"placeholder\": \"Level title\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"maxLength\",\n                                            \"value\": \"120\",\n                                            \"message\": \"Input is Exceeded\"\n                                        },\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"Title is required\"\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"code\": \"description\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": true,\n                                    \"inputType\": \"textarea\",\n                                    \"label\": \"Description\",\n                                    \"name\": \"Description\",\n                                    \"placeholder\": \"What learners build in this level\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": false,\n                                    \"visible\": true\n                                }\n                            ]\n                        }\n                    ]\n                },\n                \"childMetadata\": {\n                    \"templateName\": \"\",\n                    \"required\": [],\n                    \"properties\": [\n                        {\n                            \"name\": \"First Section\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"name\",\n                                    \"dataType\": \"text\",\n                                    \"editable\": false,\n                                    \"inputType\": \"text\",\n                                    \"label\": \"Title\",\n                                    \"name\": \"Name\",\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    },\n                                    \"required\": true,\n                                    \"visible\": true\n                                }\n                            ]\n                        }\n                    ]\n                },\n                \"search\": {\n                    \"templateName\": \"\",\n                    \"required\": [],\n                    \"properties\": [\n                        {\n                            \"code\": \"status\",\n                            \"dataType\": \"list\",\n                            \"editable\": true,\n                            \"inputType\": \"nestedselect\",\n                            \"label\": \"Status\",\n                            \"name\": \"Status\",\n                            \"visible\": true,\n                            \"range\": [\n                                \"Draft\",\n                                \"Review\",\n                                \"Live\"\n                            ]\n                        }\n                    ]\n                },\n                \"publishchecklist\": {\n                    \"templateName\": \"\",\n                    \"required\": [],\n                    \"properties\": [\n                        {\n                            \"name\": \"Publish checklist\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"checklist\",\n                                    \"dataType\": \"list\",\n                                    \"inputType\": \"checkbox\",\n                                    \"label\": \"Learning path review checklist\",\n                                    \"name\": \"Checklist\",\n                                    \"visible\": true,\n                                    \"range\": [\n                                        \"Prior assessment is a question-set-only course (when policy requires it)\",\n                                        \"Outcome assessment is a question-set-only course\",\n                                        \"Every level has at least one course and at least one skill\",\n                                        \"Level skills are within the prior assessment's skill scope\",\n                                        \"All linked courses carry skill tags\",\n                                        \"No duplicate courses across the path\",\n                                        \"Consumption policy is appropriate for the audience\"\n                                    ]\n                                }\n                            ]\n                        }\n                    ]\n                }\n            }\n        }\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - Level",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:level\",\n            \"targetObjectType\": \"Collection\",\n            \"objectMetadata\": {\n                \"config\": {\n                    \"sourcingSettings\": {\n                        \"collection\": {\n                            \"objectType\": \"Collection\",\n                            \"primaryCategory\": \"Level\",\n                            \"isRoot\": false,\n                            \"iconClass\": \"fa fa-layer-group\",\n                            \"children\": {\n                                \"Content\": [\n                                    \"Course\"\n                                ]\n                            }\n                        }\n                    }\n                },\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.ekstep.content-collection\"\n                            ]\n                        },\n                        \"visibility\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"Parent\"\n                            ],\n                            \"default\": \"Parent\"\n                        }\n                    }\n                }\n            },\n            \"forms\": {}\n        }\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
 										"url": {
 											"raw": "{{host}}/api/object/category/definition/v1/create",
 											"host": [
