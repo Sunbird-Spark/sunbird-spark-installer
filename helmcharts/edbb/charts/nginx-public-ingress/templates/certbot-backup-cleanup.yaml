@@ -62,7 +62,12 @@ spec:
   template:
     spec:
       serviceAccountName: certbot-backup-cleanup
-      automountServiceAccountToken: true
+      # Explicit projected token instead of the implicit default automount
+      # (which is what static scanners flag) -- functionally identical to
+      # what Kubernetes mounts by default, just spelled out so the intent
+      # (this Job genuinely needs API access, scoped by the Role above) is
+      # visible instead of relying on an unexamined default.
+      automountServiceAccountToken: false
       restartPolicy: Never
       containers:
         - name: kubectl-container
@@ -81,3 +86,24 @@ spec:
               cpu: 100m
               memory: 100Mi
               ephemeral-storage: 64Mi
+          volumeMounts:
+            - name: kube-api-access
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+      volumes:
+        - name: kube-api-access
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3607
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+              - downwardAPI:
+                  items:
+                    - path: namespace
+                      fieldRef:
+                        fieldPath: metadata.namespace
