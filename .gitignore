@@ -23,3 +23,7 @@ terragrunt
 
 # Ignore built JARs for JanusGraph
 scripts/janusgraph/*.jar
+
+# OpenTofu/Terraform local init artefacts (created by `tofu init`, e.g. when running the CI validate step locally)
+**/.terraform/
+.terraform.lock.hcl

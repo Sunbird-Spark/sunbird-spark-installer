@@ -1,0 +1,60 @@
+# OpenSSF Scorecard — supply-chain security posture of this repository.
+# Results are uploaded to the Security > Code scanning tab on every run.
+# publish_results (badge / api.scorecard.dev) is only allowed on the default branch —
+# the action refuses to run with it set elsewhere — so it is enabled conditionally.
+# On v* branches the analysis still runs and the SARIF is still uploaded.
+name: OpenSSF Scorecard
+
+on:
+  # Re-score when branch protection / rulesets change.
+  branch_protection_rule:
+  # Weekly, Monday 02:30 UTC.
+  schedule:
+    - cron: '30 2 * * 1'
+  push:
+    branches:
+      - main
+      - "v*"   # v1.x.x development branches (merged to main on release)
+  workflow_dispatch:
+
+# Default to read-only; the job grants only what it needs.
+permissions: read-all
+
+jobs:
+  analysis:
+    name: Scorecard analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Upload SARIF to GitHub code scanning.
+      security-events: write
+      # OIDC token, required for publish_results.
+      id-token: write
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@2d1146689b8cda280b9bc96326124645441f03bc # v2.4.4
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          # Must be false on non-default branches or the action aborts:
+          # "Only the default branch main is supported."
+          publish_results: ${{ github.ref_name == github.event.repository.default_branch }}
+
+      - name: Upload SARIF artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: SARIF file
+          path: results.sarif
+          retention-days: 5
+
+      - name: Upload to code scanning
+        uses: github/codeql-action/upload-sarif@faaca9a8f6edddba5725ffe5adefdab6669a2eca # v3.38.0
+        with:
+          sarif_file: results.sarif
