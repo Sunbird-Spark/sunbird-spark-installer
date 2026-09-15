@@ -27,3 +27,24 @@ dependencies:
   - name: common
     repository: https://nimbushubin.github.io/helmcharts
     version: 0.1.0
+  - name: kube-prometheus-stack
+    repository: ""
+    version: 52.1.0
+    condition: kube-prometheus-stack.enabled
+  - name: kubernetes-dashboard
+    repository: ""
+    version: 7.0.0-alpha1
+    condition: kubernetes-dashboard.enabled
+  - name: loki
+    repository: ""
+    version: 5.41.4
+    condition: loki.enabled
+  - name: reloader
+    repository: ""
+    version: 1.0.60
+    condition: reloader.enabled
+  - name: alloy
+    repository: ""
+    version: 1.5.1
+
+    condition: alloy.enabled
