@@ -7,6 +7,25 @@ image:
   pullPolicy: IfNotPresent
   pullSecrets: []
 
+# Was unbounded (no resources key at all) -- a python script calling the
+# Kong admin API, small and short-lived, doesn't need more than this.
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 256Mi
+
+# wait-for-kong initContainer: just a netcat/wget readiness loop.
+waitForKongResources:
+  requests:
+    cpu: 50m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 64Mi
+
 kong_admin_url: kong
 kong_admin_port: 8001
 managed_by: core

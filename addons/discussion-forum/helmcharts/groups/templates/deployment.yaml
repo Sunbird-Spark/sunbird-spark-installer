@@ -62,6 +62,8 @@ spec:
           envFrom:
           - configMapRef:
               name: {{ include "common.names.fullname" . }}-env
+          - secretRef:
+              name: {{ include "common.names.fullname" . }}-secrets
           volumeMounts:
           {{- if .Values.configmap.enabled }}
           - name: config

@@ -17,7 +17,6 @@ kube-prometheus-stack:
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
       GF_SERVER_ROOT_URL: http://example.com/grafana/
 
-
 loki:
   loki:
     auth_enabled: false

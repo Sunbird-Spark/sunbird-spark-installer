@@ -22,6 +22,10 @@ spec:
     spec:
       restartPolicy: OnFailure
       serviceAccountName: {{ include "database-export.fullname" . }}-sa
+      # elasticsearch-snapshot.py does `kubectl exec` into the source ES pod
+      # (see rbac.yaml's pods/exec Role) -- genuinely needs this token, not
+      # the usual false.
+      automountServiceAccountToken: true
       containers:
       - name: elasticsearch-snapshot
         image: {{ .Values.databases.elasticsearch.image | default .Values.jobs.image }}

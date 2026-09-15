@@ -22,6 +22,10 @@ spec:
     spec:
       restartPolicy: OnFailure
       serviceAccountName: {{ include "database-export.fullname" . }}-sa
+      # cassandra-export.sh does `kubectl exec` into the source Cassandra pod
+      # to dump the schema (see rbac.yaml's pods/exec Role) -- genuinely needs
+      # this token, not the usual false.
+      automountServiceAccountToken: true
       containers:
       - name: cassandra-export
         image: {{ .Values.databases.cassandra.image | default .Values.jobs.image }}

@@ -2,9 +2,20 @@ import urllib.request
 import urllib.error
 import argparse
 import json
+import os
 import jwt
 
 from common import json_request, get_api_plugins, retrying_urlopen
+
+def safe_join(base_dir, *parts):
+    """os.path.join, but refuses to build a path that escapes base_dir --
+    guards consumers_file_path against a faulty or malicious CLI argument
+    walking the read outside the directory this script is run from."""
+    candidate = os.path.realpath(os.path.join(base_dir, *parts))
+    base = os.path.realpath(base_dir)
+    if os.path.commonpath([candidate, base]) != base:
+        raise ValueError(f"Refusing to access outside {base!r}: {candidate!r}")
+    return candidate
 
 def _consumer_exists(kong_admin_api_url, username):
     consumers_url = "{}/consumers".format(kong_admin_api_url)
@@ -72,7 +83,11 @@ def save_consumers(kong_admin_api_url, consumers, managed_by="core"):
     
     # Pre-fetch all consumers to show a clean count at the end
     try:
-        all_saved_consumers = json.loads(urllib.request.urlopen(consumers_url + "?size=1000").read().decode('utf-8'))
+        # Use the shared retrying_urlopen (bounded timeout + backoff) instead of
+        # a raw urlopen call, consistent with every other Kong Admin API request
+        # in this file -- a bare urlopen() has no timeout and can hang forever
+        # against a faulty/unresponsive --kong-admin-api-url.
+        all_saved_consumers = json.loads(retrying_urlopen(consumers_url + "?size=1000").read().decode('utf-8'))
         total_consumers_in_kong = len(all_saved_consumers.get('data', []))
     except:
         total_consumers_in_kong = 0
@@ -320,7 +335,7 @@ if __name__ == "__main__":
         )
     )
     args = parser.parse_args()
-    with open(args.consumers_file_path) as consumers_file:
+    with open(safe_join(os.getcwd(), args.consumers_file_path)) as consumers_file:
         input_consumers = json.load(consumers_file)
         try:
             save_consumers(args.kong_admin_api_url, input_consumers, managed_by=args.managed_by)
