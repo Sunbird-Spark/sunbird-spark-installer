@@ -52,6 +52,7 @@ global:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
   subscription_id: ""
   cloud_storage_region: ""
+  local_development: true  # true = use a static in-cluster DNS resolver (10.0.0.10, AKS's default kube-dns clusterIP) instead of a live `lookup` against kube-dns; `lookup` only works against a real cluster API, not `helm lint`/`helm template`, and was crashing chart-lint CI
   object_storage_endpoint: "" # populated by OpenTofu post-provisioning (global-cloud-values.yaml) with the real storage account endpoint; left blank in this template
   public_container_name: "" # populated by OpenTofu post-provisioning (global-cloud-values.yaml) with the real public container name; left blank in this template
   aks_version: "1.35.1" # required — always specify the exact Kubernetes version e.g. "1.35.1". Run: az aks get-versions --location <region> --output table
