@@ -140,3 +140,10 @@ the live, working `edbb` release or `test.sunbirded.org`:
 - The only remaining step to see a fully issued certificate end-to-end is a
   real DNS A record for the test subdomain, confirming the whole chain up to
   that point works exactly as designed.
+- Note specific to this standalone test setup (not a cert-manager issue): the
+  test release inherited this chart's pre-existing `wait-for-keycloak`/
+  `wait-for-kong`/`wait-for-player` init containers, which do bare-hostname
+  checks that only resolve within the same namespace — since those services
+  actually live in `sunbird`, not the test's own namespace, they'd hang
+  forever. Patched out for the test release only (`kubectl patch` removing
+  those 3 containers from the Deployment); not a change to the chart itself.
