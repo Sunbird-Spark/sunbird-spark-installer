@@ -33,20 +33,25 @@ spec:
       {{- if .Values.global.cert_manager_ssl }}
         # tls.crt/tls.key are subPath-mounted below, which requires both keys
         # to already exist in the Secret -- on a brand new domain, cert-manager
-        # hasn't issued anything yet at first install, so this pod would
-        # otherwise crash-loop before it can even serve the ACME challenge that
-        # cert-manager needs routed through it. Block here until both keys show
-        # up instead.
+        # hasn't issued anything yet at first install. Just waiting here would
+        # deadlock: cert-manager's HTTP-01 challenge needs this pod running to
+        # route the challenge through in the first place, so it can never
+        # succeed while this pod is blocked waiting for it. Instead, if no cert
+        # exists yet, generate a throwaway self-signed one so nginx can start
+        # immediately and serve the challenge -- cert-manager overwrites this
+        # Secret with the real, ACME-issued cert once issuance succeeds, and
+        # Reloader (already running in-cluster) restarts nginx to pick it up.
         - name: wait-for-cert
           image: alpine:3.20
           command: ["/bin/sh", "-c"]
           args:
             - |
-              apk add --no-cache kubectl
-              until kubectl get secret {{ include "common.names.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.tls\.crt}{.data.tls\.key}' | grep -q .; do
-                echo "Waiting for cert-manager to issue the TLS certificate into the {{ include "common.names.fullname" . }} Secret..."
-                sleep 5
-              done
+              apk add --no-cache kubectl openssl
+              if ! kubectl get secret {{ include "common.names.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.tls\.crt}{.data.tls\.key}' | grep -q .; then
+                echo "No cert in the {{ include "common.names.fullname" . }} Secret yet -- generating a throwaway self-signed one so nginx can start and serve the ACME challenge."
+                openssl req -x509 -nodes -newkey rsa:2048 -keyout /tmp/tls.key -out /tmp/tls.crt -days 1 -subj "/CN=bootstrap"
+                kubectl patch secret {{ include "common.names.fullname" . }} -n {{ .Release.Namespace }} --type=merge -p="{\"data\":{\"tls.crt\":\"$(base64 -w0 /tmp/tls.crt)\",\"tls.key\":\"$(base64 -w0 /tmp/tls.key)\"}}"
+              fi
           resources:
             requests:
               cpu: 20m
