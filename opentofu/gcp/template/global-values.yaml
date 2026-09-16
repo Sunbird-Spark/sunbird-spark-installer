@@ -20,10 +20,8 @@ opensearch:
       value: *opensearch-admin-password
 # ── cert-manager (automated TLS issuance/renewal) ───────────────────────────
 # Both must be true together with global.cert_manager_ssl: true below for
-# automated TLS to actually take effect -- see
-# helmcharts/edbb/charts/nginx-public-ingress/CERT_MANAGER.md. Leave both
-# false (default) if providing your own cert/key via proxy_certificate/
-# proxy_private_key instead.
+# automated TLS to actually take effect. Leave both false (default) if
+# providing your own cert/key via proxy_certificate/proxy_private_key instead.
 cert-manager:
   enabled: false
 ingress-nginx:
