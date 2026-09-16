@@ -223,13 +223,32 @@ Once enabled, cert-manager owns the `nginx-public-ingress` Secret's `tls.crt`/`t
 
 ---
 
-### 3. If not using cert-manager
+### 3. Bringing your own certificate (not using cert-manager)
 
-If you are not using cert-manager:
+If you already have your own certificate (e.g. from a commercial CA) and don't want automated
+issuance/renewal:
 
-- Keep `cert_manager_ssl: false`.
-- Manually provide your SSL certificate and private key via `proxy_private_key` /
-  `proxy_certificate` in `global-values.yaml`.
+- Leave `cert-manager.enabled`, `ingress-nginx.enabled`, and `global.cert_manager_ssl` all at
+  their default `false` — don't set any of them.
+- Paste your certificate and private key into `global-values.yaml`:
+
+```yaml
+global:
+  proxy_certificate: |
+    -----BEGIN CERTIFICATE-----
+    ...your cert chain...
+    -----END CERTIFICATE-----
+  proxy_private_key: |
+    -----BEGIN PRIVATE KEY-----
+    ...your private key...
+    -----END PRIVATE KEY-----
+```
+
+This is rendered directly into the `nginx-public-ingress` Secret on every install/upgrade — no
+cert-manager, no cronjob, nothing else runs. There is no automation on this path: when your
+certificate is due for renewal, obtain the new cert/key from your own source, replace the values
+above in `global-values.yaml`, and re-run the upgrade. This is unrelated to cert-manager and was
+not changed by adding it.
 
 # Grafana Alloy Helm Chart
 

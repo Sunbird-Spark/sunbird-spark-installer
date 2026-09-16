@@ -163,6 +163,17 @@ would just wait on a certificate that never arrives.
   `lets_encrypt_ssl`/certbot mechanism has been removed outright rather than
   kept as a second opt-in path, since cert-manager fully replaces it.
 
+## Bringing your own certificate instead
+
+Not everyone wants cert-manager -- if you already have your own certificate (e.g. from a
+commercial CA) and don't want automated issuance/renewal, leave `cert-manager.enabled`,
+`ingress-nginx.enabled`, and `global.cert_manager_ssl` all at their default `false`, and paste
+your cert/key into `proxy_certificate`/`proxy_private_key` in `global-values.yaml` as always.
+This is rendered straight into the `nginx-public-ingress` Secret on every install/upgrade --
+no cert-manager, no cronjob, nothing else runs on this path. Renewal is entirely manual: get
+the new cert/key from your own source, replace the values in `global-values.yaml`, re-run the
+upgrade. This path is unrelated to cert-manager and unaffected by anything in this document.
+
 ## Testing performed
 
 Verified in a fully isolated standalone test (own namespace, own Helm
