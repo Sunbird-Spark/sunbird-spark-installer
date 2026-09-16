@@ -183,18 +183,12 @@ time ./install.sh destroy_tf_resources
 
 ## Note:
 
-## SSL Certificate Setup and Renewal (cert-manager Integration)
+## SSL Certificate Setup and Renewal
 
-TLS for the public domain is automated end-to-end via [cert-manager](https://cert-manager.io/),
-using Let's Encrypt as the issuer. See
-`helmcharts/edbb/charts/nginx-public-ingress/CERT_MANAGER.md` for the full architecture, security
-posture, and testing notes.
+### 1. Automated issuance and renewal (cert-manager)
 
----
-
-### 1. Enable cert-manager
-
-In your `global-values.yaml`, set all three of:
+To have SSL certificates issued and renewed automatically, enable these flags in your
+`global-values.yaml`:
 
 ```yaml
 cert-manager:
@@ -204,33 +198,18 @@ ingress-nginx:
 global:
   cert_manager_ssl: true
   cert_notifications:
-    email: "<your-email>" # used for Let's Encrypt renewal/expiry notices
+    email: "<your-email>" # used for renewal/expiry notices
 ```
 
-All three are required together -- `cert_manager_ssl` alone only skips rendering a static
-cert/key and creates the `ClusterIssuer`/`Certificate`; it doesn't install cert-manager or
-the internal ACME solver itself.
+That's it — first-ever issuance and all future renewals happen automatically, with no manual
+steps and nothing to paste into `global-values.yaml`.
 
 ---
 
-### 2. Automatic issuance and renewal
+### 2. If not using automated renewal
 
-Once enabled, cert-manager owns the `nginx-public-ingress` Secret's `tls.crt`/`tls.key` directly:
-
-- First-ever issuance happens automatically on install — no manual DNS-01/TXT record step, ever.
-- Renewal happens automatically ~30 days before expiry, with no cronjob, no manual copy-back into
-  `global-values.yaml`, and no risk of a later `helm upgrade` reverting to a stale cert.
-
----
-
-### 3. Bringing your own certificate (not using cert-manager)
-
-If you already have your own certificate (e.g. from a commercial CA) and don't want automated
-issuance/renewal:
-
-- Leave `cert-manager.enabled`, `ingress-nginx.enabled`, and `global.cert_manager_ssl` all at
-  their default `false` — don't set any of them.
-- Paste your certificate and private key into `global-values.yaml`:
+Keep the flags above set to `false` (or leave them unset), and provide your own certificate and
+private key instead:
 
 ```yaml
 global:
@@ -244,71 +223,8 @@ global:
     -----END PRIVATE KEY-----
 ```
 
-This is rendered directly into the `nginx-public-ingress` Secret on every install/upgrade — no
-cert-manager, no cronjob, nothing else runs. There is no automation on this path: when your
-certificate is due for renewal, obtain the new cert/key from your own source, replace the values
-above in `global-values.yaml`, and re-run the upgrade. This is unrelated to cert-manager and was
-not changed by adding it.
-
----
-
-### 4. A config mistake that looks like it worked but doesn't
-
-`cert-manager.enabled` / `ingress-nginx.enabled` and `global.cert_manager_ssl` are read from
-**different places** in `global-values.yaml`, and it's easy to place one wrong without Helm
-raising any error:
-
-```yaml
-# WRONG -- cert_manager_ssl nested under cert-manager: instead of under global:
-cert-manager:
-  enabled: true
-  cert_manager_ssl: true    # ← has no effect here, silently ignored
-ingress-nginx:
-  enabled: true
-global:
-  domain: "example.com"
-
-# RIGHT
-cert-manager:
-  enabled: true              # top-level, sibling of global: (a Chart.yaml `condition:` flag)
-ingress-nginx:
-  enabled: true               # top-level, sibling of global:
-global:
-  domain: "example.com"
-  cert_manager_ssl: true      # nested inside global: (read as .Values.global.cert_manager_ssl)
-```
-
-If only `cert-manager.enabled`/`ingress-nginx.enabled` are set correctly but `cert_manager_ssl`
-ends up outside `global:`, cert-manager and the internal ingress controller both start up and
-look healthy — but nothing gets wired together: no `wait-for-cert` init container, no
-`ClusterIssuer`/`Certificate` gets created, and `nginx-public-ingress` keeps rendering its static
-`proxy_certificate`/`proxy_private_key` exactly as before. Nothing breaks, but nothing gets
-automated either — worth double-checking the indentation if a `helm upgrade` finishes cleanly but
-`kubectl get certificate` shows nothing.
-
-### 5. What to expect when switching `cert_manager_ssl` on an environment that already has a cert
-
-Both directions have been verified end-to-end on a real production release (not just an isolated
-test), with no downtime in either case:
-
-- **Turning it on** when `proxy_certificate`/`proxy_private_key` are already populated: those
-  static values are simply ignored from that point on (see §1) — but the very first upgrade drops
-  `tls.crt`/`tls.key` from the Secret since the chart stops rendering them, and Reloader (already
-  configured on this chart) restarts nginx in response. If cert-manager's challenge resolves fast
-  (which it should, since HTTP-01 routing is already proven working), the new
-  cert-manager-issued certificate can land before anyone notices; if it takes longer, visitors
-  could briefly see a self-signed bootstrap certificate warning until issuance completes — plan
-  for a low-traffic window the first time you flip this on an environment with real users.
-- **Turning it off**: falls back cleanly to whatever is in `proxy_certificate`/`proxy_private_key`
-  — make sure those are populated with a currently-valid cert/key *before* disabling, or nginx
-  will get an empty certificate file and fail to start. Pull the current cert-manager-issued
-  cert/key out first if you want to keep it as the static fallback:
-  ```bash
-  kubectl get secret nginx-public-ingress -n <namespace> -o jsonpath='{.data.tls\.crt}' | base64 -d
-  kubectl get secret nginx-public-ingress -n <namespace> -o jsonpath='{.data.tls\.key}' | base64 -d
-  ```
-  Remember this becomes a static, manually-renewed cert the moment you do this — no more
-  automatic renewal until `cert_manager_ssl` is turned back on.
+When this certificate is due for renewal, update these two values manually and re-run the
+deployment.
 
 # Grafana Alloy Helm Chart
 
