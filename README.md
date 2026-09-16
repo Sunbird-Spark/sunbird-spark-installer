@@ -183,64 +183,47 @@ time ./install.sh destroy_tf_resources
 
 ## Note:
 
-## SSL Certificate Setup and Renewal (Let’s Encrypt Integration)
+## SSL Certificate Setup and Renewal (cert-manager Integration)
 
-If you are using Let’s Encrypt for SSL certificate management, follow the steps below to ensure proper setup and renewal handling.
+TLS for the public domain is automated end-to-end via [cert-manager](https://cert-manager.io/),
+using Let's Encrypt as the issuer. See
+`helmcharts/edbb/charts/nginx-public-ingress/CERT_MANAGER.md` for the full architecture, security
+posture, and testing notes.
 
 ---
 
-### 1. Enable Let’s Encrypt in Nginx
+### 1. Enable cert-manager
 
-In your `global-values.yaml`, set the following flag:
+In your `global-values.yaml`, set:
 
 ```yaml
-lets_encrypt_ssl: true
+cert_manager_ssl: true
+cert_notifications:
+  email: "<your-email>" # used for Let's Encrypt renewal/expiry notices
 ```
 
-This enables automatic SSL certificate issuance and renewal via a Kubernetes Certbot CronJob.
+This also requires `cert-manager.enabled: true` and `ingress-nginx.enabled: true` in
+`helmcharts/edbb/values.yaml`.
 
 ---
 
-### 2. Automatic Certificate Renewal
+### 2. Automatic issuance and renewal
 
-When `lets_encrypt_ssl` is enabled:
+Once enabled, cert-manager owns the `nginx-public-ingress` Secret's `tls.crt`/`tls.key` directly:
 
-- The Certbot CronJob automatically renews your SSL certificates approximately every **85 days**.
-- After renewal, it updates the SSL certificate and private key in the Kubernetes ConfigMap named `nginx-public-ingress`.
-
----
-
-### 3. Update Global Values After Renewal
-
-Once the renewal completes:
-
-1. Fetch the renewed keys from the ConfigMap.
-2. Update your `opentofu/<cloud-provider>/<env>/global-values.yaml` file with the new values:
-
-```yaml
-proxy_private_key: |
-  <paste the renewed private key from ConfigMap>
-
-proxy_certificate: |
-  <paste the renewed certificate from ConfigMap>
-```
-
-These values are essential because **edbb bundle  fetches SSL certificates from the global level** defined in above file.
+- First-ever issuance happens automatically on install — no manual DNS-01/TXT record step, ever.
+- Renewal happens automatically ~30 days before expiry, with no cronjob, no manual copy-back into
+  `global-values.yaml`, and no risk of a later `helm upgrade` reverting to a stale cert.
 
 ---
 
-### 4. If Not Using Let’s Encrypt
+### 3. If not using cert-manager
 
-If you are not using Let’s Encrypt:
-x
-- Keep `lets_encrypt_ssl: false`.
-- Manually provide your SSL certificate and private key under the same fields in `global-values.yaml`.
+If you are not using cert-manager:
 
----
-### Additional Notes
-- The CronJob handles only Let’s Encrypt–issued certificates.
-- The default renewal schedule is every **85 days**.
-- Always ensure your domain DNS records are properly configured and reachable before renewal.
+- Keep `cert_manager_ssl: false`.
+- Manually provide your SSL certificate and private key via `proxy_private_key` /
+  `proxy_certificate` in `global-values.yaml`.
 
 # Grafana Alloy Helm Chart
 
