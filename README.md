@@ -206,10 +206,10 @@ steps and nothing to paste into `global-values.yaml`.
 
 ---
 
-### 2. If not using automated renewal
+### 2. If you are using your own certificate
 
-Keep the flags above set to `false` (or leave them unset), and provide your own certificate and
-private key instead:
+If you already have your own certificate and do not want automated renewal, leave the flags above
+set to `false` (or unset), and provide your own certificate and private key instead:
 
 ```yaml
 global:
