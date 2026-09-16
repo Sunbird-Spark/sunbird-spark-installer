@@ -194,16 +194,22 @@ posture, and testing notes.
 
 ### 1. Enable cert-manager
 
-In your `global-values.yaml`, set:
+In your `global-values.yaml`, set all three of:
 
 ```yaml
-cert_manager_ssl: true
-cert_notifications:
-  email: "<your-email>" # used for Let's Encrypt renewal/expiry notices
+cert-manager:
+  enabled: true
+ingress-nginx:
+  enabled: true
+global:
+  cert_manager_ssl: true
+  cert_notifications:
+    email: "<your-email>" # used for Let's Encrypt renewal/expiry notices
 ```
 
-This also requires `cert-manager.enabled: true` and `ingress-nginx.enabled: true` in
-`helmcharts/edbb/values.yaml`.
+All three are required together -- `cert_manager_ssl` alone only skips rendering a static
+cert/key and creates the `ClusterIssuer`/`Certificate`; it doesn't install cert-manager or
+the internal ACME solver itself.
 
 ---
 

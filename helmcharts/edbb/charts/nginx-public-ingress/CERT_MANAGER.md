@@ -131,18 +131,37 @@ live end-to-end testing:
 
 ## Rollout safety
 
-This is entirely **opt-in** via a new `global.cert_manager_ssl` flag,
-defaulting to `false`:
+This is entirely **opt-in**, gated by three flags in the operator's own
+`opentofu/<provider>/<env>/global-values.yaml` (not the shared
+`helmcharts/edbb/values.yaml`), all defaulting to `false`/disabled:
 
-- Existing installs: **zero behavior change.** Nothing is different unless
-  this flag is explicitly set to `true`. With it left `false`, the chart
-  renders `proxy_certificate`/`proxy_private_key` from `global-values.yaml`
-  into the Secret exactly as before -- the old `lets_encrypt_ssl`/certbot
-  mechanism has been removed outright rather than kept as a second opt-in
-  path, since cert-manager fully replaces it.
-- cert-manager and the internal ingress-nginx controller are themselves
-  separate Helm dependencies, both `enabled: false` by default — they don't
-  even get installed unless explicitly turned on.
+```yaml
+cert-manager:
+  enabled: false
+ingress-nginx:
+  enabled: false
+global:
+  cert_manager_ssl: false
+```
+
+All three must be set together to actually enable automated TLS:
+- `cert-manager.enabled` / `ingress-nginx.enabled` are the `condition:` flags
+  on `edbb`'s own Helm dependencies (`Chart.yaml`) — install the two
+  supporting subcharts.
+- `global.cert_manager_ssl` gates this chart's own templates: it skips
+  rendering the static `proxy_certificate`/`proxy_private_key` into the
+  Secret, and creates the `ClusterIssuer`/`Certificate`.
+
+Setting only one or two of the three doesn't work: e.g. `cert_manager_ssl:
+true` alone creates a `Certificate`/`ClusterIssuer` with no controller
+installed to service them, and skips the static cert render too, so nginx
+would just wait on a certificate that never arrives.
+
+- Existing installs: **zero behavior change.** With all three left at their
+  defaults, the chart renders `proxy_certificate`/`proxy_private_key` from
+  `global-values.yaml` into the Secret exactly as before -- the old
+  `lets_encrypt_ssl`/certbot mechanism has been removed outright rather than
+  kept as a second opt-in path, since cert-manager fully replaces it.
 
 ## Testing performed
 

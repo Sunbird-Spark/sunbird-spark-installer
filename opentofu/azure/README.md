@@ -152,7 +152,7 @@ When `aks_version` is updated, OpenTofu sends an in-place update to the AKS reso
 | `global.proxy_certificate` | SSL/TLS certificate chain in PEM format (cert + CA bundle). |
 | `global.aks_version` | Kubernetes version for the AKS cluster (e.g. `"1.35.1"`). **Always specify a version.** Check available versions with `az aks get-versions --location <region> --output table`. |
 
-> Want fully automated TLS issuance/renewal instead of pasting a cert/key? Set `global.cert_manager_ssl: true` and `global.cert_notifications.email`. Leave `proxy_private_key` and `proxy_certificate` blank. See `helmcharts/edbb/charts/nginx-public-ingress/CERT_MANAGER.md`.
+> Want fully automated TLS issuance/renewal instead of pasting a cert/key? Set `cert-manager.enabled: true`, `ingress-nginx.enabled: true`, and `global.cert_manager_ssl: true` (all three, plus `global.cert_notifications.email`) in `global-values.yaml`. Leave `proxy_private_key` and `proxy_certificate` blank. See `helmcharts/edbb/charts/nginx-public-ingress/CERT_MANAGER.md`.
 
 ## AKS Kubernetes Version
 
