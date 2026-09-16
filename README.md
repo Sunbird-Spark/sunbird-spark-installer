@@ -250,6 +250,97 @@ certificate is due for renewal, obtain the new cert/key from your own source, re
 above in `global-values.yaml`, and re-run the upgrade. This is unrelated to cert-manager and was
 not changed by adding it.
 
+---
+
+### 4. How it works, and why there are two ingress-related components
+
+```
+Let's Encrypt validator
+        │  GET http://<domain>/.well-known/acme-challenge/<token>
+        ▼
+nginx-public-ingress (public IP, unchanged)
+        │  new static route: /.well-known/acme-challenge/ →
+        ▼
+ingress-nginx (internal, ClusterIP only, no public IP of its own)
+        │  reconciles cert-manager's ephemeral per-challenge Ingress
+        ▼
+cert-manager's temporary challenge-solver pod → confirms domain ownership
+        ▼
+cert-manager writes the issued cert/key straight into the nginx-public-ingress
+Secret. Reloader (already running in-cluster) restarts nginx automatically.
+```
+
+`nginx-public-ingress` stays the **only** public entrypoint — same public IP, same DNS record,
+nothing about the platform's real internet-facing traffic changes. `ingress-nginx` exists purely
+because cert-manager's standard HTTP-01 challenge mechanism requires a real Kubernetes ingress
+controller to route to its own ephemeral challenge pods — `nginx-public-ingress` is a static nginx
+config, not a controller, and can't do that on its own. There is no cert-manager-supported way
+around needing one (DNS-01 is the only alternative, and requires giving cert-manager write
+credentials to your DNS provider instead — a bigger trade-off, not a smaller one). See
+`helmcharts/edbb/charts/nginx-public-ingress/CERT_MANAGER.md` for the full write-up, including why
+merging the two into a single component isn't practical (`nginx-public-ingress` has 46+ hand-tuned
+`location` blocks, a custom `auth_request` auth gate, and an extensibility mechanism two other
+addons depend on — porting all of that to `ingress-nginx`'s annotation model would be a full
+ingress-layer rewrite, not a TLS change).
+
+### 5. A config mistake that looks like it worked but doesn't
+
+`cert-manager.enabled` / `ingress-nginx.enabled` and `global.cert_manager_ssl` are read from
+**different places** in `global-values.yaml`, and it's easy to place one wrong without Helm
+raising any error:
+
+```yaml
+# WRONG -- cert_manager_ssl nested under cert-manager: instead of under global:
+cert-manager:
+  enabled: true
+  cert_manager_ssl: true    # ← has no effect here, silently ignored
+ingress-nginx:
+  enabled: true
+global:
+  domain: "example.com"
+
+# RIGHT
+cert-manager:
+  enabled: true              # top-level, sibling of global: (a Chart.yaml `condition:` flag)
+ingress-nginx:
+  enabled: true               # top-level, sibling of global:
+global:
+  domain: "example.com"
+  cert_manager_ssl: true      # nested inside global: (read as .Values.global.cert_manager_ssl)
+```
+
+If only `cert-manager.enabled`/`ingress-nginx.enabled` are set correctly but `cert_manager_ssl`
+ends up outside `global:`, cert-manager and the internal ingress controller both start up and
+look healthy — but nothing gets wired together: no `wait-for-cert` init container, no
+`ClusterIssuer`/`Certificate` gets created, and `nginx-public-ingress` keeps rendering its static
+`proxy_certificate`/`proxy_private_key` exactly as before. Nothing breaks, but nothing gets
+automated either — worth double-checking the indentation if a `helm upgrade` finishes cleanly but
+`kubectl get certificate` shows nothing.
+
+### 6. What to expect when switching `cert_manager_ssl` on an environment that already has a cert
+
+Both directions have been verified end-to-end on a real production release (not just an isolated
+test), with no downtime in either case:
+
+- **Turning it on** when `proxy_certificate`/`proxy_private_key` are already populated: those
+  static values are simply ignored from that point on (see §1) — but the very first upgrade drops
+  `tls.crt`/`tls.key` from the Secret since the chart stops rendering them, and Reloader (already
+  configured on this chart) restarts nginx in response. If cert-manager's challenge resolves fast
+  (which it should, since HTTP-01 routing is already proven working), the new
+  cert-manager-issued certificate can land before anyone notices; if it takes longer, visitors
+  could briefly see a self-signed bootstrap certificate warning until issuance completes — plan
+  for a low-traffic window the first time you flip this on an environment with real users.
+- **Turning it off**: falls back cleanly to whatever is in `proxy_certificate`/`proxy_private_key`
+  — make sure those are populated with a currently-valid cert/key *before* disabling, or nginx
+  will get an empty certificate file and fail to start. Pull the current cert-manager-issued
+  cert/key out first if you want to keep it as the static fallback:
+  ```bash
+  kubectl get secret nginx-public-ingress -n <namespace> -o jsonpath='{.data.tls\.crt}' | base64 -d
+  kubectl get secret nginx-public-ingress -n <namespace> -o jsonpath='{.data.tls\.key}' | base64 -d
+  ```
+  Remember this becomes a static, manually-renewed cert the moment you do this — no more
+  automatic renewal until `cert_manager_ssl` is turned back on.
+
 # Grafana Alloy Helm Chart
 
 ```bash
