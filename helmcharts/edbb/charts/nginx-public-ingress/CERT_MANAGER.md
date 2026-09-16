@@ -88,8 +88,8 @@ the change and restarts nginx automatically.
   already used for Kong's admin API NetworkPolicy.
 - **Least-privilege RBAC.** The one new piece of RBAC this adds (a `wait-for-cert`
   init container, needed to solve a bootstrap ordering problem — see below) is
-  scoped to `get` on exactly one named Secret. No `list`/`watch`, no wildcard
-  resource names.
+  scoped to `get`/`patch` on exactly one named Secret. No `list`/`watch`, no
+  wildcard resource names.
 - **No cert/key material in git or `global-values.yaml` anymore.** Removes a
   real class of exposure: private key material previously had to pass through
   an operator's local machine and a values file at all. cert-manager generates
@@ -100,14 +100,31 @@ the change and restarts nginx automatically.
   new weakening, it's the same trust model the current mechanism already
   relies on.
 
-One real gap found and fixed during implementation: `tls.crt`/`tls.key` are
-`subPath`-mounted into the nginx pod, which requires both keys to already
-exist in the Secret. On a brand-new domain, cert-manager hasn't issued
-anything yet at first install — without a fix, the nginx pod would
-crash-loop before it could even serve the ACME challenge cert-manager needs
-routed through it (a chicken-and-egg deadlock). Fixed with a small
-`wait-for-cert` init container that blocks pod startup until both keys
-appear in the Secret.
+Two real gaps found and fixed during implementation, both only surfaced via
+live end-to-end testing:
+
+- `tls.crt`/`tls.key` are `subPath`-mounted into the nginx pod, which
+  requires both keys to already exist in the Secret. On a brand-new domain,
+  cert-manager hasn't issued anything yet at first install. The first version
+  of `wait-for-cert` just blocked pod startup until both keys appeared — but
+  that's a deadlock, not a fix: cert-manager's HTTP-01 challenge needs this
+  pod running to route the challenge through in the first place, so it can
+  never succeed while the pod sits blocked waiting for it. Fixed by having
+  `wait-for-cert` generate a throwaway self-signed bootstrap cert and patch it
+  into the Secret when no cert exists yet, so nginx starts immediately and can
+  serve the challenge. cert-manager overwrites the Secret with the real,
+  ACME-issued cert once issuance succeeds, and Reloader (already running
+  in-cluster) restarts nginx to pick it up.
+- The static route added for the ACME challenge path
+  (`^~ /.well-known/acme-challenge/`) was never actually reached — the
+  existing catch-all `return 301 https://...` in `proxy-default.conf` is a
+  bare directive directly in the `server` block, not inside a `location`.
+  nginx evaluates that during the server-rewrite phase, which runs *before*
+  location matching, so it fired unconditionally on every request regardless
+  of location block order, redirecting the ACME validator instead of serving
+  the challenge. Fixed by wrapping it in `location / { return 301 ...; }` so
+  it's a real location directive and the more specific challenge location
+  correctly takes precedence.
 
 ## Rollout safety
 
@@ -137,9 +154,15 @@ the live, working `edbb` release or `test.sunbirded.org`:
   `Ingress`, and the internal ingress-nginx controller picked it up and
   served the challenge correctly (`Presented challenge using HTTP-01
   challenge mechanism`).
-- The only remaining step to see a fully issued certificate end-to-end is a
-  real DNS A record for the test subdomain, confirming the whole chain up to
-  that point works exactly as designed.
+- With a real DNS A record in place for the test subdomain
+  (`dev.sunbirded.org`) and the two fixes above applied, the full chain
+  completed end-to-end: the `Challenge` reached `valid`, the `Order` reached
+  `valid`, and cert-manager wrote a real Let's Encrypt certificate into the
+  Secret. Verified directly via `openssl x509 -noout -issuer -subject -dates`
+  on the live Secret (`issuer=.../O=Let's Encrypt/CN=YR1`,
+  `subject=/CN=dev.sunbirded.org`) and via `curl -v https://dev.sunbirded.org`
+  from outside the cluster, showing `TLSv1.3` negotiated with that same
+  certificate and `HTTP/1.1 200 OK`.
 - Note specific to this standalone test setup (not a cert-manager issue): the
   test release inherited this chart's pre-existing `wait-for-keycloak`/
   `wait-for-kong`/`wait-for-player` init containers, which do bare-hostname
@@ -147,3 +170,10 @@ the live, working `edbb` release or `test.sunbirded.org`:
   actually live in `sunbird`, not the test's own namespace, they'd hang
   forever. Patched out for the test release only (`kubectl patch` removing
   those 3 containers from the Deployment); not a change to the chart itself.
+- Also specific to this standalone test setup: nginx's own upstream
+  references to `kong`/`keycloak`/`player`/`monitoring-grafana` are bare
+  hostnames, which only resolve within the same namespace. Since those
+  services live in `sunbird`, not the test namespace, the test release's
+  Secret content was live-patched to use namespace-qualified names
+  (`kong.sunbird`, `keycloak.sunbird`, etc.) instead — a test-only Secret
+  edit, not a chart change.
