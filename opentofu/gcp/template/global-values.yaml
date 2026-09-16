@@ -47,6 +47,8 @@ global:
   # with lets_encrypt_ssl -- if both are true, cert_manager_ssl wins and the
   # old certbot cronjob is skipped.
   cert_manager_ssl: false
+  cert_notifications:
+    email: "" # provide the email address for certificate renewal notifications/alerts
   play_http:
      secret_key: "a-long-secret-to-calm-the-rage-of-the-entropy-gods-hidden-deep-within-the-silent-ruins-of-forgotten-realms" 
     # cloud_private_storage_secret: "{{ .Values.global.gcp_storage_account_key | default "gcp-credentials"}}"
