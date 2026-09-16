@@ -252,38 +252,7 @@ not changed by adding it.
 
 ---
 
-### 4. How it works, and why there are two ingress-related components
-
-```
-Let's Encrypt validator
-        │  GET http://<domain>/.well-known/acme-challenge/<token>
-        ▼
-nginx-public-ingress (public IP, unchanged)
-        │  new static route: /.well-known/acme-challenge/ →
-        ▼
-ingress-nginx (internal, ClusterIP only, no public IP of its own)
-        │  reconciles cert-manager's ephemeral per-challenge Ingress
-        ▼
-cert-manager's temporary challenge-solver pod → confirms domain ownership
-        ▼
-cert-manager writes the issued cert/key straight into the nginx-public-ingress
-Secret. Reloader (already running in-cluster) restarts nginx automatically.
-```
-
-`nginx-public-ingress` stays the **only** public entrypoint — same public IP, same DNS record,
-nothing about the platform's real internet-facing traffic changes. `ingress-nginx` exists purely
-because cert-manager's standard HTTP-01 challenge mechanism requires a real Kubernetes ingress
-controller to route to its own ephemeral challenge pods — `nginx-public-ingress` is a static nginx
-config, not a controller, and can't do that on its own. There is no cert-manager-supported way
-around needing one (DNS-01 is the only alternative, and requires giving cert-manager write
-credentials to your DNS provider instead — a bigger trade-off, not a smaller one). See
-`helmcharts/edbb/charts/nginx-public-ingress/CERT_MANAGER.md` for the full write-up, including why
-merging the two into a single component isn't practical (`nginx-public-ingress` has 46+ hand-tuned
-`location` blocks, a custom `auth_request` auth gate, and an extensibility mechanism two other
-addons depend on — porting all of that to `ingress-nginx`'s annotation model would be a full
-ingress-layer rewrite, not a TLS change).
-
-### 5. A config mistake that looks like it worked but doesn't
+### 4. A config mistake that looks like it worked but doesn't
 
 `cert-manager.enabled` / `ingress-nginx.enabled` and `global.cert_manager_ssl` are read from
 **different places** in `global-values.yaml`, and it's easy to place one wrong without Helm
@@ -317,7 +286,7 @@ look healthy — but nothing gets wired together: no `wait-for-cert` init contai
 automated either — worth double-checking the indentation if a `helm upgrade` finishes cleanly but
 `kubectl get certificate` shows nothing.
 
-### 6. What to expect when switching `cert_manager_ssl` on an environment that already has a cert
+### 5. What to expect when switching `cert_manager_ssl` on an environment that already has a cert
 
 Both directions have been verified end-to-end on a real production release (not just an isolated
 test), with no downtime in either case:
