@@ -209,14 +209,15 @@ steps and nothing to paste into `global-values.yaml`.
 ### 2. If you are using a custom certificate
 
 If you already have a custom certificate, leave the flags above set to `false` (or unset), and
-provide the certificate and private key instead. Renewal is not automated on this path — you will
-need to replace the certificate and private key manually when it expires:
+provide the private key and the full chain (the certificate concatenated with the CA bundle)
+instead. Both are mandatory. Renewal is not automated on this path — you will need to replace
+them manually when the certificate expires:
 
 ```yaml
 global:
   proxy_certificate: |
     -----BEGIN CERTIFICATE-----
-    ...your cert chain...
+    ...your certificate + CA bundle (full chain)...
     -----END CERTIFICATE-----
   proxy_private_key: |
     -----BEGIN PRIVATE KEY-----
