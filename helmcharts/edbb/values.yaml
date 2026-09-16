@@ -170,6 +170,7 @@ nginx-public-ingress:
 # internet-facing on its own.
 cert-manager:
   enabled: false
+  fullnameOverride: cert-manager
   crds:
     enabled: true
 
