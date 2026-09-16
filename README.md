@@ -227,9 +227,6 @@ global:
     -----END PRIVATE KEY-----
 ```
 
-When this certificate is due for renewal, update these two values manually and re-run the
-deployment.
-
 # Grafana Alloy Helm Chart
 
 ```bash
