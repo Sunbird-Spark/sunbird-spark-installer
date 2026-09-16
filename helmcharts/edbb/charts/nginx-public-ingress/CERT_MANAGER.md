@@ -1,9 +1,12 @@
 # TLS certificate automation: moving from certbot cronjob to cert-manager
 
-## Current setup (as of today)
+## Previous setup (removed)
 
-TLS for the public domain (e.g. `test.sunbirded.org`) is handled by a hand-rolled
-in-cluster CronJob running `certbot`, plus a manual bootstrap step:
+Before cert-manager, TLS for the public domain (e.g. `test.sunbirded.org`) was handled by a
+hand-rolled in-cluster CronJob running `certbot`, plus a manual bootstrap step. This mechanism
+(the `lets_encrypt_ssl` flag, `templates/cronjob.yaml`, and the manual DNS-01 bootstrap below) has
+since been fully removed now that cert-manager is proven out end-to-end -- kept here only as
+historical context for why cert-manager was worth the migration:
 
 1. **First-ever cert for a new domain**: done manually, before any cluster/nginx
    exists to answer a challenge. Operator runs
@@ -46,7 +49,7 @@ automation tool. Moving to it removes every manual step above, permanently:
 cert-manager's `Certificate`/`ClusterIssuer` CRDs, once created, own the TLS
 Secret (`nginx-public-ingress`) directly and permanently. Getting there needed
 solving one real architectural gap: cert-manager's standard HTTP-01 validation
-(same challenge type the existing certbot cronjob already uses) requires an
+(same challenge type the old certbot cronjob used) requires an
 actual Kubernetes Ingress controller reconciling ephemeral, per-challenge
 `Ingress` objects — this repo's `nginx-public-ingress` is a hand-written
 Deployment, not a real ingress controller, so it can't do that on its own.
@@ -96,9 +99,9 @@ the change and restarts nginx automatically.
   and stores the key material directly in the cluster, never leaving it.
 - **HTTP-01 challenge traffic is inherently public/unauthenticated by
   design** — that's how ACME domain validation works for anyone (Let's
-  Encrypt, this repo's existing certbot flow, or cert-manager) — this isn't a
-  new weakening, it's the same trust model the current mechanism already
-  relies on.
+  Encrypt, this repo's old certbot flow, or cert-manager) — this isn't a
+  new weakening, it's the same trust model the old mechanism already relied
+  on.
 
 Two real gaps found and fixed during implementation, both only surfaced via
 live end-to-end testing:
@@ -132,10 +135,11 @@ This is entirely **opt-in** via a new `global.cert_manager_ssl` flag,
 defaulting to `false`:
 
 - Existing installs: **zero behavior change.** Nothing is different unless
-  this flag is explicitly set to `true`.
-- Mutually exclusive with the existing `lets_encrypt_ssl` flag — if both are
-  set, `cert_manager_ssl` wins and the old certbot CronJob is skipped, so the
-  two mechanisms never fight over the same Secret.
+  this flag is explicitly set to `true`. With it left `false`, the chart
+  renders `proxy_certificate`/`proxy_private_key` from `global-values.yaml`
+  into the Secret exactly as before -- the old `lets_encrypt_ssl`/certbot
+  mechanism has been removed outright rather than kept as a second opt-in
+  path, since cert-manager fully replaces it.
 - cert-manager and the internal ingress-nginx controller are themselves
   separate Helm dependencies, both `enabled: false` by default — they don't
   even get installed unless explicitly turned on.
