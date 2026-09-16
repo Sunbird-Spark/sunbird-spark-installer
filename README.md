@@ -74,7 +74,7 @@ Two independent fields in `global-values.yaml` — `private_cluster_enabled` and
 ## Pre-requisites
 
 1. **Domain Name**
-2. **SSL Certificate**: The FullChain, consisting of the private key and Certificate+CA_Bundle, is mandatory for installation.
+2. **SSL Certificate**: The FullChain, consisting of the private key and Certificate+CA_Bundle, is mandatory for installation if you are using a custom certificate. Not required if using cert-manager for automated issuance — see [SSL Certificate Setup and Renewal](#ssl-certificate-setup-and-renewal).
 3. **Google OAuth Credentials**: [Create credentials](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id)
 4. **Google V3 ReCaptcha Credentials**: [Create credentials](https://www.google.com/recaptcha/admin)
 5. **Email Service Provider**: Only **SendGrid** is supported in this installer. Use your SendGrid API key as the SMTP password.
