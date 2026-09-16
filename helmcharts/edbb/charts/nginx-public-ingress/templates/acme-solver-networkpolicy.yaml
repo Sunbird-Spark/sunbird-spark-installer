@@ -1,0 +1,27 @@
+{{- if .Values.global.cert_manager_ssl }}
+# The mini ingress-nginx controller cert-manager uses for HTTP-01 challenge
+# routing is internal-only (ClusterIP, no public LoadBalancer of its own --
+# see edbb/values.yaml's ingress-nginx block). This restricts it further:
+# only nginx-public-ingress (the thing that actually forwards
+# /.well-known/acme-challenge/ requests to it) can reach it at all.
+apiVersion: {{ include "common.capabilities.networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: acme-http01-solver
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/component: controller
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ include "common.names.name" . }}
+      ports:
+        - port: 80
+{{- end }}
