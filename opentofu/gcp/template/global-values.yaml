@@ -18,6 +18,16 @@ opensearch:
   extraEnvs:
     - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
       value: *opensearch-admin-password
+# ── cert-manager (automated TLS issuance/renewal) ───────────────────────────
+# Both must be true together with global.cert_manager_ssl: true below for
+# automated TLS to actually take effect -- see
+# helmcharts/edbb/charts/nginx-public-ingress/CERT_MANAGER.md. Leave both
+# false (default) if providing your own cert/key via proxy_certificate/
+# proxy_private_key instead.
+cert-manager:
+  enabled: false
+ingress-nginx:
+  enabled: false
 global:
   building_block: "" 
   env: "" 
@@ -41,9 +51,9 @@ global:
   # Set to true for fully automated TLS issuance + renewal via cert-manager
   # (no manual DNS-01/TXT record, no pasting cert/key below into
   # proxy_certificate/proxy_private_key -- ever, not even the first time).
-  # Requires cert-manager.enabled and ingress-nginx.enabled in
-  # helmcharts/edbb/values.yaml. Leave false to provide your own cert/key via
-  # proxy_certificate/proxy_private_key below instead.
+  # Also requires cert-manager.enabled: true and ingress-nginx.enabled: true
+  # above (top of this file). Leave all three false (default) to provide
+  # your own cert/key via proxy_certificate/proxy_private_key below instead.
   cert_manager_ssl: false
   cert_notifications:
     email: "" # provide the email address for certificate renewal notifications/alerts
