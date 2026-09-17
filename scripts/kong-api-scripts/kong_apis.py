@@ -515,8 +515,11 @@ def ensure_global_prometheus_plugin(kong_admin_api_url):
             print("Global prometheus plugin already enabled, skipping")
             return
         plugins_url = "{}/plugins".format(kong_admin_api_url)
-        json_request("POST", plugins_url, {"name": "prometheus"})
-        print("Enabled global prometheus plugin")
+        # per_consumer adds a consumer label to kong_http_requests_total, which
+        # api-manager.json's Consumer Level panels need -- without it, requests
+        # from all consumers are indistinguishable in the exported metrics.
+        json_request("POST", plugins_url, {"name": "prometheus", "config": {"per_consumer": True}})
+        print("Enabled global prometheus plugin (per_consumer metrics on)")
     except Exception as e:
         print("ERROR enabling global prometheus plugin: {}".format(str(e)))
         # Best-effort -- don't fail the whole sync over this

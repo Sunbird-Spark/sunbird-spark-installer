@@ -376,7 +376,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(increase(kong_request_status_count{status_code!~\"2..|3..|5..\"}[5m])) by (api, status_code) / ignoring(api, status_code) group_left sum(increase(kong_request_status_count[5m])))",
+          "expr": "(sum(increase(kong_http_requests_total{code!~\"2..|3..|5..\"}[5m])) by (service, code) / ignoring(service, code) group_left sum(increase(kong_http_requests_total[5m])))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -467,7 +467,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(increase(kong_request_status_count{status_code!~\"2..|3..|4..\"}[5m])) by (api, status_code) / ignoring(api, status_code) group_left sum(increase(kong_request_status_count[5m])))",
+          "expr": "(sum(increase(kong_http_requests_total{code!~\"2..|3..|4..\"}[5m])) by (service, code) / ignoring(service, code) group_left sum(increase(kong_http_requests_total[5m])))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -798,7 +798,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(kong_request_count[5m])",
+          "expr": "increase(kong_http_requests_total[5m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -905,7 +905,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "kong_latency_time",
+          "expr": "kong_request_latency_ms",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
