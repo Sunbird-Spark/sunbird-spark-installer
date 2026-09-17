@@ -349,8 +349,6 @@ dashboards:
   #       $RAW_JSON
      dashboard1:
        file: dashboards/api-manager.json
-     dashboard2:
-       file: dashboards/device-register-apimetrics.json
      dashboard19:
        file: dashboards/secor-consumarlag-kafka.json
      dashboard20:
