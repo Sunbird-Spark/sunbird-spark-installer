@@ -59,3 +59,27 @@ variable "vpn_enabled" {
   description = "When true, Pritunl VPN is installed on the runner VM (VM has public IP). When false, Azure Bastion is created by OpenTofu for developer access (no public IP on VM)."
   default     = true
 }
+
+variable "vnet_address_space" {
+  type        = list(string)
+  description = "VNet address space."
+  default     = ["10.0.0.0/16"]
+}
+
+variable "aks_subnet_cidr" {
+  type        = list(string)
+  description = "AKS subnet address prefixes."
+  default     = ["10.0.0.0/20"]
+}
+
+variable "runner_subnet_cidr" {
+  type        = list(string)
+  description = "Runner VM subnet address prefixes."
+  default     = ["10.0.16.0/28"]
+}
+
+variable "bastion_subnet_cidr" {
+  type        = list(string)
+  description = "AzureBastionSubnet address prefixes. Must be /26 or larger."
+  default     = ["10.0.17.0/26"]
+}

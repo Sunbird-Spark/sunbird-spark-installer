@@ -365,9 +365,6 @@ function check_pod_status() {
     echo "All pods are running successfully."
 }
 
-
-
-
 if [ $# -eq 0 ]; then
     create_tf_backend
     backup_configs

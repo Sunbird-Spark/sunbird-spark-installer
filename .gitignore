@@ -24,6 +24,11 @@ terragrunt
 # Ignore built JARs for JanusGraph
 scripts/janusgraph/*.jar
 
+# Defense in depth: random_passwords modules write plaintext admin passwords
+# here transiently before merging into global-values.yaml and deleting it --
+# never let it land in git even if that delete step is skipped/fails.
+patch-passwords.yaml
+
 # OpenTofu/Terraform local init artefacts (created by `tofu init`, e.g. when running the CI validate step locally)
 **/.terraform/
 .terraform.lock.hcl
