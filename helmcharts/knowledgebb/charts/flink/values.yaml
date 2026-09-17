@@ -71,7 +71,7 @@ serviceAccount:
   create: false
 
 serviceMonitor: &serviceMonitor
-  enabled: false
+  enabled: true
   jobmanager:
     enabled: true
     interval: 30s

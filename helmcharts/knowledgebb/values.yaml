@@ -36,6 +36,15 @@ opensearch: &opensearch
       search.insights.top_queries.latency.enabled: false
       search.insights.top_queries.cpu.enabled: false
       search.insights.top_queries.memory.enabled: false
+  # ServiceMonitor alone isn't enough -- the /_prometheus/metrics endpoint
+  # doesn't exist until this plugin is installed, version-matched to the
+  # chart's own OpenSearch appVersion (2.19.5).
+  plugins:
+    enabled: true
+    installList:
+      - https://github.com/opensearch-project/opensearch-prometheus-exporter/releases/download/2.19.5.0/prometheus-exporter-2.19.5.0.zip
+  serviceMonitor:
+    enabled: true
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
 
@@ -184,6 +193,8 @@ schema: &schema
 
 yugabyte: &yugabyte
   enabled: true
+  serviceMonitor:
+    enabled: true
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 
