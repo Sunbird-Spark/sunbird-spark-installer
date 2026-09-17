@@ -76,8 +76,7 @@ function certificate_config() {
     if [ -z "$CERTKEY" ]; then
         echo "Certificate RSA public key not available"
         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        curl_data="curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw '{\"value\":\"$CERTPUBKEY\"}'"
-        echo "kubectl -n sunbird exec deploy/knowledge-mw -- $curl_data" | sh -
+        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
     fi
 }
 
@@ -259,9 +258,9 @@ function generate_postman_env() {
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
     blob_store_path=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
     api_key=$(kubectl get secret -n sunbird lern-secrets -ojsonpath='{.data.sunbird_authorization}' | base64 -d)
-    keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
+    keycloak_secret=$(kubectl get secret -n sunbird player-secrets -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}' | base64 -d)
     keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
-    keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
+    keycloak_password=$(kubectl get secret -n sunbird lern-secrets -ojsonpath='{.data.sunbird_sso_password}' | base64 -d)
     generated_uuid=$(uuidgen)
     temp_file=$(mktemp)
     cp postman.env.json "${temp_file}"

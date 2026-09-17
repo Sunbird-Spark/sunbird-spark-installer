@@ -1,4 +1,4 @@
-FROM yugabytedb/yugabyte:latest
+FROM yugabytedb/yugabyte:2025.2.0.0-b131@sha256:3f7607281e9169597948792969a984f98683fa1cc327a920fed250616bf5e8d2
 
 # Copy migration scripts from current directory
 COPY . /opt/migrations/sunbird-yugabyte-migrations

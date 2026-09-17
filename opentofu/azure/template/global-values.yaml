@@ -4,6 +4,7 @@ default_passwords:
   grafana_admin_password: &grafana-admin-password "prom-operator"
   keycloak_password: &keycloak-password "admin"
   superset_admin_password: &superset-admin-password "admin"
+  opensearch_admin_password: &opensearch-admin-password "REPLACE_WITH_OPENSEARCH_ADMIN_PASSWORD"
 kube-prometheus-stack:
   grafana:
     adminUser: admin
@@ -13,6 +14,10 @@ keycloak:
   keycloak_password: *keycloak-password
 keycloak-kids-keys:
   KEYCLOAK_ADMIN_PASSWORD: *keycloak-password
+opensearch:
+  extraEnvs:
+    - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+      value: *opensearch-admin-password
 # ── Sync Tool (on-demand JanusGraph → OpenSearch sync) ──────────────────────
 # NOT deployed during normal install.
 # To run: set enabled: true + syncMode below, then deploy via:

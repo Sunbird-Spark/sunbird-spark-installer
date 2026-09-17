@@ -16,6 +16,7 @@ spec:
     metadata:
       labels:
         app.kubernetes.io/name: {{ include "common.names.name" . }}
+        kong-admin-client: "true"
       annotations:
         checksum/config: {{ .Files.Glob "configs/*" | toYaml | sha256sum }}
     spec:

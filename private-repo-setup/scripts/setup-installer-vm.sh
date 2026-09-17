@@ -236,35 +236,72 @@ systemctl restart systemd-resolved
 apt-get update -qq
 apt-get install -y -qq unzip jq curl git openssl ca-certificates gnupg
 
-# Azure CLI
-curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+# Azure CLI (Microsoft's signed apt repo, not the curl|bash convenience script)
+mkdir -p /etc/apt/keyrings
+curl -sLS https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
+chmod go+r /etc/apt/keyrings/microsoft.gpg
+echo "deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/azure-cli/ \$(lsb_release -cs) main" > /etc/apt/sources.list.d/azure-cli.list
+apt-get update -qq
+apt-get install -y -qq azure-cli
 
 # kubectl
 KUBECTL_VER=\$(curl -sL https://dl.k8s.io/release/stable.txt)
 curl -sLO "https://dl.k8s.io/release/\${KUBECTL_VER}/bin/linux/amd64/kubectl"
-install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl
+curl -sLO "https://dl.k8s.io/release/\${KUBECTL_VER}/bin/linux/amd64/kubectl.sha256"
+echo "\$(cat kubectl.sha256)  kubectl" | sha256sum -c -
+install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && rm kubectl kubectl.sha256
 
-# Helm
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+# Helm (pinned release tarball, verified against helm.sh's published sha256sum)
+HELM_VERSION="3.21.4"
+curl -sLO "https://get.helm.sh/helm-v\${HELM_VERSION}-linux-amd64.tar.gz"
+curl -sLO "https://get.helm.sh/helm-v\${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+sha256sum -c "helm-v\${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
+tar -xzf "helm-v\${HELM_VERSION}-linux-amd64.tar.gz"
+install -o root -g root -m 0755 linux-amd64/helm /usr/local/bin/helm
+rm -rf "helm-v\${HELM_VERSION}-linux-amd64.tar.gz" "helm-v\${HELM_VERSION}-linux-amd64.tar.gz.sha256sum" linux-amd64
 
 # OpenTofu
 TOFU_VERSION="1.11.4"
 curl -sLO "https://github.com/opentofu/opentofu/releases/download/v\${TOFU_VERSION}/tofu_\${TOFU_VERSION}_linux_amd64.zip"
-unzip -qo tofu_\${TOFU_VERSION}_linux_amd64.zip -d /usr/local/bin/ && rm tofu_\${TOFU_VERSION}_linux_amd64.zip
+curl -sLO "https://github.com/opentofu/opentofu/releases/download/v\${TOFU_VERSION}/tofu_\${TOFU_VERSION}_SHA256SUMS"
+grep " tofu_\${TOFU_VERSION}_linux_amd64.zip\$" "tofu_\${TOFU_VERSION}_SHA256SUMS" | sha256sum -c -
+unzip -qo tofu_\${TOFU_VERSION}_linux_amd64.zip -d /usr/local/bin/
+rm tofu_\${TOFU_VERSION}_linux_amd64.zip tofu_\${TOFU_VERSION}_SHA256SUMS
 
 # Terragrunt
-curl -sLo /usr/local/bin/terragrunt "https://github.com/gruntwork-io/terragrunt/releases/download/v0.77.5/terragrunt_linux_amd64"
-chmod +x /usr/local/bin/terragrunt
+TERRAGRUNT_VERSION="0.77.5"
+curl -sLO "https://github.com/gruntwork-io/terragrunt/releases/download/v\${TERRAGRUNT_VERSION}/terragrunt_linux_amd64"
+curl -sLO "https://github.com/gruntwork-io/terragrunt/releases/download/v\${TERRAGRUNT_VERSION}/SHA256SUMS"
+grep " terragrunt_linux_amd64\$" SHA256SUMS | sha256sum -c -
+install -o root -g root -m 0755 terragrunt_linux_amd64 /usr/local/bin/terragrunt
+rm terragrunt_linux_amd64 SHA256SUMS
 
-# yq
-curl -sLo /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64"
-chmod +x /usr/local/bin/yq
+# yq (checksum field position looked up per-version from yq's own checksums_hashes_order file)
+YQ_VERSION="4.44.1"
+curl -sLO "https://github.com/mikefarah/yq/releases/download/v\${YQ_VERSION}/yq_linux_amd64"
+curl -sLO "https://github.com/mikefarah/yq/releases/download/v\${YQ_VERSION}/checksums"
+curl -sLO "https://github.com/mikefarah/yq/releases/download/v\${YQ_VERSION}/checksums_hashes_order"
+YQ_SHA256_FIELD=\$((\$(grep -n '^SHA-256\$' checksums_hashes_order | cut -d: -f1) + 1))
+grep '^yq_linux_amd64 ' checksums | awk -v f="\$YQ_SHA256_FIELD" '{print \$f"  yq_linux_amd64"}' | sha256sum -c -
+install -o root -g root -m 0755 yq_linux_amd64 /usr/local/bin/yq
+rm yq_linux_amd64 checksums checksums_hashes_order
 
-# rclone
-curl https://rclone.org/install.sh | bash || true
+# rclone (pinned release zip, verified against rclone.org's published SHA256SUMS)
+RCLONE_VERSION="1.75.1"
+curl -sLO "https://downloads.rclone.org/v\${RCLONE_VERSION}/rclone-v\${RCLONE_VERSION}-linux-amd64.zip"
+curl -sLO "https://downloads.rclone.org/v\${RCLONE_VERSION}/SHA256SUMS"
+grep " rclone-v\${RCLONE_VERSION}-linux-amd64.zip\$" SHA256SUMS | sha256sum -c -
+unzip -qo "rclone-v\${RCLONE_VERSION}-linux-amd64.zip"
+install -o root -g root -m 0755 "rclone-v\${RCLONE_VERSION}-linux-amd64/rclone" /usr/local/bin/rclone
+rm -rf "rclone-v\${RCLONE_VERSION}-linux-amd64" "rclone-v\${RCLONE_VERSION}-linux-amd64.zip" SHA256SUMS
 
-# Docker
-curl -fsSL https://get.docker.com | bash || true
+# Docker (Docker's signed apt repo, not the get.docker.com convenience script)
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+chmod a+r /etc/apt/keyrings/docker.gpg
+echo "deb [arch=\$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \$(. /etc/os-release && echo \$VERSION_CODENAME) stable" > /etc/apt/sources.list.d/docker.list
+apt-get update -qq
+apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 usermod -aG docker azureuser
 
 # VPN (Pritunl + WireGuard) - only when VPN_ENABLED=true
@@ -272,8 +309,8 @@ if [ "\$VPN_ENABLED" = "true" ]; then
   echo "==> Installing Pritunl + WireGuard..."
   set +e
   apt-get install -y wireguard
-  echo "deb https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
-  apt-key adv --keyserver hkp://keyserver.ubuntu.com --recv 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+  curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x7568D9BB55FF9E5287D586017AE645C0CF8E292A" | gpg --dearmor -o /usr/share/keyrings/pritunl.gpg
+  echo "deb [signed-by=/usr/share/keyrings/pritunl.gpg] https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
   curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
   echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list
   apt-get update -qq 2>&1 | tee /tmp/pritunl-apt-update.log
