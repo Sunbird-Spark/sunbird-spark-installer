@@ -92,4 +92,5 @@ variable "sunbird_encryption_key" {
   type        = string
   description = "Encryption key from previous cluster (migration only). Leave empty for fresh install."
   default     = ""
+  sensitive   = true
 }

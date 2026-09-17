@@ -56,7 +56,7 @@ resource "null_resource" "clone_and_upload_content_plugins" {
       set -e
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
-      git clone --depth 1 --branch ${var.sunbird_player_editor_ref} https://github.com/Sunbird-Knowlg/sunbird-content-plugins.git "$tmpdir/content-plugins"
+      git clone --depth 1 --branch "${var.sunbird_player_editor_ref}" https://github.com/Sunbird-Knowlg/sunbird-content-plugins.git "$tmpdir/content-plugins"
       rm -rf "$tmpdir/content-plugins/.git"
       az storage blob upload-batch \
         --account-name ${var.storage_account_name} \
@@ -81,7 +81,7 @@ resource "null_resource" "build_and_upload_content_editor" {
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
 
-      git clone --depth 1 --branch ${var.sunbird_player_editor_ref} https://github.com/Sunbird-Knowlg/sunbird-content-editor.git "$tmpdir/content-editor"
+      git clone --depth 1 --branch "${var.sunbird_player_editor_ref}" https://github.com/Sunbird-Knowlg/sunbird-content-editor.git "$tmpdir/content-editor"
 
       host_uid=$(id -u)
       host_gid=$(id -g)
@@ -140,7 +140,7 @@ resource "null_resource" "build_and_upload_generic_editor" {
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
 
-      git clone --depth 1 --branch ${var.sunbird_player_editor_ref} https://github.com/Sunbird-Knowlg/sunbird-generic-editor.git "$tmpdir/generic-editor"
+      git clone --depth 1 --branch "${var.sunbird_player_editor_ref}" https://github.com/Sunbird-Knowlg/sunbird-generic-editor.git "$tmpdir/generic-editor"
 
       host_uid=$(id -u)
       host_gid=$(id -g)
@@ -192,7 +192,7 @@ resource "null_resource" "build_and_upload_content_player" {
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
 
-      git clone --depth 1 --branch ${var.sunbird_player_editor_ref} https://github.com/Sunbird-Knowlg/sunbird-content-player.git "$tmpdir/content-player"
+      git clone --depth 1 --branch "${var.sunbird_player_editor_ref}" https://github.com/Sunbird-Knowlg/sunbird-content-player.git "$tmpdir/content-player"
 
       host_uid=$(id -u)
       host_gid=$(id -g)
@@ -240,7 +240,7 @@ resource "null_resource" "clone_and_upload_knowledge_platform_schemas" {
       set -e
       tmpdir=$(mktemp -d)
       trap 'rm -rf "$tmpdir"' EXIT
-      git clone --depth 1 --branch ${var.knowledge_platform_ref} https://github.com/Sunbird-Knowlg/knowledge-platform.git "$tmpdir/knowledge-platform"
+      git clone --depth 1 --branch "${var.knowledge_platform_ref}" https://github.com/Sunbird-Knowlg/knowledge-platform.git "$tmpdir/knowledge-platform"
       az storage blob upload-batch \
         --account-name ${var.storage_account_name} \
         --destination ${var.storage_container_public}/schemas/local \
