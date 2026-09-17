@@ -23,6 +23,11 @@ images:
     repository: sanketikahub/kafka
     tag: "4.0.0"
 
+  kafka_exporter: &kafka_exporter
+    registry: "docker.io"
+    repository: "danielqsj/kafka-exporter"
+    tag: "v1.9.0"
+
   redis: &redis
     registry: "sunbirded.azurecr.io"
     repository: "redis"
@@ -314,6 +319,11 @@ internal: &internal
     image: *kafka
     imagePullSecrets:
       - name: "registry-secret-name"
+    metrics:
+      kafkaExporter:
+        image: *kafka_exporter
+        pullSecrets:
+          - name: "registry-secret-name"
 
   redis:
     image: *redis

@@ -1,0 +1,17 @@
+{{- if .Values.metrics.kafkaExporter.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-exporter" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/name: kafka-exporter
+spec:
+  type: ClusterIP
+  ports:
+    - name: metrics
+      port: 9308
+      targetPort: metrics
+  selector:
+    app.kubernetes.io/name: kafka-exporter
+{{- end }}
