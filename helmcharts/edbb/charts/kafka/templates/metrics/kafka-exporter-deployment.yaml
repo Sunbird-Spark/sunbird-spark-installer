@@ -22,6 +22,10 @@ spec:
           imagePullPolicy: {{ .Values.metrics.kafkaExporter.image.pullPolicy }}
           args:
             - --kafka.server={{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}
+            # Defaults to 2.0.0 otherwise, well behind this chart's actual
+            # broker version -- reuse the same tag so it can't drift out of
+            # sync if the broker version is ever bumped.
+            - --kafka.version={{ .Values.image.tag }}
           ports:
             - name: metrics
               containerPort: 9308
