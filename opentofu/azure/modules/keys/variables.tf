@@ -34,3 +34,53 @@ variable "rsa_keys_count" {
     default     = 2
 }
 
+variable "subscription_id" {
+  description = "Azure Subscription ID"
+  type        = string
+}
+
+variable "resource_group_name" {
+  type        = string
+  description = "Resource group name to create the Key Vault in."
+}
+
+variable "location" {
+  type        = string
+  description = "Azure location to create the Key Vault in."
+  default     = "Central India"
+}
+
+variable "aks_subnet_id" {
+  type        = string
+  description = "AKS subnet resource ID — allow-listed on the Key Vault firewall."
+}
+
+variable "runner_subnet_id" {
+  type        = string
+  description = "Runner VM subnet resource ID — allow-listed on the Key Vault firewall."
+}
+
+variable "grafana_admin_password" {
+  type        = string
+  description = "Grafana admin password (from the random_passwords module) — mirrored into Key Vault."
+  sensitive   = true
+}
+
+variable "superset_admin_password" {
+  type        = string
+  description = "Superset admin password (from the random_passwords module) — mirrored into Key Vault."
+  sensitive   = true
+}
+
+variable "keycloak_password" {
+  type        = string
+  description = "Keycloak admin password (from the random_passwords module) — mirrored into Key Vault."
+  sensitive   = true
+}
+
+variable "additional_tags" {
+  type        = map(string)
+  description = "Additional tags for the resources. These tags will be applied to all the resources."
+  default     = {}
+}
+

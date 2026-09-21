@@ -62,6 +62,13 @@ az storage account create --resource-group "$RESOURCE_GROUP_NAME" \
   --name "$STORAGE_ACCOUNT_NAME" --sku Standard_LRS --encryption-services blob \
   --min-tls-version TLS1_2 --allow-shared-key-access false
 
+# Protect tfstate against accidental/malicious overwrite or delete — the
+# backend account has no other recovery path if a blob is clobbered.
+az storage account blob-service-properties update --account-name "$STORAGE_ACCOUNT_NAME" \
+  --enable-versioning true \
+  --enable-delete-retention true --delete-retention-days 30 \
+  --enable-container-delete-retention true --container-delete-retention-days 30
+
 # Create the blob container
 az storage container create --name "$CONTAINER_NAME" --account-name "$STORAGE_ACCOUNT_NAME" --auth-mode login
 
