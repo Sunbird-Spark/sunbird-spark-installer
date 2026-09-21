@@ -1590,7 +1590,7 @@
       "panels": [
         {
           "id": 500022,
-          "title": "Total",
+          "title": "All Types — Total",
           "type": "stat",
           "datasource": {
             "type": "prometheus",
