@@ -130,6 +130,8 @@ yugabyte: &yugabyte
   enabled: true
   serviceMonitor:
     enabled: true
+    extraLabels:
+      release: monitoring
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 
