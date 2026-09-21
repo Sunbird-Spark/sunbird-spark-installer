@@ -21,6 +21,78 @@
     </#if>
     <title>${msg("loginPageTitle")}</title>
     <script>
+    /*
+     * Theme hand-off — id-based. Portal persists ids in localStorage
+     * (same origin, so shared with Keycloak pages):
+     *   sunbird-theme       "terracotta" | "blue" | "teal" | "purple" | ...
+     *   sunbird-font        "rubik" | "poppins" | "inter" | "satisfy" | "lora"
+     *   sunbird-template    "classic" | "modern"
+     *
+     * Mobile app passes the same ids via URL (?theme=&font=&template=) and the
+     * portal's ThemeProvider persists them to localStorage above.
+     *
+     * THEME_MAP / FONT_MAP below must be kept in sync with the portal's
+     * THEMES / FONTS catalogs in `frontend/src/theme/themes.ts`. Adding a
+     * new theme/font/template requires updating ALL three: portal, mobile,
+     * Keycloak. Unknown ids silently fall back to the CSS :root defaults
+     * (terracotta + rubik + classic).
+     */
+    (function() {
+      try {
+        var root = document.documentElement;
+        var read = function(key) {
+          try { return localStorage.getItem(key); } catch(_) { return null; }
+        };
+        var THEME_MAP = {
+          terracotta: { ph: 12,  ps: '50%', pl: '45%', ch: 45,  cs: '100%', ih: 28  },
+          blue:       { ph: 217, ps: '71%', pl: '46%', ch: 217, cs: '71%',  ih: 200 },
+          teal:       { ph: 180, ps: '38%', pl: '38%', ch: 180, cs: '38%',  ih: 170 },
+          purple:     { ph: 270, ps: '55%', pl: '45%', ch: 270, cs: '55%',  ih: 280 },
+          green:      { ph: 145, ps: '45%', pl: '35%', ch: 145, cs: '45%',  ih: 155 },
+          indigo:     { ph: 235, ps: '65%', pl: '48%', ch: 235, cs: '65%',  ih: 220 },
+          rose:       { ph: 345, ps: '60%', pl: '45%', ch: 345, cs: '60%',  ih: 335 },
+          amber:      { ph: 35,  ps: '80%', pl: '45%', ch: 35,  cs: '80%',  ih: 25  }
+        };
+        var FONT_MAP = {
+          poppins: "'Poppins', sans-serif",
+          rubik:   "'Rubik', sans-serif",
+          inter:   "'Inter', sans-serif",
+          satisfy: "'Satisfy', cursive",
+          lora:    "'Lora', serif"
+        };
+        var themeId = read('sunbird-theme');
+        var seeds = themeId && THEME_MAP[themeId];
+        if (seeds) {
+          root.style.setProperty('--sunbird-spark-theme-primary-h', String(seeds.ph));
+          root.style.setProperty('--sunbird-spark-theme-primary-s', seeds.ps);
+          root.style.setProperty('--sunbird-spark-theme-primary-l', seeds.pl);
+          root.style.setProperty('--sunbird-spark-theme-chip-h',    String(seeds.ch));
+          root.style.setProperty('--sunbird-spark-theme-chip-s',    seeds.cs);
+          root.style.setProperty('--sunbird-spark-theme-icon-h',    String(seeds.ih));
+        }
+        var fontId = read('sunbird-font');
+        if (fontId && FONT_MAP[fontId]) {
+          root.style.setProperty('--app-font-family', FONT_MAP[fontId]);
+        }
+        var templateId = read('sunbird-template');
+        if (templateId) {
+          root.setAttribute('data-template', templateId);
+        }
+        try {
+          var qs = new URLSearchParams(window.location.search);
+          var clientParam = qs.get('client');
+          if (clientParam === 'mobileApp') {
+            localStorage.setItem('sunbird-client', 'mobileApp');
+          } 
+        } catch(_) {}
+        var clientId = read('sunbird-client');
+        if (clientId === 'mobileApp') {
+          root.setAttribute('data-client', 'mobileApp');
+        }
+      } catch(e) {}
+    })();
+    </script>
+    <script>
     (function() {
       try {
         var stored = localStorage.getItem('app-language');
