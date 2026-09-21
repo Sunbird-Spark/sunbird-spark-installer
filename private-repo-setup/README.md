@@ -183,6 +183,49 @@ bash $INSTALLER_PATH/private-repo-setup/scripts/setup-installer-vm.sh
 
 **Owner's job is done. All subsequent steps run via GitHub Actions.**
 
+### GCP equivalent
+
+Same idea, GCP-native primitives: `gcp-setup-installer-vm.sh` creates a GCE VM with a dedicated **service account** (attached directly to the instance — GCP's equivalent of Azure's user-assigned managed identity) instead of a VNet+subnet+managed-identity trio. The script also pre-creates the VPC/subnetwork/router/Cloud NAT that the OpenTofu network module will later adopt (matching names + CIDRs its own defaults use), and places the runner VM in that same subnetwork — this is what lets the runner reach GKE's private control-plane endpoint later, since that endpoint is only reachable from within the same VPC.
+
+**After the script finishes**, set in `global-values.yaml` (it prints the exact values to use):
+```yaml
+create_network: false
+network: "<building_block>-<environment>-network"
+subnetwork: "<building_block>-<environment>-subnetwork-public"
+```
+so the network module adopts the existing VPC/subnetwork via data source instead of trying to create a duplicate — same idea as Azure's `skip_network_module: true` path.
+
+**Requires:** `gcloud` CLI installed + `roles/owner` (or an equivalent broad role) on the GCP project.
+
+Edit the variables at the top of the script:
+
+```bash
+PROJECT_ID=""             # gcloud config get-value project
+BUILDING_BLOCK=""         # Must match global.building_block in global-values.yaml
+ENVIRONMENT=""            # Must match your configs/ folder name (e.g. "demo")
+ZONE=""                   # GCP zone (e.g. "asia-south1-a") — must match global.zone
+GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
+GITHUB_REPO=""            # Leave empty for org-level runner
+GITHUB_RUNNER_TOKEN=""    # GitHub → Settings → Actions → Runners → New runner → copy token
+```
+
+Then run:
+
+```bash
+bash $INSTALLER_PATH/private-repo-setup/scripts/gcp-setup-installer-vm.sh
+```
+
+**What it creates:**
+- VPC + subnetwork (with GKE's pod/service secondary ranges) + Cloud Router + Cloud NAT
+- Ubuntu 22.04 VM (`e2-small`) with an attached dedicated service account, in that subnetwork
+- Least-privilege custom IAM role, project-scoped
+- `roles/container.admin` on the project (GCP's equivalent of Azure's AKS Cluster Admin role)
+- Firewall rules: UDP 1194 (VPN) + TCP 443 (Pritunl UI), tagged to the VM
+
+**startup-script runs automatically on VM boot (~5 min)** — same install list as Azure (Pritunl, WireGuard, kubectl, helm, opentofu, terragrunt, gcloud CLI, jq, yq, rclone, Docker), same GitHub Actions runner registration flow.
+
+When `VPN_ENABLED=false`, the VM gets no public IP — connect via `gcloud compute ssh <vm> --zone <zone>` (uses an IAP tunnel automatically if the VM has no external IP), GCP's equivalent of Azure Bastion.
+
 ---
 
 ## Step 6 — Configure GitHub Secrets

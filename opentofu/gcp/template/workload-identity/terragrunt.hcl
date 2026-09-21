@@ -3,7 +3,7 @@ include "root" {
 }
 
 include "environment" {
-  path = "${get_terragrunt_dir()}/../../_common/service-account.hcl"
+  path = "${get_terragrunt_dir()}/../../_common/workload-identity.hcl"
 }
 
 # module specific inputs

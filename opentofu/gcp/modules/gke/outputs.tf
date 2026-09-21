@@ -42,3 +42,16 @@ output "storage_class" {
   description = "The default storage class for the GKE cluster."
   value       = var.kubernetes_storage_class_raw
 }
+
+# ── Outputs for kubernetes provider auth in workload-identity module ──
+output "kubernetes_host" {
+  description = "Cluster endpoint host (no scheme) for the kubernetes provider."
+  value       = google_container_cluster.cluster.endpoint
+  sensitive   = true
+}
+
+output "kubernetes_cluster_ca_certificate" {
+  description = "Cluster CA cert (raw base64) for the kubernetes provider."
+  value       = google_container_cluster.cluster.master_auth[0].cluster_ca_certificate
+  sensitive   = true
+}

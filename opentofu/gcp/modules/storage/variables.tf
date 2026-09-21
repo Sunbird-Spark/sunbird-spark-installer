@@ -9,8 +9,8 @@ variable "building_block" {
 }
 
 variable "environment" {
-    type        = string
-    description = "environment name. All resources will be prefixed with this value."
+  type        = string
+  description = "environment name. All resources will be prefixed with this value."
 }
 
 variable "env" {
@@ -26,4 +26,10 @@ variable "region" {
 variable "domain" {
   description = "Domain name for the storage account."
   type        = string
+}
+
+variable "additional_tags" {
+  type        = map(string)
+  description = "Additional tags for the resources. These tags will be applied to all the resources."
+  default     = {}
 }
