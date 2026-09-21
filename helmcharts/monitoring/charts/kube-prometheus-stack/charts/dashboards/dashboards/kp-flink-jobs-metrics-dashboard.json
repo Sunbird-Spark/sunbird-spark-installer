@@ -31,7 +31,10 @@
           "id": 500000,
           "title": "Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -97,7 +100,10 @@
           "id": 500001,
           "title": "Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -163,7 +169,10 @@
           "id": 500002,
           "title": "Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -229,7 +238,10 @@
           "id": 500003,
           "title": "Audit Event Generator \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -295,7 +307,10 @@
           "id": 500004,
           "title": "Audit Event Generator \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -361,7 +376,10 @@
           "id": 500005,
           "title": "Audit Event Generator \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -427,7 +445,10 @@
           "id": 500006,
           "title": "Audit History Indexer \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -493,7 +514,10 @@
           "id": 500007,
           "title": "Audit History Indexer \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -559,7 +583,10 @@
           "id": 500008,
           "title": "Audit History Indexer \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -625,7 +652,10 @@
           "id": 500009,
           "title": "Composite Search Indexer \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -691,7 +721,10 @@
           "id": 500010,
           "title": "Composite Search Indexer \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -757,7 +790,10 @@
           "id": 500011,
           "title": "Composite Search Indexer \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -823,7 +859,10 @@
           "id": 500012,
           "title": "Obsrv MetaData Generator \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -889,7 +928,10 @@
           "id": 500013,
           "title": "Obsrv MetaData Generator \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -955,7 +997,10 @@
           "id": 500014,
           "title": "Obsrv MetaData Generator \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1021,7 +1066,10 @@
           "id": 500015,
           "title": "DIALCode External Indexer \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1087,7 +1135,10 @@
           "id": 500016,
           "title": "DIALCode External Indexer \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1153,7 +1204,10 @@
           "id": 500017,
           "title": "DIALCode External Indexer \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1219,7 +1273,10 @@
           "id": 500018,
           "title": "DIALCode Metric Indexer \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1285,7 +1342,10 @@
           "id": 500019,
           "title": "DIALCode Metric Indexer \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1351,7 +1411,10 @@
           "id": 500020,
           "title": "DIALCode Metric Indexer \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1418,7 +1481,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -1526,7 +1592,10 @@
           "id": 500022,
           "title": "Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1592,7 +1661,10 @@
           "id": 500023,
           "title": "Content Publish \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1658,7 +1730,10 @@
           "id": 500024,
           "title": "Content Publish \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1724,7 +1799,10 @@
           "id": 500025,
           "title": "Content Publish \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1790,7 +1868,10 @@
           "id": 500026,
           "title": "Content Publish \u2014 Video Streaming",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1856,7 +1937,10 @@
           "id": 500027,
           "title": "Content Publish \u2014 MVC Processor",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1922,7 +2006,10 @@
           "id": 500028,
           "title": "Collection Publish \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1988,7 +2075,10 @@
           "id": 500029,
           "title": "Collection Publish \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2054,7 +2144,10 @@
           "id": 500030,
           "title": "Collection Publish \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2120,7 +2213,10 @@
           "id": 500031,
           "title": "Collection Publish \u2014 Post-Publish Process",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2186,7 +2282,10 @@
           "id": 500032,
           "title": "Question Publish \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2252,7 +2351,10 @@
           "id": 500033,
           "title": "Question Publish \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2318,7 +2420,10 @@
           "id": 500034,
           "title": "Question Publish \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2384,7 +2489,10 @@
           "id": 500035,
           "title": "QuestionSet Publish \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2450,7 +2558,10 @@
           "id": 500036,
           "title": "QuestionSet Publish \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2516,7 +2627,10 @@
           "id": 500037,
           "title": "QuestionSet Publish \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2582,7 +2696,10 @@
           "id": 500038,
           "title": "Enrich Only \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2648,7 +2765,10 @@
           "id": 500039,
           "title": "Enrich Only \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2714,7 +2834,10 @@
           "id": 500040,
           "title": "Enrich Only \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2781,7 +2904,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -2889,7 +3015,10 @@
           "id": 500042,
           "title": "Extract \u2014 Extracted",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2955,7 +3084,10 @@
           "id": 500043,
           "title": "Extract \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3021,7 +3153,10 @@
           "id": 500044,
           "title": "Chunking \u2014 Chunked",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3087,7 +3222,10 @@
           "id": 500045,
           "title": "Chunking \u2014 Filtered",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3153,7 +3291,10 @@
           "id": 500046,
           "title": "Chunking \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3219,7 +3360,10 @@
           "id": 500047,
           "title": "Batch Embedding \u2014 Embedded",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3285,7 +3429,10 @@
           "id": 500048,
           "title": "Batch Embedding \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3351,7 +3498,10 @@
           "id": 500049,
           "title": "Quantization \u2014 Quantized",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3417,7 +3567,10 @@
           "id": 500050,
           "title": "Quantization \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3483,7 +3636,10 @@
           "id": 500051,
           "title": "OpenSearch Sink \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3549,7 +3705,10 @@
           "id": 500052,
           "title": "OpenSearch Sink \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3616,7 +3775,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -3725,7 +3887,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -3834,7 +3999,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -3939,287 +4107,206 @@
       "id": 500075,
       "panels": [
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
+          "id": 900000,
+          "title": "Total",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 0,
             "y": 1
           },
-          "hiddenSeries": false,
-          "id": 900000,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "links": [],
           "targets": [
             {
               "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_total_events_count[$__range]))",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Total",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 900001,
+          "title": "Success",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 6,
             "y": 1
           },
-          "hiddenSeries": false,
-          "id": 900001,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "links": [],
           "targets": [
             {
               "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_success_events_count[$__range]))",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Success",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 900002,
+          "title": "Failed",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 12,
             "y": 1
           },
-          "hiddenSeries": false,
-          "id": 900002,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "links": [],
           "targets": [
             {
               "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notification_trigger_failed_events_count[$__range]))",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Failed",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  }
+                ]
+              },
+              "custom": {}
             },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
         },
         {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4324,563 +4411,398 @@
       "id": 500076,
       "panels": [
         {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
+          "id": 900004,
+          "title": "Total",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
           },
-          "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 0,
             "y": 1
           },
-          "hiddenSeries": false,
-          "id": 900004,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "links": [],
           "targets": [
             {
               "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_total_delete_events_count[$__range]))",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Total",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 900005,
+          "title": "Success",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 6,
             "y": 1
           },
-          "hiddenSeries": false,
-          "id": 900005,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "links": [],
           "targets": [
             {
               "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_success_message_count[$__range]))",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Success",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 900006,
+          "title": "Skipped",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 12,
             "y": 1
           },
-          "hiddenSeries": false,
-          "id": 900006,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "links": [],
           "targets": [
             {
               "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_skipped_message_count[$__range]))",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "Skipped",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 900007,
+          "title": "API Read Success",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 18,
             "y": 1
           },
-          "hiddenSeries": false,
-          "id": 900007,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "links": [],
           "targets": [
             {
               "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_api_read_success_count[$__range]))",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "API Read Success",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 900008,
+          "title": "API Read Miss",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 0,
             "y": 6
           },
-          "hiddenSeries": false,
-          "id": 900008,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "links": [],
           "targets": [
             {
               "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_api_read_miss_count[$__range]))",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "API Read Miss",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
-        },
-        {
-          "aliasColors": {},
-          "bars": false,
-          "dashLength": 10,
-          "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "fill": 1,
-          "fillGradient": 0,
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 900009,
+          "title": "DB Update",
+          "type": "stat",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
             "x": 6,
             "y": 6
           },
-          "hiddenSeries": false,
-          "id": 900009,
-          "legend": {
-            "avg": false,
-            "current": true,
-            "max": false,
-            "min": false,
-            "show": true,
-            "total": false,
-            "values": true
-          },
-          "lines": true,
-          "linewidth": 1,
-          "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
-          "percentage": false,
-          "pointradius": 2,
-          "points": false,
-          "renderer": "flot",
-          "seriesOverrides": [],
-          "spaceLength": 10,
-          "stack": false,
-          "steppedLine": false,
+          "links": [],
           "targets": [
             {
               "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_db_update_success_count[$__range]))",
               "refId": "A"
             }
           ],
-          "thresholds": [],
-          "timeFrom": null,
-          "timeRegions": [],
-          "timeShift": null,
-          "title": "DB Update",
-          "tooltip": {
-            "shared": true,
-            "sort": 0,
-            "value_type": "individual"
-          },
-          "type": "graph",
-          "xaxis": {
-            "buckets": null,
-            "mode": "time",
-            "name": null,
-            "show": true,
-            "values": []
-          },
-          "yaxes": [
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  }
+                ]
+              },
+              "custom": {}
             },
-            {
-              "format": "short",
-              "label": null,
-              "logBase": 1,
-              "max": null,
-              "min": null,
-              "show": true
-            }
-          ],
-          "yaxis": {
-            "align": false,
-            "alignLevel": null
-          }
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
         },
         {
           "aliasColors": {},
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4988,7 +4910,10 @@
           "id": 501074,
           "title": "Certificate Generator \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5054,7 +4979,10 @@
           "id": 501075,
           "title": "Certificate Generator \u2014 Success",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5120,7 +5048,10 @@
           "id": 501076,
           "title": "Certificate Generator \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5186,7 +5117,10 @@
           "id": 501077,
           "title": "Certificate Generator \u2014 Enrolment DB Read",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5252,7 +5186,10 @@
           "id": 501078,
           "title": "Certificate Generator \u2014 DB Update",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5318,7 +5255,10 @@
           "id": 501079,
           "title": "Notifier \u2014 Notified User",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5384,7 +5324,10 @@
           "id": 501080,
           "title": "Notifier \u2014 Skip Notify User",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5450,7 +5393,10 @@
           "id": 501081,
           "title": "Notifier \u2014 Course Batch DB Read",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5516,7 +5462,10 @@
           "id": 501082,
           "title": "Notifier \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5582,7 +5531,10 @@
           "id": 501083,
           "title": "User Feed \u2014 Total",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5648,7 +5600,10 @@
           "id": 501084,
           "title": "User Feed \u2014 Failed",
           "type": "stat",
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5715,7 +5670,10 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "fieldConfig": {
             "defaults": {
               "custom": {}
