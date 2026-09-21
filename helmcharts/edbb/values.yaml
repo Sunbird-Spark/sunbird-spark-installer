@@ -130,8 +130,8 @@ yugabyte: &yugabyte
   enabled: true
   serviceMonitor:
     enabled: true
-    extraLabels:
-      release: monitoring
+    # extraLabels: {release: monitoring} intentionally left off for now --
+    # Prometheus memory pressure. Add it back to resume scraping.
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 

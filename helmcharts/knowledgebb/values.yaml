@@ -45,8 +45,8 @@ opensearch: &opensearch
       - https://github.com/opensearch-project/opensearch-prometheus-exporter/releases/download/2.19.5.0/prometheus-exporter-2.19.5.0.zip
   serviceMonitor:
     enabled: true
-    labels:
-      release: monitoring
+    # labels: {release: monitoring} intentionally left off for now --
+    # Prometheus memory pressure. Add it back to resume scraping.
   commonAnnotations:
     "helm.sh/hook-weight": "-5"
 
@@ -197,8 +197,8 @@ yugabyte: &yugabyte
   enabled: true
   serviceMonitor:
     enabled: true
-    extraLabels:
-      release: monitoring
+    # extraLabels: {release: monitoring} intentionally left off for now --
+    # Prometheus memory pressure. Add it back to resume scraping.
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 

@@ -223,8 +223,9 @@ metrics:
   # service metdata if metrics are enabled
   service:
     annotations: {}
-    labels:
-      release: monitoring
+    # labels: {release: monitoring} intentionally left off for now --
+    # Prometheus memory pressure. Add it back to resume scraping.
+    labels: {}
 
   # Pod annotations for Prometheus
   podAnnotations:
@@ -253,8 +254,9 @@ metrics:
     autodetect: true
     enabled: true
     annotations: {}
-    additionalLabels:
-      release: monitoring
+    # additionalLabels: {release: monitoring} intentionally left off for now
+    # -- Prometheus memory pressure. Add it back to resume scraping.
+    additionalLabels: {}
     # ServiceMonitor namespace. Default to Velero namespace.
     # namespace:
     # ServiceMonitor connection scheme. Defaults to HTTP.
