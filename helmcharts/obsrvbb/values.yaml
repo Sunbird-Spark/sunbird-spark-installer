@@ -51,6 +51,15 @@ kafka: &kafka
 
 superset:
   enabled: true
+  postgresql:
+    metrics:
+      image:
+        registry: dhi.io
+        repository: postgres-exporter
+        tag: 0.19.1-debian13
+      containerSecurityContext:
+        runAsUser: 65532
+
 
 yugabyte: &yugabyte
   enabled: true

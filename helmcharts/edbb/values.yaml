@@ -67,6 +67,16 @@ kafka: &kafka
       enabled: false
     existingSecret: ""
 
+  metrics:
+    jmx:
+      image:
+        registry: dhi.io
+        repository: jmx-exporter
+        tag: 1.5.0-debian13
+      containerSecurityContext:
+        runAsUser: 65532
+
+
 knowledgemw:
   opa_enabled: true
 
