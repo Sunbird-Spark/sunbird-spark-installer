@@ -6,7 +6,8 @@ on:
       - 'spark-v*'
 
 # Default to read-only; the job below grants packages: write explicitly.
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   docker-build-push:
