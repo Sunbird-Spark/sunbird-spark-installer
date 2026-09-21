@@ -540,7 +540,7 @@
           "timeShift": null,
           "targets": [
             {
-              "expr": "sum(namedprocess_namegroup_num_procs{groupname=~\"telemetry-ingest-backup.+\"})",
+              "expr": "sum(kube_statefulset_status_replicas_ready{statefulset=\"telemetry-ingest-backup\"})",
               "instant": true,
               "interval": "",
               "legendFormat": "telemetry-ingest-backup",
