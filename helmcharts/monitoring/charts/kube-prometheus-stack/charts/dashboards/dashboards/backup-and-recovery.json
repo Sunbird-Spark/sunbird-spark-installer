@@ -1809,9 +1809,9 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "Prometheus-1",
-          "value": "Prometheus-1"
+          "selected": true,
+          "text": "Prometheus",
+          "value": "Prometheus"
         },
         "hide": 0,
         "includeAll": false,
@@ -1827,7 +1827,13 @@
         "type": "datasource"
       },
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "$datasource"
@@ -1852,7 +1858,11 @@
         "useTags": false
       },
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "$datasource"
@@ -1874,7 +1884,11 @@
         "type": "query"
       },
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "$datasource"
@@ -1896,7 +1910,11 @@
         "type": "query"
       },
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "$datasource"
@@ -1918,7 +1936,11 @@
         "type": "query"
       },
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "$datasource"
@@ -1940,7 +1962,11 @@
         "type": "query"
       },
       {
-        "current": {},
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "$__all"
+        },
         "datasource": {
           "type": "prometheus",
           "uid": "$datasource"
