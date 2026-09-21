@@ -73,7 +73,7 @@ velero:
   schedules:
     edcluster-backup:
       disabled: false
-      schedule: "30 1 * * 5"
+      schedule: "30 10 * * 5"
       useOwnerReferencesInBackup: false
       template:
         ttl: "240h"
