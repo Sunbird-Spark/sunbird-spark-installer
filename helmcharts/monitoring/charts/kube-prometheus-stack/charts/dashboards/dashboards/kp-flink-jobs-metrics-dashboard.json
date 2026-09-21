@@ -96,7 +96,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_router_function_total_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_total_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -187,7 +187,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_router_function_success_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_success_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -278,7 +278,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_router_function_failed_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_failed_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -369,7 +369,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_audit_event_generator_function_total_audit_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_total_audit_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -460,7 +460,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_audit_event_generator_function_audit_event_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_audit_event_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -551,7 +551,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_audit_event_generator_function_failed_audit_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_failed_audit_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -642,7 +642,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_audit_history_indexer_function_total_audit_history_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_total_audit_history_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -733,7 +733,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_audit_history_indexer_function_audit_history_event_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_audit_history_event_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -824,7 +824,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_audit_history_indexer_function_failed_audit_history_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_failed_audit_history_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -915,7 +915,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_composite_search_indexer_composite_search_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_composite_search_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1006,7 +1006,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_composite_search_indexer_composite_search_event_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_composite_search_event_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1097,7 +1097,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_composite_search_indexer_composite_search_event_failed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_composite_search_event_failed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1188,7 +1188,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_obsrv_metadata_generator_function_total_obsrv_metadata_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_total_obsrv_metadata_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1279,7 +1279,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_obsrv_metadata_generator_function_audit_obsrv_metadata_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_audit_obsrv_metadata_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1370,7 +1370,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_obsrv_metadata_generator_function_failed_obsrv_metadata_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_failed_obsrv_metadata_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1461,7 +1461,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_dialcode_external_indexer_dialcode_external_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_dialcode_external_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1552,7 +1552,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_dialcode_external_indexer_dialcode_external_event_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_dialcode_external_event_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1643,7 +1643,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_dialcode_external_indexer_dialcode_external_event_failed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_dialcode_external_event_failed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1734,7 +1734,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_dialcode_metric_indexer_dialcode_metric_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_dialcode_metric_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1825,7 +1825,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_dialcode_metric_indexer_dialcode_metric_event_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_dialcode_metric_event_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1916,7 +1916,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_dialcode_metric_indexer_dialcode_metric_event_failed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_transaction_event_processor_dialcode_metric_event_failed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -1985,7 +1985,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max { job = \"transaction-event-processor-taskmanager-prometheus\" })",
+              "expr": "sum(flink_taskmanager_job_task_operator_KafkaSourceReader_KafkaConsumer_records_lag_max { job = \"transaction-event-processor-taskmanager-prometheus\" })",
               "instant": false,
               "interval": "",
               "legendFormat": "Consumer lag",
@@ -2116,7 +2116,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_publish_event_router_total_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_total_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -2207,7 +2207,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_process_content_publish_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_content_publish_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -2298,7 +2298,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_process_content_publish_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_content_publish_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -2389,7 +2389,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_process_content_publish_failed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_content_publish_failed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -2480,7 +2480,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_process_video_streaming_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_video_streaming_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -2571,7 +2571,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_process_mvc_processor_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_mvc_processor_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -2662,7 +2662,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_publish_process_collection_publish_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_collection_publish_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -2753,7 +2753,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_publish_process_collection_publish_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_collection_publish_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -2844,7 +2844,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_publish_process_collection_publish_failed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_collection_publish_failed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -2935,7 +2935,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_publish_process_collection_post_publish_process_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_collection_post_publish_process_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3026,7 +3026,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_question_publish_process_question_publish_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_question_publish_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3117,7 +3117,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_question_publish_process_question_publish_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_question_publish_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3208,7 +3208,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_question_publish_process_question_publish_failed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_question_publish_failed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3299,7 +3299,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_questionset_publish_process_questionset_publish_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_questionset_publish_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3390,7 +3390,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_questionset_publish_process_questionset_publish_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_questionset_publish_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3481,7 +3481,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_questionset_publish_process_questionset_publish_failed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_questionset_publish_failed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3572,7 +3572,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_enrich_only_process_enrich_only_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_enrich_only_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3663,7 +3663,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_enrich_only_process_enrich_only_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_enrich_only_success_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3754,7 +3754,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_enrich_only_process_enrich_only_failed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_publish_enrich_only_failed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -3823,7 +3823,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max { job = \"knowlg-publish-taskmanager-prometheus\" })",
+              "expr": "sum(flink_taskmanager_job_task_operator_KafkaSourceReader_KafkaConsumer_records_lag_max { job = \"knowlg-publish-taskmanager-prometheus\" })",
               "instant": false,
               "interval": "",
               "legendFormat": "Consumer lag",
@@ -3954,7 +3954,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_extract_enriched_metadata_extracted_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_extracted_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4045,7 +4045,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_extract_enriched_metadata_failed_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_failed_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4136,7 +4136,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_chunk_content_chunked_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_chunked_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4227,7 +4227,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_chunk_content_filtered_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_filtered_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4318,7 +4318,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_chunk_content_failed_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_failed_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4409,7 +4409,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_batch_generate_embeddings_embedded_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_embedded_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4500,7 +4500,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_batch_generate_embeddings_failed_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_failed_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4591,7 +4591,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_quantize_vectors_quantized_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_quantized_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4682,7 +4682,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_quantize_vectors_failed_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_failed_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4773,7 +4773,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_batched_opensearch_sink_success_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_success_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4864,7 +4864,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_batched_opensearch_sink_failed_event_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_content_embedding_failed_event_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -4933,7 +4933,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max { job = \"content-embedding-taskmanager-prometheus\" })",
+              "expr": "sum(flink_taskmanager_job_task_operator_KafkaSourceReader_KafkaConsumer_records_lag_max { job = \"content-embedding-taskmanager-prometheus\" })",
               "instant": false,
               "interval": "",
               "legendFormat": "Consumer lag",
@@ -5042,7 +5042,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max { job = \"enrichment-router-taskmanager-prometheus\" })",
+              "expr": "sum(flink_taskmanager_job_task_operator_KafkaSourceReader_KafkaConsumer_records_lag_max { job = \"enrichment-router-taskmanager-prometheus\" })",
               "instant": false,
               "interval": "",
               "legendFormat": "Consumer lag",
@@ -5151,7 +5151,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max { job = \"caption-generator-taskmanager-prometheus\" })",
+              "expr": "sum(flink_taskmanager_job_task_operator_KafkaSourceReader_KafkaConsumer_records_lag_max { job = \"caption-generator-taskmanager-prometheus\" })",
               "instant": false,
               "interval": "",
               "legendFormat": "Consumer lag",
@@ -5536,7 +5536,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max { job = \"notification-job-taskmanager-prometheus\" })",
+              "expr": "sum(flink_taskmanager_job_task_operator_KafkaSourceReader_KafkaConsumer_records_lag_max { job = \"notification-job-taskmanager-prometheus\" })",
               "instant": false,
               "interval": "",
               "legendFormat": "Consumer lag",
@@ -5645,7 +5645,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_total_delete_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_total_delete_events_count[$__range]))",
               "refId": "A"
             }
           ],
@@ -5737,7 +5737,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_success_message_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_success_message_count[$__range]))",
               "refId": "A"
             }
           ],
@@ -5829,7 +5829,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_skipped_message_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_skipped_message_count[$__range]))",
               "refId": "A"
             }
           ],
@@ -5921,7 +5921,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_api_read_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_api_read_success_count[$__range]))",
               "refId": "A"
             }
           ],
@@ -6013,7 +6013,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_api_read_miss_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_api_read_miss_count[$__range]))",
               "refId": "A"
             }
           ],
@@ -6105,7 +6105,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_deletion_cleanup_function_db_update_success_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_UserDeletionCleanupConfig_db_update_success_count[$__range]))",
               "refId": "A"
             }
           ],
@@ -6197,7 +6197,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max { job = \"user-deletion-cleanup-taskmanager-prometheus\" })",
+              "expr": "sum(flink_taskmanager_job_task_operator_KafkaSourceReader_KafkaConsumer_records_lag_max { job = \"user-deletion-cleanup-taskmanager-prometheus\" })",
               "instant": false,
               "interval": "",
               "legendFormat": "Consumer lag",
@@ -6783,7 +6783,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notifier_notified_user_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_notified_user_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -6874,7 +6874,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notifier_skipped_notify_user_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_skipped_notify_user_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -6965,7 +6965,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notifier_db_course_batch_read_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_db_course_batch_read_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -7056,7 +7056,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_notifier_failed_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_failed_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -7147,7 +7147,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_feed_user_feed_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_user_feed_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -7238,7 +7238,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_user_feed_failed_events_count[$__range]))",
+              "expr": "sum(sum_over_time(flink_taskmanager_job_task_operator_collection_certificate_generator_failed_events_count[$__range]))",
               "instant": true,
               "interval": "",
               "legendFormat": "",
@@ -7307,7 +7307,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(flink_taskmanager_job_task_operator_KafkaConsumer_records_lag_max { job = \"collection-certificate-generator-taskmanager-prometheus\" })",
+              "expr": "sum(flink_taskmanager_job_task_operator_KafkaSourceReader_KafkaConsumer_records_lag_max { job = \"collection-certificate-generator-taskmanager-prometheus\" })",
               "instant": false,
               "interval": "",
               "legendFormat": "Consumer lag",
