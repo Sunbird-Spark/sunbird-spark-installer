@@ -465,7 +465,7 @@
           "timeShift": null,
           "targets": [
             {
-              "expr": "kafka_consumergroup_lag_sum{consumergroup=~\"$env-telemetry-ingest-backup\", job=\"ingestion-kafka-exporter\"}",
+              "expr": "kafka_consumergroup_lag_sum{consumergroup=~\"$env-telemetry-ingest-backup\", job=\"kafka-exporter\"}",
               "instant": true,
               "interval": "",
               "legendFormat": "telemetry-ingest-backup",
@@ -612,8 +612,8 @@
     "list": [
       {
         "current": {
-          "text": "ntpprod",
-          "value": "ntpprod"
+          "text": "dev",
+          "value": "dev"
         },
         "hide": 2,
         "label": null,
@@ -621,11 +621,11 @@
         "options": [
           {
             "selected": true,
-            "text": "ntpprod",
-            "value": "ntpprod"
+            "text": "dev",
+            "value": "dev"
           }
         ],
-        "query": "ntpprod",
+        "query": "dev",
         "skipUrlSync": false,
         "type": "constant"
       }
