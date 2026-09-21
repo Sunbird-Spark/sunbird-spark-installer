@@ -1,0 +1,35 @@
+# Dependabot keeps the pinned versions/digests in this repo current.
+# Note: Dependabot reads this file from the default branch only.
+version: 2
+updates:
+  # GitHub Actions used by the workflows in .github/workflows (SHA-pinned).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(deps)"
+
+  # Base images for the Dockerized utilities under scripts/ (digest-pinned).
+  - package-ecosystem: docker
+    directories:
+      - /scripts/keycloak-21.1.2
+      - /scripts/keycloak-postgres-query
+      - /scripts/kong-api-scripts
+      - /scripts/sunbird-yugabyte-migrations
+      - /scripts/janusgraph
+      - /scripts/yugabyte-backup
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(deps)"
+
+  # Python dependencies of the Kong API scripts.
+  - package-ecosystem: pip
+    directories:
+      - /scripts/kong-api-scripts
+      - /scripts/yugabyte-backup
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(deps)"

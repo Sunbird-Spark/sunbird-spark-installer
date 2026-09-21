@@ -12,8 +12,21 @@ terraform {
 }
 
 locals {
-  template_files        = fileset("${path.module}/sunbird-rc/schemas", "*.json")
-  public_artifacts_path = var.public_artifacts_path
+  template_files             = fileset("${path.module}/sunbird-rc/schemas", "*.json")
+  public_artifacts_path      = var.public_artifacts_path
+  cloud_storage_schema_url   = "https://${var.storage_account_name}.blob.core.windows.net/${var.storage_container_public}"
+  public_artifacts_templates = ["credential_template.json", "project_credential_template.json"]
+}
+
+# The @context URLs in these two files must point at this environment's own
+# storage, not a hardcoded external account -- render them in place before
+# upload_public_artifacts picks up the whole public-artifacts tree.
+resource "local_file" "public_artifacts_credential_templates" {
+  for_each = toset(local.public_artifacts_templates)
+  content = templatefile("${local.public_artifacts_path}/schemas/${each.value}", {
+    cloud_storage_schema_url = local.cloud_storage_schema_url
+  })
+  filename = "${local.public_artifacts_path}/schemas/${each.value}"
 }
 
 resource "null_resource" "upload_public_artifacts" {
@@ -30,6 +43,7 @@ resource "null_resource" "upload_public_artifacts" {
         --auth-mode login
     EOT
   }
+  depends_on = [local_file.public_artifacts_credential_templates]
 }
 
 resource "null_resource" "clone_and_upload_content_plugins" {
@@ -240,8 +254,8 @@ resource "null_resource" "clone_and_upload_knowledge_platform_schemas" {
 
 resource "local_file" "output_files" {
   for_each = toset(local.template_files)
-  content  = templatefile("${path.module}/sunbird-rc/schemas/${each.value}", {
-     cloud_storage_schema_url = "https://${var.storage_account_name}.blob.core.windows.net/${var.storage_container_public}"
+  content = templatefile("${path.module}/sunbird-rc/schemas/${each.value}", {
+    cloud_storage_schema_url = local.cloud_storage_schema_url
   })
   filename = "${path.module}/sunbird-rc/schemas/${each.value}"
 }
@@ -253,5 +267,5 @@ resource "null_resource" "upload_rc_schemas_to_public_blob" {
   provisioner "local-exec" {
     command = "az storage blob upload-batch --account-name ${var.storage_account_name} --destination ${var.storage_container_public}/schemas --source ${path.module}/sunbird-rc/schemas --overwrite --auth-mode login"
   }
-  depends_on = [local_file.output_files]
+  depends_on = [local_file.output_files, null_resource.upload_public_artifacts]
 }
