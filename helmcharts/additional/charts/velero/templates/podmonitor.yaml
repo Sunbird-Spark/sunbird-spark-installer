@@ -21,7 +21,7 @@ metadata:
 spec:
   namespaceSelector:
     matchNames:
-      - {{ .Release.Namespace }}
+      - {{ (include "base.namespace" $) }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "velero.name" . }}

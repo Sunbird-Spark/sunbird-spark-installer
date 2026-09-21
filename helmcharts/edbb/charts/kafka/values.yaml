@@ -2173,6 +2173,35 @@ metrics:
     ##      listener: $1
     ##
     extraRules: ""
+  ## danielqsj/kafka-exporter -- produces kafka_consumergroup_lag /
+  ## kafka_consumergroup_lag_sum / kafka_topic_partition_current_offset /
+  ## kafka_topic_partitions, none of which the JMX exporter above can produce
+  ## (JMX only exposes broker/JVM-level metrics, not consumer group offsets).
+  ## Independent of metrics.jmx/metrics.serviceMonitor above so enabling this
+  ## doesn't also turn on JMX metrics as a side effect.
+  kafkaExporter:
+    # Disabled for now -- Prometheus memory pressure. New this branch (not
+    # present in v1.1.1); flip back once Prometheus has headroom.
+    enabled: false
+    image:
+      registry: ""
+      repository: ""
+      tag: ""
+      pullPolicy: IfNotPresent
+      pullSecrets: []
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      scrapeTimeout: 10s
+      labels:
+        release: monitoring
   ## Prometheus Operator ServiceMonitor configuration
   ##
   serviceMonitor:

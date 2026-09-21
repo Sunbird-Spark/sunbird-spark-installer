@@ -117,9 +117,15 @@ serviceAccount:
 initContainers: {}
 sidecars: {}
 
-# Inactive until Prometheus reporter is configured in ai-pipeline. Scrapes the "prom" named port
-# on JobManager and TaskManager Services.
+# Scrapes the "prom" named port on JobManager and TaskManager Services. The
+# cluster-level Prometheus reporter is now configured via FLINK_PROPERTIES in
+# templates/deployment.yaml -- this exposes standard Flink framework metrics
+# (task/operator throughput, checkpointing, etc.), not custom per-job business
+# metrics, which enrichment-router/caption-generator's own ai-pipeline code
+# doesn't emit (see pass 36).
 serviceMonitor: &serviceMonitor
+  # Disabled for now -- Prometheus memory pressure. Was flipped true this
+  # branch (not present in v1.1.1); flip back once Prometheus has headroom.
   enabled: false
   job:
     enabled: true

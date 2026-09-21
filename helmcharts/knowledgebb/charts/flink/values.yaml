@@ -71,6 +71,8 @@ serviceAccount:
   create: false
 
 serviceMonitor: &serviceMonitor
+  # Disabled for now -- Prometheus memory pressure. Was flipped true this
+  # branch (not present in v1.1.1); flip back once Prometheus has headroom.
   enabled: false
   jobmanager:
     enabled: true

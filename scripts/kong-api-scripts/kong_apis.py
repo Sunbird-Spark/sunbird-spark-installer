@@ -497,6 +497,51 @@ def _fetch_all_plugins(kong_admin_api_url):
             next_url = "{}{}".format(kong_admin_api_url.rstrip('/'), nxt if nxt.startswith('/') else '/' + nxt)
     return plugins
 
+def ensure_global_prometheus_plugin(kong_admin_api_url):
+    """
+    Enable Kong's prometheus plugin globally (not per-service/route) so it
+    reports kong_* metrics -- labeled by service/route -- for every request
+    Kong handles. Idempotent: only patches when the live config doesn't
+    already match.
+    """
+    try:
+        all_plugins = _fetch_all_plugins(kong_admin_api_url)
+        global_prometheus_plugins = [
+            p for p in all_plugins
+            if p.get('name') == 'prometheus'
+            and not p.get('service') and not p.get('route') and not p.get('consumer')
+        ]
+        # per_consumer adds a consumer label to kong_http_requests_total, which
+        # api-manager.json's Consumer Level panels need -- without it, requests
+        # from all consumers are indistinguishable in the exported metrics.
+        # status_code_metrics/latency_metrics/bandwidth_metrics all default to
+        # false on Kong 3.x's prometheus plugin -- without them, none of
+        # kong_http_requests_total, kong_request_latency_ms, or
+        # kong_bandwidth_bytes get recorded at all, regardless of per_consumer.
+        desired_config = {
+            "per_consumer": True,
+            "status_code_metrics": True,
+            "latency_metrics": True,
+            "bandwidth_metrics": True,
+        }
+        if global_prometheus_plugins:
+            plugin = global_prometheus_plugins[0]
+            current_config = plugin.get('config') or {}
+            if all(current_config.get(k) is v for k, v in desired_config.items()):
+                print("Global prometheus plugin already enabled with the desired config, skipping")
+                return
+            patch_url = "{}/plugins/{}".format(kong_admin_api_url, plugin['id'])
+            json_request("PATCH", patch_url, {"config": desired_config})
+            print("Updated existing global prometheus plugin: {}".format(desired_config))
+            return
+        plugins_url = "{}/plugins".format(kong_admin_api_url)
+        json_request("POST", plugins_url, {"name": "prometheus", "config": desired_config})
+        print("Enabled global prometheus plugin: {}".format(desired_config))
+    except Exception as e:
+        print("ERROR enabling global prometheus plugin: {}".format(str(e)))
+        # Best-effort -- don't fail the whole sync over this
+        pass
+
 def strip_legacy_anonymous_state(kong_admin_api_url):
     """
     Pre-sync cleanup: remove the lenient-anonymous bypass and the stale
@@ -583,6 +628,7 @@ if  __name__ == "__main__":
             # runs. Done BEFORE save_apis so YAML re-additions (e.g. routes
             # that explicitly list portal_anonymous in config.allow) stick.
             strip_legacy_anonymous_state(args.kong_admin_api_url)
+            ensure_global_prometheus_plugin(args.kong_admin_api_url)
             save_apis(args.kong_admin_api_url, input_apis, managed_by=args.managed_by)
         except urllib.error.HTTPError as e:
             error_message = e.read().decode('utf-8')
