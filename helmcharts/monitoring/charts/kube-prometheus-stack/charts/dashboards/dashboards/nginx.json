@@ -1670,7 +1670,7 @@
     ]
   },
   "timezone": "",
-  "title": "NGINX",
+  "title": "NGINX Public Ingress",
   "uid": "0000000025",
   "version": 3
 }
