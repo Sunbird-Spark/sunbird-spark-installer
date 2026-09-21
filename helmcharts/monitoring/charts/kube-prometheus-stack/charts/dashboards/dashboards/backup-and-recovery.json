@@ -172,7 +172,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "sum(increase(velero_backup_total[$__range]))",
+          "expr": "round(sum(increase(velero_backup_total[$__range])))",
           "format": "time_series",
           "instant": true,
           "interval": "",
@@ -257,7 +257,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "sum(velero_backup_success_total{schedule=~\"$schedule\"}) / sum(velero_backup_attempt_total{schedule=~\"$schedule\"})",
+          "expr": "sum(increase(velero_backup_success_total{schedule=~\"$schedule\"}[$__range])) / sum(increase(velero_backup_attempt_total{schedule=~\"$schedule\"}[$__range]))",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -342,7 +342,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "sum(velero_backup_deletion_success_total{schedule=~\"$schedule\"}) / sum(velero_backup_deletion_attempt_total{schedule=~\"$schedule\"})",
+          "expr": "sum(increase(velero_backup_deletion_success_total{schedule=~\"$schedule\"}[$__range])) / sum(increase(velero_backup_deletion_attempt_total{schedule=~\"$schedule\"}[$__range]))",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -427,7 +427,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "sum(velero_volume_snapshot_success_total{schedule=~\"$schedule\"}) / sum(velero_volume_snapshot_attempt_total{schedule=~\"$schedule\"})\n",
+          "expr": "sum(increase(velero_volume_snapshot_success_total{schedule=~\"$schedule\"}[$__range])) / sum(increase(velero_volume_snapshot_attempt_total{schedule=~\"$schedule\"}[$__range]))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1058,7 +1058,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "sum(velero_restore_success_total{schedule=~\"$schedule\"}) / sum(velero_restore_attempt_total{schedule=~\"$schedule\"})",
+          "expr": "sum(increase(velero_restore_success_total{schedule=~\"$schedule\"}[$__range])) / sum(increase(velero_restore_attempt_total{schedule=~\"$schedule\"}[$__range]))",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -1435,7 +1435,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "sum(restic_pod_volume_backup_dequeue_count{node=~\"$restic_node\"}) / sum(restic_pod_volume_backup_enqueue_count{node=~\"$restic_node\"})",
+          "expr": "sum(increase(podVolume_pod_volume_backup_dequeue_count{node=~\"$restic_node\"}[$__range])) / sum(increase(podVolume_pod_volume_backup_enqueue_count{node=~\"$restic_node\"}[$__range]))",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -1509,7 +1509,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "round(sum(increase(restic_pod_volume_backup_enqueue_count{node=~\"$restic_node\"}[1h])))",
+          "expr": "round(sum(increase(podVolume_pod_volume_backup_enqueue_count{node=~\"$restic_node\"}[1h])))",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -1522,7 +1522,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "round(sum(increase(restic_pod_volume_backup_dequeue_count{node=~\"$restic_node\"}[1h])))",
+          "expr": "round(sum(increase(podVolume_pod_volume_backup_dequeue_count{node=~\"$restic_node\"}[1h])))",
           "hide": false,
           "instant": false,
           "interval": "",
@@ -1621,7 +1621,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "sum(avg_over_time(restic_restic_operation_latency_seconds_gauge{backupName=~\"$restic_backup_name\", node=~\"$restic_node\", operation=~\"$restic_option\", pod_volume_backup=~\"$restic_pod_volume\"}[15m]))",
+          "expr": "sum(avg_over_time(podVolume_pod_volume_operation_latency_seconds_gauge{backupName=~\"$restic_backup_name\", node=~\"$restic_node\", operation=~\"$restic_option\", pod_volume_backup=~\"$restic_pod_volume\"}[15m]))",
           "interval": "",
           "legendFormat": "Avg over time",
           "refId": "A"
@@ -1893,14 +1893,14 @@
           "type": "prometheus",
           "uid": "$datasource"
         },
-        "definition": "label_values(restic_pod_volume_backup_enqueue_count, node)",
+        "definition": "label_values(podVolume_pod_volume_backup_enqueue_count, node)",
         "hide": 0,
         "includeAll": true,
         "multi": false,
         "name": "restic_node",
         "options": [],
         "query": {
-          "query": "label_values(restic_pod_volume_backup_enqueue_count, node)",
+          "query": "label_values(podVolume_pod_volume_backup_enqueue_count, node)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1919,14 +1919,14 @@
           "type": "prometheus",
           "uid": "$datasource"
         },
-        "definition": "label_values(restic_restic_operation_latency_seconds_gauge, backupName)",
+        "definition": "label_values(podVolume_pod_volume_operation_latency_seconds_gauge, backupName)",
         "hide": 0,
         "includeAll": true,
         "multi": false,
         "name": "restic_backup_name",
         "options": [],
         "query": {
-          "query": "label_values(restic_restic_operation_latency_seconds_gauge, backupName)",
+          "query": "label_values(podVolume_pod_volume_operation_latency_seconds_gauge, backupName)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1945,14 +1945,14 @@
           "type": "prometheus",
           "uid": "$datasource"
         },
-        "definition": "label_values(restic_restic_operation_latency_seconds_gauge, operation)",
+        "definition": "label_values(podVolume_pod_volume_operation_latency_seconds_gauge, operation)",
         "hide": 0,
         "includeAll": true,
         "multi": false,
         "name": "restic_option",
         "options": [],
         "query": {
-          "query": "label_values(restic_restic_operation_latency_seconds_gauge, operation)",
+          "query": "label_values(podVolume_pod_volume_operation_latency_seconds_gauge, operation)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
@@ -1971,14 +1971,14 @@
           "type": "prometheus",
           "uid": "$datasource"
         },
-        "definition": "label_values(restic_restic_operation_latency_seconds_gauge, pod_volume_backup)",
+        "definition": "label_values(podVolume_pod_volume_operation_latency_seconds_gauge, pod_volume_backup)",
         "hide": 0,
         "includeAll": true,
         "multi": false,
         "name": "restic_pod_volume",
         "options": [],
         "query": {
-          "query": "label_values(restic_restic_operation_latency_seconds_gauge, pod_volume_backup)",
+          "query": "label_values(podVolume_pod_volume_operation_latency_seconds_gauge, pod_volume_backup)",
           "refId": "StandardVariableQuery"
         },
         "refresh": 1,
