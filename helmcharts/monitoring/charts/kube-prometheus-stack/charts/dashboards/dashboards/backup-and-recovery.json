@@ -172,7 +172,7 @@
             "uid": "$datasource"
           },
           "exemplar": false,
-          "expr": "round(sum(increase(velero_backup_total[$__range])))",
+          "expr": "velero_backup_total",
           "format": "time_series",
           "instant": true,
           "interval": "",
