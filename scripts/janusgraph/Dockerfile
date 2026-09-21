@@ -1,5 +1,5 @@
 # Stage 1: Build the JAR
-FROM maven:3.9-eclipse-temurin-11@sha256:68656cc571525f3bde1a0a5d3be1b63a4320ee8784292ebbde0a4eaaa47bd2e2 AS builder
+FROM maven:3.9.15-eclipse-temurin-26@sha256:029a8e2838ae68238ffb8be407cddbb3f07d4d839c60c6f26c619a69fd184531 AS builder
 
 WORKDIR /build
 
