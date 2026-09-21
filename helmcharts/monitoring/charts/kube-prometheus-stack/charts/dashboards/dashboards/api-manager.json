@@ -40,7 +40,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "$cluster",
-      "decimals": 0,
+      "decimals": 2,
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -120,7 +120,7 @@
       },
       "yaxes": [
         {
-          "decimals": 0,
+          "decimals": 2,
           "format": "none",
           "label": null,
           "logBase": 1,
@@ -2674,7 +2674,7 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": "$cluster",
-          "decimals": 0,
+          "decimals": 2,
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -2754,7 +2754,7 @@
           },
           "yaxes": [
             {
-              "decimals": 0,
+              "decimals": 2,
               "format": "none",
               "label": null,
               "logBase": 1,
@@ -2783,7 +2783,7 @@
           "dashLength": 10,
           "dashes": false,
           "datasource": "$cluster",
-          "decimals": 0,
+          "decimals": 2,
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -2863,7 +2863,7 @@
           },
           "yaxes": [
             {
-              "decimals": 0,
+              "decimals": 2,
               "format": "none",
               "label": null,
               "logBase": 1,
