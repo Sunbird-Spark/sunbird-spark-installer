@@ -223,7 +223,8 @@ metrics:
   # service metdata if metrics are enabled
   service:
     annotations: {}
-    labels: {}
+    labels:
+      release: monitoring
 
   # Pod annotations for Prometheus
   podAnnotations:
@@ -252,7 +253,8 @@ metrics:
     autodetect: true
     enabled: true
     annotations: {}
-    additionalLabels: {}
+    additionalLabels:
+      release: monitoring
     # ServiceMonitor namespace. Default to Velero namespace.
     # namespace:
     # ServiceMonitor connection scheme. Defaults to HTTP.
