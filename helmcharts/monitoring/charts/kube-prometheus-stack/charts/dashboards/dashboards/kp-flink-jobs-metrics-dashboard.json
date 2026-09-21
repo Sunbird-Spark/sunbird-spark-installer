@@ -1590,7 +1590,7 @@
       "panels": [
         {
           "id": 500022,
-          "title": "All Types — Total",
+          "title": "Total Publish Events",
           "type": "stat",
           "datasource": {
             "type": "prometheus",
