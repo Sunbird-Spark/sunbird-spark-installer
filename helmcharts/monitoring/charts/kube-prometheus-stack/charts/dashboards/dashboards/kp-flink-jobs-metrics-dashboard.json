@@ -31,7 +31,7 @@
           "id": 500000,
           "title": "Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -97,7 +97,7 @@
           "id": 500001,
           "title": "Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -163,7 +163,7 @@
           "id": 500002,
           "title": "Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -229,7 +229,7 @@
           "id": 500003,
           "title": "Audit Event Generator \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -295,7 +295,7 @@
           "id": 500004,
           "title": "Audit Event Generator \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -361,7 +361,7 @@
           "id": 500005,
           "title": "Audit Event Generator \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -427,7 +427,7 @@
           "id": 500006,
           "title": "Audit History Indexer \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -493,7 +493,7 @@
           "id": 500007,
           "title": "Audit History Indexer \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -559,7 +559,7 @@
           "id": 500008,
           "title": "Audit History Indexer \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -625,7 +625,7 @@
           "id": 500009,
           "title": "Composite Search Indexer \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -691,7 +691,7 @@
           "id": 500010,
           "title": "Composite Search Indexer \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -757,7 +757,7 @@
           "id": 500011,
           "title": "Composite Search Indexer \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -823,7 +823,7 @@
           "id": 500012,
           "title": "Obsrv MetaData Generator \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -889,7 +889,7 @@
           "id": 500013,
           "title": "Obsrv MetaData Generator \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -955,7 +955,7 @@
           "id": 500014,
           "title": "Obsrv MetaData Generator \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1021,7 +1021,7 @@
           "id": 500015,
           "title": "DIALCode External Indexer \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1087,7 +1087,7 @@
           "id": 500016,
           "title": "DIALCode External Indexer \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1153,7 +1153,7 @@
           "id": 500017,
           "title": "DIALCode External Indexer \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1219,7 +1219,7 @@
           "id": 500018,
           "title": "DIALCode Metric Indexer \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1285,7 +1285,7 @@
           "id": 500019,
           "title": "DIALCode Metric Indexer \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1351,7 +1351,7 @@
           "id": 500020,
           "title": "DIALCode Metric Indexer \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1418,7 +1418,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -1526,7 +1526,7 @@
           "id": 500022,
           "title": "Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1592,7 +1592,7 @@
           "id": 500023,
           "title": "Content Publish \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1658,7 +1658,7 @@
           "id": 500024,
           "title": "Content Publish \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1724,7 +1724,7 @@
           "id": 500025,
           "title": "Content Publish \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1790,7 +1790,7 @@
           "id": 500026,
           "title": "Content Publish \u2014 Video Streaming",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1856,7 +1856,7 @@
           "id": 500027,
           "title": "Content Publish \u2014 MVC Processor",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1922,7 +1922,7 @@
           "id": 500028,
           "title": "Collection Publish \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -1988,7 +1988,7 @@
           "id": 500029,
           "title": "Collection Publish \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2054,7 +2054,7 @@
           "id": 500030,
           "title": "Collection Publish \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2120,7 +2120,7 @@
           "id": 500031,
           "title": "Collection Publish \u2014 Post-Publish Process",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2186,7 +2186,7 @@
           "id": 500032,
           "title": "Question Publish \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2252,7 +2252,7 @@
           "id": 500033,
           "title": "Question Publish \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2318,7 +2318,7 @@
           "id": 500034,
           "title": "Question Publish \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2384,7 +2384,7 @@
           "id": 500035,
           "title": "QuestionSet Publish \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2450,7 +2450,7 @@
           "id": 500036,
           "title": "QuestionSet Publish \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2516,7 +2516,7 @@
           "id": 500037,
           "title": "QuestionSet Publish \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2582,7 +2582,7 @@
           "id": 500038,
           "title": "Enrich Only \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2648,7 +2648,7 @@
           "id": 500039,
           "title": "Enrich Only \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2714,7 +2714,7 @@
           "id": 500040,
           "title": "Enrich Only \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2781,7 +2781,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -2889,7 +2889,7 @@
           "id": 500042,
           "title": "Extract \u2014 Extracted",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -2955,7 +2955,7 @@
           "id": 500043,
           "title": "Extract \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3021,7 +3021,7 @@
           "id": 500044,
           "title": "Chunking \u2014 Chunked",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3087,7 +3087,7 @@
           "id": 500045,
           "title": "Chunking \u2014 Filtered",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3153,7 +3153,7 @@
           "id": 500046,
           "title": "Chunking \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3219,7 +3219,7 @@
           "id": 500047,
           "title": "Batch Embedding \u2014 Embedded",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3285,7 +3285,7 @@
           "id": 500048,
           "title": "Batch Embedding \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3351,7 +3351,7 @@
           "id": 500049,
           "title": "Quantization \u2014 Quantized",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3417,7 +3417,7 @@
           "id": 500050,
           "title": "Quantization \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3483,7 +3483,7 @@
           "id": 500051,
           "title": "OpenSearch Sink \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3549,7 +3549,7 @@
           "id": 500052,
           "title": "OpenSearch Sink \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -3616,7 +3616,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -3725,7 +3725,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -3834,7 +3834,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -3943,7 +3943,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4035,7 +4035,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4127,7 +4127,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4219,7 +4219,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4328,7 +4328,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4420,7 +4420,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4512,7 +4512,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4604,7 +4604,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4696,7 +4696,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4788,7 +4788,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4880,7 +4880,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
@@ -4988,7 +4988,7 @@
           "id": 501074,
           "title": "Certificate Generator \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5054,7 +5054,7 @@
           "id": 501075,
           "title": "Certificate Generator \u2014 Success",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5120,7 +5120,7 @@
           "id": 501076,
           "title": "Certificate Generator \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5186,7 +5186,7 @@
           "id": 501077,
           "title": "Certificate Generator \u2014 Enrolment DB Read",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5252,7 +5252,7 @@
           "id": 501078,
           "title": "Certificate Generator \u2014 DB Update",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5318,7 +5318,7 @@
           "id": 501079,
           "title": "Notifier \u2014 Notified User",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5384,7 +5384,7 @@
           "id": 501080,
           "title": "Notifier \u2014 Skip Notify User",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5450,7 +5450,7 @@
           "id": 501081,
           "title": "Notifier \u2014 Course Batch DB Read",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5516,7 +5516,7 @@
           "id": 501082,
           "title": "Notifier \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5582,7 +5582,7 @@
           "id": 501083,
           "title": "User Feed \u2014 Total",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5648,7 +5648,7 @@
           "id": 501084,
           "title": "User Feed \u2014 Failed",
           "type": "stat",
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "gridPos": {
             "h": 5,
             "w": 6,
@@ -5715,7 +5715,7 @@
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "Flink-Prometheus",
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
               "custom": {}
