@@ -102,11 +102,11 @@ images:
 
   keycloak: &keycloak
     repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "spark-v-api-manager-test_e77efb9"
+    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
-    tag: "spark-v-api-manager-test_e77efb9"
+    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
@@ -163,11 +163,11 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "spark-v-api-manager-test_e77efb9"
+    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
-    tag: "spark-v-api-manager-test_e77efb9"
+    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
 
   # kube-prometheus-stack's own bundled images — previously entirely
   # untracked here, running whatever that chart's own defaults were.
