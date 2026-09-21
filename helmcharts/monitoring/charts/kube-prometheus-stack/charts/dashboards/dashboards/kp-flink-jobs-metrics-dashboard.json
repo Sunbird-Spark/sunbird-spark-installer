@@ -5789,7 +5789,7 @@
     ]
   },
   "timezone": "",
-  "title": "Flink Processing",
+  "title": "Flink Pipelines",
   "uid": "YngLt0kG1",
   "version": 1,
   "description": "Real Flink jobs only, confirmed against the actual chart config and live cluster pods. KP = knowledgebb (5 jobs), LP = learnbb (3 jobs), 8 total. 6 of 8 jobs have fully verified per-operator metrics, read directly from real source: transaction-event-processor, knowlg-publish, content-embedding (github.com/Sunbird-Knowlg/knowledge-platform-jobs), and Collection Certificate Generator, notification-job, user-deletion-cleanup (github.com/Sunbird-Lern/data-pipeline). DIALCode panels on transaction-event-processor only report data if the DIAL addon is deployed -- confirmed not deployed in this cluster today. enrichment-router and caption-generator (github.com/Sunbird-Knowlg/ai-pipeline, PyFlink jobs) genuinely have no custom Prometheus/Flink metrics in their source code -- checked every function, only time.perf_counter() duration logging to application logs, nothing exported as a metric. Lag-only is the complete, correct picture for these 2, not a gap in verification."
