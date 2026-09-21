@@ -124,7 +124,9 @@ sidecars: {}
 # metrics, which enrichment-router/caption-generator's own ai-pipeline code
 # doesn't emit (see pass 36).
 serviceMonitor: &serviceMonitor
-  enabled: true
+  # Disabled for now -- Prometheus memory pressure. Was flipped true this
+  # branch (not present in v1.1.1); flip back once Prometheus has headroom.
+  enabled: false
   job:
     enabled: true
     interval: 30s
