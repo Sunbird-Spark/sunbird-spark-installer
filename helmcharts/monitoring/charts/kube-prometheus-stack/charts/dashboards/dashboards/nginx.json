@@ -1555,7 +1555,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "nginx_metric_errors_total",
+              "expr": "rate(nginx_metric_errors_total[5m])",
               "interval": "",
               "legendFormat": "{{ instance }}",
               "refId": "A"
