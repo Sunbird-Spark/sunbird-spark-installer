@@ -25,7 +25,8 @@ on:
   workflow_dispatch:
 
 # Default to read-only; the job grants only what it needs.
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   analysis:
