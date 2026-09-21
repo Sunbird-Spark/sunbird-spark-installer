@@ -24,7 +24,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_Stateful",
+      "datasource": "Prometheus",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -114,7 +114,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_Stateful",
+      "datasource": "Prometheus",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -211,73 +211,19 @@
       "id": 1070,
       "panels": [
         {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
+          "id": 1071,
+          "title": "logstash Raw events lag",
           "datasource": "Prometheus",
-          "description": "Threshold:\nWarning: 1M\nCritical:  2M",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
           "gridPos": {
             "h": 4,
             "w": 4,
             "x": 0,
             "y": 1
           },
-          "id": 1071,
-          "interval": null,
+          "description": "Threshold:\nWarning: 1M\nCritical:  2M",
           "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "{consumergroup=\"ntpprod.flink.kp.events\", endpoint=\"metrics\", instance=\"11.4.35.172:9308\", job=\"ingestion-kafka-exporter\", namespace=\"monitoring\", pod=\"ingestion-kafka-exporter-75f7894b77-5h8bw\", service=\"ingestion-kafka-exporter\", topic=\"ntpprod.telemetry.raw\"}",
+          "timeFrom": null,
+          "timeShift": null,
           "targets": [
             {
               "expr": "sum without(partition) (kafka_consumergroup_lag{consumergroup=~\"ntpprod.flink.kp.events\", job=\"ingestion-kafka-exporter\"})",
@@ -287,89 +233,72 @@
               "refId": "A"
             }
           ],
-          "thresholds": "1000000,2000000",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "logstash Raw events lag",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Prometheus",
-          "description": "Threshold:\nWarning: 1M\nCritical:  2M",
+          "type": "stat",
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  },
+                  {
+                    "value": 1000000.0,
+                    "color": "rgba(237, 129, 40, 0.89)"
+                  },
+                  {
+                    "value": 2000000.0,
+                    "color": "#d44a3a"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
           },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 1072,
+          "title": "logstash Telemetry Error events lag",
+          "datasource": "Prometheus",
           "gridPos": {
             "h": 4,
             "w": 4,
             "x": 4,
             "y": 5
           },
-          "id": 1072,
-          "interval": null,
+          "description": "Threshold:\nWarning: 1M\nCritical:  2M",
           "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "{consumergroup=\"ntpprod.telemetry-log.indexer\", endpoint=\"metrics\", instance=\"11.4.33.35:9308\", job=\"processing-kafka-exporter\", namespace=\"monitoring\", pod=\"processing-kafka-exporter-5c4f4645d-cpxjn\", service=\"processing-kafka-exporter\", topic=\"ntpprod.druid.events.error\"}",
+          "timeFrom": null,
+          "timeShift": null,
           "targets": [
             {
               "expr": "sum without(partition) (kafka_consumergroup_lag{consumergroup=~\"ntpprod.telemetry-log.indexer\", job=\"processing-kafka-exporter\", topic=\"ntpprod.druid.events.error\"})",
@@ -379,89 +308,72 @@
               "refId": "A"
             }
           ],
-          "thresholds": "1000000,2000000",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "logstash Telemetry Error events lag",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Prometheus",
-          "description": "Threshold:\nWarning: 1M\nCritical:  2M",
+          "type": "stat",
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  },
+                  {
+                    "value": 1000000.0,
+                    "color": "rgba(237, 129, 40, 0.89)"
+                  },
+                  {
+                    "value": 2000000.0,
+                    "color": "#d44a3a"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
           },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 1073,
+          "title": "logstash Telemetry log events lag",
+          "datasource": "Prometheus",
           "gridPos": {
             "h": 4,
             "w": 4,
             "x": 8,
             "y": 9
           },
-          "id": 1073,
-          "interval": null,
+          "description": "Threshold:\nWarning: 1M\nCritical:  2M",
           "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "{consumergroup=\"ntpprod.telemetry-log.indexer\", endpoint=\"metrics\", instance=\"11.4.33.35:9308\", job=\"processing-kafka-exporter\", namespace=\"monitoring\", pod=\"processing-kafka-exporter-5c4f4645d-cpxjn\", service=\"processing-kafka-exporter\", topic=\"ntpprod.druid.events.log\"}",
+          "timeFrom": null,
+          "timeShift": null,
           "targets": [
             {
               "expr": "sum without(partition) (kafka_consumergroup_lag{consumergroup=~\"ntpprod.telemetry-log.indexer\", job=\"processing-kafka-exporter\", topic=\"ntpprod.druid.events.log\"})",
@@ -471,20 +383,57 @@
               "refId": "A"
             }
           ],
-          "thresholds": "1000000,2000000",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "logstash Telemetry log events lag",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
+          "type": "stat",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  },
+                  {
+                    "value": 1000000.0,
+                    "color": "rgba(237, 129, 40, 0.89)"
+                  },
+                  {
+                    "value": 2000000.0,
+                    "color": "#d44a3a"
+                  }
+                ]
+              },
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
         }
       ],
       "title": "Logstash Lag",
@@ -501,75 +450,19 @@
       "id": 2075,
       "panels": [
         {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
+          "id": 2073,
+          "title": "telemetry-ingest-backup lag",
           "datasource": "Prometheus",
-          "description": "Threshold: \nWarning: 10M\nCritical: 15M",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {}
-            },
-            "overrides": []
-          },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
-          },
           "gridPos": {
             "h": 4,
             "w": 4,
             "x": 0,
             "y": 1
           },
-          "id": 2073,
-          "interval": null,
+          "description": "Threshold: \nWarning: 10M\nCritical: 15M",
           "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "$$hashKey": "object:893",
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "$$hashKey": "object:894",
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "kafka_consumergroup_lag_sum{consumergroup=\"ntpprod.telemetry.raw.events.backup\", endpoint=\"metrics\", instance=\"11.4.32.123:9308\", job=\"processing-kafka-exporter\", namespace=\"monitoring\", pod=\"processing-kafka-exporter-5c4f4645d-4vrgh\", service=\"processing-kafka-exporter\", topic=\"ntpprod.telemetry.raw\"}",
+          "timeFrom": null,
+          "timeShift": null,
           "targets": [
             {
               "expr": "kafka_consumergroup_lag_sum{consumergroup=~\"$env-telemetry-ingest-backup\", job=\"ingestion-kafka-exporter\"}",
@@ -579,92 +472,72 @@
               "refId": "A"
             }
           ],
-          "thresholds": "15000000,20000000",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "telemetry-ingest-backup lag",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "$$hashKey": "object:896",
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
-        },
-        {
-          "cacheTimeout": null,
-          "colorBackground": false,
-          "colorValue": true,
-          "colors": [
-            "#73BF69",
-            "rgba(237, 129, 40, 0.89)",
-            "#d44a3a"
-          ],
-          "datasource": "Prometheus",
-          "description": "Threshold: \nWarning: 10M\nCritical: 15M",
+          "type": "stat",
           "fieldConfig": {
             "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  },
+                  {
+                    "value": 15000000.0,
+                    "color": "rgba(237, 129, 40, 0.89)"
+                  },
+                  {
+                    "value": 20000000.0,
+                    "color": "#d44a3a"
+                  }
+                ]
+              },
               "custom": {}
             },
             "overrides": []
           },
-          "format": "none",
-          "gauge": {
-            "maxValue": 100,
-            "minValue": 0,
-            "show": false,
-            "thresholdLabels": false,
-            "thresholdMarkers": true
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
           },
+          "pluginVersion": "11.4.0"
+        },
+        {
+          "id": 2074,
+          "title": "telemetry-ingest-backup process count",
+          "datasource": "Prometheus",
           "gridPos": {
             "h": 4,
             "w": 4,
             "x": 0,
             "y": 5
           },
-          "id": 2074,
-          "interval": null,
+          "description": "Threshold: \nWarning: 10M\nCritical: 15M",
           "links": [],
-          "mappingType": 1,
-          "mappingTypes": [
-            {
-              "$$hashKey": "object:893",
-              "name": "value to text",
-              "value": 1
-            },
-            {
-              "$$hashKey": "object:894",
-              "name": "range to text",
-              "value": 2
-            }
-          ],
-          "maxDataPoints": 100,
-          "nullPointMode": "connected",
-          "nullText": null,
-          "postfix": "",
-          "postfixFontSize": "50%",
-          "prefix": "",
-          "prefixFontSize": "50%",
-          "rangeMaps": [
-            {
-              "from": "null",
-              "text": "N/A",
-              "to": "null"
-            }
-          ],
-          "sparkline": {
-            "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "show": false,
-            "ymax": null,
-            "ymin": null
-          },
-          "tableColumn": "kafka_consumergroup_lag_sum{consumergroup=\"ntpprod.telemetry.raw.events.backup\", endpoint=\"metrics\", instance=\"11.4.32.123:9308\", job=\"processing-kafka-exporter\", namespace=\"monitoring\", pod=\"processing-kafka-exporter-5c4f4645d-4vrgh\", service=\"processing-kafka-exporter\", topic=\"ntpprod.telemetry.raw\"}",
+          "timeFrom": null,
+          "timeShift": null,
           "targets": [
             {
               "expr": "sum(namedprocess_namegroup_num_procs{groupname=~\"telemetry-ingest-backup.+\"})",
@@ -674,21 +547,57 @@
               "refId": "A"
             }
           ],
-          "thresholds": "15000000,20000000",
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "telemetry-ingest-backup process count",
-          "type": "singlestat",
-          "valueFontSize": "80%",
-          "valueMaps": [
-            {
-              "$$hashKey": "object:896",
-              "op": "=",
-              "text": "N/A",
-              "value": "null"
-            }
-          ],
-          "valueName": "current"
+          "type": "stat",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "none",
+              "mappings": [
+                {
+                  "type": "special",
+                  "options": {
+                    "match": "null+nan",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  }
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "value": null,
+                    "color": "#73BF69"
+                  },
+                  {
+                    "value": 15000000.0,
+                    "color": "rgba(237, 129, 40, 0.89)"
+                  },
+                  {
+                    "value": 20000000.0,
+                    "color": "#d44a3a"
+                  }
+                ]
+              },
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "orientation": "auto",
+            "textMode": "auto",
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto"
+          },
+          "pluginVersion": "11.4.0"
         }
       ],
       "title": "telemetry-ingest-backup",
