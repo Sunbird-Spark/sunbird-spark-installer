@@ -173,6 +173,12 @@ cert-manager:
   fullnameOverride: cert-manager
   crds:
     enabled: true
+    # Explicit even though it's the chart default: without this, `helm
+    # uninstall edbb` would delete the CRDs (they render as ordinary release
+    # templates here, not a separate crds/ hook directory) and cascade-delete
+    # every Certificate/Issuer/Order/Challenge across the whole cluster, not
+    # just this release's.
+    keep: true
 
 ingress-nginx:
   enabled: false

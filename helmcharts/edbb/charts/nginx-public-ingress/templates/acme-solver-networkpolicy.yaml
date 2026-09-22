@@ -24,4 +24,12 @@ spec:
               app.kubernetes.io/name: {{ include "common.names.name" . }}
       ports:
         - port: 80
+    # The controller's own liveness/readiness probes hit :10254 directly from
+    # the kubelet on the node, not from a labeled pod -- NetworkPolicy can't
+    # scope that by podSelector, so this port is left open network-wide.
+    # Without it the controller never passes readiness, gets zero Service
+    # endpoints, and every HTTP-01 challenge 502s. It only serves an
+    # unauthenticated /healthz and Prometheus metrics, nothing sensitive.
+    - ports:
+        - port: 10254
 {{- end }}

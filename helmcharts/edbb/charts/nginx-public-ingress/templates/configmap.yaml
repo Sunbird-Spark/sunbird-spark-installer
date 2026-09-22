@@ -15,16 +15,25 @@ stringData:
 {{- $currentScope := .}}
 {{- range $path, $_ := .Files.Glob "configs/*" }}
   {{- $skip := eq $path "configs/env.yaml" }}
-  {{- if and $.Values.global.cert_manager_ssl (or (eq $path "configs/tls.crt") (eq $path "configs/tls.key")) }}
-    {{- /* cert-manager owns tls.crt/tls.key exclusively -- see cert-manager-issuer.yaml */}}
+  {{- $rendered := "" }}
+  {{- if not $skip }}
+    {{- with $currentScope }}
+    {{- $var := .Files.Get $path }}
+    {{- $rendered = include "common.tplvalues.render" (dict "value" $var "context" $) }}
+    {{- end }}
+  {{- end }}
+  {{- if and (or (eq $path "configs/tls.crt") (eq $path "configs/tls.key")) (or $.Values.global.cert_manager_ssl (eq (trim $rendered) "")) }}
+    {{- /* cert-manager owns tls.crt/tls.key exclusively when enabled -- see
+    cert-manager-issuer.yaml. And even on the static-cert path, never let a
+    blank proxy_certificate/proxy_private_key (e.g. from flipping
+    cert_manager_ssl back to false without filling these in, or merging an
+    older values file) clobber whatever's already live in the Secret -- skip
+    unless there's an actual non-empty value to write. */}}
     {{- $skip = true }}
   {{- end }}
   {{- if not $skip }}
     {{ base $path | nindent 2 }}: |-
-      {{- with $currentScope }}
-      {{- $var := .Files.Get $path }}
-      {{- include "common.tplvalues.render" (dict "value" $var "context" $) | nindent 6 }}
-      {{- end }}
+      {{- $rendered | nindent 6 }}
   {{- end }}
 {{- end }}
 {{- end }}
