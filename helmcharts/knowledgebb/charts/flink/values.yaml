@@ -403,6 +403,7 @@ flink_jobs:
         consumer.parallelism = 1
         parallelism = 1
         router.parallelism = 1
+        auto_batch_create.parallelism = 1
       }
     
       question {
@@ -425,11 +426,18 @@ flink_jobs:
         imageTable = "dialcode_images"
       }
 
+      lms-cassandra {
+        keyspace = "sunbird_courses"
+        batchTable = "course_batch"
+      }
+
+
       {{- if eq .Values.global.deployed_dial_addon "true" }}
       service {
         dial.basePath = "https://{{ .Values.global.domain }}/dial"
         dial_code.reserve.url = "/dialcode/v1/reserve"
         dial_code.update.url = "/dialcode/v4/update"
+        lms.basePath = "http://lern-service:9000"
       }
 
       dialcode.storage.container = "{{ .Values.global.dial_state_container_public }}"
