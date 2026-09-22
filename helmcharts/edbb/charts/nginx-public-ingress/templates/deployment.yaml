@@ -36,21 +36,41 @@ spec:
         # hasn't issued anything yet at first install. Just waiting here would
         # deadlock: cert-manager's HTTP-01 challenge needs this pod running to
         # route the challenge through in the first place, so it can never
-        # succeed while this pod is blocked waiting for it. Instead, if no cert
-        # exists yet, generate a throwaway self-signed one so nginx can start
-        # immediately and serve the challenge -- cert-manager overwrites this
-        # Secret with the real, ACME-issued cert once issuance succeeds, and
-        # Reloader (already running in-cluster) restarts nginx to pick it up.
+        # succeed while this pod is blocked waiting for it. Instead, if no
+        # *valid* cert exists yet, generate a throwaway self-signed one so
+        # nginx can start immediately and serve the challenge -- cert-manager
+        # overwrites this Secret with the real, ACME-issued cert once
+        # issuance succeeds, and Reloader (already running in-cluster)
+        # restarts nginx to pick it up.
+        #
+        # The guard checks validity (openssl -checkend), not just presence:
+        # on a new install, DNS for global.domain often can't point at the
+        # LoadBalancer until it exists, so the first ACME orders fail and
+        # cert-manager backs off -- a presence-only check would let a merely
+        # *expired* bootstrap cert stand forever after that. It also checks
+        # CN=bootstrap so it only ever regenerates its own placeholder, never
+        # touches a real cert-manager-issued cert (which manages its own
+        # renewal). Validity is 30 days, comfortably longer than any
+        # expected first-issuance window.
         - name: wait-for-cert
-          image: alpine:3.20
+          image: alpine:3.20@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc
           command: ["/bin/sh", "-c"]
           args:
             - |
               apk add --no-cache kubectl openssl
-              if ! kubectl get secret {{ include "common.names.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.tls\.crt}{.data.tls\.key}' | grep -q .; then
-                echo "No cert in the {{ include "common.names.fullname" . }} Secret yet -- generating a throwaway self-signed one so nginx can start and serve the ACME challenge."
-                openssl req -x509 -nodes -newkey rsa:2048 -keyout /tmp/tls.key -out /tmp/tls.crt -days 1 -subj "/CN=bootstrap"
-                kubectl patch secret {{ include "common.names.fullname" . }} -n {{ .Release.Namespace }} --type=merge -p="{\"data\":{\"tls.crt\":\"$(base64 -w0 /tmp/tls.crt)\",\"tls.key\":\"$(base64 -w0 /tmp/tls.key)\"}}"
+              CERT_B64="$(kubectl get secret {{ include "common.names.fullname" . }} -n {{ .Release.Namespace }} -o jsonpath='{.data.tls\.crt}' 2>/dev/null)"
+              NEEDS_BOOTSTRAP=false
+              if [ -z "$CERT_B64" ]; then
+                NEEDS_BOOTSTRAP=true
+              elif ! echo "$CERT_B64" | base64 -d | openssl x509 -noout -subject 2>/dev/null | grep -q "CN *= *bootstrap"; then
+                NEEDS_BOOTSTRAP=false
+              elif ! echo "$CERT_B64" | base64 -d | openssl x509 -noout -checkend 86400 >/dev/null 2>&1; then
+                NEEDS_BOOTSTRAP=true
+              fi
+              if [ "$NEEDS_BOOTSTRAP" = "true" ]; then
+                echo "No valid cert in the {{ include "common.names.fullname" . }} Secret yet -- generating a throwaway self-signed one so nginx can start and serve the ACME challenge."
+                openssl req -x509 -nodes -newkey rsa:2048 -keyout /tmp/tls.key -out /tmp/tls.crt -days 30 -subj "/CN=bootstrap"
+                kubectl patch secret {{ include "common.names.fullname" . }} -n {{ .Release.Namespace }} --type=merge -p="{\"data\":{\"tls.crt\":\"$(openssl base64 -A -in /tmp/tls.crt)\",\"tls.key\":\"$(openssl base64 -A -in /tmp/tls.key)\"}}"
               fi
           resources:
             requests:

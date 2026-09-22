@@ -1,8 +1,13 @@
 # One-shot cleanup: on every environment where the old certbot cronjob ran
-# at least once (before the ConfigMap -> Secret migration), a
-# certbot-certs-backup ConfigMap holding the TLS private key in cleartext
-# was left behind. Nothing in the regular chart manifest owns/prunes it, so
-# this hook deletes it (if present) on every install/upgrade.
+# at least once, it left behind a certbot-certs-backup ConfigMap (before the
+# ConfigMap -> Secret migration) and/or a certbot-certs-backup Secret
+# (`kubectl create secret tls --cert=fullchain.pem --key=privkey.pem`, see
+# the now-deleted cronjob.yaml's "Creating backup Secret with renewed
+# certs"). Neither was ever Helm-owned, so nothing prunes them on upgrade --
+# and with the cronjob itself removed by this PR, nothing will ever touch
+# the Secret again, leaving the domain's private key sitting in the
+# namespace indefinitely. This hook deletes both (if present) on every
+# install/upgrade.
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -26,6 +31,10 @@ metadata:
 rules:
   - apiGroups: [""]
     resources: ["configmaps"]
+    resourceNames: ["certbot-certs-backup"]
+    verbs: ["get", "delete"]
+  - apiGroups: [""]
+    resources: ["secrets"]
     resourceNames: ["certbot-certs-backup"]
     verbs: ["get", "delete"]
 
@@ -73,6 +82,7 @@ spec:
             - |
               apk add --no-cache kubectl
               kubectl delete configmap certbot-certs-backup -n {{ .Release.Namespace }} --ignore-not-found
+              kubectl delete secret certbot-certs-backup -n {{ .Release.Namespace }} --ignore-not-found
           resources:
             requests:
               cpu: 50m

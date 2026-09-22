@@ -201,8 +201,14 @@ global:
     email: "<your-email>" # used for renewal/expiry notices
 ```
 
-That's it — first-ever issuance and all future renewals happen automatically, with no manual
-steps and nothing to paste into `global-values.yaml`.
+All future renewals happen automatically, with nothing to paste into `global-values.yaml`.
+
+**On a cluster that has never had cert-manager installed before**, run `install_helm_components`
+(or `install_component edbb`) **twice**. cert-manager's CRDs and the `Issuer`/`Certificate` that
+depend on them render in the same Helm release; the first pass installs cert-manager and its
+CRDs, and the second picks up the now-registered CRDs to actually create the `Issuer` and
+`Certificate`. A cluster that already has cert-manager's CRDs registered (e.g. a second `edbb`
+release) only needs the one pass.
 
 ---
 

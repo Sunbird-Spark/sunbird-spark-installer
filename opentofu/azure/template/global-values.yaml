@@ -60,6 +60,12 @@ global:
   # above (top of this file). Leave all three false (default) to provide
   # your own cert/key via proxy_certificate/proxy_private_key below instead.
   cert_manager_ssl: false
+  # cert_manager_acme_server: "https://acme-staging-v02.api.letsencrypt.org/directory"
+  # ^ uncomment to issue against Let's Encrypt's staging directory instead of
+  # production while debugging a new domain -- staging isn't rate-limited
+  # the way production is (5 failed validations/hour, 5 duplicate certs/week
+  # per hostname), so it's much safer to iterate against. Defaults to
+  # production when unset.
   cert_notifications:
     email: "" # provide the email address for certificate renewal notifications/alerts
   play_http:
