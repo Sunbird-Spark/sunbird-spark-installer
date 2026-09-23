@@ -403,6 +403,7 @@ flink_jobs:
         consumer.parallelism = 1
         parallelism = 1
         router.parallelism = 1
+        auto_batch_create.parallelism = 1
       }
     
       question {
@@ -424,6 +425,13 @@ flink_jobs:
         keyspace = "sunbird_dialcodes"
         imageTable = "dialcode_images"
       }
+
+      lms-cassandra {
+        keyspace = "sunbird_courses"
+        batchTable = "course_batch"
+      }
+
+      service.lms.basePath = "http://lern-service:9000"
 
       {{- if eq .Values.global.deployed_dial_addon "true" }}
       service {
