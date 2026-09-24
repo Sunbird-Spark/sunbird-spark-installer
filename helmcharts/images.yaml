@@ -113,7 +113,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.1.0_4a35a67"
+    tag: "spark-v1.1.1-enrichmentobject-v3_593894f"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
