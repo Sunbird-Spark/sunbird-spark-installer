@@ -3,7 +3,7 @@
 
 # HTTP requests
 requests==2.34.2
-urllib3==2.7.0
+urllib3==2.8.0
 
 # JWT handling for Kong credentials
 PyJWT==2.13.0
