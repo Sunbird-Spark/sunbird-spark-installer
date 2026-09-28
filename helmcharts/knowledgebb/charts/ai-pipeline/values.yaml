@@ -50,9 +50,8 @@ coreApi:
     litellmApiKeyValue: ""
 
 # One entry per deployable Restate workflow/service unit. Each becomes one RestateDeployment
-# (templates/units/restatedeployment.yaml) plus whatever Kafka triggers it declares (reconciled by
-# templates/provision/reconcile-triggers.yaml once core-api's narrower endpoint exists — see
-# README.md open item 5).
+# (templates/units/restatedeployment.yaml), self-registering with core-api on boot, which also
+# wires up whatever Kafka triggers it declares below.
 units:
   transcript:
     enabled: true
@@ -73,6 +72,10 @@ units:
       AZURE_STORAGE_ACCOUNT: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
       AZURE_STORAGE_CONTAINER: "{{ .Values.global.public_container_name }}"
       AZURE_STORAGE_AUTH_TYPE: "OIDC"
+      # @ai-pipeline/ai's generateFromEnv() requires both — reuses the same value core-api's own
+      # Secret is built from, rather than a second place to configure the same LiteLLM key.
+      LITELLM_URL: "http://litellm:4000"
+      LITELLM_API_KEY: "{{ .Values.coreApi.env.litellmApiKeyValue }}"
     # Not env-templated the way this repo's other topics are ({{ .Values.global.env }}.*) —
     # matches workflows/transcript/metadata.json's own trigger config exactly, but needs
     # reconciling before this is real production config. See README.md open item 2.
@@ -90,12 +93,3 @@ migration:
   image:
     repository: postgres
     tag: "17-alpine"
-
-# Retried by templates/provision/reconcile-triggers.yaml until core-api's endpoint exists and the
-# unit is registered with Restate by the operator — see README.md open item 5.
-reconcileTriggers:
-  maxAttempts: 30
-  retryDelaySeconds: 5
-  image:
-    repository: curlimages/curl
-    tag: "8.11.1"

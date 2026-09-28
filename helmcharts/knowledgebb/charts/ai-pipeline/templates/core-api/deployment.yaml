@@ -32,15 +32,15 @@ spec:
               value: {{ .Values.coreApi.service.port | quote }}
             - name: HOST
               value: "0.0.0.0"
-            # Same in-cluster Restate admin API the operator itself talks to — plain DNS, no
-            # service mesh, matching every other component's service-discovery convention.
-            # NOT YET VERIFIED: the exact Service name(s) the restate-operator generates for a
-            # RestateCluster's admin/ingress ports — confirm against a real deployed RestateCluster
-            # (`kubectl get svc -l ...`) before trusting this naming pattern.
+            # Confirmed against a real deployed RestateCluster: the operator creates its own
+            # dedicated namespace, named identically to the RestateCluster resource itself, with
+            # a single Service named plainly `restate` exposing both 9070 (admin) and 8080
+            # (ingress) — core-api lives in a different namespace, so this needs the full
+            # cross-namespace FQDN, not just the bare Service name.
             - name: RESTATE_ADMIN_URL
-              value: {{ printf "http://%s-restate-admin:9070" .Values.restate.clusterName | quote }}
+              value: {{ printf "http://restate.%s.svc.cluster.local:9070" .Values.restate.clusterName | quote }}
             - name: RESTATE_INGRESS_URL
-              value: {{ printf "http://%s-restate-ingress:8080" .Values.restate.clusterName | quote }}
+              value: {{ printf "http://restate.%s.svc.cluster.local:8080" .Values.restate.clusterName | quote }}
             - name: KAFKA_CLUSTER_NAME
               value: {{ .Values.global.env | default "local" | quote }}
             - name: KAFKA_BOOTSTRAP_SERVERS

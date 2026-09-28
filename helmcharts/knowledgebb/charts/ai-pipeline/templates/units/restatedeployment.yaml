@@ -1,9 +1,15 @@
 {{- range $name, $unit := .Values.units }}
 {{- if $unit.enabled }}
 # One RestateDeployment per unit — the operator creates the Pods/ReplicaSet/Service itself and
-# registers the endpoint with Restate directly (see design doc §"where RestateDeployment comes
-# into the picture"). core-api is deliberately NOT the thing registering this endpoint; it only
-# reconciles this unit's Kafka triggers afterwards (templates/provision/reconcile-triggers.yaml).
+# registers the endpoint with Restate directly. Each unit also self-registers with core-api's
+# catalogue on boot (packages/runtime's serve()), which also wires up its Kafka triggers — no
+# separate sidecar/Job needed for that anymore.
+#
+# `restate.register.service` is NOT a way to control this unit's own advertised address — checked
+# directly against the CRD's schema: it is one of four mutually exclusive ways to tell the
+# operator where Restate's *own* admin API lives (an alternative to `cluster`, not a per-unit
+# setting), and setting both errors with a oneOf validation failure. There is no field anywhere in
+# this CRD for pinning the unit's own Service name — confirmed by listing every spec field.
 apiVersion: restate.dev/v1beta1
 kind: RestateDeployment
 metadata:
@@ -38,6 +44,16 @@ spec:
           env:
             - name: PORT
               value: {{ $unit.port | default 9080 | quote }}
+            # Required by @ai-pipeline/runtime's serve() to self-register with core-api on boot.
+            # ARTIFACT_DIGEST is not set here — it's baked into the image at build time
+            # (Dockerfile's ARTIFACT_DIGEST build-arg), so it's already a real env var by the time
+            # this container starts.
+            - name: CORE_API_URL
+              value: {{ printf "http://%s-core-api:%d" (include "common.names.fullname" $) (int $.Values.coreApi.service.port) | quote }}
+            - name: ADVERTISED_ENDPOINT
+              value: {{ printf "http://%s-%s:%d" (include "common.names.fullname" $) $name (int ($unit.port | default 9080)) | quote }}
+            - name: DEPLOYMENT_MODE
+              value: "immutable"
             {{- range $key, $value := $unit.env }}
             - name: {{ $key }}
               value: {{ tpl (toString $value) $ | quote }}
