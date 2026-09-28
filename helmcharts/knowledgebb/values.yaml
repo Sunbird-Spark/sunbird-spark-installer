@@ -138,6 +138,15 @@ kafka: &kafka
     - name: "{{ .Values.global.env }}.media.multilingual.dlq"
       partitions: 1
       replicationFactor: 1
+    # Restate-based replacement for the four PyFlink topics above (removed once the parallel-run
+    # verification window is complete — see charts/ai-pipeline/README.md). NOT env-templated like
+    # every topic above it — this literal name matches workflows/transcript/metadata.json's own
+    # Kafka trigger config exactly as it exists today, but that's a real gap, not a deliberate
+    # choice: reconcile this against the {{ .Values.global.env }}.* convention before this is real
+    # production config (see design doc open question 2 / chart README.md open item 2).
+    - name: "sunbirddev.enrichment.request"
+      partitions: 3
+      replicationFactor: 1
     parallel: 1
   listeners:
     client:
@@ -223,6 +232,11 @@ flink:
 
 py-flink:
   enabled: true
+
+# Switched off until the parallel-run verification window (migration plan step 5) is complete —
+# see charts/ai-pipeline/README.md.
+ai-pipeline:
+  enabled: false
 
 global:
   channel: *channel

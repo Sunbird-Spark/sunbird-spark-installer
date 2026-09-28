@@ -1,0 +1,16 @@
+# Requires the restate-operator's CRDs to already be installed cluster-wide — see ../../README.md.
+# Deliberately single-node (no `spec.compute.replicas`/`spec.config` block) per the design doc's
+# decision to start simple and revisit clustering once this carries real production traffic.
+apiVersion: restate.dev/v1
+kind: RestateCluster
+metadata:
+  name: {{ .Values.restate.clusterName | quote }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+spec:
+  compute:
+    image: "{{ (index .Values.global .Values.restate.globalImageKey).registry }}/{{ (index .Values.global .Values.restate.globalImageKey).repository }}:{{ (index .Values.global .Values.restate.globalImageKey).tag }}"
+  storage:
+    # Rendering this value directly (no int64 cast) turns anything over int32 range into
+    # scientific notation (e.g. 2.147483648e+09) — int64 forces correct plain-integer formatting.
+    storageRequestBytes: {{ .Values.restate.storageRequestBytes | int64 }}

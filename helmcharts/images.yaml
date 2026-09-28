@@ -645,3 +645,23 @@ global:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/caption-generator"
     tag: "spark-v1.1.0_93887dd"
+
+  # Restate-based replacement for enrichment_router/caption_generator above (removed once the
+  # parallel-run verification window is complete), deployed via the `ai-pipeline` chart
+  # (helmcharts/knowledgebb/charts/ai-pipeline). Placeholder tags below — this CI does not exist
+  # yet (see that chart's README.md open item 4); replace once ai-pipeline's own build pipeline
+  # is written and ships real tags in the <git-tag>_<short-sha> convention used above.
+  restate_server:
+    registry: "docker.restate.dev"
+    repository: "restatedev/restate"
+    tag: "1.7.10"
+
+  core_api:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/core-api"
+    tag: "PLACEHOLDER_not_yet_built"
+
+  wf_transcript:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/wf-transcript"
+    tag: "PLACEHOLDER_not_yet_built"

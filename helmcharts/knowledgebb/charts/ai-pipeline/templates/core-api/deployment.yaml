@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-core-api" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: core-api
+spec:
+  replicas: {{ .Values.coreApi.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+      app.kubernetes.io/component: core-api
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: core-api
+    spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.image.pullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: core-api
+          image: "{{ (index .Values.global .Values.coreApi.globalImageKey).registry }}/{{ (index .Values.global .Values.coreApi.globalImageKey).repository }}:{{ (index .Values.global .Values.coreApi.globalImageKey).tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.coreApi.service.port }}
+          env:
+            - name: PORT
+              value: {{ .Values.coreApi.service.port | quote }}
+            - name: HOST
+              value: "0.0.0.0"
+            # Same in-cluster Restate admin API the operator itself talks to — plain DNS, no
+            # service mesh, matching every other component's service-discovery convention.
+            # NOT YET VERIFIED: the exact Service name(s) the restate-operator generates for a
+            # RestateCluster's admin/ingress ports — confirm against a real deployed RestateCluster
+            # (`kubectl get svc -l ...`) before trusting this naming pattern.
+            - name: RESTATE_ADMIN_URL
+              value: {{ printf "http://%s-restate-admin:9070" .Values.restate.clusterName | quote }}
+            - name: RESTATE_INGRESS_URL
+              value: {{ printf "http://%s-restate-ingress:8080" .Values.restate.clusterName | quote }}
+            - name: KAFKA_CLUSTER_NAME
+              value: {{ .Values.global.env | default "local" | quote }}
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ printf "%s:%d" .Values.global.kafka.host (.Values.global.kafka.port | int) | quote }}
+            - name: LITELLM_URL
+              value: {{ .Values.coreApi.env.litellmUrl | quote }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-core-api" (include "common.names.fullname" .) }}
+                  key: DATABASE_URL
+            - name: LITELLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-core-api" (include "common.names.fullname" .) }}
+                  key: LITELLM_API_KEY
+          resources: {{- toYaml .Values.coreApi.resources | nindent 12 }}
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
