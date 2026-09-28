@@ -4,6 +4,10 @@
 
 Minimum resources required to install and run Sunbird-ED on any cloud provider
 
+## Maintainer
+
+[@pallakartheekreddy](https://github.com/pallakartheekreddy)
+
 ## Infrastructure Overview
 
 **Node:** 2 × Azure Standard_B16as_v2 (16 vCPU / 64 GB RAM) → **32 vCPU / 128 GB RAM total**
