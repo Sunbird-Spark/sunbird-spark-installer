@@ -210,6 +210,19 @@ CRDs, and the second picks up the now-registered CRDs to actually create the `Is
 `Certificate`. A cluster that already has cert-manager's CRDs registered (e.g. a second `edbb`
 release) only needs the one pass.
 
+**If you're upgrading from the old certbot-cronjob-based TLS setup** (removed as of this release),
+check for a leftover `certbot-certs-backup` ConfigMap and/or Secret in your `edbb` namespace — an
+older version of that cronjob left one behind on some installs, containing the domain's private
+key in cleartext, and nothing ever pruned it automatically. Delete it manually, once, after
+upgrading:
+
+```bash
+kubectl delete configmap certbot-certs-backup -n <namespace> --ignore-not-found
+kubectl delete secret certbot-certs-backup -n <namespace> --ignore-not-found
+```
+
+If neither exists, both commands are harmless no-ops.
+
 ---
 
 ### 2. If you are using a custom certificate
