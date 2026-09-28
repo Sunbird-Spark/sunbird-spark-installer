@@ -1,0 +1,102 @@
+name: Feature request
+description: Suggest a change to the infrastructure, charts or install flow
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This installer exists so any adopter can stand up Spark on their own cloud
+        account, within a known resource budget. Changes that widen that land more
+        easily than ones that serve a single deployment.
+
+        **Agree the approach here before writing significant code.**
+
+  - type: checkboxes
+    id: prechecks
+    attributes:
+      label: Before you start
+      options:
+        - label: I searched existing issues and discussions, and this isn't already suggested
+          required: true
+        - label: I've checked the README and provider READMEs in case this is already configurable
+          required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: What would this change?
+      options:
+        - OpenTofu modules / provisioning
+        - Helm charts / service configuration
+        - Install or upgrade scripts
+        - Keycloak, Kong or authentication
+        - Monitoring or observability
+        - Backup and disaster recovery
+        - Container images under scripts/
+        - CI workflows or supply-chain hardening
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: providers
+    attributes:
+      label: Which providers would this affect?
+      options:
+        - Azure only
+        - AWS only
+        - GCP only
+        - All providers
+        - Provider-independent
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation an operator is stuck in, not the solution you have in mind.
+      placeholder: When installing ... I can't ... because ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: resource-impact
+    attributes:
+      label: What would this cost in cluster resources?
+      description: The stack is sized to fit two 16 vCPU / 64 GB nodes with all addons. Say whether this adds CPU, memory, disk or another service — "nothing" is a fine answer.
+    validations:
+      required: true
+
+  - type: textarea
+    id: who-benefits
+    attributes:
+      label: Who benefits from this?
+      description: Which adopters, and in what situations. If it's specific to one deployment, say so.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Workarounds you're using now, or how other installers solved this.
+
+  - type: dropdown
+    id: contributing
+    attributes:
+      label: Would you like to build this?
+      options:
+        - I'd like to build it myself
+        - I'd like guidance before trying
+        - I'm only suggesting it
+    validations:
+      required: true
