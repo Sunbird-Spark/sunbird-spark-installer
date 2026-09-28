@@ -2,69 +2,8 @@
 # Postgres — mirrors ../../../templates/provision/ycql.yaml's existing wait-then-migrate shape,
 # but over YSQL (psql) rather than YCQL (ycqlsh). Source of truth for this SQL is
 # ai-pipeline/infra/postgres/init/20-catalogue.sql — keep the two in sync by hand until that repo
-# ships a proper migration tool.
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ printf "%s-catalogue-schema" (include "common.names.fullname" .) }}
-  namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-data:
-  20-catalogue.sql: |
-    CREATE TABLE IF NOT EXISTS workflow_definitions (
-      name          text        NOT NULL,
-      version       text        NOT NULL,
-      kind          text        NOT NULL CHECK (kind IN ('workflow', 'service')),
-      restate_name  text        NOT NULL,
-      visibility    text        NOT NULL CHECK (visibility IN ('public', 'private')),
-      description   text        NOT NULL DEFAULT '',
-      metadata      jsonb       NOT NULL,
-      input_schema  jsonb       NOT NULL,
-      output_schema jsonb       NOT NULL,
-      config_schema jsonb       NOT NULL,
-      contract_hash text        NOT NULL,
-      created_at    timestamptz NOT NULL DEFAULT now(),
-      updated_at    timestamptz NOT NULL DEFAULT now(),
-      PRIMARY KEY (name, version)
-    );
-    CREATE INDEX IF NOT EXISTS workflow_definitions_latest ON workflow_definitions (name, updated_at DESC);
-
-    CREATE TABLE IF NOT EXISTS workflow_deployments (
-      deployment_id   text        PRIMARY KEY,
-      name            text        NOT NULL,
-      version         text        NOT NULL,
-      endpoint_uri    text        NOT NULL,
-      artifact_digest text        NOT NULL,
-      mode            text        NOT NULL CHECK (mode IN ('dev', 'immutable')),
-      status          text        NOT NULL CHECK (status IN ('active', 'draining', 'retired')),
-      registered_at   timestamptz NOT NULL DEFAULT now(),
-      drained_at      timestamptz,
-      FOREIGN KEY (name, version) REFERENCES workflow_definitions (name, version)
-    );
-    CREATE INDEX IF NOT EXISTS workflow_deployments_by_name ON workflow_deployments (name, registered_at DESC);
-
-    CREATE TABLE IF NOT EXISTS workflow_dependencies (
-      name            text NOT NULL,
-      version         text NOT NULL,
-      dependency_name text NOT NULL,
-      dependency_kind text NOT NULL CHECK (dependency_kind IN ('workflow', 'service')),
-      PRIMARY KEY (name, version, dependency_name),
-      FOREIGN KEY (name, version) REFERENCES workflow_definitions (name, version)
-    );
-
-    CREATE TABLE IF NOT EXISTS workflow_triggers (
-      name            text        NOT NULL,
-      trigger_id      text        NOT NULL,
-      type            text        NOT NULL CHECK (type IN ('rest', 'kafka')),
-      definition      jsonb       NOT NULL,
-      desired_enabled boolean     NOT NULL DEFAULT true,
-      subscription_id text,
-      observed_status text        NOT NULL DEFAULT 'pending',
-      last_error      text,
-      updated_at      timestamptz NOT NULL DEFAULT now(),
-      PRIMARY KEY (name, trigger_id)
-    );
----
+# ships a proper migration tool. The SQL is embedded directly (a heredoc on psql's stdin) rather
+# than mounted from a ConfigMap — one resource instead of two, and no hook-ordering between them.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -102,16 +41,14 @@ spec:
           resources:
             requests: { cpu: 100m, memory: 128Mi }
             limits: { cpu: 200m, memory: 256Mi, ephemeral-storage: 512Mi }
-          # PGPASSWORD comes from the Secret (an env var, never manifest text) rather than being
-          # templated straight into a connection-string argument — args/command end up in the
-          # Job's own spec, readable via `kubectl get job -o yaml` by anyone with basic read
-          # access, even without permission to read the Secret itself.
+          # Same plain-templated-value pattern as ../../../templates/provision/ycql.yaml's own
+          # YCQLSH_PASSWORD — this repo has no working way to hand a hook Job a password via a
+          # separately-created Secret (Helm hook resources here do not reliably materialize
+          # ahead of another hook that depends on them; a plain env value sidesteps that
+          # entirely by not depending on any other resource).
           env:
             - name: PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ printf "%s-core-api" (include "common.names.fullname" .) }}
-                  key: DB_PASSWORD
+              value: {{ .Values.coreApi.database.passwordValue | quote }}
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -120,13 +57,59 @@ spec:
                    -p {{ .Values.global.yugabyte.postgresql_port }} \
                    -U {{ .Values.coreApi.database.user }} \
                    -d {{ .Values.coreApi.database.name }} \
-                   -v ON_ERROR_STOP=1 \
-                   -f /opt/catalogue/20-catalogue.sql
+                   -v ON_ERROR_STOP=1 <<'SQL'
+              CREATE TABLE IF NOT EXISTS workflow_definitions (
+                name          text        NOT NULL,
+                version       text        NOT NULL,
+                kind          text        NOT NULL CHECK (kind IN ('workflow', 'service')),
+                restate_name  text        NOT NULL,
+                visibility    text        NOT NULL CHECK (visibility IN ('public', 'private')),
+                description   text        NOT NULL DEFAULT '',
+                metadata      jsonb       NOT NULL,
+                input_schema  jsonb       NOT NULL,
+                output_schema jsonb       NOT NULL,
+                config_schema jsonb       NOT NULL,
+                contract_hash text        NOT NULL,
+                created_at    timestamptz NOT NULL DEFAULT now(),
+                updated_at    timestamptz NOT NULL DEFAULT now(),
+                PRIMARY KEY (name, version)
+              );
+              CREATE INDEX IF NOT EXISTS workflow_definitions_latest ON workflow_definitions (name, updated_at DESC);
+
+              CREATE TABLE IF NOT EXISTS workflow_deployments (
+                deployment_id   text        PRIMARY KEY,
+                name            text        NOT NULL,
+                version         text        NOT NULL,
+                endpoint_uri    text        NOT NULL,
+                artifact_digest text        NOT NULL,
+                mode            text        NOT NULL CHECK (mode IN ('dev', 'immutable')),
+                status          text        NOT NULL CHECK (status IN ('active', 'draining', 'retired')),
+                registered_at   timestamptz NOT NULL DEFAULT now(),
+                drained_at      timestamptz,
+                FOREIGN KEY (name, version) REFERENCES workflow_definitions (name, version)
+              );
+              CREATE INDEX IF NOT EXISTS workflow_deployments_by_name ON workflow_deployments (name, registered_at DESC);
+
+              CREATE TABLE IF NOT EXISTS workflow_dependencies (
+                name            text NOT NULL,
+                version         text NOT NULL,
+                dependency_name text NOT NULL,
+                dependency_kind text NOT NULL CHECK (dependency_kind IN ('workflow', 'service')),
+                PRIMARY KEY (name, version, dependency_name),
+                FOREIGN KEY (name, version) REFERENCES workflow_definitions (name, version)
+              );
+
+              CREATE TABLE IF NOT EXISTS workflow_triggers (
+                name            text        NOT NULL,
+                trigger_id      text        NOT NULL,
+                type            text        NOT NULL CHECK (type IN ('rest', 'kafka')),
+                definition      jsonb       NOT NULL,
+                desired_enabled boolean     NOT NULL DEFAULT true,
+                subscription_id text,
+                observed_status text        NOT NULL DEFAULT 'pending',
+                last_error      text,
+                updated_at      timestamptz NOT NULL DEFAULT now(),
+                PRIMARY KEY (name, trigger_id)
+              );
+              SQL
               echo "catalogue schema applied"
-          volumeMounts:
-            - name: catalogue-schema
-              mountPath: /opt/catalogue
-      volumes:
-        - name: catalogue-schema
-          configMap:
-            name: {{ printf "%s-catalogue-schema" (include "common.names.fullname" .) }}

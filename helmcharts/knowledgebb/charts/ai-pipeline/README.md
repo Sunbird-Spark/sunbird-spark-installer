@@ -27,15 +27,12 @@ nothing will act on them).
 - **core-api** (`templates/core-api/`) — the workflow registry / control-plane API. Owns the
   catalogue database (points at the shared YugabyteDB YSQL port, not a dedicated Postgres).
 - **One `RestateDeployment` per unit** (`templates/units/`) — driven by `.Values.units`, currently
-  just `transcript`.
+  just `transcript`. Each unit self-registers with core-api on boot (`@ai-pipeline/runtime`'s
+  `serve()`, `POST /v1/deployments` — unchanged, the same endpoint the CLI itself uses), which
+  also wires up its Kafka triggers — no separate sidecar or Job needed for this.
 - **Provisioning jobs** (`templates/provision/`):
   - `catalogue-migrate.yaml` — applies core-api's catalogue schema against YugabyteDB (mirrors
     the existing `provision/ycql.yaml` pattern, but over YSQL instead of YCQL).
-  - `reconcile-triggers.yaml` — **depends on a core-api endpoint that does not exist yet** (a
-    narrower split of `registerDeployment()` — catalogue-write + Kafka-trigger reconciliation
-    only, without re-registering the endpoint the operator already registered). This is
-    `ai-pipeline` repo work, not something this chart can complete on its own — see the job's own
-    comments and the design doc's open questions.
 
 ## Known open items (see design doc for full detail — not resolved here)
 
@@ -45,5 +42,3 @@ nothing will act on them).
    does not yet follow this repo's `{{ .Values.global.env }}.*` templating convention — reconcile
    before this is real production config.
 3. Workload Identity (OIDC) readiness for the `transcript` unit's ServiceAccount — not confirmed.
-4. `ai-pipeline`'s own CI to build+push these images does not exist yet.
-5. core-api needs a new, narrower registration endpoint (see `reconcile-triggers.yaml`).
