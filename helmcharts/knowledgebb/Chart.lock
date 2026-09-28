@@ -29,8 +29,11 @@ dependencies:
 - name: py-flink
   repository: ""
   version: 0.1.0
+- name: ai-pipeline
+  repository: ""
+  version: 0.1.0
 - name: sync-tool
   repository: ""
   version: 0.1.0
-digest: sha256:97692448070122435958bb2ba10b8af1d09a0130a848db85107cc1d0d56485d7
-generated: "2026-07-22T12:57:45.648893+05:30"
+digest: sha256:8f1dcadc612bf20b9f72ec84d081be7840a02e2e19c395c5b26f310a53f1e48c
+generated: "2026-09-28T12:32:08.323691+05:30"

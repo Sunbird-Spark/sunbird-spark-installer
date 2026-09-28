@@ -1,0 +1,132 @@
+# core-api's catalogue schema, applied against YugabyteDB's YSQL port instead of a dedicated
+# Postgres — mirrors ../../../templates/provision/ycql.yaml's existing wait-then-migrate shape,
+# but over YSQL (psql) rather than YCQL (ycqlsh). Source of truth for this SQL is
+# ai-pipeline/infra/postgres/init/20-catalogue.sql — keep the two in sync by hand until that repo
+# ships a proper migration tool.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-catalogue-schema" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+data:
+  20-catalogue.sql: |
+    CREATE TABLE IF NOT EXISTS workflow_definitions (
+      name          text        NOT NULL,
+      version       text        NOT NULL,
+      kind          text        NOT NULL CHECK (kind IN ('workflow', 'service')),
+      restate_name  text        NOT NULL,
+      visibility    text        NOT NULL CHECK (visibility IN ('public', 'private')),
+      description   text        NOT NULL DEFAULT '',
+      metadata      jsonb       NOT NULL,
+      input_schema  jsonb       NOT NULL,
+      output_schema jsonb       NOT NULL,
+      config_schema jsonb       NOT NULL,
+      contract_hash text        NOT NULL,
+      created_at    timestamptz NOT NULL DEFAULT now(),
+      updated_at    timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (name, version)
+    );
+    CREATE INDEX IF NOT EXISTS workflow_definitions_latest ON workflow_definitions (name, updated_at DESC);
+
+    CREATE TABLE IF NOT EXISTS workflow_deployments (
+      deployment_id   text        PRIMARY KEY,
+      name            text        NOT NULL,
+      version         text        NOT NULL,
+      endpoint_uri    text        NOT NULL,
+      artifact_digest text        NOT NULL,
+      mode            text        NOT NULL CHECK (mode IN ('dev', 'immutable')),
+      status          text        NOT NULL CHECK (status IN ('active', 'draining', 'retired')),
+      registered_at   timestamptz NOT NULL DEFAULT now(),
+      drained_at      timestamptz,
+      FOREIGN KEY (name, version) REFERENCES workflow_definitions (name, version)
+    );
+    CREATE INDEX IF NOT EXISTS workflow_deployments_by_name ON workflow_deployments (name, registered_at DESC);
+
+    CREATE TABLE IF NOT EXISTS workflow_dependencies (
+      name            text NOT NULL,
+      version         text NOT NULL,
+      dependency_name text NOT NULL,
+      dependency_kind text NOT NULL CHECK (dependency_kind IN ('workflow', 'service')),
+      PRIMARY KEY (name, version, dependency_name),
+      FOREIGN KEY (name, version) REFERENCES workflow_definitions (name, version)
+    );
+
+    CREATE TABLE IF NOT EXISTS workflow_triggers (
+      name            text        NOT NULL,
+      trigger_id      text        NOT NULL,
+      type            text        NOT NULL CHECK (type IN ('rest', 'kafka')),
+      definition      jsonb       NOT NULL,
+      desired_enabled boolean     NOT NULL DEFAULT true,
+      subscription_id text,
+      observed_status text        NOT NULL DEFAULT 'pending',
+      last_error      text,
+      updated_at      timestamptz NOT NULL DEFAULT now(),
+      PRIMARY KEY (name, trigger_id)
+    );
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "%s-catalogue-migrate" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: catalogue-migrate
+    scope: provisioning
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: catalogue-migrate
+    spec:
+      restartPolicy: Never
+      # SQL-only; no Kubernetes API calls.
+      automountServiceAccountToken: false
+      initContainers:
+        - name: wait-for-yugabyte
+          image: busybox
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests: { cpu: 50m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 64Mi }
+          command: ["/bin/sh", "-c"]
+          args:
+            - "timeout {{ .Values.migration.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port }}; do echo waiting for yugabyte ysql; sleep 10; done'"
+      containers:
+        - name: catalogue-migrate
+          image: "{{ .Values.migration.image.repository }}:{{ .Values.migration.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { cpu: 200m, memory: 256Mi, ephemeral-storage: 512Mi }
+          # PGPASSWORD comes from the Secret (an env var, never manifest text) rather than being
+          # templated straight into a connection-string argument — args/command end up in the
+          # Job's own spec, readable via `kubectl get job -o yaml` by anyone with basic read
+          # access, even without permission to read the Secret itself.
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-core-api" (include "common.names.fullname" .) }}
+                  key: DB_PASSWORD
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              psql -h {{ .Values.global.yugabyte.host }} \
+                   -p {{ .Values.global.yugabyte.postgresql_port }} \
+                   -U {{ .Values.coreApi.database.user }} \
+                   -d {{ .Values.coreApi.database.name }} \
+                   -v ON_ERROR_STOP=1 \
+                   -f /opt/catalogue/20-catalogue.sql
+              echo "catalogue schema applied"
+          volumeMounts:
+            - name: catalogue-schema
+              mountPath: /opt/catalogue
+      volumes:
+        - name: catalogue-schema
+          configMap:
+            name: {{ printf "%s-catalogue-schema" (include "common.names.fullname" .) }}

@@ -58,6 +58,12 @@ dependencies:
   - name: py-flink
     version: 0.1.0
     condition: py-flink.enabled
+  # Restate-based replacement for py-flink (enrichment-router + caption-generator). Deployed
+  # alongside py-flink, switched off by default, until the parallel-run verification window in
+  # the migration plan is complete — see charts/ai-pipeline/README.md.
+  - name: ai-pipeline
+    version: 0.1.0
+    condition: ai-pipeline.enabled
   - name: sync-tool
     version: 0.1.0
     condition: sync-tool.enabled

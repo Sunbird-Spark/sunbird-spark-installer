@@ -1,0 +1,48 @@
+{{- range $name, $unit := .Values.units }}
+{{- if $unit.enabled }}
+# One RestateDeployment per unit — the operator creates the Pods/ReplicaSet/Service itself and
+# registers the endpoint with Restate directly (see design doc §"where RestateDeployment comes
+# into the picture"). core-api is deliberately NOT the thing registering this endpoint; it only
+# reconciles this unit's Kafka triggers afterwards (templates/provision/reconcile-triggers.yaml).
+apiVersion: restate.dev/v1beta1
+kind: RestateDeployment
+metadata:
+  name: {{ printf "%s-%s" (include "common.names.fullname" $) $name }}
+  namespace: {{ include "common.names.namespace" $ | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $.Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+spec:
+  replicas: {{ $unit.replicas | default 1 }}
+  restate:
+    register:
+      cluster: {{ $.Values.restate.clusterName }}
+  selector:
+    matchLabels:
+      app: {{ printf "%s-%s" (include "common.names.fullname" $) $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ printf "%s-%s" (include "common.names.fullname" $) $name }}
+    spec:
+      {{- if $.Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml $.Values.image.pullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $name }}
+          image: "{{ (index $.Values.global $unit.globalImageKey).registry }}/{{ (index $.Values.global $unit.globalImageKey).repository }}:{{ (index $.Values.global $unit.globalImageKey).tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ $unit.port | default 9080 }}
+              name: restate
+          env:
+            - name: PORT
+              value: {{ $unit.port | default 9080 | quote }}
+            {{- range $key, $value := $unit.env }}
+            - name: {{ $key }}
+              value: {{ tpl (toString $value) $ | quote }}
+            {{- end }}
+          resources: {{- toYaml $unit.resources | nindent 12 }}
+---
+{{- end }}
+{{- end }}

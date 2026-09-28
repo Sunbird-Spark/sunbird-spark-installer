@@ -1,0 +1,101 @@
+# ai-pipeline: Restate-based AI enrichment pipeline. Replaces py-flink's enrichment-router and
+# caption-generator jobs. See README.md for the restate-operator prerequisite and open items.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  pullPolicy: IfNotPresent
+  # Not global-values-driven anywhere in this repo (confirmed against every sibling chart) —
+  # each chart carries its own, same as py-flink/flink/knowlg/search/sync-tool/janusgraph do.
+  pullSecrets: []
+
+commonLabels: {}
+commonAnnotations: {}
+
+# The RestateCluster this chart creates. Single-node deliberately, for now (see design doc §5) —
+# scaling to a real multi-node cluster later is a `replicas`/`config` addition here, not a rewrite.
+restate:
+  clusterName: ai-pipeline-restate
+  # References global.restate_server in helmcharts/images.yaml, matching every other chart's
+  # globalImageKey convention (see py-flink's own `globalImageKey` usage).
+  globalImageKey: restate_server
+  storageRequestBytes: 2147483648 # 2 GiB to start
+
+coreApi:
+  replicaCount: 1
+  globalImageKey: core_api
+  service:
+    port: 3000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  # DATABASE_URL points at the shared YugabyteDB YSQL port (global.yugabyte.host/postgresql_port),
+  # never a dedicated Postgres — see design doc §2. Database/user/password are chart-local so this
+  # doesn't collide with any other YSQL consumer sharing the same YugabyteDB instance.
+  database:
+    name: ai_pipeline_catalogue
+    user: ai_pipeline
+    # Real value supplied via opentofu/<provider>/<env>/global-values.yaml, same convention as
+    # global.openai_api_key — never committed here.
+    passwordValue: ""
+  env:
+    litellmUrl: "http://litellm:4000"
+    # Real value supplied the same way as global.openai_api_key — a hosted provider key in
+    # production, replacing the local-testing Ollama model.
+    litellmApiKeyValue: ""
+
+# One entry per deployable Restate workflow/service unit. Each becomes one RestateDeployment
+# (templates/units/restatedeployment.yaml) plus whatever Kafka triggers it declares (reconciled by
+# templates/provision/reconcile-triggers.yaml once core-api's narrower endpoint exists — see
+# README.md open item 5).
+units:
+  transcript:
+    enabled: true
+    globalImageKey: wf_transcript
+    restateName: Transcript
+    port: 9080
+    replicas: 1
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 1Gi
+    env:
+      KNOWLG_BASE_URL: "http://knowlg-service:9000"
+      WHISPER_BASE_URL: "http://whisper-service:8000"
+      AZURE_STORAGE_ACCOUNT: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
+      AZURE_STORAGE_CONTAINER: "{{ .Values.global.public_container_name }}"
+      AZURE_STORAGE_AUTH_TYPE: "OIDC"
+    # Not env-templated the way this repo's other topics are ({{ .Values.global.env }}.*) —
+    # matches workflows/transcript/metadata.json's own trigger config exactly, but needs
+    # reconciling before this is real production config. See README.md open item 2.
+    triggers:
+      - id: sunbirddev-enrichment-request
+        type: kafka
+        topic: "sunbirddev.enrichment.request"
+
+migration:
+  # Mirrors migration.yugabyte.waitTime's existing convention in the parent chart.
+  waitTime: 120
+  # Plain postgres client image — psql speaks YSQL fine since it's wire-compatible. Not routed
+  # through images.yaml since it's a stock public image, same treatment as provision/ycql.yaml's
+  # own busybox init container.
+  image:
+    repository: postgres
+    tag: "17-alpine"
+
+# Retried by templates/provision/reconcile-triggers.yaml until core-api's endpoint exists and the
+# unit is registered with Restate by the operator — see README.md open item 5.
+reconcileTriggers:
+  maxAttempts: 30
+  retryDelaySeconds: 5
+  image:
+    repository: curlimages/curl
+    tag: "8.11.1"
