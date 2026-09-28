@@ -1,4 +1,4 @@
-name: Feature request
+name: "\U0001F680 Feature request"
 description: Suggest a change to the infrastructure, charts or install flow
 labels: ["enhancement"]
 body:

@@ -1,5 +1,5 @@
 <!-- omit in toc -->
-# Sunbird Spark Installer Contributing Guide
+# Spark Installer Contributing Guide
 
 First off, thanks for taking the time to contribute! ❤️
 
