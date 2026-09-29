@@ -44,13 +44,16 @@ coreApi:
       cpu: 500m
       memory: 512Mi
   # DATABASE_URL points at the shared YugabyteDB YSQL port (global.yugabyte.host/postgresql_port),
-  # never a dedicated Postgres — see design doc §2. Database/user/password are chart-local so this
-  # doesn't collide with any other YSQL consumer sharing the same YugabyteDB instance.
+  # never a dedicated Postgres — see design doc §2. Reuses the cluster's existing yugabyte
+  # superuser rather than a dedicated ai_pipeline role — see
+  # scripts/sunbird-yugabyte-migrations/sunbird-knowlg/ai_pipeline_catalogue.sql, which creates
+  # only the database, owned by yugabyte, not a new role.
   database:
     name: ai_pipeline_catalogue
-    user: ai_pipeline
+    user: yugabyte
     # Real value supplied via opentofu/<provider>/<env>/global-values.yaml, same convention as
-    # global.openai_api_key — never committed here.
+    # global.openai_api_key — never committed here. Must match the cluster's real yugabyte
+    # superuser password (global.yugabyte.password), not a separate ai_pipeline credential.
     passwordValue: ""
   env:
     litellmUrl: "http://litellm:4000"
