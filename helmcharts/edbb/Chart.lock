@@ -41,5 +41,11 @@ dependencies:
 - name: secor
   repository: ""
   version: 0.1.0
-digest: sha256:06d5e52d6af5c6a5cc812c8487b55f18758d8c9c0b7c6031fbd44992281a50d9
-generated: "2026-04-22T12:49:53.864916621+05:30"
+- name: cert-manager
+  repository: https://charts.jetstack.io
+  version: v1.21.1
+- name: ingress-nginx
+  repository: https://kubernetes.github.io/ingress-nginx
+  version: 4.15.1
+digest: sha256:734e35393436c4ea1420a0020f7f7ebe6593a5f425134679aa73e7c72384db4f
+generated: "2026-09-11T11:41:08.708787+05:30"

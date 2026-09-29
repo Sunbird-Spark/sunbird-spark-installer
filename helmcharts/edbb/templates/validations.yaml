@@ -1,0 +1,17 @@
+{{- /*
+cert-manager-driven TLS is opt-in via three independent flags:
+global.cert_manager_ssl, cert-manager.enabled, and ingress-nginx.enabled.
+Only the first actually gates the ClusterIssuer/Certificate/NetworkPolicy
+templates in nginx-public-ingress -- setting just that one (the natural
+mistake, since it's the flag that sits with the other TLS settings) renders
+those with no cert-manager and no CRDs installed, which fails the same way
+as a fresh install with no CRDs registered yet. Fail fast here instead of
+letting that surface as a confusing mid-upgrade error.
+*/}}
+{{- if .Values.global.cert_manager_ssl }}
+{{- $certManager := index .Values "cert-manager" }}
+{{- $ingressNginx := index .Values "ingress-nginx" }}
+{{- if not (and $certManager.enabled $ingressNginx.enabled) }}
+{{- fail "global.cert_manager_ssl is true but cert-manager.enabled and/or ingress-nginx.enabled is false. All three must be set together -- see README's 'Automated issuance and renewal (cert-manager)' section." }}
+{{- end }}
+{{- end }}
