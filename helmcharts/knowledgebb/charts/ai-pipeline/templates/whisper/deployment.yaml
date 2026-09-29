@@ -41,11 +41,20 @@ spec:
           resources: {{- toYaml .Values.whisper.resources | nindent 12 }}
           # No startup probe: loading the model into memory on first boot can take a while, and
           # readiness/liveness periodSeconds already tolerate that via a generous initialDelay.
+          # faster-whisper's model.transcribe() is a synchronous, CPU-bound call that blocks
+          # FastAPI's single event loop for the duration of a real request — /health can't answer
+          # while one is in flight. Generous timeout/failureThreshold so an in-progress
+          # transcription doesn't read as a liveness failure and get the pod killed mid-request
+          # (confirmed live: the default 1s probe timeout did exactly that).
           readinessProbe:
             httpGet: { path: /health, port: http }
             initialDelaySeconds: 20
             periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 6
           livenessProbe:
             httpGet: { path: /health, port: http }
             initialDelaySeconds: 30
             periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 12
