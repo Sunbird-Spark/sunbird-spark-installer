@@ -1,6 +1,12 @@
 # sunbird-spark-installer
 
-Minimum resources required to install and run Sunbird-ED on any cloud provider
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Sunbird-Spark/sunbird-spark-installer/badge)](https://scorecard.dev/viewer/?uri=github.com/Sunbird-Spark/sunbird-spark-installer)
+
+Minimum resources required to install and run Sunbird-Spark on any cloud provider
+
+## Maintainer
+
+[@pallakartheekreddy](https://github.com/pallakartheekreddy)
 
 ## Infrastructure Overview
 
