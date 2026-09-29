@@ -87,15 +87,21 @@ Restate subscribes to `kafka://<cluster>/<topic>` and refuses a cluster name it 
 
 ## Known open items (see design doc for full detail — not resolved here)
 
-1. Nothing creates the `ai_pipeline_catalogue` database or the `ai_pipeline` role in YugabyteDB;
-   `catalogue-migrate` assumes both exist. Create them by hand before the first install for now.
+1. `ai_pipeline_catalogue` and its tables are now created by `knowledgebb`'s own YCQL migration job
+   (`scripts/sunbird-yugabyte-migrations/sunbird-knowlg/ai_pipeline_catalogue.sql`), owned by the
+   cluster's existing `yugabyte` superuser — no dedicated role, and this chart's own
+   `catalogue-migrate.yaml` was removed since it did the same DDL a second time.
 2. This chart's own Kafka topic provisioning now follows the `{{ .Values.global.env }}.*`
    convention, but `workflows/transcript/metadata.json`'s trigger topic is a literal
-   (`sunbirddev.content.published`) baked into the image at build time — Helm has no reach into
-   an already-built image's JSON, so this can't be templated the same way. Hardcoded to `dev` for
+   (`dev.content.published`) baked into the image at build time — Helm has no reach into an
+   already-built image's JSON, so this can't be templated the same way. Hardcoded to `dev` for
    now; a real per-environment mechanism (metadata.json placeholder + env var resolved at boot)
-   is deferred.
-3. Workload Identity (OIDC) readiness for the `transcript` unit's ServiceAccount — not confirmed.
+   is deferred. `global.env` must actually equal `dev` for the two to agree.
+3. Workload Identity (OIDC) for the `transcript` unit now reuses the same
+   `global.workload_identity_service_account_name` / `global.azure_client_id` /
+   `global.cloud_storage_provider` values py-flink's caption-generator/enrichment-router already
+   depend on — one cluster-wide federated ServiceAccount, not a new one per unit. Not yet verified
+   against a real cluster.
 4. A drained version stays registered in Restate — the operator scales it to zero and keeps it for
    rollback — so core-api lists it as `draining`. Retire it through core-api
    (`DELETE /v1/deployments/<deploymentId>`, refused while anything is pinned to it) once it is no
