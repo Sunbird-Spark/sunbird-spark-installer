@@ -58,7 +58,7 @@ spec:
             {{- $svc := printf "%s-core-api" (include "common.names.fullname" .) }}
             {{- $ns := include "common.names.namespace" . }}
             - name: ALLOWED_HOSTS
-              value: {{ concat (list "localhost" "127.0.0.1" "::1" $svc (printf "%s.%s" $svc $ns) (printf "%s.%s.svc" $svc $ns) (printf "%s.%s.svc.%s" $svc $ns .Values.clusterDomain)) .Values.coreApi.extraAllowedHosts | join "," | quote }}
+              value: {{ list "localhost" "127.0.0.1" "::1" $svc (printf "%s.%s" $svc $ns) (printf "%s.%s.svc" $svc $ns) (printf "%s.%s.svc.%s" $svc $ns .Values.clusterDomain) | join "," | quote }}
             - name: LITELLM_URL
               value: {{ .Values.coreApi.env.litellmUrl | quote }}
             - name: DATABASE_URL

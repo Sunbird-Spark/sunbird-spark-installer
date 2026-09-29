@@ -57,7 +57,17 @@ id, so there is exactly one Restate deployment per version.
 `minReadySeconds` (default 30) holds a new version back from the operator until its pods have
 stayed up that long. A build core-api refuses (for instance a changed artifact under an unchanged
 `version`: `VERSION_ARTIFACT_CONFLICT`) exits within seconds, so the operator never routes to it and
-the `RestateDeployment` reports `Ready=False` instead.
+the `RestateDeployment` reports `Ready=False` instead. It does not cover a core-api outage longer
+than `minReadySeconds`: a unit retries registration for about 90 seconds before it exits, and the
+operator registers the version once its pods have been up for 30.
+
+Two registrars come with one trade-off. core-api promotes a version as soon as its first pod
+registers, before the operator's own gate (every replica ready for `minReadySeconds`). A build that
+registers and then crashes inside that window still receives new invocations; and if its pods never
+become available, the operator's not-ready cleanup scales the previous version — no longer the
+latest — to zero after its drain delay. Configuration errors fail before a unit listens, so they are
+not affected. Recover with `helm rollback`. If this ever matters, the alternative is for core-api to
+wait for the operator's registration instead of making its own.
 
 ### Network access
 

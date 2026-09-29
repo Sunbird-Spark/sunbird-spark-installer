@@ -62,8 +62,6 @@ coreApi:
     # trigger in its metadata.json (`local` today). Restate subscribes to kafka://<cluster>/<topic>
     # and refuses a subscription to a cluster name it does not know.
     clusterName: local
-  # Host headers core-api accepts beyond its own in-cluster Service names (e.g. an ingress host).
-  extraAllowedHosts: []
 
 # One entry per deployable Restate workflow/service unit. Each becomes one RestateDeployment
 # (templates/units/restatedeployment.yaml) that registers itself with core-api on boot. Its Kafka
