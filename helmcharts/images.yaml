@@ -658,9 +658,9 @@ global:
   core_api:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/core-api"
-    tag: "spark-v1.1.1-transcript-restate-wf-4_fe8ab53"
+    tag: "spark-v1.1.1-transcript-restate-wf-5_1a4555d"
 
   wf_transcript:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/wf-transcript"
-    tag: "spark-v1.1.1-transcript-restate-wf-4_fe8ab53"
+    tag: "spark-v1.1.1-transcript-restate-wf-5_1a4555d"
