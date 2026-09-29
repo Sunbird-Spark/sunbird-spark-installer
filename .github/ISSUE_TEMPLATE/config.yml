@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/orgs/Sunbird-Spark/discussions
+    about: Ask a question, or float an idea before it becomes a feature request.
+  - name: Prerequisites and install steps
+    url: https://github.com/Sunbird-Spark/sunbird-spark-installer/blob/main/README.md
+    about: Required CLI tools, credentials, sizing, and installing on Azure, AWS or GCP.
+  - name: Per-component resource details
+    url: https://github.com/Sunbird-Spark/sunbird-spark-installer/blob/main/INFRA_DETAILS.md
+    about: CPU, memory and disk breakdown for every component and addon.
+  - name: Report a security vulnerability
+    url: https://github.com/Sunbird-Spark/sunbird-spark-installer/security/advisories/new
+    about: Never report security issues publicly. See SECURITY.md for what to expect.
