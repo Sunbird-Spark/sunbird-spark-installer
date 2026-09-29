@@ -1,0 +1,51 @@
+# Speech-to-text backend for the transcript unit's whisper.transcribe step
+# (workflows/transcript/src/whisper.ts). Plain FastAPI + faster-whisper, no auth, CPU-only for
+# now (services/whisper's own default) — a GPU node pool would be a nodeSelector/tolerations
+# addition here later, not a rewrite.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-whisper" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: whisper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+      app.kubernetes.io/component: whisper
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: whisper
+    spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.image.pullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: whisper
+          image: "{{ (index .Values.global .Values.whisper.globalImageKey).registry }}/{{ (index .Values.global .Values.whisper.globalImageKey).repository }}:{{ (index .Values.global .Values.whisper.globalImageKey).tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.whisper.service.port }}
+          env:
+            - name: WHISPER_MODEL_SIZE
+              value: {{ .Values.whisper.model.size | quote }}
+            - name: WHISPER_DEVICE
+              value: {{ .Values.whisper.model.device | quote }}
+            - name: WHISPER_COMPUTE_TYPE
+              value: {{ .Values.whisper.model.computeType | quote }}
+          resources: {{- toYaml .Values.whisper.resources | nindent 12 }}
+          # No startup probe: loading the model into memory on first boot can take a while, and
+          # readiness/liveness periodSeconds already tolerate that via a generous initialDelay.
+          readinessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: http }
+            initialDelaySeconds: 30
+            periodSeconds: 15
