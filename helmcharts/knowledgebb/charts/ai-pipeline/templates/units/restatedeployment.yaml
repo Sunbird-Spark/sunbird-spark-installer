@@ -1,34 +1,44 @@
 {{- range $name, $unit := .Values.units }}
 {{- if $unit.enabled }}
-# One RestateDeployment per unit — the operator creates the Pods/ReplicaSet/Service itself and
-# registers the endpoint with Restate directly. Each unit also self-registers with core-api's
-# catalogue on boot (packages/runtime's serve()), which also wires up its Kafka triggers — no
-# separate sidecar/Job needed for that anymore.
+{{- $rsdName := printf "%s-%s" (include "common.names.fullname" $) $name }}
+# One RestateDeployment per unit. Two things register it with Restate, and they must name the same
+# endpoint:
 #
-# `restate.register.service` is NOT a way to control this unit's own advertised address — checked
-# directly against the CRD's schema: it is one of four mutually exclusive ways to tell the
-# operator where Restate's *own* admin API lives (an alternative to `cluster`, not a per-unit
-# setting), and setting both errors with a oneOf validation failure. There is no field anywhere in
-# this CRD for pinning the unit's own Service name — confirmed by listing every spec field.
+#  - the restate-operator registers every version of the pod template at
+#    http://<name>-<pod-template-hash>.<namespace>.svc.<clusterDomain>:9080/, a Service it creates
+#    per version so a version keeps serving until its in-flight invocations drain. That URL changes
+#    whenever the pod template does (image, env, resources…) — the operator's versioning, by design.
+#  - the unit posts its own build to core-api on boot (packages/runtime's serve()), which registers
+#    ADVERTISED_ENDPOINT with Restate too; it is how the catalogue and the Kafka triggers learn of
+#    the build.
+#
+# So ADVERTISED_ENDPOINT is built at run time from the pod's own `pod-template-hash` label (the
+# operator adds it), never written into the template: a literal hash here would change the
+# template, and with it the hash. Given the same URL, Restate answers the second registration with
+# the first one's deployment id — one deployment, and nothing for the two registrars to fight over.
 apiVersion: restate.dev/v1beta1
 kind: RestateDeployment
 metadata:
-  name: {{ printf "%s-%s" (include "common.names.fullname" $) $name }}
+  name: {{ $rsdName }}
   namespace: {{ include "common.names.namespace" $ | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" $.Values.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: {{ $name }}
 spec:
   replicas: {{ $unit.replicas | default 1 }}
+  # The operator registers a version once its pods are available. A build core-api refuses
+  # (VERSION_*_CONFLICT, SERVICE_MISMATCH, …) exits within seconds of starting, so this keeps it from
+  # counting as available — and the operator from routing new invocations to it.
+  minReadySeconds: {{ ternary $unit.minReadySeconds 30 (hasKey $unit "minReadySeconds") }}
   restate:
     register:
       cluster: {{ $.Values.restate.clusterName }}
   selector:
     matchLabels:
-      app: {{ printf "%s-%s" (include "common.names.fullname" $) $name }}
+      app: {{ $rsdName }}
   template:
     metadata:
       labels:
-        app: {{ printf "%s-%s" (include "common.names.fullname" $) $name }}
+        app: {{ $rsdName }}
     spec:
       {{- if $.Values.image.pullSecrets }}
       imagePullSecrets:
@@ -50,13 +60,27 @@ spec:
             # this container starts.
             - name: CORE_API_URL
               value: {{ printf "http://%s-core-api:%d" (include "common.names.fullname" $) (int $.Values.coreApi.service.port) | quote }}
+            # The version this pod belongs to, as the operator named it.
+            - name: POD_TEMPLATE_HASH
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['pod-template-hash']
+            # Exactly the URL the operator registers for this version (port 9080 is the operator's
+            # Service port, whatever the container port).
             - name: ADVERTISED_ENDPOINT
-              value: {{ printf "http://%s-%s:%d" (include "common.names.fullname" $) $name (int ($unit.port | default 9080)) | quote }}
+              value: {{ printf "http://%s-$(POD_TEMPLATE_HASH).%s.svc.%s:9080/" $rsdName (include "common.names.namespace" $) $.Values.clusterDomain | quote }}
             - name: DEPLOYMENT_MODE
               value: "immutable"
             {{- range $key, $value := $unit.env }}
             - name: {{ $key }}
               value: {{ tpl (toString $value) $ | quote }}
+            {{- end }}
+            {{- range $key, $secretKey := $unit.secretEnv }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-core-api" (include "common.names.fullname" $) }}
+                  key: {{ $secretKey }}
             {{- end }}
           resources: {{- toYaml $unit.resources | nindent 12 }}
 ---

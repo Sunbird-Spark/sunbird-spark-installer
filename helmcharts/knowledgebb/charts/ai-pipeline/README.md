@@ -34,10 +34,61 @@ nothing will act on them).
   - `catalogue-migrate.yaml` — applies core-api's catalogue schema against YugabyteDB (mirrors
     the existing `provision/ycql.yaml` pattern, but over YSQL instead of YCQL).
 
+## How a unit gets registered — and why its URL changes
+
+Each unit is registered with Restate twice, and both registrations must name the same endpoint:
+
+1. **The restate-operator** registers every *version* of a `RestateDeployment`'s pod template at
+   `http://<name>-<pod-template-hash>.<namespace>.svc.<clusterDomain>:9080/`. It creates one
+   ReplicaSet and one Service per version, so an old version keeps serving until the invocations
+   pinned to it finish; then it scales that version to zero. Any change to the pod template —
+   image tag, an env value, resources — is a new version at a new URL. That is expected; do not try
+   to pin it.
+2. **The unit itself** posts its build to core-api on boot, and core-api registers
+   `ADVERTISED_ENDPOINT` with Restate as well. This is the only way the catalogue and the Kafka
+   triggers learn of a build.
+
+`ADVERTISED_ENDPOINT` is therefore built when the pod starts, from its own `pod-template-hash`
+label (downward API), and never written into the template: a literal hash in the template would
+itself change the template, and so the hash — the URL would move on every deploy. With the same URL
+on both sides, Restate answers whichever registration comes second with the first one's deployment
+id, so there is exactly one Restate deployment per version.
+
+`minReadySeconds` (default 30) holds a new version back from the operator until its pods have
+stayed up that long. A build core-api refuses (for instance a changed artifact under an unchanged
+`version`: `VERSION_ARTIFACT_CONFLICT`) exits within seconds, so the operator never routes to it and
+the `RestateDeployment` reports `Ready=False` instead. It does not cover a core-api outage longer
+than `minReadySeconds`: a unit retries registration for about 90 seconds before it exits, and the
+operator registers the version once its pods have been up for 30.
+
+Two registrars come with one trade-off. core-api promotes a version as soon as its first pod
+registers, before the operator's own gate (every replica ready for `minReadySeconds`). A build that
+registers and then crashes inside that window still receives new invocations; and if its pods never
+become available, the operator's not-ready cleanup scales the previous version — no longer the
+latest — to zero after its drain delay. Configuration errors fail before a unit listens, so they are
+not affected. Recover with `helm rollback`. If this ever matters, the alternative is for core-api to
+wait for the operator's registration instead of making its own.
+
+### Network access
+
+The operator puts the Restate namespace behind a deny-all `NetworkPolicy`: the admin API is open to
+the operator only, ingress to no one, and egress reaches DNS, public addresses and pods the operator
+labels (every `RestateDeployment` pod). `restatecluster.yaml` opens the admin and ingress ports to
+core-api and egress to the Kafka brokers (`restate.kafkaPodLabels`) in this release's namespace.
+Without them, core-api waits at boot for an admin API it cannot reach, and Restate cannot consume
+trigger topics. For the same reason, core-api hands Restate a fully-qualified Kafka address:
+Restate resolves it from its own namespace.
+
+### Kafka cluster name
+
+`coreApi.kafka.clusterName` is the name Restate knows the Kafka cluster by, not the environment.
+It must equal the `cluster` of every unit's Kafka trigger in its `metadata.json` (`local` today):
+Restate subscribes to `kafka://<cluster>/<topic>` and refuses a cluster name it does not know.
+
 ## Known open items (see design doc for full detail — not resolved here)
 
-1. Confirm YugabyteDB's `pg_advisory_lock` support against the exact pinned build
-   (`yugabytedb/yugabyte:2025.2.0.0-b131`) before trusting core-api against it in anger.
+1. Nothing creates the `ai_pipeline_catalogue` database or the `ai_pipeline` role in YugabyteDB;
+   `catalogue-migrate` assumes both exist. Create them by hand before the first install for now.
 2. This chart's own Kafka topic provisioning now follows the `{{ .Values.global.env }}.*`
    convention, but `workflows/transcript/metadata.json`'s trigger topic is a literal
    (`sunbirddev.content.published`) baked into the image at build time — Helm has no reach into
@@ -45,3 +96,11 @@ nothing will act on them).
    now; a real per-environment mechanism (metadata.json placeholder + env var resolved at boot)
    is deferred.
 3. Workload Identity (OIDC) readiness for the `transcript` unit's ServiceAccount — not confirmed.
+4. A drained version stays registered in Restate — the operator scales it to zero and keeps it for
+   rollback — so core-api lists it as `draining`. Retire it through core-api
+   (`DELETE /v1/deployments/<deploymentId>`, refused while anything is pinned to it) once it is no
+   longer needed; that works alongside the operator.
+
+YugabyteDB's session advisory locks, which core-api takes on every registration, were checked
+against the pinned build (`yugabytedb/yugabyte:2025.2.0.0-b131`, default flags): a second session
+cannot take a held lock and can once it is released.
