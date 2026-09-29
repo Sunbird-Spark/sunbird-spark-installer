@@ -11,7 +11,8 @@ on:
       - "v*"   # v1.x.x development branches
   workflow_dispatch:
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   actionlint:
