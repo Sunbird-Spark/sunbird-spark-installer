@@ -56,15 +56,43 @@ coreApi:
     # superuser password (global.yugabyte.password), not a separate ai_pipeline credential.
     passwordValue: ""
   env:
-    # Still assumes a real LiteLLM-compatible gateway reachable here — none exists in this
-    # cluster today. Units source their own LITELLM_API_KEY straight from openai-secret (see
-    # units.transcript.secretEnv below); core-api itself never calls an LLM.
+    # This chart's own litellm Deployment/Service (templates/litellm/), not an external gateway.
+    # core-api itself never calls an LLM — this is only read by units.
     litellmUrl: "http://litellm:4000"
   kafka:
     # A name inside Restate, not the environment: it must equal the `cluster` of every unit's Kafka
     # trigger in its metadata.json (`local` today). Restate subscribes to kafka://<cluster>/<topic>
     # and refuses a subscription to a cluster name it does not know.
     clusterName: local
+
+# Model gateway for units that call an LLM (packages/ai's generateFromEnv()). Same shape as
+# ai-pipeline's own local dev stack (compose.yaml + infra/litellm/config.yaml) — only the
+# upstream provider changes: Azure here, Ollama there. Config, image tag and the
+# num_retries: 0 / master_key convention are all copied from that real, working file, not
+# reinvented.
+litellm:
+  globalImageKey: litellm
+  service:
+    port: 4000
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+  # Real value supplied via opentofu/<provider>/<env>/global-values.yaml, same convention as
+  # coreApi.database.passwordValue — never committed here. This is the "virtual key" units
+  # present to this proxy; it is not the real Azure key (that's openai-secret, read directly by
+  # this Deployment only).
+  masterKeyValue: ""
+  model:
+    name: chat-default
+    # Same Azure OpenAI deployment py-flink's caption-generator already calls successfully
+    # (helmcharts/knowledgebb/charts/py-flink/values.yaml) — proven working in this cluster.
+    provider: "azure/gpt-5-mini"
+    apiBase: "https://cossdev-semanticsearch.openai.azure.com/"
+    apiVersion: "2024-12-01-preview"
 
 # One entry per deployable Restate workflow/service unit. Each becomes one RestateDeployment
 # (templates/units/restatedeployment.yaml) that registers itself with core-api on boot. Its Kafka
@@ -103,14 +131,13 @@ units:
         topic: "{{ .Values.global.env }}.content.published"
     # Kept out of the pod template on purpose: a value written there is readable by anyone who
     # can read the RestateDeployment, and rotating it would change the template hash — a new
-    # Restate deployment for every key rotation. Reuses the cluster's existing openai-secret,
-    # same as py-flink's own caption-generator (helmcharts/knowledgebb/charts/py-flink/values.yaml)
-    # — no separate LiteLLM proxy exists in this cluster; LITELLM_API_KEY is really just "the
-    # Azure OpenAI key", read straight from where it already lives.
+    # Restate deployment for every key rotation. This is the litellm proxy's own virtual key
+    # (litellm.masterKeyValue above), not the real Azure key — the proxy is the only thing that
+    # ever sees openai-secret directly.
     secretEnv:
       - envName: LITELLM_API_KEY
-        secretName: openai-secret
-        secretKey: OPENAI_API_KEY
+        secretName: "{{ printf \"%s-litellm\" (include \"common.names.fullname\" $) }}"
+        secretKey: LITELLM_MASTER_KEY
 
 migration:
   # Mirrors migration.yugabyte.waitTime's existing convention in the parent chart.

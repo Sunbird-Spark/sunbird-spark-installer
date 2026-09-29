@@ -664,3 +664,10 @@ global:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/wf-transcript"
     tag: "spark-v1.1.1-transcript-restate-wf-5_1a4555d"
+
+  # Model gateway for ai-pipeline units — same image ai-pipeline's own local dev stack pins
+  # (compose.yaml). A pre-built public image, not one this repo builds itself.
+  litellm:
+    registry: "ghcr.io"
+    repository: "berriai/litellm"
+    tag: "v1.101.0"

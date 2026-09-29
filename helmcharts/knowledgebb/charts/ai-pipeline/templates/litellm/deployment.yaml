@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-litellm" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: litellm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+      app.kubernetes.io/component: litellm
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: litellm
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/litellm/configmap.yaml") . | sha256sum }}
+    spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.image.pullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: litellm
+          image: "{{ (index .Values.global .Values.litellm.globalImageKey).registry }}/{{ (index .Values.global .Values.litellm.globalImageKey).repository }}:{{ (index .Values.global .Values.litellm.globalImageKey).tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ['--config', '/app/config.yaml', '--host', '0.0.0.0', '--port', {{ .Values.litellm.service.port | quote }}]
+          ports:
+            - name: http
+              containerPort: {{ .Values.litellm.service.port }}
+          env:
+            - name: LITELLM_LOCAL_MODEL_COST_MAP
+              value: "true"
+            - name: LITELLM_TELEMETRY
+              value: "false"
+            - name: DO_NOT_TRACK
+              value: "1"
+            - name: LITELLM_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-litellm" (include "common.names.fullname" .) }}
+                  key: LITELLM_MASTER_KEY
+            # The real Azure key — only this container ever sees it, straight from the same
+            # Secret py-flink's caption-generator already reads (helmcharts/knowledgebb/charts/
+            # py-flink/values.yaml's own secretEnv).
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openai-secret
+                  key: OPENAI_API_KEY
+          volumeMounts:
+            - name: config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+          resources: {{- toYaml .Values.litellm.resources | nindent 12 }}
+          readinessProbe:
+            httpGet: { path: /health/liveliness, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /health/liveliness, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: config
+          configMap:
+            name: {{ printf "%s-litellm" (include "common.names.fullname" .) }}

@@ -92,7 +92,7 @@ spec:
             - name: {{ .envName }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ .secretName }}
+                  name: {{ tpl (toString .secretName) $ }}
                   key: {{ .secretKey }}
             {{- end }}
           resources: {{- toYaml $unit.resources | nindent 12 }}
