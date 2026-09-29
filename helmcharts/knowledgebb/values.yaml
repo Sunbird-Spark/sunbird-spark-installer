@@ -232,10 +232,10 @@ flink:
 py-flink:
   enabled: true
 
-# Switched off until the parallel-run verification window (migration plan step 5) is complete —
-# see charts/ai-pipeline/README.md.
+# Parallel-run verification window (migration plan step 5) skipped — cutting over directly.
+# Requires restate-operator installed cluster-wide first (see charts/ai-pipeline/README.md).
 ai-pipeline:
-  enabled: false
+  enabled: true
 
 global:
   channel: *channel
