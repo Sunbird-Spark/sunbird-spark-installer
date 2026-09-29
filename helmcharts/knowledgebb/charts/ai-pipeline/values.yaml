@@ -76,13 +76,15 @@ units:
       # Secret is built from, rather than a second place to configure the same LiteLLM key.
       LITELLM_URL: "http://litellm:4000"
       LITELLM_API_KEY: "{{ .Values.coreApi.env.litellmApiKeyValue }}"
-    # Not env-templated the way this repo's other topics are ({{ .Values.global.env }}.*) —
-    # matches workflows/transcript/metadata.json's own trigger config exactly, but needs
-    # reconciling before this is real production config. See README.md open item 2.
+    # Documentation only — nothing in this chart's templates reads units.*.triggers. The real
+    # trigger config a unit registers with is baked into its own metadata.json at image build
+    # time (self-registered on boot), and metadata.json's topic string is NOT env-templatable —
+    # Helm has no reach into an already-built image's JSON. This entry exists only so it's
+    # visible here, and must be kept in sync with metadata.json by hand. See README.md open item 2.
     triggers:
-      - id: sunbirddev-enrichment-request
+      - id: sunbirddev-content-published
         type: kafka
-        topic: "sunbirddev.enrichment.request"
+        topic: "{{ .Values.global.env }}.content.published"
 
 migration:
   # Mirrors migration.yugabyte.waitTime's existing convention in the parent chart.

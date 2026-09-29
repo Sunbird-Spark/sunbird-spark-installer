@@ -38,7 +38,10 @@ nothing will act on them).
 
 1. Confirm YugabyteDB's `pg_advisory_lock` support against the exact pinned build
    (`yugabytedb/yugabyte:2025.2.0.0-b131`) before trusting core-api against it in anger.
-2. The Kafka topic name `sunbirddev.enrichment.request` (from `workflows/transcript/metadata.json`)
-   does not yet follow this repo's `{{ .Values.global.env }}.*` templating convention — reconcile
-   before this is real production config.
+2. This chart's own Kafka topic provisioning now follows the `{{ .Values.global.env }}.*`
+   convention, but `workflows/transcript/metadata.json`'s trigger topic is a literal
+   (`sunbirddev.content.published`) baked into the image at build time — Helm has no reach into
+   an already-built image's JSON, so this can't be templated the same way. Hardcoded to `dev` for
+   now; a real per-environment mechanism (metadata.json placeholder + env var resolved at boot)
+   is deferred.
 3. Workload Identity (OIDC) readiness for the `transcript` unit's ServiceAccount — not confirmed.
