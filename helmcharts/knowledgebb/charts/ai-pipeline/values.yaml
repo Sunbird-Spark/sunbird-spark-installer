@@ -94,6 +94,23 @@ litellm:
     apiBase: "https://cossdev-semanticsearch.openai.azure.com/"
     apiVersion: "2024-12-01-preview"
 
+# Speech-to-text backend for the transcript unit (services/whisper) — CPU-only for now.
+whisper:
+  globalImageKey: whisper
+  service:
+    port: 8000
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
+  model:
+    size: small
+    device: cpu
+    computeType: int8
+
 # One entry per deployable Restate workflow/service unit. Each becomes one RestateDeployment
 # (templates/units/restatedeployment.yaml) that registers itself with core-api on boot. Its Kafka
 # triggers come from the image's own metadata.json, not from here.
