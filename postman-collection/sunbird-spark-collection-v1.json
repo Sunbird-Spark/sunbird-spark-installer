@@ -1662,7 +1662,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"request\": {\n    \"id\": \"privacyPolicyConfig\",\n    \"field\": \"privacyPolicyConfig\",\n    \"value\": \"{\\\"latestVersion\\\":\\\"1.0.0\\\",\\\"1.0.0\\\":{\\\"url\\\":\\\"{{blob_store_path}}\\/{{public_container_name}}/termsandcondtions\\/terms-and-conditions-v9.html#termsOfUse\\\"}}\"\n  }\n}",
+							"raw": "{\n  \"request\": {\n    \"id\": \"privacyPolicyConfig\",\n    \"field\": \"privacyPolicyConfig\",\n    \"value\": \"{\\\"latestVersion\\\":\\\"1.0.0\\\",\\\"1.0.0\\\":{\\\"url\\\":\\\"{{blob_store_path}}\\/{{public_container_name}}/termsandcondtions\\/privacy-policy-v1.html\\\"}}\"\n  }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
