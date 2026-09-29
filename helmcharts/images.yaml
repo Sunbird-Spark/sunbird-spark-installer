@@ -113,7 +113,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.1.0_4a35a67"
+    tag: "spark-v1.1.1-enrichmentobject-v3_593894f"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -617,7 +617,7 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.1.0_dec74d7"
+    tag: "spark-v1.1.1-content-published-1_0ea74e7"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
@@ -633,7 +633,7 @@ global:
   # ai-pipeline/docker/Dockerfile.enrichment-router and
   # Dockerfile.caption-generator.
   #
-  # Built and pushed by ai-pipeline's .github/workflows/build.yaml on tag
+  # Built and pushed by ai-pipeline's .github/workflows/build.yml on tag
   # push — tag format is <git-tag>_<short-sha> (see knowlg-service.yml for
   # the same convention).
   enrichment_router:
@@ -648,9 +648,8 @@ global:
 
   # Restate-based replacement for enrichment_router/caption_generator above (removed once the
   # parallel-run verification window is complete), deployed via the `ai-pipeline` chart
-  # (helmcharts/knowledgebb/charts/ai-pipeline). Placeholder tags below — this CI does not exist
-  # yet (see that chart's README.md open item 4); replace once ai-pipeline's own build pipeline
-  # is written and ships real tags in the <git-tag>_<short-sha> convention used above.
+  # (helmcharts/knowledgebb/charts/ai-pipeline). Built and pushed by ai-pipeline's own
+  # .github/workflows/build.yml on tag push, same <git-tag>_<short-sha> convention as above.
   restate_server:
     registry: "docker.restate.dev"
     repository: "restatedev/restate"
@@ -659,9 +658,9 @@ global:
   core_api:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/core-api"
-    tag: "PLACEHOLDER_not_yet_built"
+    tag: "spark-v1.1.1-transcript-restate-wf-4_fe8ab53"
 
   wf_transcript:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/wf-transcript"
-    tag: "PLACEHOLDER_not_yet_built"
+    tag: "spark-v1.1.1-transcript-restate-wf-4_fe8ab53"

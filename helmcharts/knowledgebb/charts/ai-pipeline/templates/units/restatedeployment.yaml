@@ -39,7 +39,16 @@ spec:
     metadata:
       labels:
         app: {{ $rsdName }}
+        # Same convention as py-flink's own caption-generator/enrichment-router pods, which already
+        # touch Azure Blob Storage — this reuses the one cluster-wide federated ServiceAccount rather
+        # than creating a new one per unit.
+        {{- if and (eq $.Values.global.cloud_storage_provider "azure") $.Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
     spec:
+      {{- if $.Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ $.Values.global.workload_identity_service_account_name }}
+      {{- end }}
       {{- if $.Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml $.Values.image.pullSecrets | nindent 8 }}
@@ -71,6 +80,10 @@ spec:
               value: {{ printf "http://%s-$(POD_TEMPLATE_HASH).%s.svc.%s:9080/" $rsdName (include "common.names.namespace" $) $.Values.clusterDomain | quote }}
             - name: DEPLOYMENT_MODE
               value: "immutable"
+            {{- if and (eq $.Values.global.cloud_storage_provider "azure") $.Values.global.azure_client_id }}
+            - name: AZURE_CLIENT_ID
+              value: "{{ $.Values.global.azure_client_id }}"
+            {{- end }}
             {{- range $key, $value := $unit.env }}
             - name: {{ $key }}
               value: {{ tpl (toString $value) $ | quote }}
