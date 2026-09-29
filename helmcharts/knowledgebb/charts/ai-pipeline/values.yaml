@@ -81,11 +81,11 @@ litellm:
     limits:
       cpu: 500m
       memory: 1Gi
-  # Real value supplied via opentofu/<provider>/<env>/global-values.yaml, same convention as
-  # coreApi.database.passwordValue — never committed here. This is the "virtual key" units
-  # present to this proxy; it is not the real Azure key (that's openai-secret, read directly by
-  # this Deployment only).
-  masterKeyValue: ""
+  # TEST VALUE ONLY — replace with a real generated secret via
+  # opentofu/<provider>/<env>/global-values.yaml (same convention as coreApi.database.passwordValue)
+  # before this is real production config. This is the "virtual key" units present to this proxy;
+  # it is not the real Azure key (that's openai-secret, read directly by this Deployment only).
+  masterKeyValue: "sk-litellm-test-master-key"
   model:
     name: chat-default
     # Same Azure OpenAI deployment py-flink's caption-generator already calls successfully
