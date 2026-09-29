@@ -1,6 +1,11 @@
 # Same shape as ai-pipeline's own local dev config (infra/litellm/config.yaml) — only the
 # upstream provider changes (Azure here, Ollama there). num_retries: 0 is deliberate: Restate's
 # own ctx.run retry profiles are the single retry authority, not LiteLLM's.
+#
+# drop_params: true (unlike the local dev config, which uses false against Ollama) — confirmed
+# live: gpt-5-mini is a reasoning model and rejects temperature=0 (packages/ai's own default)
+# outright unless unsupported params are dropped. Ollama has no such constraint, which is why
+# local dev never needed this.
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -19,7 +24,7 @@ data:
           api_key: os.environ/OPENAI_API_KEY
     litellm_settings:
       telemetry: false
-      drop_params: false
+      drop_params: true
       request_timeout: 180
       num_retries: 0
     general_settings:
