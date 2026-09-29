@@ -56,10 +56,10 @@ coreApi:
     # superuser password (global.yugabyte.password), not a separate ai_pipeline credential.
     passwordValue: ""
   env:
+    # Still assumes a real LiteLLM-compatible gateway reachable here — none exists in this
+    # cluster today. Units source their own LITELLM_API_KEY straight from openai-secret (see
+    # units.transcript.secretEnv below); core-api itself never calls an LLM.
     litellmUrl: "http://litellm:4000"
-    # Real value supplied the same way as global.openai_api_key — a hosted provider key in
-    # production, replacing the local-testing Ollama model.
-    litellmApiKeyValue: ""
   kafka:
     # A name inside Restate, not the environment: it must equal the `cluster` of every unit's Kafka
     # trigger in its metadata.json (`local` today). Restate subscribes to kafka://<cluster>/<topic>
@@ -92,12 +92,16 @@ units:
       AZURE_STORAGE_AUTH_TYPE: "OIDC"
       # @ai-pipeline/ai's generateFromEnv() requires LITELLM_URL and LITELLM_API_KEY (below).
       LITELLM_URL: "http://litellm:4000"
-    # Env vars read from this chart's Secret (templates/core-api/secret.yaml), as name → key. Kept
-    # out of the pod template on purpose: a value written there is readable by anyone who can read
-    # the RestateDeployment, and rotating it would change the template hash — a new Restate
-    # deployment for every key rotation.
+    # Kept out of the pod template on purpose: a value written there is readable by anyone who
+    # can read the RestateDeployment, and rotating it would change the template hash — a new
+    # Restate deployment for every key rotation. Reuses the cluster's existing openai-secret,
+    # same as py-flink's own caption-generator (helmcharts/knowledgebb/charts/py-flink/values.yaml)
+    # — no separate LiteLLM proxy exists in this cluster; LITELLM_API_KEY is really just "the
+    # Azure OpenAI key", read straight from where it already lives.
     secretEnv:
-      LITELLM_API_KEY: LITELLM_API_KEY
+      - envName: LITELLM_API_KEY
+        secretName: openai-secret
+        secretKey: OPENAI_API_KEY
 
 migration:
   # Mirrors migration.yugabyte.waitTime's existing convention in the parent chart.

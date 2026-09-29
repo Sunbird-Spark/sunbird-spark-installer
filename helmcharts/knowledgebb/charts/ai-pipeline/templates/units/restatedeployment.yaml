@@ -88,12 +88,12 @@ spec:
             - name: {{ $key }}
               value: {{ tpl (toString $value) $ | quote }}
             {{- end }}
-            {{- range $key, $secretKey := $unit.secretEnv }}
-            - name: {{ $key }}
+            {{- range $unit.secretEnv }}
+            - name: {{ .envName }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ printf "%s-core-api" (include "common.names.fullname" $) }}
-                  key: {{ $secretKey }}
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
             {{- end }}
           resources: {{- toYaml $unit.resources | nindent 12 }}
 ---
