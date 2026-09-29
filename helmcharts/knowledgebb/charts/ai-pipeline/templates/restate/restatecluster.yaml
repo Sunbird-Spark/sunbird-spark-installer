@@ -1,11 +1,15 @@
 # Requires the restate-operator's CRDs to already be installed cluster-wide — see ../../README.md.
 # Deliberately single-node (no `spec.compute.replicas`/`spec.config` block) per the design doc's
 # decision to start simple and revisit clustering once this carries real production traffic.
+{{- $ns := include "common.names.namespace" . }}
+{{- $coreApi := dict
+      "namespaceSelector" (dict "matchLabels" (dict "kubernetes.io/metadata.name" $ns))
+      "podSelector" (dict "matchLabels" (dict "app.kubernetes.io/name" (include "common.names.name" .) "app.kubernetes.io/component" "core-api")) }}
 apiVersion: restate.dev/v1
 kind: RestateCluster
 metadata:
   name: {{ .Values.restate.clusterName | quote }}
-  namespace: {{ include "common.names.namespace" . | quote }}
+  namespace: {{ $ns | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
 spec:
   compute:
@@ -14,3 +18,22 @@ spec:
     # Rendering this value directly (no int64 cast) turns anything over int32 range into
     # scientific notation (e.g. 2.147483648e+09) — int64 forces correct plain-integer formatting.
     storageRequestBytes: {{ .Values.restate.storageRequestBytes | int64 }}
+  # The operator puts the cluster's namespace behind a deny-all NetworkPolicy: admin (9070) is open
+  # to the operator only, ingress (8080) to no one, and egress reaches only DNS, public addresses
+  # and the pods it labels (every RestateDeployment pod). core-api needs admin — it registers
+  # deployments and subscriptions — and ingress, which starts runs; Restate needs Kafka to consume
+  # trigger topics. Without these, core-api waits at boot for an admin API it cannot reach.
+  security:
+    networkPeers:
+      admin: {{- list $coreApi | toYaml | nindent 8 }}
+      ingress: {{- list $coreApi | toYaml | nindent 8 }}
+    networkEgressRules:
+      - to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: {{ $ns }}
+            podSelector:
+              matchLabels: {{- toYaml .Values.restate.kafkaPodLabels | nindent 16 }}
+        ports:
+          - port: {{ .Values.global.kafka.port | int }}
+            protocol: TCP
