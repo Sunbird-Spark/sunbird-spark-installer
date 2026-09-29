@@ -89,9 +89,12 @@ Restate subscribes to `kafka://<cluster>/<topic>` and refuses a cluster name it 
 
 1. Nothing creates the `ai_pipeline_catalogue` database or the `ai_pipeline` role in YugabyteDB;
    `catalogue-migrate` assumes both exist. Create them by hand before the first install for now.
-2. The Kafka topic name `sunbirddev.enrichment.request` (from `workflows/transcript/metadata.json`)
-   does not yet follow this repo's `{{ .Values.global.env }}.*` templating convention — reconcile
-   before this is real production config.
+2. This chart's own Kafka topic provisioning now follows the `{{ .Values.global.env }}.*`
+   convention, but `workflows/transcript/metadata.json`'s trigger topic is a literal
+   (`sunbirddev.content.published`) baked into the image at build time — Helm has no reach into
+   an already-built image's JSON, so this can't be templated the same way. Hardcoded to `dev` for
+   now; a real per-environment mechanism (metadata.json placeholder + env var resolved at boot)
+   is deferred.
 3. Workload Identity (OIDC) readiness for the `transcript` unit's ServiceAccount — not confirmed.
 4. A drained version stays registered in Restate — the operator scales it to zero and keeps it for
    rollback — so core-api lists it as `draining`. Retire it through core-api
