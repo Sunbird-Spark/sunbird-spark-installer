@@ -110,6 +110,13 @@ function install_component() {
             certificate_keys
         fi
       fi
+    if [ "$component" = "knowledgebb" ]; then
+        # Prerequisite for the ai-pipeline subchart's RestateCluster/RestateDeployment
+        # resources — cluster-wide, its own CRDs, not templated by this chart itself.
+        # --install makes this safe to re-run on every knowledgebb deploy, not just the first.
+        helm upgrade --install restate-operator oci://ghcr.io/restatedev/restate-operator-helm \
+            --namespace restate-operator --create-namespace
+    fi
     local addon_values_flag=""
     if [ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]; then
         if [ -f "../addons/global-cloud-values.yaml" ]; then
