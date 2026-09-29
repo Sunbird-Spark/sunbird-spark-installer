@@ -158,7 +158,7 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v1.1.1-restate-wf_078f31d"
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
