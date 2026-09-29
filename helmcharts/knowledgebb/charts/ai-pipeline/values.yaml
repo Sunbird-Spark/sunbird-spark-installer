@@ -4,6 +4,11 @@
 nameOverride: ""
 fullnameOverride: ""
 
+# Must equal the restate-operator's CLUSTER_DNS (its default is cluster.local): each unit advertises
+# the URL the operator registers for it, and Restate resolves the names core-api hands it from its
+# own namespace.
+clusterDomain: cluster.local
+
 image:
   pullPolicy: IfNotPresent
   # Not global-values-driven anywhere in this repo (confirmed against every sibling chart) —
@@ -21,6 +26,10 @@ restate:
   # globalImageKey convention (see py-flink's own `globalImageKey` usage).
   globalImageKey: restate_server
   storageRequestBytes: 2147483648 # 2 GiB to start
+  # Labels of the Kafka broker pods in this release's namespace, which Restate's egress policy must
+  # reach to consume trigger topics (see templates/restate/restatecluster.yaml).
+  kafkaPodLabels:
+    app.kubernetes.io/name: kafka
 
 coreApi:
   replicaCount: 1
@@ -48,17 +57,25 @@ coreApi:
     # Real value supplied the same way as global.openai_api_key — a hosted provider key in
     # production, replacing the local-testing Ollama model.
     litellmApiKeyValue: ""
+  kafka:
+    # A name inside Restate, not the environment: it must equal the `cluster` of every unit's Kafka
+    # trigger in its metadata.json (`local` today). Restate subscribes to kafka://<cluster>/<topic>
+    # and refuses a subscription to a cluster name it does not know.
+    clusterName: local
+  # Host headers core-api accepts beyond its own in-cluster Service names (e.g. an ingress host).
+  extraAllowedHosts: []
 
 # One entry per deployable Restate workflow/service unit. Each becomes one RestateDeployment
-# (templates/units/restatedeployment.yaml), self-registering with core-api on boot, which also
-# wires up whatever Kafka triggers it declares below.
+# (templates/units/restatedeployment.yaml) that registers itself with core-api on boot. Its Kafka
+# triggers come from the image's own metadata.json, not from here.
 units:
   transcript:
     enabled: true
     globalImageKey: wf_transcript
-    restateName: Transcript
     port: 9080
     replicas: 1
+    # How long a new version's pods must stay up before the operator registers it.
+    minReadySeconds: 30
     resources:
       requests:
         cpu: 250m
@@ -72,17 +89,14 @@ units:
       AZURE_STORAGE_ACCOUNT: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
       AZURE_STORAGE_CONTAINER: "{{ .Values.global.public_container_name }}"
       AZURE_STORAGE_AUTH_TYPE: "OIDC"
-      # @ai-pipeline/ai's generateFromEnv() requires both — reuses the same value core-api's own
-      # Secret is built from, rather than a second place to configure the same LiteLLM key.
+      # @ai-pipeline/ai's generateFromEnv() requires LITELLM_URL and LITELLM_API_KEY (below).
       LITELLM_URL: "http://litellm:4000"
-      LITELLM_API_KEY: "{{ .Values.coreApi.env.litellmApiKeyValue }}"
-    # Not env-templated the way this repo's other topics are ({{ .Values.global.env }}.*) —
-    # matches workflows/transcript/metadata.json's own trigger config exactly, but needs
-    # reconciling before this is real production config. See README.md open item 2.
-    triggers:
-      - id: sunbirddev-enrichment-request
-        type: kafka
-        topic: "sunbirddev.enrichment.request"
+    # Env vars read from this chart's Secret (templates/core-api/secret.yaml), as name → key. Kept
+    # out of the pod template on purpose: a value written there is readable by anyone who can read
+    # the RestateDeployment, and rotating it would change the template hash — a new Restate
+    # deployment for every key rotation.
+    secretEnv:
+      LITELLM_API_KEY: LITELLM_API_KEY
 
 migration:
   # Mirrors migration.yugabyte.waitTime's existing convention in the parent chart.
