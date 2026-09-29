@@ -87,7 +87,7 @@ cp /tmp/neo4j_relationships.csv /tmp/relationships.csv
 
 echo "==> Installing kubectl for remote JanusGraph import..."
 apt-get update -qq && apt-get install -y -qq curl ca-certificates
-curl -fL "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl
+curl -fL --proto '=https' --tlsv1.2 "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl
 chmod +x /usr/local/bin/kubectl
 
 if [[ "$1" == "--download-only" ]]; then

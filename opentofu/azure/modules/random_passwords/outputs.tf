@@ -12,3 +12,8 @@ output "keycloak_password" {
   value     = random_password.keycloak.result
   sensitive = true
 }
+
+output "opensearch_admin_password" {
+  value     = random_password.opensearch_admin.result
+  sensitive = true
+}

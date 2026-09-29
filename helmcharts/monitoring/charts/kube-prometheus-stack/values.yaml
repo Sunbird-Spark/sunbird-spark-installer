@@ -4215,6 +4215,9 @@ extraManifests: []
 
 prometheus-blackbox-exporter:
   releaseLabel: true
+  pod:
+    labels:
+      kong-admin-client: "true"
   serviceMonitor:
     selfMonitor:
       enabled: true

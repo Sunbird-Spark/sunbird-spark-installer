@@ -163,6 +163,10 @@ def step_6_yb_backfill():
     # 1) Generate CQL file on pod (fast — single short exec)
     print("  Generating backfill.cql on pod...")
     gen_script = (
+        # rm -f first: /tmp is world-writable, and a plain `>` redirect
+        # follows an existing symlink instead of refusing to -- remove
+        # whatever's there before writing fresh.
+        f"rm -f /tmp/backfill.cql; "
         f"awk -F',' '{{print \"UPDATE {KEYSPACE}.user SET createdat=\\x27\" "
         f"substr($2,1,10) \"\\x27 WHERE id=\\x27\" $1 \"\\x27;\"}}' "
         f"/tmp/users.csv > /tmp/backfill.cql && wc -l /tmp/backfill.cql"
