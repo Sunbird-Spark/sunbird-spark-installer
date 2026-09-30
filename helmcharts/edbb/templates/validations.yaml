@@ -15,3 +15,18 @@ letting that surface as a confusing mid-upgrade error.
 {{- fail "global.cert_manager_ssl is true but cert-manager.enabled and/or ingress-nginx.enabled is false. All three must be set together -- see README's 'Automated issuance and renewal (cert-manager)' section." }}
 {{- end }}
 {{- end }}
+
+{{- /*
+Same shape of problem as cert_manager_ssl above: global.use_cassandra_postgres
+is one flag, but cassandra.enabled/postgresql.enabled are separate ones that
+have to be set together with it (and yugabyte.enabled turned off), or the
+umbrella chart ends up with no database backend actually running at all.
+*/}}
+{{- if .Values.global.use_cassandra_postgres }}
+{{- if not (and .Values.cassandra.enabled .Values.postgresql.enabled) }}
+{{- fail "global.use_cassandra_postgres is true but cassandra.enabled and/or postgresql.enabled is false. Set cassandra.enabled: true, postgresql.enabled: true, and yugabyte.enabled: false together in the bundle that owns the real instance (edbb, by default)." }}
+{{- end }}
+{{- if .Values.yugabyte.enabled }}
+{{- fail "global.use_cassandra_postgres is true but yugabyte.enabled is still true -- both database backends would be deployed at once. Set yugabyte.enabled: false." }}
+{{- end }}
+{{- end }}

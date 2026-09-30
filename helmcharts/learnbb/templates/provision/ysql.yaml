@@ -1,3 +1,13 @@
+{{- /*
+This job's migration image bundles ysqlsh -- itself a fork of real
+PostgreSQL's own psql (per YugabyteDB's own docs), and YSQL is genuinely
+PostgreSQL-wire-compatible, so this runs the same way regardless of which
+backend global.use_cassandra_postgres selects. One caveat not fully verified:
+the actual .sql files this job pulls from the external sunbird-devops repo
+were written targeting YSQL -- if any of them use Yugabyte-specific DDL
+extensions (e.g. distributed-table hints) rather than plain Postgres SQL,
+those specific statements could still fail against a real Postgres server.
+*/ -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -36,7 +46,7 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte postgres; 10; done'"
+          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; 10; done'"
           # Downloading migration files
           set -e
           export devops_branch={{ .Values.devops_release_branch }}
@@ -71,10 +81,10 @@ spec:
         args:
         - |
             set -e
-            export PGHOST={{.Values.global.yugabyte.host}}
-            export PGPORT={{.Values.global.postgresql_port}}
-            export PGUSER={{.Values.global.yugabyte.username}}
-            export PGPASSWORD={{.Values.global.yugabyte.password}}
+            export PGHOST={{ include "sunbird.postgresHost" $ }}
+            export PGPORT={{ include "sunbird.postgresPort" $ }}
+            export PGUSER={{ include "sunbird.postgresUsername" $ }}
+            export PGPASSWORD={{ include "sunbird.postgresPassword" $ }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then

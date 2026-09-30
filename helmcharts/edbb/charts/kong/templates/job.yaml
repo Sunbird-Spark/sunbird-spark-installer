@@ -18,7 +18,7 @@ spec:
           args:
           - |
             timeout 600 sh -c '
-            until nc -z {{.Values.global.yugabyte.host}} {{.Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'
+            until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; sleep 10; done'
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -86,13 +86,13 @@ spec:
             - name: KONG_PG_DATABASE
               value: {{ .Values.kong_pg_database }}
             - name: KONG_PG_HOST
-              value: {{ .Values.global.yugabyte.host }}
+              value: {{ include "sunbird.postgresHost" $ }}
             - name: KONG_PG_PORT
-              value: {{ .Values.global.yugabyte.postgresql_port | quote }}
+              value: {{ include "sunbird.postgresPort" $ | quote }}
             - name: KONG_PG_PASSWORD
-              value: {{ .Values.global.yugabyte.password }}
+              value: {{ include "sunbird.postgresPassword" $ }}
             - name: KONG_PG_USER
-              value: {{ .Values.global.yugabyte.username }}
+              value: {{ include "sunbird.postgresUsername" $ }}
             - name: KONG_PG_SSL
               value: {{ .Values.kong_pg_ssl | quote }}
             - name: KONG_PROXY_ACCESS_LOG
