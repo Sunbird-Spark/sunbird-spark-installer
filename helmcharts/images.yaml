@@ -617,7 +617,7 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.1.0_dec74d7"
+    tag: "spark-v1.1.1_b20f070"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
