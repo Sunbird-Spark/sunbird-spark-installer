@@ -1,3 +1,13 @@
+{{- /*
+This job's migration image (yugabytecql, ghcr.io/sunbird-spark/sunbird-yugabyte-migrations)
+bundles ysqlsh, YugabyteDB's own psql-derived client -- not confirmed to work
+unmodified against a real standalone PostgreSQL server, and the actual SQL
+migration content it pulls from sunbird-devops was written against Yugabyte's
+YSQL. Only runs on the yugabyte path; the equivalent schema provisioning for
+a real Postgres backend is a known, not-yet-implemented gap when
+global.use_cassandra_postgres is true.
+*/ -}}
+{{- if not .Values.global.use_cassandra_postgres }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -36,7 +46,7 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte postgres; 10; done'"
+          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; 10; done'"
           # Downloading migration files
           set -e
           export devops_branch={{ .Values.devops_release_branch }}
@@ -71,10 +81,10 @@ spec:
         args:
         - |
             set -e
-            export PGHOST={{.Values.global.yugabyte.host}}
-            export PGPORT={{.Values.global.postgresql_port}}
-            export PGUSER={{.Values.global.yugabyte.username}}
-            export PGPASSWORD={{.Values.global.yugabyte.password}}
+            export PGHOST={{ include "sunbird.postgresHost" $ }}
+            export PGPORT={{ include "sunbird.postgresPort" $ }}
+            export PGUSER={{ include "sunbird.postgresUsername" $ }}
+            export PGPASSWORD={{ include "sunbird.postgresPassword" $ }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then
@@ -144,3 +154,4 @@ spec:
             done
             echo "Sunbird-lern SQL migrations completed."
   backoffLimit: 30
+{{- end }}

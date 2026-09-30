@@ -1,3 +1,13 @@
+{{- /*
+This job runs ycqlsh (YugabyteDB's own CQL shell) and a migration image built
+specifically against YugabyteDB's YCQL -- it isn't compatible with a real
+standalone Cassandra cluster (real Cassandra uses cqlsh, a different tool,
+and the actual keyspace/table migration content this job runs lives in an
+external repo, not vendored here). Only runs on the yugabyte path; the
+equivalent schema provisioning for a real Cassandra backend is a known,
+not-yet-implemented gap when global.use_cassandra_postgres is true.
+*/ -}}
+{{- if not .Values.global.use_cassandra_postgres }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -80,3 +90,4 @@ spec:
         - name: shared-volume
           mountPath: /opt/shared-volume
   backoffLimit: 30
+{{- end }}

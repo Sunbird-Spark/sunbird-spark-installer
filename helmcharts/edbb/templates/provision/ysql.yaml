@@ -1,3 +1,12 @@
+{{- /*
+This job's migration image is yugabytedb/yugabyte itself, used solely for its
+bundled ysqlsh (YugabyteDB's own psql-derived client) -- the job's own error
+message ("please use an image with Yugabyte YSQL client") confirms this isn't
+meant to run against a real standalone Postgres. Only runs on the yugabyte
+path; the equivalent schema provisioning for a real Postgres backend is a
+known, not-yet-implemented gap when global.use_cassandra_postgres is true.
+*/ -}}
+{{- if not .Values.global.use_cassandra_postgres }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -72,3 +81,4 @@ spec:
 
             echo "YugabyteSQL setup completed."
   backoffLimit: 30
+{{- end }}
