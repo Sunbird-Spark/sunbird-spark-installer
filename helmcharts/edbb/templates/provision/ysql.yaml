@@ -1,12 +1,10 @@
 {{- /*
-This job's migration image is yugabytedb/yugabyte itself, used solely for its
-bundled ysqlsh (YugabyteDB's own psql-derived client) -- the job's own error
-message ("please use an image with Yugabyte YSQL client") confirms this isn't
-meant to run against a real standalone Postgres. Only runs on the yugabyte
-path; the equivalent schema provisioning for a real Postgres backend is a
-known, not-yet-implemented gap when global.use_cassandra_postgres is true.
+This job's migration image is yugabytedb/yugabyte, used for its bundled
+ysqlsh -- but ysqlsh is itself a fork of real PostgreSQL's own psql (per
+YugabyteDB's own docs), and YSQL is genuinely PostgreSQL-wire-compatible.
+Nothing in this job's SQL is Yugabyte-specific, so it runs the same way
+regardless of which backend global.use_cassandra_postgres selects.
 */ -}}
-{{- if not .Values.global.use_cassandra_postgres }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -39,7 +37,7 @@ spec:
             memory: 64Mi
         command: ['sh', '-c']
         args:
-        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'"
+        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; sleep 10; done'"
       containers:
       - name: migration
         image: "{{ .Values.yugabyte_migration_image.registry }}/{{ .Values.yugabyte_migration_image.repository }}:{{ .Values.yugabyte_migration_image.tag }}"
@@ -59,10 +57,10 @@ spec:
         - |
             set -e
             export devops_branch={{ .Values.devops_release_branch }}
-            export PGHOST={{.Values.global.yugabyte.host}}
-            export PGPORT={{.Values.global.yugabyte.postgresql_port}}
-            export PGUSER=yugabyte
-            export PGPASSWORD=yugabyte
+            export PGHOST={{ include "sunbird.postgresHost" $ }}
+            export PGPORT={{ include "sunbird.postgresPort" $ }}
+            export PGUSER={{ include "sunbird.postgresUsername" $ }}
+            export PGPASSWORD={{ include "sunbird.postgresPassword" $ }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             # Ensure ysqlsh is available in the image
@@ -81,4 +79,3 @@ spec:
 
             echo "YugabyteSQL setup completed."
   backoffLimit: 30
-{{- end }}
