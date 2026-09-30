@@ -114,6 +114,7 @@ jobs:
     limits:
       memory: "4Gi"
       cpu: "2000m"
+      ephemeral-storage: "10Gi"
 
 # -----------------------------------------------------------------------------
 # Validation

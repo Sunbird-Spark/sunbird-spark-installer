@@ -15,6 +15,7 @@ Usage (direct):
   python3 migration/migrate_forms.py --env env.json --collection sunbird-spark-collection-v1.json
 """
 import json
+import os
 import re
 import sys
 import argparse
@@ -22,8 +23,20 @@ import urllib.request
 import urllib.error
 
 
+def safe_join(base_dir, *parts):
+    """os.path.join, but refuses to build a path that escapes base_dir --
+    guards --env/--collection against a faulty or malicious CLI argument
+    (e.g. '../../../etc/passwd' or an absolute path) walking the read
+    outside the directory this script is intended to be run from."""
+    candidate = os.path.realpath(os.path.join(base_dir, *parts))
+    base = os.path.realpath(base_dir)
+    if os.path.commonpath([candidate, base]) != base:
+        raise ValueError(f"Refusing to access outside {base!r}: {candidate!r}")
+    return candidate
+
+
 def load_env(path):
-    with open(path) as f:
+    with open(safe_join(os.getcwd(), path)) as f:
         data = json.load(f)
     return {v["key"]: v["value"] for v in data["values"] if v.get("enabled", True)}
 
@@ -124,6 +137,12 @@ def main():
     except FileNotFoundError:
         print(f"ERROR: env file not found: {args.env}")
         sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"ERROR: {args.env} is not valid JSON: {e}")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"ERROR: {e}")
+        sys.exit(1)
 
     host = env.get("host", "").rstrip("/")
     apikey = env.get("apikey", "")
@@ -133,10 +152,16 @@ def main():
         sys.exit(1)
 
     try:
-        with open(args.collection) as f:
+        with open(safe_join(os.getcwd(), args.collection)) as f:
             collection = json.load(f)
     except FileNotFoundError:
         print(f"ERROR: collection file not found: {args.collection}")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"ERROR: {args.collection} is not valid JSON: {e}")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"ERROR: {e}")
         sys.exit(1)
 
     print(f"\nHost : {host}\n")
