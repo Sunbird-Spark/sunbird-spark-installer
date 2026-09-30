@@ -1,13 +1,12 @@
 {{- /*
-This job runs ycqlsh (YugabyteDB's own CQL shell) and a migration image built
-specifically against YugabyteDB's YCQL -- it isn't compatible with a real
-standalone Cassandra cluster (real Cassandra uses cqlsh, a different tool,
-and the actual keyspace/table migration content this job runs lives in an
-external repo, not vendored here). Only runs on the yugabyte path; the
-equivalent schema provisioning for a real Cassandra backend is a known,
-not-yet-implemented gap when global.use_cassandra_postgres is true.
+ycqlsh (used by this job) is itself a fork of real Apache Cassandra's own
+cqlsh, and the actual .cql content it runs (scripts/sunbird-yugabyte-migrations)
+is genuine Cassandra syntax -- references real
+org.apache.cassandra.db.compaction.* / io.compress.* class names, SimpleStrategy
+replication, standard CQL DDL. Nothing YCQL-specific found in either the tool
+or the content, so this runs the same way regardless of which backend
+global.use_cassandra_postgres selects.
 */ -}}
-{{- if not .Values.global.use_cassandra_postgres }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -43,7 +42,7 @@ spec:
             memory: 64Mi
         command: ["/bin/sh", "-c"]
         args:
-        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z  {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte; sleep 10; done'"
+        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z  {{ include "sunbird.cassandraHost" $ }} {{ include "sunbird.cassandraPort" $ }}; do echo waiting for cassandra; sleep 10; done'"
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
@@ -64,8 +63,8 @@ spec:
         - |
           set -ex
           export ENV={{ .Values.global.env | default "dev" }}
-          export YCQLSH_HOST={{ .Values.global.yugabyte.host }}
-          export YCQLSH_PORT={{ .Values.global.yugabyte.port }}
+          export YCQLSH_HOST={{ include "sunbird.cassandraHost" $ }}
+          export YCQLSH_PORT={{ include "sunbird.cassandraPort" $ }}
           export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
           export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
           # run migrations directly from embedded scripts
@@ -90,4 +89,3 @@ spec:
         - name: shared-volume
           mountPath: /opt/shared-volume
   backoffLimit: 30
-{{- end }}
