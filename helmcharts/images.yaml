@@ -44,7 +44,7 @@ images:
 
   player: &player
     repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "test-quml-0.1.20_6cde166"
+    tag: "test-quml-0.1.20-1_b61ee20"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
