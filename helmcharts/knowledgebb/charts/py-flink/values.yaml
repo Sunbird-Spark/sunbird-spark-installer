@@ -182,7 +182,7 @@ py_flink_jobs:
       cloud_storage_auth_type: OIDC
       cloud_storage_container: "{{ .Values.global.public_container_name }}"
       cloud_storage_auth:
-        account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
+        account_name: "{{ (splitList \".\" (.Values.global.object_storage_endpoint | default \"\")) | first }}"
 
       enrichment:
         transcript:
@@ -253,7 +253,7 @@ py_flink_jobs:
       cloud_storage_container: "{{ .Values.global.public_container_name }}"
       # account_name and public_endpoint are required for OIDC storage configuration.
       cloud_storage_auth:
-        account_name: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
+        account_name: "{{ (splitList \".\" (.Values.global.object_storage_endpoint | default \"\")) | first }}"
       cloud_storage_public_endpoint: "{{ .Values.global.object_storage_endpoint }}"
 
       transcription:

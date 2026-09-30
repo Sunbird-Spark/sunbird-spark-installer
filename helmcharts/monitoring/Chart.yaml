@@ -27,3 +27,16 @@ dependencies:
   - name: common
     repository: https://nimbushubin.github.io/helmcharts
     version: 0.1.0
+  # The 5 below are vendored locally under charts/ (customized in-repo, not
+  # fetched from any remote repo) -- declared here with no `repository` so
+  # `helm lint`/`helm dependency` metadata matches what's actually on disk.
+  - name: kube-prometheus-stack
+    version: 52.1.0
+  - name: kubernetes-dashboard
+    version: 7.0.0-alpha1
+  - name: loki
+    version: 5.41.4
+  - name: reloader
+    version: 1.0.60
+  - name: alloy
+    version: 1.5.1
