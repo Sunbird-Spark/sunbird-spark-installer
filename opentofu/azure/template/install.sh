@@ -124,14 +124,9 @@ function install_component() {
         fi
     fi
 
-    # ai-pipeline deploys into its own namespace, and --server-side is used only for its own
-    # release: RestateCluster/RestateDeployment (CRDs) don't diff correctly under Helm's default
-    # client-side apply, and this release is now the only one that manages them.
     local namespace="sunbird"
-    local extra_flags=""
     if [ "$component" = "ai-pipeline" ]; then
         namespace="ai-pipeline"
-        extra_flags="--server-side"
     fi
 
     helm upgrade --install "$component" "$component" --namespace "$namespace" -f "$component/values.yaml" \
@@ -140,7 +135,7 @@ function install_component() {
         -f images.yaml \
         -f "global-resources.yaml" \
         -f "../opentofu/azure/$environment/global-values.yaml" \
-        -f "../opentofu/azure/$environment/global-cloud-values.yaml" --timeout 30m --debug $extra_flags
+        -f "../opentofu/azure/$environment/global-cloud-values.yaml" --timeout 30m --debug
 }
 
 function install_service() {
