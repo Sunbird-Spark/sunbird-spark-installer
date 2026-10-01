@@ -40,10 +40,11 @@ spec:
             - name: KAFKA_CLUSTER_NAME
               value: {{ .Values.kafka.clusterName | quote }}
             # Handed to Restate, which resolves it from its own namespace, so a bare Service name
-            # (global.kafka.host is `kafka`) is qualified with this release's namespace.
+            # (global.kafka.host is `kafka`) is qualified with Kafka's own namespace (global.kafkaNamespace,
+            # e.g. `sunbird`) — not this release's namespace, which is a different one.
             {{- $kafkaHost := .Values.global.kafka.host }}
             {{- if not (contains "." $kafkaHost) }}
-            {{- $kafkaHost = printf "%s.%s.svc.%s" $kafkaHost (include "common.names.namespace" .) .Values.global.clusterDomain }}
+            {{- $kafkaHost = printf "%s.%s.svc.%s" $kafkaHost .Values.global.kafkaNamespace .Values.global.clusterDomain }}
             {{- end }}
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: {{ printf "%s:%d" $kafkaHost (.Values.global.kafka.port | int) | quote }}

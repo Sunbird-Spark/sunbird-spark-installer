@@ -14,6 +14,18 @@ global:
   # the cluster's actual workload in a namespace matching this name. Nested under global so every
   # subchart (core-api, units) reads the same value rather than each carrying its own copy.
   restateClusterName: ai-pipeline
+  # Kafka lives in `sunbird`, not this release's own namespace. Nested under global (not restate:)
+  # so the core-api subchart can qualify KAFKA_BOOTSTRAP_SERVERS with it too — subcharts only
+  # inherit global.*, not the parent chart's other root values.
+  kafkaNamespace: sunbird
+  kafka:
+    host: "kafka"
+    port: 9092
+  # YugabyteDB also lives in `sunbird`, not this release's own namespace.
+  yugabyteNamespace: sunbird
+  yugabyte:
+    host: "yb-tserver-service"
+    postgresql_port: 5433
 
 # Installs the RestateCluster/RestateDeployment CRDs + operator controller.
 restate-operator-helm:
@@ -23,8 +35,6 @@ restate-operator-helm:
 restate:
   globalImageKey: restate_server
   storageRequestBytes: 2147483648 # 2 GiB to start
-  # Kafka lives in `sunbird`, not this release's own namespace — don't swap for $ns/common.names.namespace.
-  kafkaNamespace: sunbird
   kafkaPodLabels:
     app.kubernetes.io/name: kafka
 
