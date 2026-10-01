@@ -34,9 +34,6 @@ core-api:
 litellm:
   enabled: true
 
-whisper:
-  enabled: true
-
 # One entry per deployable Restate workflow/service unit. Each becomes one RestateDeployment
 # (templates/units/restatedeployment.yaml) that registers itself with core-api on boot. Its Kafka
 # triggers come from the image's own metadata.json, not from here.
@@ -57,8 +54,24 @@ units:
     env:
       # knowlg-service stays in sunbird — cross-namespace FQDN, not the bare Service name.
       KNOWLG_BASE_URL: "http://knowlg-service.sunbird.svc.{{ .Values.global.clusterDomain }}:9000"
-      WHISPER_BASE_URL: "http://whisper-service:8000"
       AZURE_STORAGE_ACCOUNT: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
       AZURE_STORAGE_CONTAINER: "{{ .Values.global.public_container_name }}"
       AZURE_STORAGE_AUTH_TYPE: "OIDC"
       LITELLM_URL: "http://litellm:4000"
+  whisper:
+    enabled: true
+    globalImageKey: whisper
+    port: 9080
+    replicas: 1
+    minReadySeconds: 30
+    resources:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+    env:
+      WHISPER_MODEL_SIZE: small
+      WHISPER_DEVICE: cpu
+      WHISPER_COMPUTE_TYPE: int8
