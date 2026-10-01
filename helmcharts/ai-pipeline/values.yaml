@@ -28,6 +28,14 @@ restate:
   kafkaPodLabels:
     app.kubernetes.io/name: kafka
 
+# Creates core-api's catalogue database + tables before it starts — see
+# templates/provision/job.yaml and files/ai_pipeline_catalogue.sql.
+migration:
+  waitTime: 120
+  image:
+    repository: postgres
+    tag: "17-alpine"
+
 core-api:
   enabled: true
 
