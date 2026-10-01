@@ -24,6 +24,10 @@ spec:
         - name: sql
           configMap:
             name: {{ include "common.names.fullname" . }}-catalogue-migration
+      {{- $yugabyteHost := .Values.global.yugabyte.host }}
+      {{- if not (contains "." $yugabyteHost) }}
+      {{- $yugabyteHost = printf "%s.%s.svc.%s" $yugabyteHost .Values.global.yugabyteNamespace .Values.global.clusterDomain }}
+      {{- end }}
       initContainers:
         - name: wait-for-yugabyte
           image: busybox
@@ -33,7 +37,7 @@ spec:
             limits: { cpu: 200m, memory: 64Mi }
           command: ['/bin/sh', '-c']
           args:
-            - "timeout {{ .Values.migration.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port }}; do echo waiting for yugabyte; sleep 10; done'"
+            - "timeout {{ .Values.migration.waitTime }} sh -c 'until nc -z {{ $yugabyteHost }} {{ .Values.global.yugabyte.postgresql_port }}; do echo waiting for yugabyte; sleep 10; done'"
       containers:
         - name: migration
           image: "{{ .Values.migration.image.repository }}:{{ .Values.migration.image.tag }}"
@@ -43,13 +47,13 @@ spec:
             limits: { cpu: 200m, memory: 256Mi, ephemeral-storage: 512Mi }
           env:
             - name: PGHOST
-              value: {{ .Values.global.yugabyte.host | quote }}
+              value: {{ $yugabyteHost | quote }}
             - name: PGPORT
               value: {{ .Values.global.yugabyte.postgresql_port | quote }}
             - name: PGUSER
-              value: {{ .Values.global.yugabyte.user | quote }}
+              value: {{ .Values.global.yugabyte.ysql.user | quote }}
             - name: PGPASSWORD
-              value: {{ .Values.global.yugabyte.password | quote }}
+              value: {{ .Values.global.yugabyte.ysql.password | quote }}
           command: ['psql', '-f', '/opt/migrations/ai_pipeline_catalogue.sql']
           volumeMounts:
             - name: sql
