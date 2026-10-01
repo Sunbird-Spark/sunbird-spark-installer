@@ -138,11 +138,6 @@ kafka: &kafka
     - name: "{{ .Values.global.env }}.media.multilingual.dlq"
       partitions: 1
       replicationFactor: 1
-    # Restate-based replacement for the four PyFlink topics above (removed once the parallel-run
-    # verification window is complete — see charts/ai-pipeline/README.md). Generic, emitted by
-    # knowlg-publish on every Content/Collection/Question/QuestionSet publish, not scoped to
-    # Transcript or to enrichment specifically — every unit that cares filters its own trigger
-    # condition against edata.enrichmentTypes/objectType.
     - name: "{{ .Values.global.env }}.content.published"
       partitions: 3
       replicationFactor: 1
@@ -230,11 +225,6 @@ flink:
   enabled: true
 
 py-flink:
-  enabled: true
-
-# Parallel-run verification window (migration plan step 5) skipped — cutting over directly.
-# Requires restate-operator installed cluster-wide first (see charts/ai-pipeline/README.md).
-ai-pipeline:
   enabled: true
 
 global:

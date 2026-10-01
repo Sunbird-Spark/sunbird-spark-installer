@@ -646,9 +646,8 @@ global:
     repository: "sunbird-knowlg/ai-pipeline/caption-generator"
     tag: "spark-v1.1.0_93887dd"
 
-  # Restate-based replacement for enrichment_router/caption_generator above (removed once the
-  # parallel-run verification window is complete), deployed via the `ai-pipeline` chart
-  # (helmcharts/knowledgebb/charts/ai-pipeline). Built and pushed by ai-pipeline's own
+  # Restate-based replacement for enrichment_router/caption_generator above, deployed via the
+  # standalone `ai-pipeline` chart (helmcharts/ai-pipeline). Built and pushed by ai-pipeline's own
   # .github/workflows/build.yml on tag push, same <git-tag>_<short-sha> convention as above.
   restate_server:
     registry: "docker.restate.dev"
