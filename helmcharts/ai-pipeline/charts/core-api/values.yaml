@@ -1,0 +1,31 @@
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: {}
+commonAnnotations: {}
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+replicaCount: 1
+globalImageKey: core_api
+service:
+  port: 3000
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Reuses the cluster's existing yugabyte superuser (global.yugabyte.user/password) rather than a
+# dedicated ai_pipeline role — see scripts/sunbird-yugabyte-migrations/sunbird-knowlg/
+# ai_pipeline_catalogue.sql, which creates only the database, owned by yugabyte.
+database:
+  name: ai_pipeline_catalogue
+
+kafka:
+  # A name inside Restate, not the environment — must equal every unit's metadata.json `cluster`.
+  clusterName: local

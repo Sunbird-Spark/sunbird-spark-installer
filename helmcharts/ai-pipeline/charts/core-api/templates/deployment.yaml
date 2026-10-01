@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 8 }}
+    spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.image.pullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: core-api
+          image: "{{ (index .Values.global .Values.globalImageKey).registry }}/{{ (index .Values.global .Values.globalImageKey).repository }}:{{ (index .Values.global .Values.globalImageKey).tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+          env:
+            - name: PORT
+              value: {{ .Values.service.port | quote }}
+            - name: HOST
+              value: "0.0.0.0"
+            # The operator creates its own namespace, named identically to the RestateCluster,
+            # with a single Service named plainly `restate` exposing 9070 (admin) and 8080
+            # (ingress). Same namespace as core-api under the current layout, but the FQDN still
+            # resolves correctly either way.
+            - name: RESTATE_ADMIN_URL
+              value: {{ printf "http://restate.%s.svc.%s:9070" .Values.global.restateClusterName .Values.global.clusterDomain | quote }}
+            - name: RESTATE_INGRESS_URL
+              value: {{ printf "http://restate.%s.svc.%s:8080" .Values.global.restateClusterName .Values.global.clusterDomain | quote }}
+            - name: KAFKA_CLUSTER_NAME
+              value: {{ .Values.kafka.clusterName | quote }}
+            # Handed to Restate, which resolves it from its own namespace, so a bare Service name
+            # (global.kafka.host is `kafka`) is qualified with this release's namespace.
+            {{- $kafkaHost := .Values.global.kafka.host }}
+            {{- if not (contains "." $kafkaHost) }}
+            {{- $kafkaHost = printf "%s.%s.svc.%s" $kafkaHost (include "common.names.namespace" .) .Values.global.clusterDomain }}
+            {{- end }}
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: {{ printf "%s:%d" $kafkaHost (.Values.global.kafka.port | int) | quote }}
+            # core-api only answers Host names on this list (its guard against DNS rebinding; there
+            # is no auth). Units call it by its Service name; the probes below send localhost.
+            {{- $svc := include "common.names.fullname" . }}
+            {{- $ns := include "common.names.namespace" . }}
+            - name: ALLOWED_HOSTS
+              value: {{ list "localhost" "127.0.0.1" "::1" $svc (printf "%s.%s" $svc $ns) (printf "%s.%s.svc" $svc $ns) (printf "%s.%s.svc.%s" $svc $ns .Values.global.clusterDomain) | join "," | quote }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "common.names.fullname" . }}
+                  key: DATABASE_URL
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          # The Host header is set because kubelet otherwise sends the pod IP, which ALLOWED_HOSTS
+          # refuses with a 403.
+          #
+          # core-api waits for Postgres and Restate before it listens (up to ~5 minutes), so the
+          # startup probe gives it that long before liveness can restart it.
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: http
+              httpHeaders: [{ name: Host, value: localhost }]
+            periodSeconds: 5
+            failureThreshold: 60
+          # Postgres and Restate both answering: units can register through it.
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+              httpHeaders: [{ name: Host, value: localhost }]
+            periodSeconds: 5
+          # The process answers; a Restate or Postgres outage must not restart it.
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+              httpHeaders: [{ name: Host, value: localhost }]
+            periodSeconds: 10

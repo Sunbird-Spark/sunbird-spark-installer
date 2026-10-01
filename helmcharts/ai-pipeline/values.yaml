@@ -1,0 +1,64 @@
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: {}
+commonAnnotations: {}
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+global:
+  clusterDomain: cluster.local
+  # Restate cluster name — also must equal this release's own --namespace: the operator creates
+  # the cluster's actual workload in a namespace matching this name. Nested under global so every
+  # subchart (core-api, units) reads the same value rather than each carrying its own copy.
+  restateClusterName: ai-pipeline
+
+# Installs the RestateCluster/RestateDeployment CRDs + operator controller.
+restate-operator-helm:
+  enabled: true
+
+# Single-node for now (see design doc §5).
+restate:
+  globalImageKey: restate_server
+  storageRequestBytes: 2147483648 # 2 GiB to start
+  # Kafka lives in `sunbird`, not this release's own namespace — don't swap for $ns/common.names.namespace.
+  kafkaNamespace: sunbird
+  kafkaPodLabels:
+    app.kubernetes.io/name: kafka
+
+core-api:
+  enabled: true
+
+litellm:
+  enabled: true
+
+whisper:
+  enabled: true
+
+# One entry per deployable Restate workflow/service unit. Each becomes one RestateDeployment
+# (templates/units/restatedeployment.yaml) that registers itself with core-api on boot. Its Kafka
+# triggers come from the image's own metadata.json, not from here.
+units:
+  transcript:
+    enabled: true
+    globalImageKey: wf_transcript
+    port: 9080
+    replicas: 1
+    minReadySeconds: 30
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 1Gi
+    env:
+      # knowlg-service stays in sunbird — cross-namespace FQDN, not the bare Service name.
+      KNOWLG_BASE_URL: "http://knowlg-service.sunbird.svc.{{ .Values.global.clusterDomain }}:9000"
+      WHISPER_BASE_URL: "http://whisper-service:8000"
+      AZURE_STORAGE_ACCOUNT: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
+      AZURE_STORAGE_CONTAINER: "{{ .Values.global.public_container_name }}"
+      AZURE_STORAGE_AUTH_TYPE: "OIDC"
+      LITELLM_URL: "http://litellm:4000"

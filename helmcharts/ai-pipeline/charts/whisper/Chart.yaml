@@ -1,0 +1,10 @@
+apiVersion: v2
+name: whisper
+description: Speech-to-text backend for the transcript unit.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+dependencies:
+  - name: common
+    repository: https://nimbushubin.github.io/helmcharts
+    version: 0.1.0

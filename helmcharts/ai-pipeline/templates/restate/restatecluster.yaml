@@ -1,0 +1,34 @@
+# Single-node (no spec.compute.replicas/spec.config) — see design doc §5.
+{{- $ns := include "common.names.namespace" . }}
+{{- $coreApi := dict
+      "namespaceSelector" (dict "matchLabels" (dict "kubernetes.io/metadata.name" $ns))
+      "podSelector" (dict "matchLabels" (dict "app.kubernetes.io/name" "core-api")) }}
+apiVersion: restate.dev/v1
+kind: RestateCluster
+metadata:
+  name: {{ .Values.global.restateClusterName | quote }}
+  namespace: {{ $ns | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+spec:
+  compute:
+    image: "{{ (index .Values.global .Values.restate.globalImageKey).registry }}/{{ (index .Values.global .Values.restate.globalImageKey).repository }}:{{ (index .Values.global .Values.restate.globalImageKey).tag }}"
+  storage:
+    # int64 cast: plain int renders large values in scientific notation.
+    storageRequestBytes: {{ .Values.restate.storageRequestBytes | int64 }}
+  # Operator default-denies the cluster's namespace; core-api needs admin (9070, registration) and
+  # ingress (8080, starting runs), Restate needs Kafka egress for trigger topics.
+  # Not currently enforced (no NetworkPolicy CNI on this cluster) but kept correct regardless.
+  security:
+    networkPeers:
+      admin: {{- list $coreApi | toYaml | nindent 8 }}
+      ingress: {{- list $coreApi | toYaml | nindent 8 }}
+    networkEgressRules:
+      - to:
+          - namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: {{ .Values.restate.kafkaNamespace }}
+            podSelector:
+              matchLabels: {{- toYaml .Values.restate.kafkaPodLabels | nindent 16 }}
+        ports:
+          - port: {{ .Values.global.kafka.port | int }}
+            protocol: TCP
