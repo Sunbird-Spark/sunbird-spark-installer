@@ -20,7 +20,3 @@ dependencies:
     version: 0.1.0
     repository: "file://./charts/litellm"
     condition: litellm.enabled
-  - name: whisper
-    version: 0.1.0
-    repository: "file://./charts/whisper"
-    condition: whisper.enabled

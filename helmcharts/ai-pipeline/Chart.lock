@@ -11,8 +11,5 @@ dependencies:
 - name: litellm
   repository: file://./charts/litellm
   version: 0.1.0
-- name: whisper
-  repository: file://./charts/whisper
-  version: 0.1.0
-digest: sha256:39c89fe9b332b3aaacbdc82dfa077273f5261a39dec9619400e78ad5358ee5a0
-generated: "2026-10-01T10:53:50.304425+05:30"
+digest: sha256:2b5f3805246d12af08dc55445101ef7e0250eda91474c697fec5458169daa329
+generated: "2026-10-01T15:47:11.294887+05:30"
