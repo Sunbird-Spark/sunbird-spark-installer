@@ -1,5 +1,8 @@
 deployed_dial_addon:  &deployed_dial_addon  "false"
 enable_asset_enrichment: &enable_asset_enrichment "false"
+# Gates ai-pipeline in install_helm_components' "deploy everything" path only — an explicit
+# `install_component ai-pipeline` / `install_helm_components ai-pipeline` call always deploys it.
+ai_pipeline_enabled: "false"
 default_passwords:
   grafana_admin_password: &grafana-admin-password "prom-operator"
   keycloak_password: &keycloak-password "admin"

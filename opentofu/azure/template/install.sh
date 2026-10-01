@@ -88,9 +88,16 @@ function install_component() {
         cd ../../../helmcharts 2>/dev/null || true
     fi
     local component="$1"
+
+    if [ "$component" = "ai-pipeline" ] && [ "$(yq '.ai_pipeline_enabled' "../opentofu/azure/$environment/global-values.yaml")" != "true" ]; then
+        echo -e "\nSkipping ai-pipeline (ai_pipeline_enabled is not true in global-values.yaml)"
+        return
+    fi
+
     # namespaces sunbird and velero are created by workload-identity Terraform module
     kubectl create namespace volume-autoscaler 2>/dev/null || true
     kubectl create namespace nlweb 2>/dev/null || true
+    kubectl create namespace ai-pipeline 2>/dev/null || true
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
@@ -110,13 +117,6 @@ function install_component() {
             certificate_keys
         fi
       fi
-    if [ "$component" = "knowledgebb" ]; then
-        # Prerequisite for the ai-pipeline subchart's RestateCluster/RestateDeployment
-        # resources — cluster-wide, its own CRDs, not templated by this chart itself.
-        # --install makes this safe to re-run on every knowledgebb deploy, not just the first.
-        helm upgrade --install restate-operator oci://ghcr.io/restatedev/restate-operator-helm \
-            --namespace restate-operator --create-namespace
-    fi
     local addon_values_flag=""
     if [ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]; then
         if [ -f "../addons/global-cloud-values.yaml" ]; then
@@ -124,13 +124,23 @@ function install_component() {
         fi
     fi
 
-    helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
+    # ai-pipeline deploys into its own namespace, and --server-side is used only for its own
+    # release: RestateCluster/RestateDeployment (CRDs) don't diff correctly under Helm's default
+    # client-side apply, and this release is now the only one that manages them.
+    local namespace="sunbird"
+    local extra_flags=""
+    if [ "$component" = "ai-pipeline" ]; then
+        namespace="ai-pipeline"
+        extra_flags="--server-side"
+    fi
+
+    helm upgrade --install "$component" "$component" --namespace "$namespace" -f "$component/values.yaml" \
         $ed_values_flag \
         $addon_values_flag \
         -f images.yaml \
         -f "global-resources.yaml" \
         -f "../opentofu/azure/$environment/global-values.yaml" \
-        -f "../opentofu/azure/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/azure/$environment/global-cloud-values.yaml" --timeout 30m --debug $extra_flags
 }
 
 function install_service() {
@@ -228,7 +238,8 @@ function install_helm_components() {
         install_component "$1"
     else
         # No args: deploy all bundles in order (original behavior)
-        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional")
+        # install_component itself skips ai-pipeline if ai_pipeline_enabled is not true.
+        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional" "ai-pipeline")
         for component in "${components[@]}"; do
             install_component "$component"
         done
