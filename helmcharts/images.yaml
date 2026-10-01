@@ -113,7 +113,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.1.1_adca974"
+    tag: "spark-v1.1.1-ai-pipeline-v1_2add1ad"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -617,7 +617,7 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.1.1_b20f070"
+    tag: "spark-v1.1.1-ai-pipeline-v1_0ea74e7"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
@@ -657,12 +657,12 @@ global:
   core_api:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/core-api"
-    tag: "spark-v1.1.1-transcript-restate-wf-5_1a4555d"
+    tag: "spark-v1.1.1-ai-pipeline-v1_9648458"
 
   wf_transcript:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/wf-transcript"
-    tag: "spark-v1.1.1-transcript-restate-wf-5_1a4555d"
+    tag: "spark-v1.1.1-ai-pipeline-v1_9648458"
 
   # Speech-to-text backend for the transcript unit. Not a Restate unit itself (no metadata.json),
   # built by its own dedicated CI job (ai-pipeline's build.yml) since pipeline units never
@@ -670,7 +670,7 @@ global:
   whisper:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/whisper"
-    tag: "spark-v1.1.1-transcript-restate-wf-6_ac54b27"
+    tag: "spark-v1.1.1-ai-pipeline-v1_9648458"
 
   # Model gateway for ai-pipeline units — same image ai-pipeline's own local dev stack pins
   # (compose.yaml). A pre-built public image, not one this repo builds itself.
