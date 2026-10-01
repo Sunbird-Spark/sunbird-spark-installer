@@ -1,0 +1,25 @@
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: {}
+commonAnnotations: {}
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+globalImageKey: whisper
+service:
+  port: 8000
+resources:
+  requests:
+    cpu: "1"
+    memory: 2Gi
+  limits:
+    cpu: "2"
+    memory: 4Gi
+
+model:
+  size: small
+  device: cpu
+  computeType: int8
