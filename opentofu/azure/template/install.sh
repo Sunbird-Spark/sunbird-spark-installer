@@ -127,6 +127,13 @@ function install_component() {
     local namespace="sunbird"
     if [ "$component" = "ai-pipeline" ]; then
         namespace="ai-pipeline"
+        # restate-operator-helm's own CRDs are disabled (installCrds: false); this chart vendors
+        # them into its own crds/ instead. Helm's native crds/ only applies within the same `helm
+        # upgrade --install` run, but that run's own object-kind resolution is built before crds/
+        # is applied, so it still fails to resolve RestateCluster/RestateDeployment on a first-ever
+        # install unless the CRDs already exist before Helm starts — hence this plain kubectl
+        # apply ahead of time. No-op on every later run.
+        kubectl apply -f ai-pipeline/crds/
     fi
 
     helm upgrade --install "$component" "$component" --namespace "$namespace" -f "$component/values.yaml" \
