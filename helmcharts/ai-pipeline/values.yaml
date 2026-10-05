@@ -27,9 +27,15 @@ global:
     host: "yb-tserver-service"
     postgresql_port: 5433
 
-# Installs the RestateCluster/RestateDeployment CRDs + operator controller.
+# Installs the operator controller. Its CRDs are vendored into this chart's own crds/ instead of
+# letting this subchart template-render them — Helm's native crds/ applies before any template
+# in the release, so the controller's CRDs always exist before this chart's own RestateCluster/
+# RestateDeployment objects need them (can't rely on template ordering across two charts in one
+# release). Means they won't auto-upgrade on schema changes — re-copy from the subchart's own
+# charts/restate-operator-crds/crd-manifests/ if restate-operator-helm's version bumps.
 restate-operator-helm:
   enabled: true
+  installCrds: false
 
 # Single-node for now (see design doc §5).
 restate:
