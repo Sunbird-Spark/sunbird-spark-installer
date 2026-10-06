@@ -16,15 +16,15 @@ set -euo pipefail
 ###############################################################
 
 # ── CONFIGURE THESE BEFORE RUNNING ──────────────────────────────────────────
-TENANT_ID=""              # Azure AD Tenant ID (Azure Portal -> Azure Active Directory -> Overview)
-SUBSCRIPTION_ID=""        # Azure Subscription ID (Azure Portal -> Subscriptions)
-BUILDING_BLOCK=""         # Must match global.building_block in global-values.yaml (e.g. "ed")
-ENVIRONMENT=""            # Must match configs/ folder name (e.g. "dev")
-RESOURCE_GROUP=""         # Azure resource group (e.g. "ed-dev")
-LOCATION=""               # Azure region (e.g. "Central India")
-GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
-GITHUB_REPO=""            # GitHub repo name for repo-level runner, or leave empty for org-level
-GITHUB_RUNNER_TOKEN=""    # GitHub -> Settings -> Actions -> Runners -> New runner -> copy token (expires in 1 hour)
+TENANT_ID="4836227a-1ace-434f-b54c-8a7a14a0b449"       # Azure AD Tenant ID
+SUBSCRIPTION_ID="ace365b8-6378-40cc-99f6-e021f02e5905" # Azure Subscription ID ("OneClickInstallation")
+BUILDING_BLOCK="ed"       # Must match global.building_block in global-values.yaml
+ENVIRONMENT="test"        # Must match configs/ folder name
+RESOURCE_GROUP="ed-test"  # Azure resource group
+LOCATION="Central India"  # Azure region (matches ed-dev/ed-sandbox)
+GITHUB_ORG="Sunbird-Spark" # GitHub org name
+GITHUB_REPO=""            # Empty = org-level runner
+GITHUB_RUNNER_TOKEN=""    # FILL IN RIGHT BEFORE RUNNING: GitHub -> Settings -> Actions -> Runners -> New runner -> copy token (expires in 1 hour)
 VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "false" = Azure Bastion (no public IP on VM)
 # ─────────────────────────────────────────────────────────────────────────────
 
