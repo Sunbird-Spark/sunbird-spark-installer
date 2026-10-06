@@ -77,20 +77,29 @@ function certificate_keys() {
 
 function certificate_config() {
     echo "Configuring Certificate keys"
-    if ! kubectl -n sunbird exec deploy/knowledge-mw -- which jq >/dev/null 2>&1; then
-        echo "jq not found in knowledge-mw container, attempting to install..."
-        # Try to install jq using available package manager, fallback if apt fails
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get update || true"
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get install -y jq || true"
-    fi
+    # registry-service is only reachable inside the cluster. knowledge-mw's image
+    # is distroless (no shell, no curl, no jq at all -- exec'ing into it to run
+    # those tools doesn't work), so port-forward to it from here instead, where
+    # curl/jq are guaranteed to exist (installed by setup-installer-vm.sh).
+    kubectl -n sunbird port-forward svc/registry-service 18081:8081 >/tmp/registry-port-forward.log 2>&1 &
+    local pf_pid=$!
+    trap 'kill $pf_pid 2>/dev/null || true' RETURN
 
-    CERTKEY=$(kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
-    # Inject cert keys to the service if its not available 
+    local retries=0
+    until curl -s -o /dev/null "http://localhost:18081/health" || [ $retries -ge 15 ]; do
+        sleep 1
+        retries=$((retries + 1))
+    done
+
+    CERTKEY=$(curl --location --request POST 'http://localhost:18081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
+    # Inject cert keys to the service if its not available
     if [ -z "$CERTKEY" ]; then
         echo "Certificate RSA public key not available"
         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
+        curl --location --request POST 'http://localhost:18081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
     fi
+
+    kill $pf_pid 2>/dev/null || true
 }
 function install_component() {
     # We need a dummy cm for configmap to start. Later Lernbb will create real one
