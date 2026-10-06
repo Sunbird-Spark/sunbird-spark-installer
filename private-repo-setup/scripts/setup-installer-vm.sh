@@ -23,7 +23,7 @@ ENVIRONMENT="test"        # Must match configs/ folder name
 RESOURCE_GROUP="ed-test"  # Azure resource group
 LOCATION="Central India"  # Azure region (matches ed-dev/ed-sandbox)
 GITHUB_ORG="Sunbird-Spark" # GitHub org name
-GITHUB_REPO=""            # Empty = org-level runner
+GITHUB_REPO="spark-devops-test" # Repo-level runner registered on this repo
 GITHUB_RUNNER_TOKEN=""    # FILL IN RIGHT BEFORE RUNNING: GitHub -> Settings -> Actions -> Runners -> New runner -> copy token (expires in 1 hour)
 VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "false" = Azure Bastion (no public IP on VM)
 # ─────────────────────────────────────────────────────────────────────────────
