@@ -1,0 +1,22 @@
+apiVersion: v2
+name: ai-pipeline
+description: Restate-based AI enrichment pipeline, replacing py-flink's enrichment-router/caption-generator.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+dependencies:
+  - name: common
+    repository: https://nimbushubin.github.io/helmcharts
+    version: 0.1.0
+  - name: restate-operator-helm
+    repository: oci://ghcr.io/restatedev
+    version: 3.1.0
+    condition: restate-operator-helm.enabled
+  - name: core-api
+    version: 0.1.0
+    repository: "file://./charts/core-api"
+    condition: core-api.enabled
+  - name: litellm
+    version: 0.1.0
+    repository: "file://./charts/litellm"
+    condition: litellm.enabled

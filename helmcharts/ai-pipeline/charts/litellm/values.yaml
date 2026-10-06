@@ -1,0 +1,26 @@
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: {}
+commonAnnotations: {}
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+globalImageKey: litellm
+service:
+  port: 4000
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+model:
+  name: chat-default
+  provider: "azure/gpt-5-mini"
+  apiBase: "https://cossdev-semanticsearch.openai.azure.com/"
+  apiVersion: "2024-12-01-preview"

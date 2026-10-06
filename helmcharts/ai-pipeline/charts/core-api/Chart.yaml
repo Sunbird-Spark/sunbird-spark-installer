@@ -1,0 +1,10 @@
+apiVersion: v2
+name: core-api
+description: ai-pipeline's workflow registry/control-plane.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+dependencies:
+  - name: common
+    repository: https://nimbushubin.github.io/helmcharts
+    version: 0.1.0

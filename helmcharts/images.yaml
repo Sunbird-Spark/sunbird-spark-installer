@@ -113,7 +113,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.1.1_adca974"
+    tag: "spark-v1.1.1-ai-pipeline-v1_2add1ad"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -158,7 +158,7 @@ images:
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v1.1.1-restate-wf_078f31d"
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
@@ -617,7 +617,7 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.1.1_b20f070"
+    tag: "spark-v1.1.1-ai-pipeline-v1_0ea74e7"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
@@ -633,7 +633,7 @@ global:
   # ai-pipeline/docker/Dockerfile.enrichment-router and
   # Dockerfile.caption-generator.
   #
-  # Built and pushed by ai-pipeline's .github/workflows/build.yaml on tag
+  # Built and pushed by ai-pipeline's .github/workflows/build.yml on tag
   # push — tag format is <git-tag>_<short-sha> (see knowlg-service.yml for
   # the same convention).
   enrichment_router:
@@ -645,3 +645,36 @@ global:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/caption-generator"
     tag: "spark-v1.1.0_93887dd"
+
+  # Restate-based replacement for enrichment_router/caption_generator above, deployed via the
+  # standalone `ai-pipeline` chart (helmcharts/ai-pipeline). Built and pushed by ai-pipeline's own
+  # .github/workflows/build.yml on tag push, same <git-tag>_<short-sha> convention as above.
+  restate_server:
+    registry: "docker.restate.dev"
+    repository: "restatedev/restate"
+    tag: "1.7.10"
+
+  core_api:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/core-api"
+    tag: "spark-v1.1.1-ai-pipeline-v5_9fd0f17"
+
+  wf_transcript:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/wf-transcript"
+    tag: "spark-v1.1.1-ai-pipeline-v5_9fd0f17"
+
+  # Speech-to-text backend for the transcript unit. Not a Restate unit itself (no metadata.json),
+  # built by its own dedicated CI job (ai-pipeline's build.yml) since pipeline units never
+  # discovers it.
+  whisper:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/whisper"
+    tag: "spark-v1.1.1-ai-pipeline-v5_9fd0f17"
+
+  # Model gateway for ai-pipeline units — same image ai-pipeline's own local dev stack pins
+  # (compose.yaml). A pre-built public image, not one this repo builds itself.
+  litellm:
+    registry: "ghcr.io"
+    repository: "berriai/litellm"
+    tag: "v1.101.0"

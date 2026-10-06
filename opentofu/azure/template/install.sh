@@ -88,9 +88,16 @@ function install_component() {
         cd ../../../helmcharts 2>/dev/null || true
     fi
     local component="$1"
+
+    if [ "$component" = "ai-pipeline" ] && [ "$(yq '.ai_pipeline_enabled' "../opentofu/azure/$environment/global-values.yaml")" != "true" ]; then
+        echo -e "\nSkipping ai-pipeline (ai_pipeline_enabled is not true in global-values.yaml)"
+        return
+    fi
+
     # namespaces sunbird and velero are created by workload-identity Terraform module
     kubectl create namespace volume-autoscaler 2>/dev/null || true
     kubectl create namespace nlweb 2>/dev/null || true
+    kubectl create namespace ai-pipeline 2>/dev/null || true
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
@@ -117,7 +124,19 @@ function install_component() {
         fi
     fi
 
-    helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
+    local namespace="sunbird"
+    if [ "$component" = "ai-pipeline" ]; then
+        namespace="ai-pipeline"
+        # restate-operator-helm's own CRDs are disabled (installCrds: false); this chart vendors
+        # them into its own crds/ instead. Helm's native crds/ only applies within the same `helm
+        # upgrade --install` run, but that run's own object-kind resolution is built before crds/
+        # is applied, so it still fails to resolve RestateCluster/RestateDeployment on a first-ever
+        # install unless the CRDs already exist before Helm starts — hence this plain kubectl
+        # apply ahead of time. No-op on every later run.
+        kubectl apply -f ai-pipeline/crds/
+    fi
+
+    helm upgrade --install "$component" "$component" --namespace "$namespace" -f "$component/values.yaml" \
         $ed_values_flag \
         $addon_values_flag \
         -f images.yaml \
@@ -221,7 +240,8 @@ function install_helm_components() {
         install_component "$1"
     else
         # No args: deploy all bundles in order (original behavior)
-        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional")
+        # install_component itself skips ai-pipeline if ai_pipeline_enabled is not true.
+        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional" "ai-pipeline")
         for component in "${components[@]}"; do
             install_component "$component"
         done

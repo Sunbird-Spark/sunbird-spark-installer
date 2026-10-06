@@ -1,0 +1,101 @@
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: {}
+commonAnnotations: {}
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+global:
+  clusterDomain: cluster.local
+  # Restate cluster name — also must equal this release's own --namespace: the operator creates
+  # the cluster's actual workload in a namespace matching this name. Nested under global so every
+  # subchart (core-api, units) reads the same value rather than each carrying its own copy.
+  restateClusterName: ai-pipeline
+  # Kafka lives in `sunbird`, not this release's own namespace. Nested under global (not restate:)
+  # so the core-api subchart can qualify KAFKA_BOOTSTRAP_SERVERS with it too — subcharts only
+  # inherit global.*, not the parent chart's other root values.
+  kafkaNamespace: sunbird
+  kafka:
+    host: "kafka"
+    port: 9092
+  # YugabyteDB also lives in `sunbird`, not this release's own namespace.
+  yugabyteNamespace: sunbird
+  yugabyte:
+    host: "yb-tserver-service"
+    postgresql_port: 5433
+
+# Installs the operator controller. Its CRDs are vendored into this chart's own crds/ instead of
+# letting this subchart template-render them — Helm's native crds/ applies before any template
+# in the release, so the controller's CRDs always exist before this chart's own RestateCluster/
+# RestateDeployment objects need them (can't rely on template ordering across two charts in one
+# release). Means they won't auto-upgrade on schema changes — re-copy from the subchart's own
+# charts/restate-operator-crds/crd-manifests/ if restate-operator-helm's version bumps.
+restate-operator-helm:
+  enabled: true
+  installCrds: false
+
+# Single-node for now (see design doc §5).
+restate:
+  globalImageKey: restate_server
+  storageRequestBytes: 2147483648 # 2 GiB to start
+  kafkaPodLabels:
+    app.kubernetes.io/name: kafka
+
+# Creates core-api's catalogue database + tables before it starts — see
+# templates/provision/job.yaml and files/ai_pipeline_catalogue.sql.
+migration:
+  waitTime: 120
+  image:
+    repository: postgres
+    tag: "17-alpine"
+
+core-api:
+  enabled: true
+
+litellm:
+  enabled: true
+
+# One entry per deployable Restate workflow/service unit. Each becomes one RestateDeployment
+# (templates/units/restatedeployment.yaml) that registers itself with core-api on boot. Its Kafka
+# triggers come from the image's own metadata.json, not from here.
+units:
+  transcript:
+    enabled: true
+    globalImageKey: wf_transcript
+    port: 9080
+    replicas: 1
+    minReadySeconds: 30
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 1Gi
+    env:
+      # knowlg-service stays in sunbird — cross-namespace FQDN, not the bare Service name.
+      KNOWLG_BASE_URL: "http://knowlg-service.sunbird.svc.{{ .Values.global.clusterDomain }}:9000"
+      AZURE_STORAGE_ACCOUNT: "{{ (splitList \".\" .Values.global.object_storage_endpoint) | first }}"
+      AZURE_STORAGE_CONTAINER: "{{ .Values.global.public_container_name }}"
+      AZURE_STORAGE_AUTH_TYPE: "OIDC"
+      LITELLM_URL: "http://litellm:4000"
+  whisper:
+    enabled: true
+    globalImageKey: whisper
+    port: 9080
+    replicas: 1
+    minReadySeconds: 30
+    resources:
+      requests:
+        cpu: "1"
+        memory: 2Gi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+    env:
+      WHISPER_MODEL_SIZE: small
+      WHISPER_DEVICE: cpu
+      WHISPER_COMPUTE_TYPE: int8
