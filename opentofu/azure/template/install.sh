@@ -42,36 +42,24 @@ function create_tf_resources() {
 
 
 function certificate_keys() {
-    # Path to the env folder depends on where this was called from:
-    # install_component() cd's into helmcharts/ first (so ../opentofu/azure/$environment
-    # resolves correctly from there), but this function is also invoked directly as
-    # `bash install.sh certificate_keys` with CWD already at the env folder itself --
-    # in that case ../opentofu/azure/$environment would double up and not exist.
-    local keys_dir
-    if [ "$(basename "$(pwd)")" = "helmcharts" ]; then
-        keys_dir="../opentofu/azure/$environment"
-    else
-        keys_dir="."
-    fi
-
     #  # If keys already present in global-values.yaml → skip writing
-    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' "$keys_dir/global-values.yaml" 2>/dev/null; then
+    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/azure/$environment/global-values.yaml 2>/dev/null; then
         echo "Certificate keys already present — skipping generation and write."
         return
     fi
     # Generate private and public keys using openssl
     echo "Creation of RSA keys for certificate signing"
-    openssl genrsa -out "$keys_dir/certkey.pem";
-    openssl rsa -in "$keys_dir/certkey.pem" -pubout -out "$keys_dir/certpubkey.pem";
-    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' "$keys_dir/certkey.pem" | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' "$keys_dir/certpubkey.pem" | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' "$keys_dir/certkey.pem" | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' "$keys_dir/certpubkey.pem" | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
-    printf "\n" >> "$keys_dir/global-values.yaml"
-    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> "$keys_dir/global-values.yaml"
-    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> "$keys_dir/global-values.yaml"
-    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> "$keys_dir/global-values.yaml"
-    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> "$keys_dir/global-values.yaml"
+    openssl genrsa -out ../opentofu/azure/$environment/certkey.pem;
+    openssl rsa -in ../opentofu/azure/$environment/certkey.pem -pubout -out ../opentofu/azure/$environment/certpubkey.pem;
+    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/azure/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/azure/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../opentofu/azure/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../opentofu/azure/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
+    printf "\n" >> ../opentofu/azure/$environment/global-values.yaml
+    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> ../opentofu/azure/$environment/global-values.yaml
+    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> ../opentofu/azure/$environment/global-values.yaml
+    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> ../opentofu/azure/$environment/global-values.yaml
+    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> ../opentofu/azure/$environment/global-values.yaml
 }
 
 
