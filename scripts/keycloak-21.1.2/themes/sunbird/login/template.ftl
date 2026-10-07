@@ -38,6 +38,17 @@
       } catch(e) {}
     })();
     </script>
+    <script>
+    (function() {
+      try {
+        var stored = localStorage.getItem('sunbird-sso-providers');
+        var providers = stored ? JSON.parse(stored) : ['google'];
+        window.__enabledSsoProviders = Array.isArray(providers) ? providers : ['google'];
+      } catch(e) {
+        window.__enabledSsoProviders = ['google'];
+      }
+    })();
+    </script>
     <link rel="icon" type="image/png" sizes="32x32" href="${url.resourcesPath}/img/fav.png" />
     <#if isRTL>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
