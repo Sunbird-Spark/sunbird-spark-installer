@@ -73,7 +73,8 @@ spec:
             "-Ds3.path.style.access={{ .Values.s3_path_style_access }}",
   {{- end }}
             "-Dweb.submit.enable=false",
-            "-Dmetrics.reporter.prom.class=org.apache.flink.metrics.prometheus.PrometheusReporter",
+            "-Dmetrics.reporters=prom",
+            "-Dmetrics.reporter.prom.factory.class=org.apache.flink.metrics.prometheus.PrometheusReporterFactory",
             "-Dmetrics.reporter.prom.host={{ $jobName }}-taskmanager",
             "-Dmetrics.reporter.prom.port=9251-9260",
             "-Djobmanager.rpc.address={{ $jobName }}-jobmanager",
@@ -180,7 +181,8 @@ spec:
   {{- end }}
                 "--job-classname={{ $jobData.job_classname }}",
                 "-Dweb.submit.enable=false",
-                "-Dmetrics.reporter.prom.class=org.apache.flink.metrics.prometheus.PrometheusReporter",
+                "-Dmetrics.reporters=prom",
+                "-Dmetrics.reporter.prom.factory.class=org.apache.flink.metrics.prometheus.PrometheusReporterFactory",
                 "-Dmetrics.reporter.prom.port={{ .Values.jobmanager.prom_port }}",
                 "-Djobmanager.rpc.address={{ $jobName }}-jobmanager",
                 "-Djobmanager.rpc.port={{ .Values.jobmanager.rpc_port }}",
