@@ -97,6 +97,12 @@ global:
   openai_azure_endpoint: "REPLACE_WITH_OPENAI_AZURE_ENDPOINT"  # e.g. https://<resource>.openai.azure.com/
   openai_azure_deployment: "text-embedding-3-small"
   openai_azure_api_version: "2023-05-15"
+  # Only needed if running the optional yugabyte-managed module (opentofu/azure/modules/yugabyte-managed)
+  # to provision a YugabyteDB Aeon cluster via Azure Private Link, instead of / alongside the self-hosted
+  # YugabyteDB that ships with the learnbb/knowledgebb/edbb bundles.
+  yugabyte_managed_auth_token: "REPLACE_WITH_YUGABYTE_AEON_API_KEY"  # Usage & Billing > API Keys in the Aeon console
+  yugabyte_managed_db_username: "REPLACE_WITH_YUGABYTE_MANAGED_DB_USERNAME"
+  yugabyte_managed_db_password: "REPLACE_WITH_YUGABYTE_MANAGED_DB_PASSWORD"
   superset:
       init:
         adminUser:
