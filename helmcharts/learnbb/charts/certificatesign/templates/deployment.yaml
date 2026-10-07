@@ -56,6 +56,8 @@ spec:
           envFrom:
           - configMapRef:
               name: {{ include "common.names.fullname" . }}-env
+          - secretRef:
+              name: {{ include "common.names.fullname" . }}-secrets
           volumeMounts:
           {{- if .Values.configmap.enabled }}
           - name: config
@@ -70,6 +72,6 @@ spec:
           name: {{ include "common.names.fullname" . }}-env
       {{- if .Values.configmap.enabled }}
       - name: config
-        configMap:
-          name: {{ include "common.names.fullname" . }}
+        secret:
+          secretName: {{ include "common.names.fullname" . }}
       {{- end }}

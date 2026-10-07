@@ -7,9 +7,10 @@ terraform {
   }
 }
 provider "azurerm" {
-  subscription_id = var.subscription_id
+  subscription_id                 = var.subscription_id
   features {}                              # Always include the features block for Azure provider
   resource_provider_registrations = "none" # Optional
+  storage_use_azuread              = true
 }
 data "azurerm_subscription" "current" {}
 
@@ -39,6 +40,19 @@ resource "azurerm_storage_account" "storage_account" {
   account_tier               = var.azure_storage_tier
   account_replication_type   = var.azure_storage_replication
   https_traffic_only_enabled = true
+  shared_access_key_enabled  = false
+
+  # System-assigned identity for the storage account resource itself (e.g. if this
+  # account later adopts customer-managed keys via Key Vault, or diagnostic settings
+  # that need to authenticate outward). This is separate from, and doesn't conflict
+  # with, modules/workload-identity's user-assigned identity -- that one is used by
+  # Kubernetes workloads/Terraform to authenticate INTO this account (RBAC roles
+  # scoped to azurerm_storage_account.storage_account.id); shared_access_key_enabled
+  # = false + storage_use_azuread above already make that the only way in.
+  identity {
+    type = "SystemAssigned"
+  }
+
   blob_properties {
     cors_rule {
       max_age_in_seconds = 200
@@ -66,8 +80,15 @@ resource "azurerm_storage_container" "velero_storage_container_private" {
   storage_account_name  = azurerm_storage_account.storage_account.name
   container_access_type = "private"
 }
+# Anonymous read for blobs, scoped to this one container only ("blob" access type
+# grants GET on blobs in this container, not container listing, and not the account's
+# other containers -- storage_container_private and velero_storage_container_private
+# above stay "private"). This is CDN-style public content delivery, not a blanket
+# account-level anonymous-access allowance -- same reasoning as the public buckets in
+# opentofu/gcp/modules/storage/main.tf.
 resource "azurerm_storage_container" "storage_container_public" {
   name                  = "${local.environment_name}-public-${local.unique_uuid}"
   storage_account_name  = azurerm_storage_account.storage_account.name
   container_access_type = "blob"
 }
+

@@ -306,6 +306,10 @@ log4j_console_properties: |
   logger.netty.name = org.apache.flink.shaded.akka.org.jboss.netty.channel.DefaultChannelPipeline
   logger.netty.level = OFF
 
+  # Suppress known Flink Sink V2 Committer metric registration bug (FLINK-37559) 
+  logger.flink_metrics.name = org.apache.flink.metrics.MetricGroup
+  logger.flink_metrics.level = ERROR
+
 base_config: |
   kafka {
       broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"

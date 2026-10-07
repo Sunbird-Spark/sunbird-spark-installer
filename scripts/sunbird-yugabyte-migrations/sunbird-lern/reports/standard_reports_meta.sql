@@ -68,7 +68,7 @@ INSERT INTO standard_reports_meta (
 -- Report: course-assessment-summary
 -- Data Source: YUGABYTE_CQL_AGG
 -- Keyspace: sunbird_courses
--- Note: No index required. course_id is the partition key; batch_id is the first clustering column.
+-- Note: No index required. collection_id is the partition key; context_id is the first clustering column.
 -- ============================================================
 --
 -- Per-user assessment summary for a course and batch.
@@ -89,10 +89,10 @@ INSERT INTO standard_reports_meta (
     'Per-user assessment summary for a course and batch',
     'consumption',
     'YUGABYTE_CQL_AGG',
-    'SELECT user_id, course_id, batch_id, content_id, attempt_id, total_score, total_max_score, last_attempted_on
+    'SELECT user_id, collection_id, context_id, content_id, attempt_id, total_score, total_max_score, last_attempted_on
   FROM sunbird_courses.assessment_aggregator
-  WHERE course_id = {{courseid}}
-  {{#batchid}}AND batch_id = {{batchid}}{{/batchid}}',
+  WHERE collection_id = {{courseid}}
+  {{#batchid}}AND context_id = {{batchid}}{{/batchid}}',
     '["courseid", "batchid"]',
     TRUE,
     '{
@@ -251,10 +251,10 @@ INSERT INTO standard_reports_meta (
     'All assessment attempts for a user, optionally filtered by course',
     'consumption',
     'YUGABYTE_CQL',
-    'SELECT course_id, batch_id, content_id, attempt_id, total_score, total_max_score, last_attempted_on
+    'SELECT collection_id, context_id, content_id, attempt_id, total_score, total_max_score, last_attempted_on
   FROM sunbird_courses.assessment_aggregator
   WHERE user_id = {{userid}}
-  {{#courseid}}AND course_id = {{courseid}}{{/courseid}}',
+  {{#courseid}}AND collection_id = {{courseid}}{{/courseid}}',
     '["userid", "courseid"]',
     TRUE,
     NULL

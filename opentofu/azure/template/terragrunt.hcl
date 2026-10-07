@@ -8,6 +8,7 @@ generate "backend" {
     storage_account_name = "${get_env("AZURE_OPENTOFU_BACKEND_STORAGE_ACCOUNT")}"
     container_name       = "${get_env("AZURE_OPENTOFU_BACKEND_CONTAINER")}"
     key                  = "${path_relative_to_include()}/tofu.tfstate"
+    use_azuread_auth     = true
   }
 }
 EOF

@@ -24,3 +24,7 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     version: 32.2.15
     condition: kafka.enabled
+  - name: yugabyte-backup
+    version: 0.1.0
+    repository: "file://./charts/yugabyte-backup"
+    condition: yugabyte-backup.enabled

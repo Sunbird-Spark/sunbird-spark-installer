@@ -4,14 +4,7 @@ include "root" {
 
 include "environment" {
   path = "${get_terragrunt_dir()}/../../_common/output-file.hcl"
-# This section will be enabled after final code is pushed and tagged
-#  expose = true
 }
-
-# This section will be enabled after final code is pushed and tagged
-# terraform {
-#   source = "${include.environment.locals.source_base_url}?ref=v1.0.0"
-# }
 
 # module specific inputs
 inputs = {

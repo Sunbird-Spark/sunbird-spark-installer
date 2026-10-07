@@ -1,0 +1,269 @@
+{{/*
+Deploys a JobManager + TaskManager pair per enabled py_flink_jobs entry in Application Mode.
+
+Key configurations for execution compatibility:
+1. Entrypoint: Do not override `command` (which replaces the Docker ENTRYPOINT). Use `args` to pass "standalone-job", "jobmanager", or "taskmanager" so the entrypoint script handles them.
+2. Foreground Mode: Avoid passing "start-foreground" in `args`; the entrypoint script adds it automatically.
+3. Python Driver Strictness: Flink's `PythonDriver` fails on unrecognized CLI arguments. Pass only job-specific flags (e.g., -py, --job-classname) in `args`. Use `FLINK_PROPERTIES` env var for all other cluster configurations instead of CLI options.
+*/}}
+{{- $currentScope := . }}
+{{- range $jobName, $jobData := .Values.py_flink_jobs }}
+{{- if $jobData.enabled }}
+{{- with $currentScope }}
+{{- $img := index .Values.global $jobData.globalImageKey }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-taskmanager" $jobName }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  annotations:
+    checksum/job-config: {{ $jobData.config | toYaml | sha256sum }}
+  {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ $jobData.taskManagerReplicas | default .Values.replicaCount }}
+  # Use Recreate instead of RollingUpdate to avoid CPU deadlocks/FailedScheduling
+  # due to lack of surge capacity. This is safe as the JobManager automatically
+  # re-submits the job upon restart.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+      app.kubernetes.io/component: {{ printf "%s-taskmanager" $jobName }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "common.names.name" . }}
+        app.kubernetes.io/component: {{ printf "%s-taskmanager" $jobName }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
+      annotations:
+        checksum/job-config: {{ $jobData.config | toYaml | sha256sum }}
+    spec:
+      {{- if or .Values.serviceAccount.create .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name | default (.Values.serviceAccount.name | default $jobName) }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $jobName }}-taskmanager
+          image: "{{ $img.registry }}/{{ $img.repository }}:{{ $img.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # Matches JobManager's workingDir so relative config paths resolve identically for Python UDFs.
+          workingDir: /opt/sunbird-ai/jobs/{{ $jobData.jobDir }}
+          # Do not override 'command' (preserves docker-entrypoint.sh) or add "start-foreground"
+          # to 'args' (added automatically). Pass all configs via FLINK_PROPERTIES instead of CLI args.
+          args: ["taskmanager"]
+          ports:
+            - containerPort: {{ .Values.taskmanager.rpc_port }}
+              name: rpc
+          env:
+            - name: FLINK_PROPERTIES
+              value: |
+                jobmanager.rpc.address: {{ printf "%s-jobmanager" $jobName }}
+                jobmanager.rpc.port: {{ .Values.jobmanager.rpc_port }}
+                taskmanager.rpc.port: {{ .Values.taskmanager.rpc_port }}
+                taskmanager.numberOfTaskSlots: {{ $jobData.taskSlots | default .Values.taskmanager.numberOfTaskSlots }}
+            {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+            - name: AZURE_CLIENT_ID
+              value: "{{ .Values.global.azure_client_id }}"
+            {{- end }}
+            {{- range $jobData.secretEnv }}
+            - name: {{ .envName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
+                  optional: {{ .optional | default false }}
+            {{- end }}
+            {{- if $jobData.extraEnv }}
+            {{- include "common.tplvalues.render" (dict "value" $jobData.extraEnv "context" $) | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- if $jobData.resources }}
+            {{- toYaml $jobData.resources | nindent 12 }}
+            {{- else }}
+            {{- toYaml .Values.resources | nindent 12 }}
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: {{ $jobData.configPath }}
+              subPath: config.yaml
+            - name: config-volume
+              mountPath: /opt/flink/conf/log4j-console.properties
+              subPath: log4j-console.properties
+      {{- with .Values.sidecars }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ printf "%s-config" $jobName }}
+            items:
+              - key: config.yaml
+                path: config.yaml
+              - key: log4j_console_properties
+                path: log4j-console.properties
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-jobmanager" $jobName }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  annotations:
+    checksum/job-config: {{ $jobData.config | toYaml | sha256sum }}
+  {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  # Dedicated per-job JobManager (Application Mode). Scale via TaskManagers instead.
+  replicas: 1
+  # Use Recreate instead of RollingUpdate (same resource constraints as taskmanager).
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "common.names.name" . }}
+      app.kubernetes.io/component: {{ printf "%s-jobmanager" $jobName }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "common.names.name" . }}
+        app.kubernetes.io/component: {{ printf "%s-jobmanager" $jobName }}
+        {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
+      annotations:
+        checksum/job-config: {{ $jobData.config | toYaml | sha256sum }}
+    spec:
+      {{- if or .Values.serviceAccount.create .Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ .Values.global.workload_identity_service_account_name | default (.Values.serviceAccount.name | default $jobName) }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $jobName }}-jobmanager
+          image: "{{ $img.registry }}/{{ $img.repository }}:{{ $img.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          workingDir: /opt/sunbird-ai/jobs/{{ $jobData.jobDir }}
+          # Do not override 'command'. Use only PythonDriver-compatible arguments in 'args'.
+          # Pass all other cluster configs via FLINK_PROPERTIES.
+          args: ["standalone-job",
+            "--job-classname", "org.apache.flink.client.python.PythonDriver",
+            "-py", "{{ $jobData.pyEntrypoint }}",
+            "--config", "config.yaml"]
+          ports:
+            - containerPort: {{ .Values.jobmanager.rpc_port }}
+              name: rpc
+            - containerPort: {{ .Values.jobmanager.blob_port }}
+              name: blob
+            - containerPort: {{ .Values.jobmanager.query_port }}
+              name: query
+            - containerPort: {{ .Values.jobmanager.ui_port }}
+              name: ui
+          env:
+            # Set explicitly to override hostname fallback in docker-entrypoint.sh,
+            # ensuring TaskManagers can connect via Service DNS.
+            - name: JOB_MANAGER_RPC_ADDRESS
+              value: {{ printf "%s-jobmanager" $jobName }}
+            - name: FLINK_PROPERTIES
+              value: |
+                jobmanager.rpc.port: {{ .Values.jobmanager.rpc_port }}
+                blob.server.port: {{ .Values.jobmanager.blob_port }}
+                queryable-state.server.ports: {{ .Values.jobmanager.query_port }}
+                rest.port: {{ .Values.jobmanager.ui_port }}
+                rest.address: 0.0.0.0
+                parallelism.default: {{ $jobData.config.job.parallelism | default 1 }}
+            {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
+            - name: AZURE_CLIENT_ID
+              value: "{{ .Values.global.azure_client_id }}"
+            {{- end }}
+            {{- range $jobData.secretEnv }}
+            - name: {{ .envName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .secretName }}
+                  key: {{ .secretKey }}
+                  optional: {{ .optional | default false }}
+            {{- end }}
+            {{- if $jobData.extraEnv }}
+            {{- include "common.tplvalues.render" (dict "value" $jobData.extraEnv "context" $) | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- if $jobData.jobManagerResources }}
+            {{- toYaml $jobData.jobManagerResources | nindent 12 }}
+            {{- else }}
+            {{- toYaml .Values.jobManagerResources | nindent 12 }}
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: {{ $jobData.configPath }}
+              subPath: config.yaml
+            - name: config-volume
+              mountPath: /opt/flink/conf/log4j-console.properties
+              subPath: log4j-console.properties
+      {{- with .Values.sidecars }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ printf "%s-config" $jobName }}
+            items:
+              - key: config.yaml
+                path: config.yaml
+              - key: log4j_console_properties
+                path: log4j-console.properties
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

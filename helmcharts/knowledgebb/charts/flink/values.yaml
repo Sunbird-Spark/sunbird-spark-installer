@@ -167,6 +167,10 @@ log4j_console_properties: |
   logger.netty.name = org.apache.flink.shaded.pekko.org.jboss.netty.channel.DefaultChannelPipeline
   logger.netty.level = OFF
 
+  # Suppress known Flink Sink V2 Committer metric registration bug (FLINK-37559) 
+  logger.flink_metrics.name = org.apache.flink.metrics.MetricGroup
+  logger.flink_metrics.level = ERROR
+
 base_config: |
   kafka {
     broker-servers = "{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
@@ -299,6 +303,10 @@ flink_jobs:
           dialcode-metrics-indexer = {{ eq .Values.global.deployed_dial_addon "true" }}
       }
       compositesearch.index.name = "compositesearch"
+      # Fields stripped from the composite-search index document before
+      # upsert (TransactionEventProcessorConfig.scala:204-207) - was
+      # relying on the code default, making it explicit here.
+      ignored.fields = ["responseDeclaration", "body", "transcripts"]
       nested.fields = ["badgeAssertions", "targets", "badgeAssociations", "me_totalTimeSpent", "me_totalPlaySessionCount", "me_totalTimeSpentInSec", "provider", "osMetadata", "actions"]
       schema.definition_cache.expiry = 14400
       restrict {
@@ -371,7 +379,9 @@ flink_jobs:
 
           content {
             enabled = true
-            includeFields = []
+            # artifactUrl is required by ai-pipeline's enrichment_router to
+            # build the transcription-request event.
+            includeFields = ["artifactUrl"]
           }
 
           collection {
@@ -683,7 +693,7 @@ flink_jobs:
         openai {
           api_key = ""
           api_key = ${?OPENAI_API_KEY}
-          model = "text-embedding-3-small"
+          model = "{{ .Values.global.openai_model | default "text-embedding-3-small" }}"
           dimensions = 1536
           timeout = 30
           azure_endpoint = "{{ .Values.global.openai_azure_endpoint | default "" }}"

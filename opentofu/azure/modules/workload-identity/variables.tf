@@ -81,8 +81,3 @@ variable "k8s_service_accounts" {
   }
 }
 
-variable "container_names" {
-  type        = list(string)
-  description = "List of blob container names to grant access to."
-  default     = []
-}

@@ -1,0 +1,5 @@
+apiVersion: v2
+name: yugabyte-backup
+description: Automated daily backup of YugabyteDB (YSQL + YCQL) to cloud storage
+version: 0.1.0
+appVersion: "0.1.0"

@@ -56,8 +56,7 @@ Installation order matters — each bundle builds on the previous:
 | 3 | `learnbb` | Lern service, Keycloak, YugabyteDB, Elasticsearch, Redis, Flink jobs, cert services |
 | 4 | `knowledgebb` | Knowlg service, Search, JanusGraph (on YugabyteDB), Flink jobs |
 | 5 | `obsrvbb` | Telemetry service, Superset dashboards |
-| 6 | `inquirybb` | Inquiry service |
-| 7 | `additional` | cert-ng, NL web, volume autoscaler |
+| 6 | `additional` | cert-ng, NL web, volume autoscaler |
 
 Each bundle is an umbrella Helm chart in `helmcharts/<bundle>/` with subcharts in `helmcharts/<bundle>/charts/`. All `helm upgrade --install` calls use `--timeout 30m --debug`.
 

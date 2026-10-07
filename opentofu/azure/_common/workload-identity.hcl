@@ -54,13 +54,4 @@ inputs = {
   kubernetes_client_certificate      = dependency.aks.outputs.client_certificate
   kubernetes_client_key              = dependency.aks.outputs.client_key
   kubernetes_cluster_ca_certificate  = dependency.aks.outputs.cluster_ca_certificate
-  container_names = local.skip_storage_module ? [
-    local.cloud_vars.global.public_container_name,
-    local.cloud_vars.global.private_container_name,
-    local.cloud_vars.global.velero_storage_container_private,
-  ] : [
-    dependency.storage.outputs.azurerm_storage_container_public,
-    dependency.storage.outputs.azurerm_storage_container_private,
-    dependency.storage.outputs.azurerm_velero_container_name,
-  ]
 }

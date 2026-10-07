@@ -1,6 +1,12 @@
 # sunbird-spark-installer
 
-Minimum resources required to install and run Sunbird-ED on any cloud provider
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Sunbird-Spark/sunbird-spark-installer/badge)](https://scorecard.dev/viewer/?uri=github.com/Sunbird-Spark/sunbird-spark-installer)
+
+Minimum resources required to install and run Sunbird-Spark on any cloud provider
+
+## Maintainer
+
+[@pallakartheekreddy](https://github.com/pallakartheekreddy)
 
 ## Infrastructure Overview
 
@@ -61,10 +67,20 @@ Two approaches are available for provisioning infrastructure and deploying Sunbi
 
 ---
 
+## Private AKS Cluster & VPN Access (Azure)
+
+By default the installer creates a **private AKS cluster** — the Kubernetes API server has no public endpoint. Developers and CI/CD runners must be inside the VNet to run `kubectl` or `helm`.
+
+Two independent fields in `global-values.yaml` — `private_cluster_enabled` and `vpn_enabled` — control this and the developer access method (Pritunl VPN vs. Azure Bastion). Full explanation, decision tree, and setup guides:
+
+**[opentofu/azure/README.md](opentofu/azure/README.md#private-cluster--access-options)**
+
+---
+
 ## Pre-requisites
 
 1. **Domain Name**
-2. **SSL Certificate**: The FullChain, consisting of the private key and Certificate+CA_Bundle, is mandatory for installation.
+2. **SSL Certificate**: The FullChain, consisting of the private key and Certificate+CA_Bundle, is mandatory for installation if you are using a custom certificate. Not required if using cert-manager for automated issuance — see [SSL Certificate Setup and Renewal](#ssl-certificate-setup-and-renewal).
 3. **Google OAuth Credentials**: [Create credentials](https://developers.google.com/workspace/guides/create-credentials#oauth-client-id)
 4. **Google V3 ReCaptcha Credentials**: [Create credentials](https://www.google.com/recaptcha/admin)
 5. **Email Service Provider**: Only **SendGrid** is supported in this installer. Use your SendGrid API key as the SMTP password.
@@ -173,64 +189,66 @@ time ./install.sh destroy_tf_resources
 
 ## Note:
 
-## SSL Certificate Setup and Renewal (Let’s Encrypt Integration)
+## SSL Certificate Setup and Renewal
 
-If you are using Let’s Encrypt for SSL certificate management, follow the steps below to ensure proper setup and renewal handling.
+### 1. Automated issuance and renewal (cert-manager)
 
----
-
-### 1. Enable Let’s Encrypt in Nginx
-
-In your `global-values.yaml`, set the following flag:
+To have SSL certificates issued and renewed automatically, enable these flags in your
+`global-values.yaml`:
 
 ```yaml
-lets_encrypt_ssl: true
+cert-manager:
+  enabled: true
+ingress-nginx:
+  enabled: true
+global:
+  cert_manager_ssl: true
+  cert_notifications:
+    email: "<your-email>" # used for renewal/expiry notices
 ```
 
-This enables automatic SSL certificate issuance and renewal via a Kubernetes Certbot CronJob.
+All future renewals happen automatically, with nothing to paste into `global-values.yaml`.
+
+**On a cluster that has never had cert-manager installed before**, run `install_helm_components`
+(or `install_component edbb`) **twice**. cert-manager's CRDs and the `Issuer`/`Certificate` that
+depend on them render in the same Helm release; the first pass installs cert-manager and its
+CRDs, and the second picks up the now-registered CRDs to actually create the `Issuer` and
+`Certificate`. A cluster that already has cert-manager's CRDs registered (e.g. a second `edbb`
+release) only needs the one pass.
+
+**If you're upgrading from the old certbot-cronjob-based TLS setup** (removed as of this release),
+check for a leftover `certbot-certs-backup` ConfigMap and/or Secret in your `edbb` namespace — an
+older version of that cronjob left one behind on some installs, containing the domain's private
+key in cleartext, and nothing ever pruned it automatically. Delete it manually, once, after
+upgrading:
+
+```bash
+kubectl delete configmap certbot-certs-backup -n <namespace> --ignore-not-found
+kubectl delete secret certbot-certs-backup -n <namespace> --ignore-not-found
+```
+
+If neither exists, both commands are harmless no-ops.
 
 ---
 
-### 2. Automatic Certificate Renewal
+### 2. If you are using a custom certificate
 
-When `lets_encrypt_ssl` is enabled:
-
-- The Certbot CronJob automatically renews your SSL certificates approximately every **85 days**.
-- After renewal, it updates the SSL certificate and private key in the Kubernetes ConfigMap named `nginx-public-ingress`.
-
----
-
-### 3. Update Global Values After Renewal
-
-Once the renewal completes:
-
-1. Fetch the renewed keys from the ConfigMap.
-2. Update your `opentofu/<cloud-provider>/<env>/global-values.yaml` file with the new values:
+If you already have a custom certificate, leave the flags above set to `false` (or unset), and
+provide the private key and the full chain (the certificate concatenated with the CA bundle)
+instead. Both are mandatory. Renewal is not automated on this path — you will need to replace
+them manually when the certificate expires:
 
 ```yaml
-proxy_private_key: |
-  <paste the renewed private key from ConfigMap>
-
-proxy_certificate: |
-  <paste the renewed certificate from ConfigMap>
+global:
+  proxy_certificate: |
+    -----BEGIN CERTIFICATE-----
+    ...your certificate + CA bundle (full chain)...
+    -----END CERTIFICATE-----
+  proxy_private_key: |
+    -----BEGIN PRIVATE KEY-----
+    ...your private key...
+    -----END PRIVATE KEY-----
 ```
-
-These values are essential because **edbb bundle  fetches SSL certificates from the global level** defined in above file.
-
----
-
-### 4. If Not Using Let’s Encrypt
-
-If you are not using Let’s Encrypt:
-x
-- Keep `lets_encrypt_ssl: false`.
-- Manually provide your SSL certificate and private key under the same fields in `global-values.yaml`.
-
----
-### Additional Notes
-- The CronJob handles only Let’s Encrypt–issued certificates.
-- The default renewal schedule is every **85 days**.
-- Always ensure your domain DNS records are properly configured and reachable before renewal.
 
 # Grafana Alloy Helm Chart
 
@@ -361,3 +379,60 @@ if saved_credential.get('key') == credential_iss:
 - [Kong Migration Guide](https://docs.konghq.com/gateway/latest/upgrade/)
 - [Kong 3.9.x Release Notes](https://docs.konghq.com/gateway/changelog/)
 - [YugabyteDB PostgreSQL Compatibility](https://docs.yugabyte.com/preview/explore/ysql-language-features/)
+
+---
+
+## Sync Tool — JanusGraph to OpenSearch
+
+Bulk sync/repair tool for syncing JanusGraph graph data to the OpenSearch composite search index. Runs as a K8s Job — starts, syncs, exits. Zero cost when idle.
+
+Sync tool is a subchart of `knowledgebb`, disabled by default. Controlled via `global-values.yaml`.
+
+### Usage
+
+1. Edit `global-values.yaml` — set sync-tool config:
+   ```yaml
+   sync-tool:
+     enabled: true
+     syncMode: full              # full | objectType | identifiers | days | file
+     objectType: ""              # e.g. "Content" (when syncMode=objectType)
+     identifiers: ""             # e.g. "do_123,do_456" (when syncMode=identifiers)
+     days: ""                    # e.g. "5" (when syncMode=days)
+   ```
+
+2. Deploy sync-tool only (does not redeploy other knowledgebb charts):
+   ```bash
+   cd opentofu/<cloud-provider>/<env>
+   ./install.sh install_service knowledgebb sync-tool
+   ```
+
+3. Monitor logs:
+   ```bash
+   kubectl logs -f -l app=sync-tool -n sunbird
+   ```
+
+4. After sync completes, set `enabled: false` in `global-values.yaml`.
+
+### File Mode
+
+For syncing specific identifiers from a CSV file:
+
+1. Edit `helmcharts/knowledgebb/charts/sync-tool/identifiers.csv` — add one identifier per line
+2. Set `syncMode: file` in `global-values.yaml`
+3. Deploy: `./install.sh install_service knowledgebb sync-tool`
+
+### GitHub Actions
+
+Check `knowledgebb` bundle + type `sync-tool` in `specific_charts`. Sync config must be set in `global-values.yaml` before triggering.
+
+### When to use
+
+| Scenario | syncMode | value |
+|----------|----------|-------|
+| Empty index after environment setup | `full` | — |
+| Missed CDC events for specific nodes | `identifiers` | `do_123,do_456` |
+| Backfill after adding new searchable fields | `full` | — |
+| Repair a specific content type | `objectType` | `Content` |
+| Catch up after pipeline downtime | `days` | `3` |
+
+---

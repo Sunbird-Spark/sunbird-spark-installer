@@ -35,6 +35,13 @@ data "azurerm_storage_account" "existing" {
   resource_group_name = var.resource_group_name
 }
 
+# Anonymous read for blobs, scoped to this one container only ("blob" access type
+# grants GET on blobs here, not container listing, and not the parent account's other
+# containers). DIAL QR-code-to-content mappings need to be publicly readable by
+# anonymous scanners -- this is CDN-style public content delivery, not a blanket
+# account-level anonymous-access allowance. Same reasoning as the public buckets in
+# opentofu/gcp/modules/storage/main.tf, and writes still require the
+# workload-identity-scoped role assignment below, not anonymous access.
 resource "azurerm_storage_container" "dial_state_container_public" {
   name                  = "${local.environment_name}-dial-${local.unique_uuid}"
   storage_account_name  = data.azurerm_storage_account.existing.name

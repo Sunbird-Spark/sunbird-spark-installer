@@ -1,0 +1,10 @@
+# Sync Tool — Node Identifiers
+#
+# Add one node identifier per line. Empty lines and lines starting with # are ignored.
+#
+# Usage:
+#   ./install.sh sync_file identifiers.csv
+#
+# Examples:
+# do_1234567890123456789
+# do_9876543210987654321

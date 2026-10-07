@@ -7,6 +7,12 @@ metadata:
     app.kubernetes.io/component: kafka-provisioning
     scope: provisioning
   annotations:
+    # Jobs have an immutable spec.template — without these, any change to
+    # this Job's pod spec (e.g. its image) makes `helm upgrade` fail with
+    # "cannot patch ... Job.batch is invalid: spec.template". These make
+    # Helm delete and recreate it instead of trying to patch in place.
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation
     {{- if .Values.global.kafka.provisioning.annotations }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.global.kafka.provisioning.annotations "context" $ ) | nindent 4 }}
     {{- end }}
@@ -34,7 +40,7 @@ spec:
       initContainers:
         {{- if .Values.global.kafka.provisioning.waitForKafka }}
         - name: wait-for-available-kafka
-          image: "{{.Values.global.kafka.image.repository}}:{{.Values.global.kafka.image.tag}}"
+          image: "{{.Values.global.kafka.image.registry}}/{{.Values.global.kafka.image.repository}}:{{.Values.global.kafka.image.tag}}"
           imagePullPolicy: IfNotPresent
           command:
             - /bin/bash

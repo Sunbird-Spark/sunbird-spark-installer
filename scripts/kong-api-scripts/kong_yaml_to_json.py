@@ -1,5 +1,6 @@
 import yaml
 import json
+import os
 import os.path
 
 
@@ -21,8 +22,16 @@ def yaml_to_json_file(input_file, output_file, onboarding_type):
                     item['credential_rsa_public_key'] = item['credential_rsa_public_key'].replace('\\n', '\n')
             json_data = json.dumps(kong_consumers_data, indent=2)
 
-        # Write JSON content to file
-        with open(output_file, 'w') as file:
+        # Write JSON content to file. output_file's path is fixed (the Job
+        # template that chains this script to kong_apis.py/kong_consumers.py
+        # expects it at a known /tmp path), so guard the write itself against
+        # a pre-planted symlink: O_NOFOLLOW refuses to open if the final
+        # path component is a symlink, without also refusing a normal
+        # pre-existing regular file from an earlier run (O_EXCL would raise
+        # FileExistsError on every re-run, which the broad except below
+        # swallows into a silent no-write).
+        fd = os.open(output_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(fd, 'w') as file:
             file.write(json_data)
 
         print("Conversion successful. JSON written to '{}'.".format(output_file))

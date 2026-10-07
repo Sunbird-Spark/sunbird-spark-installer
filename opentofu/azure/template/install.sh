@@ -22,7 +22,7 @@ function deploy_tf_module() {
     echo -e "\nDeploying module: $module"
     cd $module
     terragrunt init --reconfigure
-    terragrunt apply --auto-approve --terragrunt-ignore-dependency-errors
+    terragrunt apply --auto-approve --queue-ignore-errors
     cd ..
 }
 
@@ -77,8 +77,7 @@ function certificate_config() {
     if [ -z "$CERTKEY" ]; then
         echo "Certificate RSA public key not available"
         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        curl_data="curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw '{\"value\":\"$CERTPUBKEY\"}'"
-        echo "kubectl -n sunbird exec deploy/knowledge-mw -- $curl_data" | sh -
+        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
     fi
 }
 function install_component() {
@@ -135,7 +134,8 @@ function install_service() {
 
     local bundle="$1"
     shift
-    local target_charts=("$@")   # one or more chart names
+    local target_charts=("$@")
+    local extra_flags=()
 
     local current_directory="$(pwd)"
     if [ "$(basename "$current_directory")" != "helmcharts" ]; then
@@ -221,7 +221,7 @@ function install_helm_components() {
         install_component "$1"
     else
         # No args: deploy all bundles in order (original behavior)
-        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "inquirybb" "additional")
+        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional")
         for component in "${components[@]}"; do
             install_component "$component"
         done
@@ -260,12 +260,12 @@ function generate_postman_env() {
         cd ../opentofu/azure/$environment 2>/dev/null || true
     fi
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
-    blob_store_path=$(kubectl get cm -n sunbird lern-env -o jsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
+    blob_store_path=$(kubectl get cm -n sunbird lern-env -o jsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$||')
     public_container_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_content_cloud_storage_container}') 
-    api_key=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_authorization}')
-    keycloak_secret=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}')
+    api_key=$(kubectl get secret -n sunbird lern-secrets -ojsonpath='{.data.sunbird_authorization}' | base64 -d)
+    keycloak_secret=$(kubectl get secret -n sunbird player-secrets -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}' | base64 -d)
     keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
-    keycloak_password=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_password}')
+    keycloak_password=$(kubectl get secret -n sunbird lern-secrets -ojsonpath='{.data.sunbird_sso_password}' | base64 -d)
     google_oauth_client_id=$(kubectl get cm -n sunbird player-env -ojsonpath='{.data.GOOGLE_OAUTH_CLIENT_ID}')
     google_captcha_site_key=$(yq '.global.sunbird_google_captcha_site_key' global-values.yaml)
     generated_uuid=$(uuidgen)
@@ -289,8 +289,8 @@ function generate_postman_env() {
 
 function restart_workloads_using_keys() {
     echo -e "\nRestart workloads using keycloak keys and wait for them to start..."
-    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
-    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry groups registry
+    kubectl rollout restart deployment -n sunbird knowledge-mw player adminutil cert-registry  registry
+    kubectl rollout status deployment -n sunbird knowledge-mw player adminutil cert-registry  registry
     echo -e "\nWaiting for all pods to start"
 }
 
@@ -317,19 +317,6 @@ function migrate_forms() {
         --env env.json
 }
 
-function create_client_forms() {
-    local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
-        cd ../opentofu/azure/$environment 2>/dev/null || true
-    fi
-    cp -rf ../../../postman-collection/ED-${RELEASE}  .
-    check_pod_status
-    #loop through files inside collection folder
-    for FILES in ED-${RELEASE}/*.json; do
-     echo "Creating client forms in.. $FILES"
-      postman collection run $FILES --environment env.json --delay-request 500 --bail --insecure
-    done 
-   }
 
 function cleanworkspace() {
         rm  certkey.pem certpubkey.pem
@@ -378,10 +365,7 @@ function check_pod_status() {
     echo "All pods are running successfully."
 }
 
-RELEASE="release700"
-POSTMAN_COLLECTION_LINK="https://api.postman.com/collections/5338608-e28d5510-20d5-466e-a9ad-3fcf59ea9f96?access_key=PMAT-01HMV5SB2ZPXCGNKD74J7ARKRQ"
-CERTPUBLICKEY=""
-CERTPRIVATEKEY=""
+
 
 
 if [ $# -eq 0 ]; then
@@ -396,7 +380,6 @@ if [ $# -eq 0 ]; then
     dns_mapping
     generate_postman_env
     run_post_install
-    create_client_forms
 else
     case "$1" in
     "create_tf_backend")
@@ -435,11 +418,9 @@ else
     "certificate_config")
         certificate_config
         ;;
-    "create_client_forms")
-        create_client_forms
-        ;;
     *)
         invoke_functions "$@"
         ;;
     esac
 fi
+

@@ -1,5 +1,6 @@
 import urllib.request
 import urllib.error
+import urllib.parse
 import argparse
 import json
 import copy
@@ -162,8 +163,13 @@ def _save_routes_for_service(kong_admin_api_url, input_api_details, stats):
     Handles: create, update, delete of routes
     """
     service_name = input_api_details["name"]
-    routes_url = "{}/services/{}/routes".format(kong_admin_api_url, service_name)
-    
+    # service_name comes from the operator-supplied apis file, not a network
+    # request, but it still ends up in a URL path segment used for real HTTP
+    # calls below -- quote it so it can't be used to redirect the request
+    # (e.g. a name containing "/" or "?") to something other than this
+    # specific service's routes.
+    routes_url = "{}/services/{}/routes".format(kong_admin_api_url, urllib.parse.quote(service_name, safe=""))
+
     # Get existing routes for this service
     try:
         existing_routes = get_routes(kong_admin_api_url, service_name)
@@ -283,7 +289,7 @@ def _save_plugins_for_service(kong_admin_api_url, input_api_details, stats):
     # Filter out None entries (shouldn't happen but safety check)
     input_plugins = [p for p in input_plugins if p is not None]
     
-    plugins_url = "{}/services/{}/plugins".format(kong_admin_api_url, service_name)
+    plugins_url = "{}/services/{}/plugins".format(kong_admin_api_url, urllib.parse.quote(service_name, safe=""))
     
     saved_plugins_including_consumer_overrides = get_api_plugins(kong_admin_api_url, service_name)
     saved_plugins_without_consumer_overrides = [plugin for plugin in saved_plugins_including_consumer_overrides if not plugin.get('consumer_id')]
