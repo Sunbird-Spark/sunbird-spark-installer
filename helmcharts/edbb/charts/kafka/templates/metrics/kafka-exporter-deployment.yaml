@@ -1,0 +1,38 @@
+{{- if .Values.metrics.kafkaExporter.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-exporter" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/name: kafka-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka-exporter
+    spec:
+      containers:
+        - name: kafka-exporter
+          image: "{{ .Values.metrics.kafkaExporter.image.registry }}/{{ .Values.metrics.kafkaExporter.image.repository }}:{{ .Values.metrics.kafkaExporter.image.tag }}"
+          imagePullPolicy: {{ .Values.metrics.kafkaExporter.image.pullPolicy }}
+          args:
+            - --kafka.server={{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}
+            # Defaults to 2.0.0 otherwise, well behind this chart's actual
+            # broker version -- reuse the same tag so it can't drift out of
+            # sync if the broker version is ever bumped.
+            - --kafka.version={{ .Values.image.tag }}
+          ports:
+            - name: metrics
+              containerPort: 9308
+          resources:
+            {{- toYaml .Values.metrics.kafkaExporter.resources | nindent 12 }}
+      {{- with .Values.metrics.kafkaExporter.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

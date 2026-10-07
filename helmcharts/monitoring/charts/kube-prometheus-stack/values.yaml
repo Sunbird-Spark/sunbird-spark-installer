@@ -1379,7 +1379,7 @@ kubelet:
 ## Component scraping the kube controller manager
 ##
 kubeControllerManager:
-  enabled: true
+  enabled: false
 
   ## If your kube controller manager is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1616,7 +1616,7 @@ kubeDns:
 ## Component scraping etcd
 ##
 kubeEtcd:
-  enabled: true
+  enabled: false
 
   ## If your etcd is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1708,7 +1708,7 @@ kubeEtcd:
 ## Component scraping kube scheduler
 ##
 kubeScheduler:
-  enabled: true
+  enabled: false
 
   ## If your kube scheduler is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1797,7 +1797,7 @@ kubeScheduler:
 ## Component scraping kube proxy
 ##
 kubeProxy:
-  enabled: true
+  enabled: false
 
   ## If your kube proxy is not deployed as a pod, specify IPs it can be found on
   ##
@@ -4229,9 +4229,6 @@ prometheus-blackbox-exporter:
       - name: knowledgemw
         url: "http://knowledge-mw-service:5000/service/health"
         module: http_2xx
-      - name: userorg
-        url: "http://lern-service:9000/service/health"
-        module: http_2xx
       - name: dial
         url: "http://dial-service:9000/health"
         module: http_2xx
@@ -4247,9 +4244,6 @@ prometheus-blackbox-exporter:
       - name: adminutils
         url: "http://adminutil:4000/health"
         module: http_2xx
-      - name: lms
-        url: "http://lern-service:9000/service/health"
-        module: http_2xx
       - name: cert
         url: "http://cert-service:9000/service/health"
         module: http_2xx
@@ -4258,9 +4252,6 @@ prometheus-blackbox-exporter:
         module: http_2xx
       - name: knowlg
         url: "http://knowlg-service:9000/service/health"
-        module: http_2xx
-      - name: report
-        url: "http://report-service:3030/service/health"
         module: http_2xx
       - name: groups
         url: "http://groups-service:9000/service/health"
@@ -4275,7 +4266,7 @@ prometheus-blackbox-exporter:
         url: "http://lern-service:9000/health"
         module: http_2xx
       - name: registry
-        url: "http://registry-service:8081"
+        url: "http://registry-service:8081/health"
         module: http_2xx
       - name: kong
         url: "http://kong:8001/status"

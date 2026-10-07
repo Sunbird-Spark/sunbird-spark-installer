@@ -23,6 +23,11 @@ images:
     repository: sanketikahub/kafka
     tag: "4.0.0"
 
+  kafka_exporter: &kafka_exporter
+    registry: "docker.io"
+    repository: "danielqsj/kafka-exporter"
+    tag: "v1.9.0"
+
   redis: &redis
     registry: "sunbirded.azurecr.io"
     repository: "redis"
@@ -57,11 +62,11 @@ images:
 
   kong_apis: &kong_apis
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v-api-manager-test_e77efb9"
 
   kong_consumers: &kong_consumers
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v-api-manager-test_e77efb9"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -314,6 +319,11 @@ internal: &internal
     image: *kafka
     imagePullSecrets:
       - name: "registry-secret-name"
+    metrics:
+      kafkaExporter:
+        image: *kafka_exporter
+        pullSecrets:
+          - name: "registry-secret-name"
 
   redis:
     image: *redis
