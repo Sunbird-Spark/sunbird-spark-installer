@@ -9,13 +9,13 @@ metadata:
     {{- toYaml .Values.serviceMonitor.labels | nindent 4 }}
 spec:
   endpoints:
-  - honorLabels: true
-    interval: 15s
+  - honorLabels: {{ .Values.serviceMonitor.honorLabels }}
+    interval: {{ .Values.serviceMonitor.interval }}
     path: /metrics
-    port: metrics
+    port: admin
     scheme: http
-    scrapeTimeout: 10s
-  jobLabel: nginx-public-ingress
+    scrapeTimeout: {{ .Values.serviceMonitor.scrapeTimeout }}
+  jobLabel: {{ .Values.serviceMonitor.jobLabel }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "common.names.name" . }}
