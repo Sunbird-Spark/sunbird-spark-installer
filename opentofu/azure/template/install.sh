@@ -218,7 +218,8 @@ function install_helm_components() {
         install_service "$@"
     elif [[ $# -eq 1 ]]; then
         # One arg: deploy the entire bundle
-        install_component "$1"
+        local bundle_name="$1"
+        install_component "$bundle_name"
     else
         # No args: deploy all bundles in order (original behavior)
         local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional")
