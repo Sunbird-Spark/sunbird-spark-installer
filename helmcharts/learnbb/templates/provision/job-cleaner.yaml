@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{.Chart.Name}}-job-deleter
+  name: {{ .Chart.Name }}-job-deleter
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: "pre-install,pre-upgrade"
@@ -13,7 +13,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{.Chart.Name}}-job-deleter-role
+  name: {{ .Chart.Name }}-job-deleter-role
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: "pre-install,pre-upgrade"
@@ -27,17 +27,17 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{.Chart.Name}}-job-deleter-rolebinding
+  name: {{ .Chart.Name }}-job-deleter-rolebinding
   namespace: {{ .Release.Namespace }}
   annotations:
     helm.sh/hook: "pre-install,pre-upgrade"
     helm.sh/hook-weight: "-5"
 subjects:
 - kind: ServiceAccount
-  name: {{.Chart.Name}}-job-deleter
+  name: {{ .Chart.Name }}-job-deleter
 roleRef:
   kind: Role
-  name: {{.Chart.Name}}-job-deleter-role
+  name: {{ .Chart.Name }}-job-deleter-role
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: batch/v1

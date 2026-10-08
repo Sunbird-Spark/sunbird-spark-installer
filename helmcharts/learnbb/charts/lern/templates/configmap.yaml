@@ -12,7 +12,7 @@ metadata:
   {{- end }}
 type: Opaque
 stringData:
-{{- $currentScope := .}}
+{{- $currentScope := . }}
 {{- range $path, $_ := .Files.Glob "configs/*" }}
   {{- if and (ne $path "configs/env.yaml") (ne $path "configs/secrets.yaml") }}
     {{ base $path | nindent 2 }}: |-
@@ -69,7 +69,7 @@ metadata:
 {{ include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
   {{- end }}
 data:
-{{- $currentScope := .}}
+{{- $currentScope := . }}
 {{- range $path, $_ := .Files.Glob "configs/opa/**" }}
   {{ base $path | nindent 2 }}: |-
   {{- with $currentScope }}
@@ -90,7 +90,7 @@ metadata:
 {{ include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
   {{- end }}
 data:
-{{- $currentScope := .}}
+{{- $currentScope := . }}
 {{- range $path, $_ := .Files.Glob "configs/envoy/**" }}
   {{ base $path | nindent 2 }}: |-
   {{- with $currentScope }}

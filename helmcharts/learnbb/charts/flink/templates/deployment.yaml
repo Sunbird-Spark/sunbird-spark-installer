@@ -1,4 +1,4 @@
-{{- $currentScope := .}}
+{{- $currentScope := . }}
 {{- range $jobName, $jobData := .Values.flink_jobs }}
 {{- if $jobData.enabled }}
 {{- with $currentScope }}
@@ -230,5 +230,5 @@ spec:
           - key: log4j_console_properties
             path: log4j-console.properties
 {{- end }}
-{{- end}}
-{{- end}}
+{{- end }}
+{{- end }}
