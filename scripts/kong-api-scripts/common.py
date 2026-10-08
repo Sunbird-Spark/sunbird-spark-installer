@@ -90,7 +90,7 @@ def retrying_urlopen(url, retry_count=0, data=None):
                 print(f"URL: {e.url}", flush=True)
                 if error_body:
                     print(f"Kong error response: {error_body}", flush=True)
-                print(f"==================\n", flush=True)
+                print("==================\n", flush=True)
             
             # Don't retry 4xx client errors (except 429 Too Many Requests)
             # These indicate bad request data, not transient failures
