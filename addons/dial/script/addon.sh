@@ -32,28 +32,28 @@ deploy_chart() {
         echo "ERROR: ENV_NAME environment variable is not set. Please export it (e.g., export ENV_NAME=demo) before running this script." >&2
         exit 1
     fi
-    local CLOUD_DIR="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/$ENV_NAME"
+    local cloud_dir="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/$ENV_NAME"
     
     # Check for required configuration files
-    if [[ ! -f "$CLOUD_DIR/global-values.yaml" ]] || [[ ! -f "$CLOUD_DIR/global-cloud-values.yaml" ]]; then
-        echo "ERROR: OpenTofu global values not found in $CLOUD_DIR. Please run opentofu first." >&2
+    if [[ ! -f "$cloud_dir/global-values.yaml" ]] || [[ ! -f "$cloud_dir/global-cloud-values.yaml" ]]; then
+        echo "ERROR: OpenTofu global values not found in $cloud_dir. Please run opentofu first." >&2
         exit 1
     fi
     
     # Standard values layering
-    local HELM_ARGS="-f $CLOUD_DIR/global-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-values.yaml"
+    local helm_args="-f $cloud_dir/global-values.yaml"
+    helm_args="$helm_args -f $cloud_dir/global-cloud-values.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/global-values.yaml"
     if [[ -f "$REPO_ROOT/addons/global-cloud-values.yaml" ]]; then
-        HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-cloud-values.yaml"
+        helm_args="$helm_args -f $REPO_ROOT/addons/global-cloud-values.yaml"
     fi
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/images.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/images.yaml"
 
     for chart in "${CHARTS[@]}"; do
         echo "Deploying $chart Helm chart..."
         local chart_path="$ADDON_DIR/helmcharts/$chart"
         if [[ -d "$chart_path" ]]; then
-            helm upgrade --install "$chart" "$chart_path" --namespace "$NAMESPACE" $HELM_ARGS
+            helm upgrade --install "$chart" "$chart_path" --namespace "$NAMESPACE" $helm_args
             echo "$chart service deployed successfully"
         else
             echo "Warning: Chart directory $chart_path not found. Skipping."
