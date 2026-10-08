@@ -338,10 +338,14 @@ class OAuthManager {
 }
 
 // Initialize OAuth manager when DOM is ready
+function initOAuthManager() {
+    OAuthManager.create()
+        .then((instance) => { window.oauthManager = instance; })
+        .catch((error) => console.error('Failed to initialize OAuth manager:', error));
+}
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        OAuthManager.create().then((instance) => { window.oauthManager = instance; });
-    });
+    document.addEventListener('DOMContentLoaded', initOAuthManager);
 } else {
-    OAuthManager.create().then((instance) => { window.oauthManager = instance; });
+    initOAuthManager();
 }

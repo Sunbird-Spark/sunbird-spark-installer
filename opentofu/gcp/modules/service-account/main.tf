@@ -29,6 +29,13 @@ resource "google_project_iam_member" "service_account-roles" {
 # project-wide roles/storage.admin, which also grants bucket create/delete
 # and IAM-policy changes on every bucket in the project, including ones
 # unrelated to this environment.
+#
+# roles/storage.objectAdmin is still the minimal built-in role for this: this
+# SA both uploads (upload-files/output-file modules, runtime GCP-storage
+# services) and overwrites/removes stale objects, so read-only
+# (objectViewer) and write-only (objectCreator, can't overwrite or delete)
+# aren't enough -- objectAdmin is the narrowest GCS role covering all three,
+# and it's already scoped per-bucket via `bucket =` below, not project-wide.
 resource "google_storage_bucket_iam_member" "storage_object_admin" {
   for_each = toset([
     var.sa_key_store_bucket,
