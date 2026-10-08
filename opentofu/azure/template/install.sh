@@ -111,10 +111,8 @@ function install_component() {
         fi
       fi
     local addon_values_flag=""
-    if [[ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]]; then
-        if [[ -f "../addons/global-cloud-values.yaml" ]]; then
-            addon_values_flag="-f ../addons/global-cloud-values.yaml"
-        fi
+    if [[ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]] && [[ -f "../addons/global-cloud-values.yaml" ]]; then
+        addon_values_flag="-f ../addons/global-cloud-values.yaml"
     fi
 
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
@@ -152,10 +150,8 @@ function install_service() {
     fi
 
     local addon_values_flag=""
-    if [[ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]]; then
-        if [[ -f "../addons/global-cloud-values.yaml" ]]; then
-            addon_values_flag="-f ../addons/global-cloud-values.yaml"
-        fi
+    if [[ "$(yq '.deployed_dial_addon' "../opentofu/azure/$environment/global-values.yaml")" = "true" ]] && [[ -f "../addons/global-cloud-values.yaml" ]]; then
+        addon_values_flag="-f ../addons/global-cloud-values.yaml"
     fi
 
     if helm status "$bundle" --namespace sunbird &>/dev/null; then
