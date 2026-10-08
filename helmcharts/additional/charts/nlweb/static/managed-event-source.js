@@ -330,7 +330,7 @@ export class ManagedEventSource {
         
         // Compile last answers from current items
         const newAnswers = [];
-        for (const [item, domItem] of chatInterface.currentItems) {
+        for (const [item] of chatInterface.currentItems) {
           if (item.title && item.url) {
             newAnswers.push({
               title: item.title,

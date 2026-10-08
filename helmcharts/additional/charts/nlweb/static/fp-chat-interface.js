@@ -1853,7 +1853,6 @@ class ModernChatInterface {
       rememberedSection.appendChild(itemsList);
       
       // Insert after conversations list in the sidebar
-      const sidebar = this.elements.sidebar;
       const conversationsList = this.elements.conversationsList;
       // Insert after conversations list, not inside it
       conversationsList.parentNode.insertBefore(rememberedSection, conversationsList.nextSibling);

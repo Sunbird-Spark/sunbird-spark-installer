@@ -257,7 +257,6 @@ class ChatInterface {
     const schemaUrl = jsonItem.url || schema.url || '';
     const schemaScore = jsonItem.score || 100;
     const schemaDescription = jsonItem.description || schema.description || '';
-    const schemaImages = schema.images || schema.image || [];
     const schemaTotalTime = schema.totalTime || '';
     const schemaNutrition = schema.nutrition || null;
     const schemaAggregateRating = schema.aggregateRating || null;

@@ -878,7 +878,6 @@
                         this.productCardsArea = document.getElementById('resultsList');
                         
                         // Get product cards
-                        const host = "http://74.179.100.160:8000";
                         const url = `/ask?query=${encodeURIComponent(queryText)}&site=tripadvisor&num=10&model=gpt-4o&prev=${encodeURIComponent(this.prevMessages.join(','))}`;
                         
                         this.getAndProcessResponse(url);
@@ -922,7 +921,7 @@
                                     }
                                     
                                     // Add sorted domItems back
-                                    for (const [item, domItem] of chatInterface.currentItems) {
+                                    for (const [, domItem] of chatInterface.currentItems) {
                                         chatInterface.productCardsArea.appendChild(domItem);
                                     }
                                 }

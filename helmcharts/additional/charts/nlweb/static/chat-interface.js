@@ -54,7 +54,6 @@ export class ChatInterface {
     const urlParams = new URLSearchParams(window.location.search);
     this.initialQuery = urlParams.get('query');
     const prevMessagesStr = urlParams.get('prev');
-    const contextUrl = urlParams.get('context_url');
     const urlGenerateMode = urlParams.get('generate_mode');
     
     if (urlGenerateMode) {
@@ -576,7 +575,7 @@ export class ChatInterface {
       }
       
       // Add sorted result items
-      for (const [item, domItem] of this.currentItems) {
+      for (const [, domItem] of this.currentItems) {
         this.bubble.appendChild(domItem);
       }
     }
