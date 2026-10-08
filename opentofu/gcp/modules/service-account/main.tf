@@ -30,13 +30,26 @@ resource "google_project_iam_member" "service_account-roles" {
 # and IAM-policy changes on every bucket in the project, including ones
 # unrelated to this environment.
 #
-# roles/storage.objectAdmin is still the minimal built-in role for this: this
-# SA both uploads (upload-files/output-file modules, runtime GCP-storage
-# services) and overwrites/removes stale objects, so read-only
-# (objectViewer) and write-only (objectCreator, can't overwrite or delete)
-# aren't enough -- objectAdmin is the narrowest GCS role covering all three,
-# and it's already scoped per-bucket via `bucket =` below, not project-wide.
-resource "google_storage_bucket_iam_member" "storage_object_admin" {
+# Custom role instead of the built-in roles/storage.objectAdmin: this SA
+# uploads (upload-files/output-file modules, runtime GCP-storage services)
+# and overwrites/removes stale objects, so it needs get+create+delete+list,
+# but objectAdmin also throws in object-level IAM/ACL management
+# (getIamPolicy/setIamPolicy) and metadata-only updates that nothing here
+# actually uses -- define exactly the 4 permissions needed instead.
+resource "google_project_iam_custom_role" "storage_object_rw" {
+  role_id     = "storageObjectRW_${replace(local.environment_name, "-", "_")}"
+  project     = var.project
+  title       = "Storage Object Read/Write (${local.environment_name})"
+  description = "Read, create, delete, and list objects -- no bucket or IAM management."
+  permissions = [
+    "storage.objects.get",
+    "storage.objects.create",
+    "storage.objects.delete",
+    "storage.objects.list",
+  ]
+}
+
+resource "google_storage_bucket_iam_member" "storage_object_rw" {
   for_each = toset([
     var.sa_key_store_bucket,
     var.public_bucket,
@@ -45,7 +58,7 @@ resource "google_storage_bucket_iam_member" "storage_object_admin" {
   ])
 
   bucket = each.value
-  role   = "roles/storage.objectAdmin"
+  role   = google_project_iam_custom_role.storage_object_rw.id
   member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
