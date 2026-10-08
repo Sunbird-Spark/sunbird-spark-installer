@@ -7,6 +7,9 @@ import jwt
 
 from common import json_request, get_api_plugins, retrying_urlopen
 
+CONSUMERS_PATH = "{}/consumers"
+JWT_TOKEN_LOG = "JWT token for {} is : {}"
+
 def safe_join(base_dir, *parts):
     """os.path.join, but refuses to build a path that escapes base_dir --
     guards consumers_file_path against a faulty or malicious CLI argument
@@ -18,7 +21,7 @@ def safe_join(base_dir, *parts):
     return candidate
 
 def _consumer_exists(kong_admin_api_url, username):
-    consumers_url = "{}/consumers".format(kong_admin_api_url)
+    consumers_url = CONSUMERS_PATH.format(kong_admin_api_url)
     try:
         retrying_urlopen(consumers_url + "/" + username)
         return True
@@ -29,7 +32,7 @@ def _consumer_exists(kong_admin_api_url, username):
             raise
 
 def _get_consumer(kong_admin_api_url, username):
-    consumers_url = "{}/consumers".format(kong_admin_api_url)
+    consumers_url = CONSUMERS_PATH.format(kong_admin_api_url)
     try:
         response = retrying_urlopen(consumers_url + "/" + username)
         consumer = json.loads(response.read().decode('utf-8'))
@@ -45,7 +48,7 @@ def _dict_without_keys(a_dict, keys):
 
 def _ensure_consumer_exists(kong_admin_api_url, consumer):
     username = consumer['username']
-    consumers_url = "{}/consumers".format(kong_admin_api_url)
+    consumers_url = CONSUMERS_PATH.format(kong_admin_api_url)
     if not _consumer_exists(kong_admin_api_url, username):
         print("Adding consumer {}".format(username))
         consumer_data = {'username': username}
@@ -68,7 +71,7 @@ def _derive_owned_groups(consumers):
     return owned
 
 def save_consumers(kong_admin_api_url, consumers, managed_by="core"):
-    consumers_url = "{}/consumers".format(kong_admin_api_url)
+    consumers_url = CONSUMERS_PATH.format(kong_admin_api_url)
     
     # Track statistics for the summary
     stats = {
@@ -226,7 +229,7 @@ def _get_first_or_create_jwt_credential(kong_admin_api_url, consumer, stats):
         # Print token for HS256
         if jwt_credential['algorithm'] == 'HS256':
             jwt_token = jwt.encode({'iss': jwt_credential['key']}, jwt_credential['secret'], algorithm='HS256')
-            print("JWT token for {} is : {}".format(username, jwt_token))
+            print(JWT_TOKEN_LOG.format(username, jwt_token))
         if 'print_credentials' in consumer:
             print("Credentials for consumer {}, key: {}, secret: {}".format(username, jwt_credential['key'], jwt_credential['secret']))
             
@@ -250,7 +253,7 @@ def _get_first_or_create_jwt_credential(kong_admin_api_url, consumer, stats):
             # Print token for HS256
             if jwt_credential['algorithm'] == 'HS256':
                 jwt_token = jwt.encode({'iss': jwt_credential['key']}, jwt_credential['secret'], algorithm='HS256')
-                print("JWT token for {} is : {}".format(username, jwt_token))
+                print(JWT_TOKEN_LOG.format(username, jwt_token))
                 
             return jwt_credential
         except urllib.error.HTTPError as e:
@@ -264,7 +267,7 @@ def _get_first_or_create_jwt_credential(kong_admin_api_url, consumer, stats):
                         stats["credentials"]["skipped"] += 1
                         if cred['algorithm'] == 'HS256':
                             jwt_token = jwt.encode({'iss': cred['key']}, cred['secret'], algorithm='HS256')
-                            print("JWT token for {} is : {}".format(username, jwt_token))
+                            print(JWT_TOKEN_LOG.format(username, jwt_token))
                         return cred
             raise
 
