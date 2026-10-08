@@ -111,7 +111,7 @@ CONTAINER="{{ .Values.databases.janusgraph.container | default "janusgraph" }}"
 echo "==> Finding JanusGraph pod..."
 POD_NAME=$(kubectl get pod -n "$NS" -l "$LABEL" -o jsonpath='{.items[0].metadata.name}' --field-selector=status.phase=Running)
 
-if [ -n "$POD_NAME" ]; then
+if [[ -n "$POD_NAME" ]]; then
     echo "Found JanusGraph pod: $POD_NAME. Starting bulk import..."
     kubectl exec -n "$NS" "$POD_NAME" -c "$CONTAINER" -- mkdir -p /tmp/migration
     kubectl cp /tmp/nodes.csv "$NS/$POD_NAME:/tmp/nodes.csv" -c "$CONTAINER"

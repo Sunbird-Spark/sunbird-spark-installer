@@ -18,12 +18,12 @@ function backup_configs() {
     echo -e "\nBacking up existing config files if they exist..."
 
     mkdir -p ~/.kube
-    if [ -f ~/.kube/config ]; then
+    if [[ -f ~/.kube/config ]]; then
         mv ~/.kube/config ~/.kube/config.$timestamp
     fi
 
     mkdir -p ~/.config/rclone
-    if [ -f ~/.config/rclone/rclone.conf ]; then
+    if [[ -f ~/.config/rclone/rclone.conf ]]; then
         mv ~/.config/rclone/rclone.conf ~/.config/rclone/rclone.conf.$timestamp
     fi
 
@@ -73,7 +73,7 @@ function certificate_config() {
 
     CERTKEY=$(kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
     # Inject cert keys to the service if its not available 
-    if [ -z "$CERTKEY" ]; then
+    if [[ -z "$CERTKEY" ]]; then
         echo "Certificate RSA public key not available"
         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
         kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
@@ -84,7 +84,7 @@ function install_component() {
     # We need a dummy cm for configmap to start. Later Lernbb will create real one
     kubectl create configmap keycloak-key -n sunbird 2>/dev/null || true
     local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "helmcharts" ]; then
+    if [[ "$(basename $current_directory)" != "helmcharts" ]]; then
         cd ../../../helmcharts 2>/dev/null || true
     fi
     local component="$1"
@@ -94,25 +94,25 @@ function install_component() {
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
-    if [ -f "$component/ed-values.yaml" ]; then
+    if [[ -f "$component/ed-values.yaml" ]]; then
         ed_values_flag="-f $component/ed-values.yaml --wait --wait-for-jobs"
     fi
     ### Generate the key pair required for certificate template
-      if [ $component = "learnbb" ]; then
+      if [[ $component = "learnbb" ]]; then
         if kubectl get job keycloak-kids-keys -n sunbird >/dev/null 2>&1; then
             echo "Deleting existing job keycloak-kids-keys..."
             kubectl delete job keycloak-kids-keys -n sunbird
         fi
 
-        if [ -f "certkey.pem" ] && [ -f "certpubkey.pem" ]; then
+        if [[ -f "certkey.pem" ]] && [[ -f "certpubkey.pem" ]]; then
             echo "Certificate keys are already created. Skipping the keys creation..."
         else
             certificate_keys
         fi
       fi
     local addon_values_flag=""
-    if [ "$(yq '.deployed_dial_addon' "../opentofu/gcp/$environment/global-values.yaml")" = "true" ]; then
-        if [ -f "../addons/global-values.yaml" ]; then
+    if [[ "$(yq '.deployed_dial_addon' "../opentofu/gcp/$environment/global-values.yaml")" = "true" ]]; then
+        if [[ -f "../addons/global-values.yaml" ]]; then
             addon_values_flag="-f ../addons/global-values.yaml"
         fi
     fi
@@ -126,7 +126,7 @@ function install_component() {
 }
 
 function install_service() {
-    if [ $# -lt 2 ]; then
+    if [[ $# -lt 2 ]]; then
         echo "Usage: ./install.sh install_service <bundle> <chart> [chart2] [chart3] ..."
         return 1
     fi
@@ -136,23 +136,23 @@ function install_service() {
     local target_charts=("$@")   # one or more chart names
 
     local current_directory="$(pwd)"
-    if [ "$(basename "$current_directory")" != "helmcharts" ]; then
+    if [[ "$(basename "$current_directory")" != "helmcharts" ]]; then
         cd ../../../helmcharts 2>/dev/null || true
     fi
 
-    if [ ! -d "$bundle" ]; then
+    if [[ ! -d "$bundle" ]]; then
         echo "Error: bundle '$bundle' not found in helmcharts/"
         return 1
     fi
 
     local ed_values_flag=""
-    if [ -f "$bundle/ed-values.yaml" ]; then
+    if [[ -f "$bundle/ed-values.yaml" ]]; then
         ed_values_flag="-f $bundle/ed-values.yaml"
     fi
 
     local addon_values_flag=""
-    if [ "$(yq '.deployed_dial_addon' "../opentofu/gcp/$environment/global-values.yaml")" = "true" ]; then
-        if [ -f "../addons/global-cloud-values.yaml" ]; then
+    if [[ "$(yq '.deployed_dial_addon' "../opentofu/gcp/$environment/global-values.yaml")" = "true" ]]; then
+        if [[ -f "../addons/global-cloud-values.yaml" ]]; then
             addon_values_flag="-f ../addons/global-cloud-values.yaml"
         fi
     fi
@@ -186,7 +186,7 @@ function install_service() {
         while IFS= read -r chart_name; do
             local is_target=false
             for chart in "${target_charts[@]}"; do
-                [ "$chart_name" = "$chart" ] && is_target=true && break
+                [[ "$chart_name" = "$chart" ]] && is_target=true && break
             done
             if $is_target; then
                 set_flags="$set_flags --set ${chart_name}.enabled=true"
@@ -209,10 +209,10 @@ function install_service() {
 }
 
 function install_helm_components() {
-    if [ $# -ge 2 ]; then
+    if [[ $# -ge 2 ]]; then
         # Two or more args: deploy one or more services within a bundle
         install_service "$@"
-    elif [ $# -eq 1 ]; then
+    elif [[ $# -eq 1 ]]; then
         # One arg: deploy the entire bundle
         install_component "$1"
     else
@@ -233,10 +233,10 @@ function dns_mapping() {
 
     echo -e "\nAdd/update your DNS mapping for your domain by adding an A record to this IP: ${PUBLIC_IP}. The script will wait for 20 minutes"
 
-    while [ $SECONDS -lt $timeout ]; do
+    while [[ $SECONDS -lt $timeout ]]; do
         current_ip=$(nslookup $domain_name | grep -E -o 'Address: [0-9.]+' | awk '{print $2}')
 
-        if [ "$current_ip" == "$PUBLIC_IP" ]; then
+        if [[ "$current_ip" == "$PUBLIC_IP" ]]; then
             echo -e "\nDNS mapping has propagated successfully."
             return
         fi
@@ -252,7 +252,7 @@ function dns_mapping() {
 
 function generate_postman_env() {
     local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
+    if [[ "$(basename $current_directory)" != "$environment" ]]; then
         cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
@@ -286,7 +286,7 @@ function restart_workloads_using_keys() {
 
 function run_post_install() {
     local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
+    if [[ "$(basename $current_directory)" != "$environment" ]]; then
         cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
     check_pod_status
@@ -297,7 +297,7 @@ function run_post_install() {
 
 function migrate_forms() {
     local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
+    if [[ "$(basename $current_directory)" != "$environment" ]]; then
         cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
     echo "Migrating missing forms..."
@@ -309,7 +309,7 @@ function migrate_forms() {
 
 function create_client_forms() {
     local current_directory="$(pwd)"
-    if [ "$(basename $current_directory)" != "$environment" ]; then
+    if [[ "$(basename $current_directory)" != "$environment" ]]; then
         cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
     cp -rf ../../../postman-collection/ED-${RELEASE}  .
@@ -348,7 +348,7 @@ function check_pod_status() {
     local timeout=$((SECONDS + 600))
     consecutive_runs=0
     echo "Ensure the post are stable for 100 seconds"
-    while [ $SECONDS -lt $timeout ]; do
+    while [[ $SECONDS -lt $timeout ]]; do
         if ! kubectl get pods --no-headers -n sunbird | grep -v Running | grep -v Completed; then
             echo "All pods are running successfully."
             break
@@ -356,7 +356,7 @@ function check_pod_status() {
             ((consecutive_runs++))
         fi
 
-        if [ $consecutive_runs -ge 10 ]; then
+        if [[ $consecutive_runs -ge 10 ]]; then
             echo "Timed out after 10 tries. Some pods are still not running successfully. Check the crashing pod logs and resolve the issues. Once pods are running successfully, re-reun this script as below:"
             echo "./install.sh run_post_install"
             exit
@@ -370,7 +370,7 @@ function check_pod_status() {
 
 
 
-if [ $# -eq 0 ]; then
+if [[ $# -eq 0 ]]; then
     create_tf_backend
     backup_configs
     create_tf_resources

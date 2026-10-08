@@ -41,7 +41,7 @@ while true; do
   IDS=$(echo "$RESPONSE" | jq -r '.result.content[]?.identifier // empty')
   HIT_COUNT=$(echo "$IDS" | grep -c . || true)
 
-  if [ "$HIT_COUNT" -eq 0 ]; then
+  if [[ "$HIT_COUNT" -eq 0 ]]; then
     echo "[$(date)] Search complete. Total IDs: $TOTAL_DOCS" | tee -a "$LOG_FILE"
     break
   fi
@@ -87,7 +87,7 @@ EOF
 
   # Check response
   ERROR=$(echo "$RESPONSE" | jq -r '.error // empty')
-  if [ -n "$ERROR" ]; then
+  if [[ -n "$ERROR" ]]; then
     echo "[ERROR] Batch $BATCH_NUM failed: $ERROR" | tee -a "$LOG_FILE"
     printf '%s\n' "${BATCH[@]}" >> "$FAILED_FILE"
     ((FAILED+=BATCH_SIZE_ACTUAL))
@@ -98,7 +98,7 @@ EOF
     echo "[$(date)] Batch $BATCH_NUM: $SUCCESS_COUNT succeeded" | tee -a "$LOG_FILE"
     ((SUCCEEDED+=SUCCESS_COUNT))
 
-    if [ -n "$FAILED_IDS" ]; then
+    if [[ -n "$FAILED_IDS" ]]; then
       echo "$FAILED_IDS" >> "$FAILED_FILE"
       FAILED_COUNT=$(echo "$FAILED_IDS" | wc -l)
       ((FAILED+=FAILED_COUNT))
@@ -116,4 +116,4 @@ echo "Succeeded: $SUCCEEDED" | tee -a "$LOG_FILE"
 echo "Failed: $FAILED" | tee -a "$LOG_FILE"
 echo "Batches: $BATCH_NUM" | tee -a "$LOG_FILE"
 echo "Log: $LOG_FILE" | tee -a "$LOG_FILE"
-[ -f "$FAILED_FILE" ] && echo "Failed IDs: $FAILED_FILE" | tee -a "$LOG_FILE"
+[[ -f "$FAILED_FILE" ]] && echo "Failed IDs: $FAILED_FILE" | tee -a "$LOG_FILE"

@@ -30,7 +30,7 @@ VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "f
 
 # ── Validate inputs ────────────────────────────────────────────────────────
 for var in TENANT_ID SUBSCRIPTION_ID BUILDING_BLOCK ENVIRONMENT RESOURCE_GROUP LOCATION GITHUB_ORG GITHUB_RUNNER_TOKEN; do
-  if [ -z "${!var}" ]; then
+  if [[ -z "${!var}" ]]; then
     echo "❌ ERROR: $var is not set. Edit the variables at the top of this script."
     exit 1
   fi
@@ -60,7 +60,7 @@ fi
 
 # ── Step 2a: Enforce no-shared-key-access on any storage account in this RG ─
 POLICY_DEF_ID=$(az policy definition list --query "[?displayName=='Storage accounts should have shared key access disabled'].id" -o tsv 2>/dev/null || true)
-if [ -n "$POLICY_DEF_ID" ]; then
+if [[ -n "$POLICY_DEF_ID" ]]; then
   az policy assignment create \
     --name "deny-storage-shared-key-${ENVIRONMENT}" \
     --display-name "Deny storage accounts with shared key access enabled" \
@@ -176,7 +176,7 @@ cat > "$ROLE_JSON_FILE" <<EOF
 EOF
 
 EXISTING_ROLE=$(az role definition list --name "$CUSTOM_ROLE_NAME" --query "[0].roleName" -o tsv 2>/dev/null || true)
-if [ -z "$EXISTING_ROLE" ]; then
+if [[ -z "$EXISTING_ROLE" ]]; then
   if az role definition create --role-definition "$ROLE_JSON_FILE" >/dev/null 2>&1; then
     echo "✓ Custom role created: $CUSTOM_ROLE_NAME"
     echo "  Waiting for role to propagate (30s)..."
@@ -210,7 +210,7 @@ az role assignment create \
   || echo "✓ AKS Cluster Admin role already assigned (skipped)"
 
 # ── Step 6: Build GitHub runner URL ───────────────────────────────────────
-if [ -n "$GITHUB_REPO" ]; then
+if [[ -n "$GITHUB_REPO" ]]; then
   GITHUB_URL="https://github.com/${GITHUB_ORG}/${GITHUB_REPO}"
 else
   GITHUB_URL="https://github.com/${GITHUB_ORG}"
@@ -305,19 +305,19 @@ apt-get install -y -qq docker-ce docker-ce-cli containerd.io docker-buildx-plugi
 usermod -aG docker azureuser
 
 # VPN (Pritunl + WireGuard) - only when VPN_ENABLED=true
-if [ "\$VPN_ENABLED" = "true" ]; then
+if [[ "\$VPN_ENABLED" = "true" ]]; then
   echo "==> Installing Pritunl + WireGuard..."
   set +e
   apt-get install -y wireguard
   curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x7568D9BB55FF9E5287D586017AE645C0CF8E292A" | gpg --dearmor -o /usr/share/keyrings/pritunl.gpg
   echo "deb [signed-by=/usr/share/keyrings/pritunl.gpg] https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
   curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
-  echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list
+  echo "deb [[ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ]] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list
   apt-get update -qq 2>&1 | tee /tmp/pritunl-apt-update.log
   apt-get install -y pritunl mongodb-org 2>&1 | tee /tmp/pritunl-install.log
   PRITUNL_INSTALL_STATUS=\$?
   set -e
-  if [ \$PRITUNL_INSTALL_STATUS -ne 0 ]; then
+  if [[ \$PRITUNL_INSTALL_STATUS -ne 0 ]]; then
     echo "ERROR: Pritunl install failed. Reason:"
     tail -20 /tmp/pritunl-install.log
   else
@@ -354,7 +354,7 @@ sudo -u azureuser ./config.sh \
   --unattended --replace 2>&1 | tee /tmp/runner-config.log
 RUNNER_CONFIG_STATUS=\$?
 set -e
-if [ \$RUNNER_CONFIG_STATUS -ne 0 ]; then
+if [[ \$RUNNER_CONFIG_STATUS -ne 0 ]]; then
   echo "ERROR: GitHub Actions runner registration failed. Reason:"
   tail -20 /tmp/runner-config.log
 else
@@ -404,7 +404,7 @@ if az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" &>/dev/null; 
   echo "$RUN_OUTPUT"
   VM_IP_CHECK=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" --show-details --query publicIps -o tsv)
   SETUP_STATUS=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 azureuser@"$VM_IP_CHECK" 'cat /tmp/setup-status 2>/dev/null || echo UNKNOWN')
-  if [ "$SETUP_STATUS" = "SUCCESS" ]; then
+  if [[ "$SETUP_STATUS" = "SUCCESS" ]]; then
     echo "✓ Setup completed successfully on existing VM."
   else
     echo "ERROR: Setup failed or output was truncated. Check full log:"
@@ -414,7 +414,7 @@ if az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" &>/dev/null; 
   rm -f "$SETUP_SCRIPT" "$CLOUD_INIT_FILE"
 else
   echo "Creating VM... (this takes ~2 minutes)"
-  if [ "$VPN_ENABLED" = "true" ]; then
+  if [[ "$VPN_ENABLED" = "true" ]]; then
     PUBLIC_IP_ARGS=(--public-ip-sku Standard)
   else
     PUBLIC_IP_ARGS=(--no-public-ip-address)
@@ -438,7 +438,7 @@ else
 fi
 
 # ── Open NSG ports (VPN only) ─────────────────────────────────────────────
-if [ "$VPN_ENABLED" = "true" ]; then
+if [[ "$VPN_ENABLED" = "true" ]]; then
   # Azure auto-creates NSG named <VM_NAME>NSG
   VM_NSG="${VM_NAME}NSG"
 
@@ -447,7 +447,7 @@ if [ "$VPN_ENABLED" = "true" ]; then
     NIC_ID=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
       --query "networkProfile.networkInterfaces[0].id" -o tsv)
     NSG_ID=$(az network nic show --ids "$NIC_ID" --query "networkSecurityGroup.id" -o tsv 2>/dev/null || true)
-    if [ -n "$NSG_ID" ]; then
+    if [[ -n "$NSG_ID" ]]; then
       VM_NSG=$(basename "$NSG_ID")
     else
       echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 1194, TCP 443"
@@ -455,7 +455,7 @@ if [ "$VPN_ENABLED" = "true" ]; then
     fi
   fi
 
-  if [ -n "$VM_NSG" ]; then
+  if [[ -n "$VM_NSG" ]]; then
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
       --name "allow-pritunl-vpn" --priority 100 --protocol Udp \
@@ -475,7 +475,7 @@ fi
 # ── Done ───────────────────────────────────────────────────────────────────
 echo "Runner VM setup complete."
 echo "VM: $VM_NAME"
-if [ "$VPN_ENABLED" = "true" ]; then
+if [[ "$VPN_ENABLED" = "true" ]]; then
   VM_IP=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
     --show-details --query publicIps -o tsv)
   echo "Public IP: $VM_IP"
@@ -484,7 +484,7 @@ else
   echo "Public IP: none (private VM, access via Azure Bastion after create_tf_resources)"
 fi
 
-if [ "$VM_EXISTED" = "true" ]; then
+if [[ "$VM_EXISTED" = "true" ]]; then
   echo "Setup complete. Runner and VPN are ready."
 else
   echo "cloud-init running in background (~10 min). Check: ssh azureuser@${VM_IP:-<ip>} 'sudo tail -f /var/log/runner-setup.log'"
@@ -492,12 +492,12 @@ fi
 
 echo "Runner: https://github.com/${GITHUB_ORG}/${GITHUB_REPO:+${GITHUB_REPO}/}settings/actions/runners"
 
-if [ "$VPN_ENABLED" = "true" ]; then
+if [[ "$VPN_ENABLED" = "true" ]]; then
   PRITUNL_CREDS=$(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 azureuser@"$VM_IP" 'cat /tmp/pritunl-creds 2>/dev/null || echo ""')
   PRITUNL_PASS=$(echo "$PRITUNL_CREDS" | cut -d: -f2)
   echo "Pritunl VPN: https://${VM_IP}"
   echo "Pritunl username: pritunl"
-  if [ -n "$PRITUNL_PASS" ]; then
+  if [[ -n "$PRITUNL_PASS" ]]; then
     echo "Pritunl password: ${PRITUNL_PASS}"
   else
     echo "Pritunl password: ssh azureuser@${VM_IP} 'sudo pritunl default-password'"

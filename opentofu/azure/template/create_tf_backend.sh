@@ -69,7 +69,7 @@ az storage container create --name "$CONTAINER_NAME" --account-name "$STORAGE_AC
 # installer VM (setup-installer-vm.sh already added Microsoft.Storage to its
 # subnet), so that subnet already exists at this point.
 VM_RESOURCE_ID=$(curl -s -H "Metadata:true" "http://169.254.169.254/metadata/instance/compute?api-version=2021-02-01" 2>/dev/null | jq -r '.resourceId // empty')
-if [ -n "$VM_RESOURCE_ID" ]; then
+if [[ -n "$VM_RESOURCE_ID" ]]; then
   NIC_ID=$(az vm show --ids "$VM_RESOURCE_ID" --query "networkProfile.networkInterfaces[0].id" -o tsv)
   SUBNET_ID=$(az network nic show --ids "$NIC_ID" --query "ipConfigurations[0].subnet.id" -o tsv)
   SUBNET_NAME=$(echo "$SUBNET_ID" | awk -F'/' '{print $NF}')
