@@ -173,7 +173,7 @@ export class ChatInterface {
     this.input.style.height = '60px';
 
     // Get response
-    this.getResponse(message);
+    this.getResponse(message).catch((error) => console.error('Error fetching response:', error));
   }
 
   /**

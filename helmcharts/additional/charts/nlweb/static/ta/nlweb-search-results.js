@@ -27,7 +27,7 @@ class NLWebSearchResults {
         if (query) {
             this.searchInput.value = query;
             this.searchQueryDisplay.textContent = query;
-            this.performSearch(query);
+            this.performSearch(query).catch((error) => console.error('Search error:', error));
         }
         
         // Set up event listeners
@@ -40,7 +40,7 @@ class NLWebSearchResults {
                 window.history.pushState({}, '', newUrl);
                 
                 this.searchQueryDisplay.textContent = query;
-                this.performSearch(query);
+                this.performSearch(query).catch((error) => console.error('Search error:', error));
             }
         });
         

@@ -261,7 +261,7 @@ class ModernChatInterface {
       }
     } else {
       // Load sites for the dropdown
-      this.loadSites();
+      this.loadSites().catch((error) => console.error('Error loading sites:', error));
     }
   }
   
@@ -1572,7 +1572,7 @@ class ModernChatInterface {
     
     // Load sites if not already loaded AND no specific site is selected
     if ((!this.sites || this.sites.length === 0) && (!this.selectedSite || this.selectedSite === 'all')) {
-      this.loadSites();
+      this.loadSites().catch((error) => console.error('Error loading sites:', error));
     } else {
       // If sites are already loaded, populate the dropdown
       this.populateSiteDropdown();
