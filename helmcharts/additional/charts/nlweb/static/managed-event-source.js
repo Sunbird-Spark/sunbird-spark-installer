@@ -436,7 +436,7 @@ export class ManagedEventSource {
     
     // Clear existing content safely
     while (chatInterface.bubble.firstChild) {
-      chatInterface.bubble.removeChild(chatInterface.bubble.firstChild);
+      chatInterface.bubble.firstChild.remove();
     }
     
     // Safely handle answer
@@ -1171,7 +1171,7 @@ export class ManagedEventSource {
     
     // Clear any loading indicators
     while (chatInterface.bubble.firstChild) {
-      chatInterface.bubble.removeChild(chatInterface.bubble.firstChild);
+      chatInterface.bubble.firstChild.remove();
     }
     
     // Create container for substitution content

@@ -318,7 +318,7 @@ export class ChatInterface {
    */
   handleFirstMessage() {
     this.dotsStillThere = false;
-    this.messagesArea.removeChild(this.messagesArea.lastChild);
+    this.messagesArea.lastChild.remove();
   }
 
   /**
@@ -550,7 +550,7 @@ export class ChatInterface {
       
       // Clear existing children
       while (this.bubble.firstChild) {
-        this.bubble.removeChild(this.bubble.firstChild);
+        this.bubble.firstChild.remove();
       }
       
       // Add sorted content back in proper order

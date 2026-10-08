@@ -9,7 +9,7 @@ export function handleCompareItems(data, chatInterface) {
   
   // Clear existing content safely
   while (chatInterface.bubble.firstChild) {
-    chatInterface.bubble.removeChild(chatInterface.bubble.firstChild);
+    chatInterface.bubble.firstChild.remove();
   }
   
   // Display the comparison summary with expand/collapse functionality
@@ -30,7 +30,7 @@ export function handleCompareItems(data, chatInterface) {
     const lineHeight = Number.parseFloat(window.getComputedStyle(measureDiv).lineHeight) || 24;
     const totalHeight = measureDiv.offsetHeight;
     const estimatedLines = Math.ceil(totalHeight / lineHeight);
-    document.body.removeChild(measureDiv);
+    measureDiv.remove();
     
     // If more than 4 lines, create expandable version
     if (estimatedLines > 4) {
