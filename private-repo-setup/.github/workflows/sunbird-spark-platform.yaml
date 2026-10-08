@@ -109,7 +109,7 @@ on:
         default: false
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   CONFIG_PATH: "configs/${{ inputs.environment }}"
@@ -126,6 +126,8 @@ jobs:
     if: ${{ inputs.create_tf_backend || inputs.backup_configs || inputs.create_tf_resources }}
     runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: write   # Encrypt and Commit Updated Configs pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
@@ -170,18 +172,35 @@ jobs:
 
       - name: Verify Tools
         if: ${{ inputs.create_tf_backend || inputs.create_tf_resources }}
+        env:
+          TOFU_VERSION: "1.11.4"
         run: |
           if ! command -v tofu &>/dev/null; then
             sudo apt-get install -y unzip -q
-            curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
+            TOFU_VERSION="1.11.4"
+            curl -sLO --proto '=https' "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
+            curl -sLO --proto '=https' "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
+            grep " tofu_${TOFU_VERSION}_linux_amd64.zip$" "tofu_${TOFU_VERSION}_SHA256SUMS" | sha256sum -c -
+            sudo unzip -qo tofu_${TOFU_VERSION}_linux_amd64.zip -d /usr/local/bin/
+            rm tofu_${TOFU_VERSION}_linux_amd64.zip tofu_${TOFU_VERSION}_SHA256SUMS
           fi
           if ! command -v terragrunt &>/dev/null; then
-            sudo wget -qO /usr/local/bin/terragrunt               https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.21/terragrunt_linux_amd64
-            sudo chmod +x /usr/local/bin/terragrunt
+            TERRAGRUNT_VERSION="0.77.5"
+            curl -sLO --proto '=https' "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_amd64"
+            curl -sLO --proto '=https' "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/SHA256SUMS"
+            grep " terragrunt_linux_amd64$" SHA256SUMS | sha256sum -c -
+            sudo install -m 0755 terragrunt_linux_amd64 /usr/local/bin/terragrunt
+            rm terragrunt_linux_amd64 SHA256SUMS
           fi
           if ! command -v yq &>/dev/null; then
-            sudo wget -qO /usr/local/bin/yq               https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-            sudo chmod +x /usr/local/bin/yq
+            YQ_VERSION="4.44.1"
+            curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
+            curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums"
+            curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums_hashes_order"
+            YQ_SHA256_FIELD=$(($(grep -n '^SHA-256$' checksums_hashes_order | cut -d: -f1) + 1))
+            grep '^yq_linux_amd64 ' checksums | awk -v f="$YQ_SHA256_FIELD" '{print $f"  yq_linux_amd64"}' | sha256sum -c -
+            sudo install -m 0755 yq_linux_amd64 /usr/local/bin/yq
+            rm yq_linux_amd64 checksums checksums_hashes_order
           fi
           echo "/usr/local/bin" >> $GITHUB_PATH
           export PATH="/usr/local/bin:$PATH"
@@ -293,6 +312,8 @@ jobs:
     needs: [infra]
     runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: write   # Commit certificate keys after learnbb pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
@@ -566,6 +587,8 @@ jobs:
     needs: [deploy]
     runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
+    permissions:
+      contents: write   # Encrypt and Commit env.json pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
@@ -629,9 +652,19 @@ jobs:
           echo "✅ Environment folder ready: $ENV_FOLDER"
 
       - name: Install Platform Tools
+        env:
+          # Postman doesn't publish an official checksum for this script (no
+          # .sha256 sibling file at the same URL). Pinned to the checksum of
+          # the version reviewed while fixing this -- if the script's
+          # legitimately changed upstream, re-review it and update this
+          # value; don't just drop the check.
+          POSTMAN_INSTALL_SHA256: "7d1f5f3d138ab09a656794a33c9ff1c2b7315c4cce2200b62ef49273e6cc823b"
         run: |
           if ! command -v postman &>/dev/null; then
-            curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+            curl -fsSL --proto '=https' --tlsv1.2 -o postman-install.sh "https://dl-cli.pstmn.io/install/linux64.sh"
+            echo "${POSTMAN_INSTALL_SHA256}  postman-install.sh" | sha256sum -c -
+            sh postman-install.sh
+            rm -f postman-install.sh
           fi
           kubectl version --client && helm version && yq --version && openssl version && postman --version
           echo "✅ Platform tools ready"
