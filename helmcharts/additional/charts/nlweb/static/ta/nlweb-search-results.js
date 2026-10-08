@@ -262,8 +262,8 @@ class NLWebSearchResults {
         // Convert ISO 8601 duration to readable format
         const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
         if (match) {
-            const hours = match[1] ? parseInt(match[1]) : 0;
-            const minutes = match[2] ? parseInt(match[2]) : 0;
+            const hours = match[1] ? Number.parseInt(match[1]) : 0;
+            const minutes = match[2] ? Number.parseInt(match[2]) : 0;
             
             if (hours && minutes) {
                 return `${hours}h ${minutes}m`;

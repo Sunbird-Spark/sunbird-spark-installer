@@ -27,7 +27,7 @@ export function handleCompareItems(data, chatInterface) {
     document.body.appendChild(measureDiv);
     
     // Calculate approximate number of lines (assuming ~1.5em line height)
-    const lineHeight = parseFloat(window.getComputedStyle(measureDiv).lineHeight) || 24;
+    const lineHeight = Number.parseFloat(window.getComputedStyle(measureDiv).lineHeight) || 24;
     const totalHeight = measureDiv.offsetHeight;
     const estimatedLines = Math.ceil(totalHeight / lineHeight);
     document.body.removeChild(measureDiv);
