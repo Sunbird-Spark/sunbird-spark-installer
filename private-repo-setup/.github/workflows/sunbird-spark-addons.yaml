@@ -49,30 +49,31 @@ on:
         type: boolean
         default: false
 
-      # ── UNINSTALL ADDONS ─────────────────────────────────────────────
-      run_addon_uninstall:
-        description: '3️⃣ Uninstall addon components'
+      # ── REMOVE ADDONS ────────────────────────────────────────────────
+      run_remove_addon_components:
+        description: '3️⃣ Remove addon components (uninstall)'
         type: boolean
         default: false
-      uninstall_dial:
+      remove_addon_dial:
         description: '   ↳ DIAL'
         type: boolean
         default: false
-      uninstall_discussion_forum:
+      remove_addon_discussion_forum:
         description: '   ↳ Discussion Forum'
         type: boolean
         default: false
-      uninstall_video_stream_generator:
+      remove_addon_video_stream_generator:
         description: '   ↳ Video Stream Generator'
         type: boolean
         default: false
-      uninstall_asset_enrichment:
+      remove_addon_asset_enrichment:
         description: '   ↳ Asset Enrichment'
         type: boolean
         default: false
 
 permissions:
-  contents: read
+  id-token: write
+  contents: write
 
 env:
   CONFIG_PATH: "configs/${{ inputs.environment }}"
@@ -85,11 +86,8 @@ jobs:
   infra-addons:
     name: "1 — Infra Addons (DIAL OpenTofu)"
     if: ${{ inputs.run_dial_infra }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
-    permissions:
-      id-token: write   # azure/login
-      contents: write   # Encrypt and Commit Addon Configs pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
@@ -98,27 +96,17 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
-        env:
-          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch "$SOURCE_BRANCH" \
+          git clone --depth 1 --branch ${{ inputs.source_branch }} \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
+          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
 
-      - name: Azure Login (Infra)
-        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
-        with:
-          client-id: ${{ secrets.AZURE_INFRA_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install --only-binary :all: ansible==14.3.1
+          pip install ansible
 
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -133,29 +121,14 @@ jobs:
           rm /tmp/vault_pass.txt
 
       - name: Install Terraform Tools
-        env:
-          TOFU_VERSION: "1.11.4"
         run: |
-          TOFU_VERSION="1.11.4"
-          curl -sLO --proto '=https' "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip"
-          curl -sLO --proto '=https' "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_SHA256SUMS"
-          grep " tofu_${TOFU_VERSION}_linux_amd64.zip$" "tofu_${TOFU_VERSION}_SHA256SUMS" | sha256sum -c -
-          sudo unzip -qo tofu_${TOFU_VERSION}_linux_amd64.zip -d /usr/local/bin/
-          rm tofu_${TOFU_VERSION}_linux_amd64.zip tofu_${TOFU_VERSION}_SHA256SUMS
-          TERRAGRUNT_VERSION="0.77.5"
-          curl -sLO --proto '=https' "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_amd64"
-          curl -sLO --proto '=https' "https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/SHA256SUMS"
-          grep " terragrunt_linux_amd64$" SHA256SUMS | sha256sum -c -
-          sudo install -m 0755 terragrunt_linux_amd64 /usr/local/bin/terragrunt
-          rm terragrunt_linux_amd64 SHA256SUMS
-          YQ_VERSION="4.44.1"
-          curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
-          curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums"
-          curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums_hashes_order"
-          YQ_SHA256_FIELD=$(($(grep -n '^SHA-256$' checksums_hashes_order | cut -d: -f1) + 1))
-          grep '^yq_linux_amd64 ' checksums | awk -v f="$YQ_SHA256_FIELD" '{print $f"  yq_linux_amd64"}' | sha256sum -c -
-          sudo install -m 0755 yq_linux_amd64 /usr/local/bin/yq
-          rm yq_linux_amd64 checksums checksums_hashes_order
+          curl -fsSL https://get.opentofu.org/install-opentofu.sh | sudo sh -s -- --install-method standalone
+          sudo wget -qO /usr/local/bin/terragrunt \
+            https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.21/terragrunt_linux_amd64
+          sudo chmod +x /usr/local/bin/terragrunt
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
           tofu --version && terragrunt --version && yq --version
 
       - name: Setup Environment Folder
@@ -190,10 +163,8 @@ jobs:
           echo "✅ DIAL addon OpenTofu completed"
 
       - name: Encrypt and Commit Addon Configs
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
           ADDON_CLOUD="sunbird-spark-installer/addons/global-cloud-values.yaml"
           if [ -f "$ADDON_CLOUD" ]; then
@@ -231,11 +202,8 @@ jobs:
     name: "2 — Deploy Addons"
     if: ${{ always() && inputs.run_addon_components }}
     needs: [infra-addons]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
-    permissions:
-      contents: read
-      id-token: write   # azure/login
 
     steps:
       - name: Checkout Configuration Repository
@@ -244,27 +212,17 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
-        env:
-          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch "$SOURCE_BRANCH" \
+          git clone --depth 1 --branch ${{ inputs.source_branch }} \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
+          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
 
-      - name: Azure Login (Deploy)
-        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
-        with:
-          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install --only-binary :all: ansible==14.3.1
+          pip install ansible
 
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -307,29 +265,13 @@ jobs:
           echo "✅ Environment folder ready: $ENV_FOLDER"
 
       - name: Install Deploy Tools
-        env:
-          HELM_VERSION: "3.21.4"
         run: |
-          KUBECTL_VER=$(curl -sL --proto '=https' https://dl.k8s.io/release/stable.txt)
-          curl -sLO --proto '=https' "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
-          curl -sLO --proto '=https' "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl.sha256"
-          echo "$(cat kubectl.sha256)  kubectl" | sha256sum -c -
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/ && rm kubectl.sha256
-          HELM_VERSION="3.21.4"
-          curl -sLO --proto '=https' "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
-          curl -sLO --proto '=https' "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
-          sha256sum -c "helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
-          tar -xzf "helm-v${HELM_VERSION}-linux-amd64.tar.gz"
-          sudo install -m 0755 linux-amd64/helm /usr/local/bin/helm
-          rm -rf helm-v${HELM_VERSION}-linux-amd64.tar.gz helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum linux-amd64
-          YQ_VERSION="4.44.1"
-          curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
-          curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums"
-          curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums_hashes_order"
-          YQ_SHA256_FIELD=$(($(grep -n '^SHA-256$' checksums_hashes_order | cut -d: -f1) + 1))
-          grep '^yq_linux_amd64 ' checksums | awk -v f="$YQ_SHA256_FIELD" '{print $f"  yq_linux_amd64"}' | sha256sum -c -
-          sudo install -m 0755 yq_linux_amd64 /usr/local/bin/yq
-          rm yq_linux_amd64 checksums checksums_hashes_order
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
           kubectl version --client && helm version && yq --version
 
       - name: Get AKS Credentials
@@ -385,17 +327,14 @@ jobs:
           echo "================================================"
 
 # ════════════════════════════════════════════════════════════════════════════
-# JOB 3 — UNINSTALL ADDONS
+# JOB 3 — REMOVE ADDONS (DIAL, Discussion Forum, Video Stream Generator)
 # ════════════════════════════════════════════════════════════════════════════
-  uninstall-addons:
-    name: "3 — Uninstall Addons"
-    if: ${{ always() && inputs.run_addon_uninstall }}
-    needs: [deploy-addons]
-    runs-on: ubuntu-latest
+  remove-addons:
+    name: "3 — Remove Addons"
+    if: ${{ always() && inputs.run_remove_addon_components }}
+    needs: [infra-addons, deploy-addons]
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
-    permissions:
-      contents: read
-      id-token: write   # azure/login
 
     steps:
       - name: Checkout Configuration Repository
@@ -404,27 +343,17 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
-        env:
-          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch "$SOURCE_BRANCH" \
+          git clone --depth 1 --branch ${{ inputs.source_branch }} \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
+          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
 
-      - name: Azure Login (Uninstall)
-        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
-        with:
-          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          pip install --only-binary :all: ansible==14.3.1
+          pip install ansible
 
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -434,6 +363,23 @@ jobs:
             ansible-vault decrypt $CONFIG_PATH/global-cloud-values.yaml \
               --vault-password-file=/tmp/vault_pass.txt
             echo "✅ global-cloud-values.yaml decrypted"
+          fi
+
+          if [ -f "$CONFIG_PATH/addons/global-cloud-values.yaml" ]; then
+            ansible-vault decrypt $CONFIG_PATH/addons/global-cloud-values.yaml \
+              --vault-password-file=/tmp/vault_pass.txt
+            if [ -f "sunbird-spark-installer/addons/global-cloud-values.yaml" ]; then
+              yq eval-all 'select(fileIndex==0) * select(fileIndex==1)' \
+                sunbird-spark-installer/addons/global-cloud-values.yaml \
+                $CONFIG_PATH/addons/global-cloud-values.yaml \
+                > /tmp/merged-addon-cloud.yaml
+              cp /tmp/merged-addon-cloud.yaml sunbird-spark-installer/addons/global-cloud-values.yaml
+              echo "✅ Addon cloud values merged"
+            else
+              cp $CONFIG_PATH/addons/global-cloud-values.yaml \
+                sunbird-spark-installer/addons/global-cloud-values.yaml
+              echo "✅ Addon cloud values copied"
+            fi
           fi
 
           rm /tmp/vault_pass.txt
@@ -450,29 +396,13 @@ jobs:
           echo "✅ Environment folder ready: $ENV_FOLDER"
 
       - name: Install Deploy Tools
-        env:
-          HELM_VERSION: "3.21.4"
         run: |
-          KUBECTL_VER=$(curl -sL --proto '=https' https://dl.k8s.io/release/stable.txt)
-          curl -sLO --proto '=https' "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl"
-          curl -sLO --proto '=https' "https://dl.k8s.io/release/${KUBECTL_VER}/bin/linux/amd64/kubectl.sha256"
-          echo "$(cat kubectl.sha256)  kubectl" | sha256sum -c -
-          chmod +x kubectl && sudo mv kubectl /usr/local/bin/ && rm kubectl.sha256
-          HELM_VERSION="3.21.4"
-          curl -sLO --proto '=https' "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz"
-          curl -sLO --proto '=https' "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
-          sha256sum -c "helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum"
-          tar -xzf "helm-v${HELM_VERSION}-linux-amd64.tar.gz"
-          sudo install -m 0755 linux-amd64/helm /usr/local/bin/helm
-          rm -rf helm-v${HELM_VERSION}-linux-amd64.tar.gz helm-v${HELM_VERSION}-linux-amd64.tar.gz.sha256sum linux-amd64
-          YQ_VERSION="4.44.1"
-          curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64"
-          curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums"
-          curl -sLO --proto '=https' "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/checksums_hashes_order"
-          YQ_SHA256_FIELD=$(($(grep -n '^SHA-256$' checksums_hashes_order | cut -d: -f1) + 1))
-          grep '^yq_linux_amd64 ' checksums | awk -v f="$YQ_SHA256_FIELD" '{print $f"  yq_linux_amd64"}' | sha256sum -c -
-          sudo install -m 0755 yq_linux_amd64 /usr/local/bin/yq
-          rm yq_linux_amd64 checksums checksums_hashes_order
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
           kubectl version --client && helm version && yq --version
 
       - name: Get AKS Credentials
@@ -486,43 +416,43 @@ jobs:
           kubectl get nodes
           echo "✅ AKS credentials configured (cluster: $CLUSTER_NAME)"
 
-      - name: 3️⃣ uninstall — DIAL
-        if: ${{ inputs.uninstall_dial }}
+      - name: 3️⃣ remove — DIAL
+        if: ${{ inputs.remove_addon_dial }}
         run: |
           export ENV_NAME="${{ inputs.environment }}"
           bash sunbird-spark-installer/addons/dial/script/addon.sh uninstall azure
           echo "✅ DIAL uninstalled"
 
-      - name: 3️⃣ uninstall — Discussion Forum
-        if: ${{ inputs.uninstall_discussion_forum }}
+      - name: 3️⃣ remove — Discussion Forum
+        if: ${{ inputs.remove_addon_discussion_forum }}
         run: |
           export ENV_NAME="${{ inputs.environment }}"
           bash sunbird-spark-installer/addons/discussion-forum/script/addon.sh uninstall azure
           echo "✅ Discussion Forum uninstalled"
 
-      - name: 3️⃣ uninstall — Video Stream Generator
-        if: ${{ inputs.uninstall_video_stream_generator }}
+      - name: 3️⃣ remove — Video Stream Generator
+        if: ${{ inputs.remove_addon_video_stream_generator }}
         run: |
           export ENV_NAME="${{ inputs.environment }}"
           bash sunbird-spark-installer/addons/video-stream-generator/script/addon.sh uninstall azure
           echo "✅ Video Stream Generator uninstalled"
 
-      - name: 3️⃣ uninstall — Asset Enrichment
-        if: ${{ inputs.uninstall_asset_enrichment }}
+      - name: 3️⃣ remove — Asset Enrichment
+        if: ${{ inputs.remove_addon_asset_enrichment }}
         run: |
           export ENV_NAME="${{ inputs.environment }}"
           bash sunbird-spark-installer/addons/asset-enrichment/script/addon.sh uninstall azure
           echo "✅ Asset Enrichment uninstalled"
 
-      - name: Uninstall Addons Summary
+      - name: Remove Addons Summary
         if: always()
         run: |
           echo "================================================"
-          echo "     UNINSTALL ADDONS SUMMARY"
+          echo "     REMOVE ADDONS SUMMARY"
           echo "================================================"
           echo "Environment : ${{ inputs.environment }}"
-          [ "${{ inputs.uninstall_dial }}"                   == "true" ] && echo "  ✅ DIAL"                   || echo "  ⏭️  DIAL (skipped)"
-          [ "${{ inputs.uninstall_discussion_forum }}"       == "true" ] && echo "  ✅ Discussion Forum"       || echo "  ⏭️  Discussion Forum (skipped)"
-          [ "${{ inputs.uninstall_video_stream_generator }}" == "true" ] && echo "  ✅ Video Stream Generator" || echo "  ⏭️  Video Stream Generator (skipped)"
-          [ "${{ inputs.uninstall_asset_enrichment }}"       == "true" ] && echo "  ✅ Asset Enrichment"       || echo "  ⏭️  Asset Enrichment (skipped)"
+          [ "${{ inputs.remove_addon_dial }}"                   == "true" ] && echo "  ✅ DIAL"                   || echo "  ⏭️  DIAL (skipped)"
+          [ "${{ inputs.remove_addon_discussion_forum }}"       == "true" ] && echo "  ✅ Discussion Forum"       || echo "  ⏭️  Discussion Forum (skipped)"
+          [ "${{ inputs.remove_addon_video_stream_generator }}" == "true" ] && echo "  ✅ Video Stream Generator" || echo "  ⏭️  Video Stream Generator (skipped)"
+          [ "${{ inputs.remove_addon_asset_enrichment }}"       == "true" ] && echo "  ✅ Asset Enrichment"       || echo "  ⏭️  Asset Enrichment (skipped)"
           echo "================================================"
