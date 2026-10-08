@@ -257,7 +257,6 @@ class ChatInterface {
     const schemaUrl = jsonItem.url || schema.url || '';
     const schemaScore = jsonItem.score || 100;
     const schemaDescription = jsonItem.description || schema.description || '';
-    const schemaImages = schema.images || schema.image || [];
     const schemaTotalTime = schema.totalTime || '';
     const schemaNutrition = schema.nutrition || null;
     const schemaAggregateRating = schema.aggregateRating || null;
@@ -433,14 +432,14 @@ class ChatInterface {
     // Remove all current items from DOM
     const itemElements = this.currentItems.map(([item, domItem]) => {
       if (domItem && domItem.parentNode) {
-        domItem.parentNode.removeChild(domItem);
+        domItem.remove();
       }
       return domItem;
     });
     
     // Clear the bubble
     while (this.bubble.firstChild) {
-      this.bubble.removeChild(this.bubble.firstChild);
+      this.bubble.firstChild.remove();
     }
     
     // Add back in correct order: memory, sources, items, summary

@@ -27,7 +27,7 @@ class NLWebSearchResults {
         if (query) {
             this.searchInput.value = query;
             this.searchQueryDisplay.textContent = query;
-            this.performSearch(query);
+            this.performSearch(query).catch((error) => console.error('Search error:', error));
         }
         
         // Set up event listeners
@@ -40,7 +40,7 @@ class NLWebSearchResults {
                 window.history.pushState({}, '', newUrl);
                 
                 this.searchQueryDisplay.textContent = query;
-                this.performSearch(query);
+                this.performSearch(query).catch((error) => console.error('Search error:', error));
             }
         });
         
@@ -262,8 +262,8 @@ class NLWebSearchResults {
         // Convert ISO 8601 duration to readable format
         const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
         if (match) {
-            const hours = match[1] ? parseInt(match[1]) : 0;
-            const minutes = match[2] ? parseInt(match[2]) : 0;
+            const hours = match[1] ? Number.parseInt(match[1]) : 0;
+            const minutes = match[2] ? Number.parseInt(match[2]) : 0;
             
             if (hours && minutes) {
                 return `${hours}h ${minutes}m`;

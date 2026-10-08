@@ -8,7 +8,7 @@ need_apt=0
 command -v python3   >/dev/null 2>&1 || need_apt=1
 command -v curl      >/dev/null 2>&1 || need_apt=1
 
-if [ "$need_apt" = "1" ]; then
+if [[ "$need_apt" = "1" ]]; then
   echo "==> Installing python3, curl, ca-certificates..."
   apt-get update -qq
   apt-get install -y -qq --no-install-recommends python3 curl ca-certificates

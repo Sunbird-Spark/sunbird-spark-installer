@@ -54,7 +54,6 @@ export class ChatInterface {
     const urlParams = new URLSearchParams(window.location.search);
     this.initialQuery = urlParams.get('query');
     const prevMessagesStr = urlParams.get('prev');
-    const contextUrl = urlParams.get('context_url');
     const urlGenerateMode = urlParams.get('generate_mode');
     
     if (urlGenerateMode) {
@@ -194,7 +193,7 @@ export class ChatInterface {
     this.input.style.height = '60px';
 
     // Get response
-    this.getResponse(message);
+    this.getResponse(message).catch((error) => console.error('Error fetching response:', error));
   }
 
   /**
@@ -319,7 +318,7 @@ export class ChatInterface {
    */
   handleFirstMessage() {
     this.dotsStillThere = false;
-    this.messagesArea.removeChild(this.messagesArea.lastChild);
+    this.messagesArea.lastChild.remove();
   }
 
   /**
@@ -551,7 +550,7 @@ export class ChatInterface {
       
       // Clear existing children
       while (this.bubble.firstChild) {
-        this.bubble.removeChild(this.bubble.firstChild);
+        this.bubble.firstChild.remove();
       }
       
       // Add sorted content back in proper order
@@ -576,7 +575,7 @@ export class ChatInterface {
       }
       
       // Add sorted result items
-      for (const [item, domItem] of this.currentItems) {
+      for (const [, domItem] of this.currentItems) {
         this.bubble.appendChild(domItem);
       }
     }

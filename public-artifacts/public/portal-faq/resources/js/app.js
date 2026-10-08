@@ -48,7 +48,7 @@ $(document).ready(function(){
     $(document).on( 'submit','#know-more-form',function(e) {
         e.preventDefault();
         var inputVal = $( this )[0][0].value; // resolves to current input element.
-        if(inputVal && inputVal.length){
+        if(inputVal?.length){
             var value = {};
             value.action = "no-clicked"
             value.position = Number($(this).parent().parent().attr("id").substr(-1)) +1;

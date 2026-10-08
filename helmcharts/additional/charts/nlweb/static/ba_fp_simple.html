@@ -176,7 +176,7 @@
   </div>
 
   <script type="module">
-    import { ModernChatInterface } from '/static/fp-chat-interface.js';
+    import { ModernChatInterface } from './fp-chat-interface.js';
     
     // Prevent double initialization
     window.ModernChatInterfaceExported = true;
@@ -192,8 +192,7 @@
     // Override getStreamingResponse to ensure site is always bon_appetit
     const originalGetStreamingResponse = chatInterface.getStreamingResponse.bind(chatInterface);
     chatInterface.getStreamingResponse = function(query) {
-      // Temporarily set site to bon_appetit
-      const savedSite = this.selectedSite;
+      // Force site to bon_appetit
       this.selectedSite = 'bon_appetit';
       
       console.log('BA: Forcing site to bon_appetit for query:', query);

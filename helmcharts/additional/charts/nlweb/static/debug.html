@@ -45,7 +45,7 @@
         chatInterface.enableDatabaseSelector = ENABLE_DATABASE_SELECTOR;
         
         // Initialize dropdown interface with option to use text input for site
-        const dropdownInterface = new DropdownInterface(
+        new DropdownInterface(
           chatInterface,
           container,
           { useTextInputForSite: true }  // Use text input instead of dropdown
@@ -55,7 +55,7 @@
         chatInterface.appendInterfaceElements(container);
       } else {
         // Normal initialization for non-dropdown mode
-        const chatInterface = new ChatInterface(
+        new ChatInterface(
           null,
           display_mode,
           "list"

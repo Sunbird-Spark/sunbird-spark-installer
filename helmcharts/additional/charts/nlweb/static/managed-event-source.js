@@ -330,7 +330,7 @@ export class ManagedEventSource {
         
         // Compile last answers from current items
         const newAnswers = [];
-        for (const [item, domItem] of chatInterface.currentItems) {
+        for (const [item] of chatInterface.currentItems) {
           if (item.title && item.url) {
             newAnswers.push({
               title: item.title,
@@ -436,7 +436,7 @@ export class ManagedEventSource {
     
     // Clear existing content safely
     while (chatInterface.bubble.firstChild) {
-      chatInterface.bubble.removeChild(chatInterface.bubble.firstChild);
+      chatInterface.bubble.firstChild.remove();
     }
     
     // Safely handle answer
@@ -1171,7 +1171,7 @@ export class ManagedEventSource {
     
     // Clear any loading indicators
     while (chatInterface.bubble.firstChild) {
-      chatInterface.bubble.removeChild(chatInterface.bubble.firstChild);
+      chatInterface.bubble.firstChild.remove();
     }
     
     // Create container for substitution content

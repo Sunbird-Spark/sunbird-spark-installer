@@ -29,9 +29,9 @@ spec:
     interval: {{ $smData.interval }}
     scrapeTimeout: {{ $smData.scrapeTimeout }}
     honorLabels: {{ $smData.honorLabels }}
-{{- end}}
-{{- end}}
-{{- end}}
-{{- end}}
-{{- end}}
-{{- end}}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

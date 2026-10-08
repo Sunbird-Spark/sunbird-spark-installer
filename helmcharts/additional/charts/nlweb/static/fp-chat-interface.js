@@ -261,7 +261,7 @@ class ModernChatInterface {
       }
     } else {
       // Load sites for the dropdown
-      this.loadSites();
+      this.loadSites().catch((error) => console.error('Error loading sites:', error));
     }
   }
   
@@ -822,256 +822,6 @@ class ModernChatInterface {
     return resultsContainer.outerHTML;
   }
   
-  renderEnsembleResult(result) {
-    const recommendations = result.recommendations;
-    if (!recommendations) return '';
-    
-    // Create ensemble result container
-    const container = document.createElement('div');
-    container.className = 'ensemble-result-container';
-    container.style.cssText = 'background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 10px 0;';
-    
-    // Add theme header
-    if (recommendations.theme) {
-      const themeHeader = document.createElement('h3');
-      themeHeader.textContent = recommendations.theme;
-      themeHeader.style.cssText = 'color: #333; margin-bottom: 20px; font-size: 1.2em;';
-      container.appendChild(themeHeader);
-    }
-    
-    // Add items
-    if (recommendations.items && Array.isArray(recommendations.items)) {
-      const itemsContainer = document.createElement('div');
-      itemsContainer.style.cssText = 'display: grid; gap: 15px;';
-      
-      recommendations.items.forEach(item => {
-        const itemCard = this.createEnsembleItemCard(item);
-        itemsContainer.appendChild(itemCard);
-      });
-      
-      container.appendChild(itemsContainer);
-    }
-    
-    // Add overall tips
-    if (recommendations.overall_tips && Array.isArray(recommendations.overall_tips)) {
-      const tipsSection = document.createElement('div');
-      tipsSection.style.cssText = 'margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6;';
-      
-      const tipsHeader = document.createElement('h4');
-      tipsHeader.textContent = 'Planning Tips';
-      tipsHeader.style.cssText = 'color: #555; margin-bottom: 10px; font-size: 1.1em;';
-      tipsSection.appendChild(tipsHeader);
-      
-      const tipsList = document.createElement('ul');
-      tipsList.style.cssText = 'margin: 0; padding-left: 20px;';
-      
-      recommendations.overall_tips.forEach(tip => {
-        const tipItem = document.createElement('li');
-        tipItem.textContent = tip;
-        tipItem.style.cssText = 'color: #666; margin-bottom: 5px;';
-        tipsList.appendChild(tipItem);
-      });
-      
-      tipsSection.appendChild(tipsList);
-      container.appendChild(tipsSection);
-    }
-    
-    return container.outerHTML;
-  }
-  
-  createEnsembleItemCard(item) {
-    const card = document.createElement('div');
-    card.style.cssText = 'background: white; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);';
-    
-    // Create a flex container for content and image
-    const flexContainer = document.createElement('div');
-    flexContainer.style.cssText = 'display: flex; gap: 15px; align-items: center;';
-    
-    // Content container (goes first, on the left)
-    const contentContainer = document.createElement('div');
-    contentContainer.style.cssText = 'flex-grow: 1;';
-    
-    // Category badge
-    const categoryBadge = document.createElement('span');
-    categoryBadge.textContent = item.category;
-    categoryBadge.style.cssText = `
-      display: inline-block;
-      padding: 4px 12px;
-      background-color: ${item.category === 'Garden' ? '#28a745' : '#007bff'};
-      color: white;
-      border-radius: 20px;
-      font-size: 0.85em;
-      margin-bottom: 10px;
-    `;
-    contentContainer.appendChild(categoryBadge);
-    
-    // Name with hyperlink
-    const nameContainer = document.createElement('h4');
-    nameContainer.style.cssText = 'margin: 10px 0;';
-    
-    // Get URL from item or schema_object
-    const itemUrl = item.url || (item.schema_object && item.schema_object.url);
-    
-    if (itemUrl) {
-      const nameLink = document.createElement('a');
-      nameLink.href = itemUrl;
-      nameLink.textContent = item.name;
-      nameLink.target = '_blank';
-      nameLink.style.cssText = 'color: #0066cc; text-decoration: none; font-weight: bold;';
-      nameLink.onmouseover = function() { this.style.textDecoration = 'underline'; };
-      nameLink.onmouseout = function() { this.style.textDecoration = 'none'; };
-      nameContainer.appendChild(nameLink);
-    } else {
-      nameContainer.textContent = item.name;
-      nameContainer.style.color = '#333';
-    }
-    
-    contentContainer.appendChild(nameContainer);
-    
-    // Description
-    const description = document.createElement('p');
-    description.textContent = item.description;
-    description.style.cssText = 'color: #666; margin: 10px 0; line-height: 1.5;';
-    contentContainer.appendChild(description);
-    
-    // Why recommended
-    const whySection = document.createElement('div');
-    whySection.style.cssText = 'background-color: #e8f4f8; padding: 10px; border-radius: 4px; margin: 10px 0;';
-    
-    const whyLabel = document.createElement('strong');
-    whyLabel.textContent = 'Why recommended: ';
-    whyLabel.style.cssText = 'color: #0066cc;';
-    
-    const whyText = document.createElement('span');
-    whyText.textContent = item.why_recommended;
-    whyText.style.cssText = 'color: #555;';
-    
-    whySection.appendChild(whyLabel);
-    whySection.appendChild(whyText);
-    contentContainer.appendChild(whySection);
-    
-    // Details
-    if (item.details && Object.keys(item.details).length > 0) {
-      const detailsSection = document.createElement('div');
-      detailsSection.style.cssText = 'margin-top: 10px; font-size: 0.9em;';
-      
-      Object.entries(item.details).forEach(([key, value]) => {
-        const detailLine = document.createElement('div');
-        detailLine.style.cssText = 'color: #777; margin: 3px 0;';
-        
-        const detailKey = document.createElement('strong');
-        detailKey.textContent = `${key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')}: `;
-        detailKey.style.cssText = 'color: #555;';
-        
-        const detailValue = document.createElement('span');
-        detailValue.textContent = value;
-        
-        detailLine.appendChild(detailKey);
-        detailLine.appendChild(detailValue);
-        detailsSection.appendChild(detailLine);
-      });
-      
-      contentContainer.appendChild(detailsSection);
-    }
-    
-    // Additional info from schema_object
-    if (item.schema_object) {
-      // Price
-      if (item.schema_object.price || (item.schema_object.offers && item.schema_object.offers.price)) {
-        const priceDiv = document.createElement('div');
-        priceDiv.style.cssText = 'margin-top: 10px; font-weight: bold; color: #28a745;';
-        const price = item.schema_object.price || item.schema_object.offers.price;
-        priceDiv.textContent = `Price: ${typeof price === 'object' ? price.value : price}`;
-        contentContainer.appendChild(priceDiv);
-      }
-      
-      // Rating
-      if (item.schema_object.aggregateRating) {
-        const rating = item.schema_object.aggregateRating;
-        const ratingValue = rating.ratingValue || rating.value;
-        const reviewCount = rating.reviewCount || rating.ratingCount || rating.count;
-        
-        if (ratingValue) {
-          const ratingDiv = document.createElement('div');
-          ratingDiv.style.cssText = 'margin-top: 5px; color: #f39c12;';
-          const stars = '★'.repeat(Math.round(ratingValue));
-          const reviewText = reviewCount ? ` (${reviewCount} reviews)` : '';
-          ratingDiv.innerHTML = `Rating: ${stars} ${ratingValue}/5${reviewText}`;
-          contentContainer.appendChild(ratingDiv);
-        }
-      }
-    }
-    
-    // Append content container to flex container
-    flexContainer.appendChild(contentContainer);
-    
-    // Add image from schema_object if available (on the right side)
-    if (item.schema_object) {
-      const imageUrl = this.extractImageUrl(item.schema_object);
-      
-      if (imageUrl) {
-        const imageContainer = document.createElement('div');
-        imageContainer.style.cssText = 'flex-shrink: 0; display: flex; align-items: center;';
-        
-        const image = document.createElement('img');
-        image.src = imageUrl;
-        image.alt = item.name;
-        image.style.cssText = 'width: 120px; height: 120px; object-fit: cover; border-radius: 6px;';
-        imageContainer.appendChild(image);
-        flexContainer.appendChild(imageContainer);
-      }
-    }
-    
-    // Append flex container to card
-    card.appendChild(flexContainer);
-    
-    return card;
-  }
-  
-  extractImageUrl(schema_object) {
-    if (!schema_object) return null;
-    
-    // Check various possible image fields
-    if (schema_object.image) {
-      return this.extractImageUrlFromField(schema_object.image);
-    } else if (schema_object.images && Array.isArray(schema_object.images) && schema_object.images.length > 0) {
-      return this.extractImageUrlFromField(schema_object.images[0]);
-    } else if (schema_object.thumbnailUrl) {
-      return this.extractImageUrlFromField(schema_object.thumbnailUrl);
-    } else if (schema_object.thumbnail) {
-      return this.extractImageUrlFromField(schema_object.thumbnail);
-    }
-    
-    return null;
-  }
-  
-  extractImageUrlFromField(imageField) {
-    // Handle string URLs
-    if (typeof imageField === 'string') {
-      return imageField;
-    }
-    
-    // Handle object with url property
-    if (typeof imageField === 'object' && imageField !== null) {
-      if (imageField.url) {
-        return imageField.url;
-      }
-      if (imageField.contentUrl) {
-        return imageField.contentUrl;
-      }
-      if (imageField['@id']) {
-        return imageField['@id'];
-      }
-    }
-    
-    // Handle array of images
-    if (Array.isArray(imageField) && imageField.length > 0) {
-      return this.extractImageUrlFromField(imageField[0]);
-    }
-    
-    return null;
-  }
-  
   endStreaming() {
     if (this.eventSource) {
       this.eventSource.close();
@@ -1572,7 +1322,7 @@ class ModernChatInterface {
     
     // Load sites if not already loaded AND no specific site is selected
     if ((!this.sites || this.sites.length === 0) && (!this.selectedSite || this.selectedSite === 'all')) {
-      this.loadSites();
+      this.loadSites().catch((error) => console.error('Error loading sites:', error));
     } else {
       // If sites are already loaded, populate the dropdown
       this.populateSiteDropdown();
@@ -1853,7 +1603,6 @@ class ModernChatInterface {
       rememberedSection.appendChild(itemsList);
       
       // Insert after conversations list in the sidebar
-      const sidebar = this.elements.sidebar;
       const conversationsList = this.elements.conversationsList;
       // Insert after conversations list, not inside it
       conversationsList.parentNode.insertBefore(rememberedSection, conversationsList.nextSibling);

@@ -90,21 +90,21 @@ export class RecipeRenderer {
         } else if (typeof schema.aggregateRating === 'object') {
           // Safe data handling for rating value
           if (schema.aggregateRating.ratingValue !== undefined) {
-            const ratingValue = parseFloat(schema.aggregateRating.ratingValue);
-            if (!isNaN(ratingValue)) {
+            const ratingValue = Number.parseFloat(schema.aggregateRating.ratingValue);
+            if (!Number.isNaN(ratingValue)) {
               rating = ratingValue;
             }
           }
           
           // Safe data handling for review count
           if (schema.aggregateRating.ratingCount !== undefined) {
-            const parsedCount = parseInt(schema.aggregateRating.ratingCount, 10);
-            if (!isNaN(parsedCount)) {
+            const parsedCount = Number.parseInt(schema.aggregateRating.ratingCount, 10);
+            if (!Number.isNaN(parsedCount)) {
               reviewCount = parsedCount;
             }
           } else if (schema.aggregateRating.reviewCount !== undefined) {
-            const parsedCount = parseInt(schema.aggregateRating.reviewCount, 10);
-            if (!isNaN(parsedCount)) {
+            const parsedCount = Number.parseInt(schema.aggregateRating.reviewCount, 10);
+            if (!Number.isNaN(parsedCount)) {
               reviewCount = parsedCount;
             }
           }
@@ -192,7 +192,7 @@ export class RecipeRenderer {
      */
     generateStars(rating) {
       // Convert rating to a number and ensure it's between 0 and 5
-      const numRating = parseFloat(rating) || 0;
+      const numRating = Number.parseFloat(rating) || 0;
       const clampedRating = Math.max(0, Math.min(5, numRating));
       
       const fullStars = Math.floor(clampedRating);
@@ -215,10 +215,10 @@ export class RecipeRenderer {
       const matches = duration.match(/P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/i);
       if (!matches) return duration; // Return original if can't parse
       
-      const days = matches[1] ? parseInt(matches[1], 10) : 0;
-      const hours = matches[2] ? parseInt(matches[2], 10) : 0;
-      const minutes = matches[3] ? parseInt(matches[3], 10) : 0;
-      const seconds = matches[4] ? parseInt(matches[4], 10) : 0;
+      const days = matches[1] ? Number.parseInt(matches[1], 10) : 0;
+      const hours = matches[2] ? Number.parseInt(matches[2], 10) : 0;
+      const minutes = matches[3] ? Number.parseInt(matches[3], 10) : 0;
+      const seconds = matches[4] ? Number.parseInt(matches[4], 10) : 0;
       
       const parts = [];
       if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);

@@ -25,10 +25,41 @@ resource "google_project_iam_member" "service_account-roles" {
   member  = "serviceAccount:${google_service_account.service_account.email}"
 }
 
-resource "google_project_iam_member" "storage_admin_role" {
-  project = var.project
-  role    = "roles/storage.admin"
-  member  = "serviceAccount:${google_service_account.service_account.email}"
+# Object-level access on just the buckets this environment owns -- not
+# project-wide roles/storage.admin, which also grants bucket create/delete
+# and IAM-policy changes on every bucket in the project, including ones
+# unrelated to this environment.
+#
+# Custom role instead of the built-in roles/storage.objectAdmin: this SA
+# uploads (upload-files/output-file modules, runtime GCP-storage services)
+# and overwrites/removes stale objects, so it needs get+create+delete+list,
+# but objectAdmin also throws in object-level IAM/ACL management
+# (getIamPolicy/setIamPolicy) and metadata-only updates that nothing here
+# actually uses -- define exactly the 4 permissions needed instead.
+resource "google_project_iam_custom_role" "storage_object_rw" {
+  role_id     = "storageObjectRW_${replace(local.environment_name, "-", "_")}"
+  project     = var.project
+  title       = "Storage Object Read/Write (${local.environment_name})"
+  description = "Read, create, delete, and list objects -- no bucket or IAM management."
+  permissions = [
+    "storage.objects.get",
+    "storage.objects.create",
+    "storage.objects.delete",
+    "storage.objects.list",
+  ]
+}
+
+resource "google_storage_bucket_iam_member" "storage_object_rw" {
+  for_each = toset([
+    var.sa_key_store_bucket,
+    var.public_bucket,
+    var.dial_state_bucket,
+    var.velero_bucket,
+  ])
+
+  bucket = each.value
+  role   = google_project_iam_custom_role.storage_object_rw.id
+  member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 # Assign Workload Identity User role to service account (optional)

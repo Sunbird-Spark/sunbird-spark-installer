@@ -9,7 +9,7 @@ export function handleCompareItems(data, chatInterface) {
   
   // Clear existing content safely
   while (chatInterface.bubble.firstChild) {
-    chatInterface.bubble.removeChild(chatInterface.bubble.firstChild);
+    chatInterface.bubble.firstChild.remove();
   }
   
   // Display the comparison summary with expand/collapse functionality
@@ -27,10 +27,10 @@ export function handleCompareItems(data, chatInterface) {
     document.body.appendChild(measureDiv);
     
     // Calculate approximate number of lines (assuming ~1.5em line height)
-    const lineHeight = parseFloat(window.getComputedStyle(measureDiv).lineHeight) || 24;
+    const lineHeight = Number.parseFloat(window.getComputedStyle(measureDiv).lineHeight) || 24;
     const totalHeight = measureDiv.offsetHeight;
     const estimatedLines = Math.ceil(totalHeight / lineHeight);
-    document.body.removeChild(measureDiv);
+    measureDiv.remove();
     
     // If more than 4 lines, create expandable version
     if (estimatedLines > 4) {

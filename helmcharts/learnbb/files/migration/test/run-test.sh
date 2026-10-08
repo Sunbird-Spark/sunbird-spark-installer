@@ -16,7 +16,7 @@ SNAPSHOT_SRC="${SNAPSHOT_SRC:-/Users/chethan/test/es-backup-08-06-2026}"
 SNAPSHOT_NAME="${SNAPSHOT_NAME:-snapshot_08_06_2026}"
 
 command -v jq >/dev/null || { echo "jq required"; exit 1; }
-[ -d "$SNAPSHOT_SRC" ] || { echo "snapshot dir not found: $SNAPSHOT_SRC"; exit 1; }
+[[ -d "$SNAPSHOT_SRC" ]] || { echo "snapshot dir not found: $SNAPSHOT_SRC"; exit 1; }
 
 # prefer the compose v2 plugin, fall back to the standalone docker-compose
 if docker compose version >/dev/null 2>&1; then
@@ -64,12 +64,12 @@ mismatch=0
 while read -r idx; do
   ec=$(curl -s "localhost:9200/$idx/_count" | jq -r '.count // "MISSING"')
   oc=$(curl -s "localhost:9201/$idx/_count" | jq -r '.count // "MISSING"')
-  flag=""; [ "$ec" != "$oc" ] && { flag="  <-- MISMATCH"; mismatch=1; }
+  flag=""; [[ "$ec" != "$oc" ]] && { flag="  <-- MISMATCH"; mismatch=1; }
   printf "%-28s %8s %8s%s\n" "$idx" "$ec" "$oc" "$flag"
 done <<< "$indices"
 
 echo
-if [ "$mismatch" = 0 ]; then echo "RESULT: PASS — all counts match, no data lost"; else echo "RESULT: FAIL — see mismatches above"; fi
+if [[ "$mismatch" = 0 ]]; then echo "RESULT: PASS — all counts match, no data lost"; else echo "RESULT: FAIL — see mismatches above"; fi
 
 echo
 echo "### compositesearch knn check on OpenSearch"

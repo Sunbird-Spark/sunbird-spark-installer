@@ -45,7 +45,7 @@
         chatInterface.enableDatabaseSelector = ENABLE_DATABASE_SELECTOR;
         
         // Initialize dropdown interface
-        const dropdownInterface = new DropdownInterface(
+        new DropdownInterface(
           chatInterface,
           container
         );
@@ -54,7 +54,7 @@
         chatInterface.appendInterfaceElements(container);
       } else {
         // Normal initialization for non-dropdown mode
-        const chatInterface = new ChatInterface(
+        new ChatInterface(
           null,
           display_mode,
           "list"

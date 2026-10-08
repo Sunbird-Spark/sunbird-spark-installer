@@ -17,25 +17,25 @@ deploy_chart() {
     echo "Deploying Asset Enrichment Helm chart..."
     cd "$CHART_DIR"
 
-    if [ -z "$ENV_NAME" ]; then
-        echo "ERROR: ENV_NAME environment variable is not set. Please export it (e.g., export ENV_NAME=demo) before running this script."
+    if [[ -z "$ENV_NAME" ]]; then
+        echo "ERROR: ENV_NAME environment variable is not set. Please export it (e.g., export ENV_NAME=demo) before running this script." >&2
         exit 1
     fi
-    local CLOUD_DIR="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/$ENV_NAME"
+    local cloud_dir="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/$ENV_NAME"
 
     # Check for required configuration files
-    if [ ! -f "$CLOUD_DIR/global-values.yaml" ] || [ ! -f "$CLOUD_DIR/global-cloud-values.yaml" ]; then
-        echo "ERROR: OpenTofu global values not found in $CLOUD_DIR. Please run opentofu first."
+    if [[ ! -f "$cloud_dir/global-values.yaml" ]] || [[ ! -f "$cloud_dir/global-cloud-values.yaml" ]]; then
+        echo "ERROR: OpenTofu global values not found in $cloud_dir. Please run opentofu first." >&2
         exit 1
     fi
 
     # Standard values layering
-    HELM_ARGS="-f $CLOUD_DIR/global-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/images.yaml"
+    local helm_args="-f $cloud_dir/global-values.yaml"
+    helm_args="$helm_args -f $cloud_dir/global-cloud-values.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/global-values.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/images.yaml"
 
-    helm upgrade --install "$RELEASE_NAME" . --namespace "$NAMESPACE" $HELM_ARGS
+    helm upgrade --install "$RELEASE_NAME" . --namespace "$NAMESPACE" $helm_args
     echo "Asset Enrichment deployed successfully"
 }
 
