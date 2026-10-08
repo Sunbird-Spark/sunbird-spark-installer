@@ -30,12 +30,12 @@ deploy_chart() {
     fi
 
     # Standard values layering
-    HELM_ARGS="-f $cloud_dir/global-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $cloud_dir/global-cloud-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/images.yaml"
+    local helm_args="-f $cloud_dir/global-values.yaml"
+    helm_args="$helm_args -f $cloud_dir/global-cloud-values.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/global-values.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/images.yaml"
 
-    helm upgrade --install "$RELEASE_NAME" . --namespace "$NAMESPACE" $HELM_ARGS
+    helm upgrade --install "$RELEASE_NAME" . --namespace "$NAMESPACE" $helm_args
     echo "Asset Enrichment deployed successfully"
 }
 

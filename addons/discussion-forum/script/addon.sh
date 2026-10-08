@@ -35,12 +35,12 @@ deploy_service() {
     fi
     
     # Standard values layering
-    HELM_ARGS="-f $cloud_dir/global-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $cloud_dir/global-cloud-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/images.yaml"
-    
-    helm upgrade --install "$service_name" . --namespace "$NAMESPACE" $HELM_ARGS
+    local helm_args="-f $cloud_dir/global-values.yaml"
+    helm_args="$helm_args -f $cloud_dir/global-cloud-values.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/global-values.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/images.yaml"
+
+    helm upgrade --install "$service_name" . --namespace "$NAMESPACE" $helm_args
     echo "$service_name deployed successfully"
 }
 
