@@ -21,7 +21,7 @@ Then deploy the `additional` building block:
 ## Auth Modes
 
 Cloud storage auth is driven by `global.cloud_storage_auth_type`, shared with every
-other chart in this repo (flink, cert, lern, knowlg, velero, secor, nlwebflink):
+other chart in this repo (flink, cert, lern, knowlg, velero, secor):
 
 | Value | Behavior |
 |---|---|
