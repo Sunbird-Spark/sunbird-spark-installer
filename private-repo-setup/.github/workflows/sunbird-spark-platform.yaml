@@ -8,8 +8,8 @@ on:
         required: true
         type: choice
         options:
-          - your-env   # Replace this with your environment name (e.g. dev, prod, staging)
-        default: your-env
+          - <env>   # Replace with your environment name (e.g. dev, prod, staging)
+        default: <env>
       config_branch:
         description: 'Config repository branch (your private repo)'
         required: true
