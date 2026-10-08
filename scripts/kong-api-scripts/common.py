@@ -81,7 +81,7 @@ def retrying_urlopen(url, retry_count=0, data=None):
             error_body = ""
             try:
                 error_body = e.read().decode('utf-8')
-            except:
+            except Exception:
                 pass
             
             # Print error details on first attempt or final failure

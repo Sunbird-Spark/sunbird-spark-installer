@@ -6,7 +6,7 @@ window.ChatInterface = ChatInterface;
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('ai-search-input');
     const searchButton = document.getElementById('ai-search-button');
-    var chatContainer = document.getElementById('chat-container');
+    const chatContainer = document.getElementById('chat-container');
     searchButton.addEventListener('click', handleSearch);
     searchInput.addEventListener('keypress', (e) => {
          if (e.key === 'Enter') {
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
          }
     });
 
-    var chat_interface = null;
+    let chat_interface = null;
 
     window.findChatInterface = function() {
         if (chat_interface) {

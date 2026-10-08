@@ -17,6 +17,10 @@ case $STORAGE_TYPE in
     "aws")
         pip3 install --no-cache-dir --only-binary :all: boto3==1.43.80
         ;;
+    *)
+        echo "Unknown STORAGE_TYPE: '$STORAGE_TYPE' (expected azure, gcp, or aws)" >&2
+        exit 1
+        ;;
 esac
 
 # Run the keycloak credentials update script

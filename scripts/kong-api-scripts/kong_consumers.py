@@ -89,7 +89,7 @@ def save_consumers(kong_admin_api_url, consumers, managed_by="core"):
         # against a faulty/unresponsive --kong-admin-api-url.
         all_saved_consumers = json.loads(retrying_urlopen(consumers_url + "?size=1000").read().decode('utf-8'))
         total_consumers_in_kong = len(all_saved_consumers.get('data', []))
-    except:
+    except Exception:
         total_consumers_in_kong = 0
 
     consumers_to_be_present = [consumer for consumer in consumers if consumer['state'] == 'present']

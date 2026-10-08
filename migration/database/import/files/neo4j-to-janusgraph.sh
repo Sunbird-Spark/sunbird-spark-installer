@@ -60,6 +60,10 @@ download_from_storage() {
             AWS_SECRET_ACCESS_KEY={{ .Values.target.secretAccessKey }} \
             aws s3 cp "s3://{{ .Values.target.s3Bucket }}/$blob_name" "$file"
             ;;
+        *)
+            echo "Unknown STORAGE_TYPE: '$STORAGE_TYPE' (expected azure, gcp, or aws)" >&2
+            exit 1
+            ;;
     esac
 }
 
