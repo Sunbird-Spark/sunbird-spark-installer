@@ -44,7 +44,7 @@ def _get_consumer(kong_admin_api_url, username):
             raise
 
 def _dict_without_keys(a_dict, keys):
-    return dict((key, a_dict[key]) for key in a_dict if key not in keys)
+    return {key: a_dict[key] for key in a_dict if key not in keys}
 
 def _ensure_consumer_exists(kong_admin_api_url, consumer):
     username = consumer['username']
@@ -286,7 +286,7 @@ def _save_groups_for_consumer(kong_admin_api_url, consumer, owned_groups, stats,
         print("Warning: Could not fetch ACL groups for consumer {}: {}".format(username, str(e)))
         saved_acls = []
 
-    saved_groups = set(acl["group"] for acl in saved_acls)
+    saved_groups = {acl["group"] for acl in saved_acls}
     
     # Groups to add: in input but not yet in Kong
     groups_to_add = input_groups - saved_groups

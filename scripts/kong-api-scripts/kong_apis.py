@@ -470,7 +470,7 @@ def _convert_plugin_for_kong_3(plugin_input):
 
 def _sanitized_api_data(input_api):
     keys_to_ignore = ['plugins', 'routes']
-    sanitized_api_data = dict((key, input_api[key]) for key in input_api if key not in keys_to_ignore)
+    sanitized_api_data = {key: input_api[key] for key in input_api if key not in keys_to_ignore}
     return sanitized_api_data
 
 def _fetch_all_plugins(kong_admin_api_url):
@@ -491,7 +491,7 @@ def _fetch_all_plugins(kong_admin_api_url):
             break
         # Kong may return `next` as a path (e.g. "/plugins?offset=...") or a
         # full URL — normalise both to an absolute admin URL.
-        if nxt.startswith('http://') or nxt.startswith('https://'):
+        if nxt.startswith(('http://', 'https://')):
             next_url = nxt
         else:
             next_url = "{}{}".format(kong_admin_api_url.rstrip('/'), nxt if nxt.startswith('/') else '/' + nxt)
