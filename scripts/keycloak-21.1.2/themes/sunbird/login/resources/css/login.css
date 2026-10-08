@@ -364,7 +364,6 @@ body {
 /* Login Button */
 .login-button {
     background-color: #A85236 !important;
-    border-color: #A85236 !important;
     border: none !important;
     box-shadow: none !important;
     color: white !important;
@@ -380,7 +379,6 @@ body {
 .login-button:hover {
     opacity: 0.85 !important;
     background-color: #A85236 !important;
-    border-color: #A85236 !important;
     border: none !important;
     box-shadow: none !important;
     cursor: pointer !important;
