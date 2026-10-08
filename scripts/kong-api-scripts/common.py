@@ -31,7 +31,7 @@ def get_apis(kong_admin_api_url, managed_by=None):
     total_services = services_response.get("total", len(data))
 
     if(total_services > max_page_size):
-        raise Exception("There are {} services existing in system which is more than max_page_size={}. Please increase max_page_size if this is expected".format(total_services, max_page_size))
+        raise ValueError("There are {} services existing in system which is more than max_page_size={}. Please increase max_page_size if this is expected".format(total_services, max_page_size))
     else:
        return data
 

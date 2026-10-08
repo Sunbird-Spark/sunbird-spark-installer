@@ -50,10 +50,11 @@ function certificate_keys() {
     echo "Creation of RSA keys for certificate signing"
     openssl genrsa -out ../opentofu/gcp/$environment/certkey.pem;
     openssl rsa -in ../opentofu/gcp/$environment/certkey.pem -pubout -out ../opentofu/gcp/$environment/certpubkey.pem
-    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/gcp/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/gcp/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../opentofu/gcp/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../opentofu/gcp/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
+    local awk_join_lines='{printf("%s",$0)}'
+    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/gcp/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk "$awk_join_lines")
+    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/gcp/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk "$awk_join_lines")
+    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../opentofu/gcp/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk "$awk_join_lines")
+    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../opentofu/gcp/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk "$awk_join_lines")
     printf "\n" >> ../opentofu/gcp/$environment/global-values.yaml
     echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
     echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
