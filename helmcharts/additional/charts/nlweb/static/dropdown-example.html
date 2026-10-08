@@ -143,7 +143,7 @@
 &lt;script type="module"&gt;
   import { NLWebDropdownChat } from './nlweb-dropdown-chat.js';
   
-  const chat = new NLWebDropdownChat({
+  const chat = await NLWebDropdownChat.create({
     containerId: 'recipe-search-container',
     site: 'seriouseats',
     placeholder: 'Search for recipes...',
@@ -158,7 +158,7 @@
         import { NLWebDropdownChat } from './nlweb-dropdown-chat.js';
         
         // Initialize the search instance
-        const chat = new NLWebDropdownChat({
+        const chat = await NLWebDropdownChat.create({
             containerId: 'recipe-search-container',
             site: 'seriouseats',
             placeholder: 'Search for recipes...',

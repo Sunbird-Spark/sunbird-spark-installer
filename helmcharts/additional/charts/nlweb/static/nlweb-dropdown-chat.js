@@ -1,10 +1,10 @@
 /**
  * NLWeb Dropdown Chat Component
  * A self-contained search box with dropdown chat functionality
- * 
+ *
  * Usage:
  * import { NLWebDropdownChat } from './nlweb-dropdown-chat.js';
- * const chat = new NLWebDropdownChat({
+ * const chat = await NLWebDropdownChat.create({
  *   containerId: 'my-search-container',
  *   site: 'seriouseats',
  *   placeholder: 'Ask a question...'
@@ -21,10 +21,17 @@ export class NLWebDropdownChat {
             cssPrefix: config.cssPrefix || 'nlweb-dropdown',
             ...config
         };
-        
-        this.init();
     }
-    
+
+    // Async setup can't run in a constructor (constructors can't be awaited,
+    // so callers would get an instance back before init() finished). Use
+    // this instead of `new NLWebDropdownChat(...)`.
+    static async create(config = {}) {
+        const instance = new NLWebDropdownChat(config);
+        await instance.init();
+        return instance;
+    }
+
     async init() {
         // Create the HTML structure
         this.createDOM();

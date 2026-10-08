@@ -9,16 +9,22 @@ class OAuthManager {
         this.authWindow = null;
         this.authCheckInterval = null;
         this.baseUrl = window.location.origin;
-        
+
         // Bind methods
         this.handleLogin = this.handleLogin.bind(this);
         this.handleLogout = this.handleLogout.bind(this);
         this.handleAuthMessage = this.handleAuthMessage.bind(this);
-        
-        // Initialize
-        this.init();
     }
-    
+
+    // Async setup can't run in a constructor (constructors can't be awaited,
+    // so callers would get an instance back before init() finished). Use
+    // this instead of `new OAuthManager()`.
+    static async create() {
+        const instance = new OAuthManager();
+        await instance.init();
+        return instance;
+    }
+
     async init() {
         // Load OAuth configuration
         await this.loadConfig();
@@ -334,8 +340,8 @@ class OAuthManager {
 // Initialize OAuth manager when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        window.oauthManager = new OAuthManager();
+        OAuthManager.create().then((instance) => { window.oauthManager = instance; });
     });
 } else {
-    window.oauthManager = new OAuthManager();
+    OAuthManager.create().then((instance) => { window.oauthManager = instance; });
 }
