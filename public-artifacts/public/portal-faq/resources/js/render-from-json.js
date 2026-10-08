@@ -33,12 +33,12 @@ $(document).ready(function () {
 
 function readJson(jsonUrl) {
     $.getJSON(jsonUrl, function (data) {
-        for (var i = 0; i < data.faqs.length; i++) {
-            if (data.faqs[i].topic.includes('{{APP_NAME}}')) {
-                data.faqs[i].topic = data.faqs[i].topic.replace('{{APP_NAME}}', appName);
+        for (const faq of data.faqs) {
+            if (faq.topic.includes('{{APP_NAME}}')) {
+                faq.topic = faq.topic.replace('{{APP_NAME}}', appName);
             }
-            if (data.faqs[i].description.includes('{{APP_NAME}}')) {
-                data.faqs[i].description = data.faqs[i].description.replace('{{APP_NAME}}', appName);
+            if (faq.description.includes('{{APP_NAME}}')) {
+                faq.description = faq.description.replace('{{APP_NAME}}', appName);
             }
         }
 
@@ -102,8 +102,8 @@ function readJson(jsonUrl) {
 function getUrlVars() {
     var vars = [], hash;
     var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-    for (var i = 0; i < hashes.length; i++) {
-        hash = hashes[i].split('=');
+    for (const hashStr of hashes) {
+        hash = hashStr.split('=');
         vars.push(hash[0]);
         vars[hash[0]] = hash[1];
     }
