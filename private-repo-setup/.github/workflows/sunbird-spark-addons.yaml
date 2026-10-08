@@ -97,15 +97,17 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
 
       - name: Decrypt Config Files
         run: |
-          pip install ansible
+          pip install --only-binary :all: ansible==14.3.1
 
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
@@ -228,15 +230,17 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
 
       - name: Decrypt Config Files
         run: |
-          pip install ansible
+          pip install --only-binary :all: ansible==14.3.1
 
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
@@ -375,15 +379,17 @@ jobs:
           ref: ${{ inputs.config_branch }}
 
       - name: Clone Source Repository
+        env:
+          SOURCE_BRANCH: ${{ inputs.source_branch }}
         run: |
-          git clone --depth 1 --branch ${{ inputs.source_branch }} \
+          git clone --depth 1 --branch "$SOURCE_BRANCH" \
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
-          echo "✅ Cloned source repository (branch: ${{ inputs.source_branch }})"
+          echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
 
       - name: Decrypt Config Files
         run: |
-          pip install ansible
+          pip install --only-binary :all: ansible==14.3.1
 
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
