@@ -31,7 +31,7 @@ VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "f
 # ── Validate inputs ────────────────────────────────────────────────────────
 for var in TENANT_ID SUBSCRIPTION_ID BUILDING_BLOCK ENVIRONMENT RESOURCE_GROUP LOCATION GITHUB_ORG GITHUB_RUNNER_TOKEN; do
   if [[ -z "${!var}" ]]; then
-    echo "❌ ERROR: $var is not set. Edit the variables at the top of this script."
+    echo "❌ ERROR: $var is not set. Edit the variables at the top of this script." >&2
     exit 1
   fi
 done
@@ -407,7 +407,7 @@ if az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" &>/dev/null; 
   if [[ "$SETUP_STATUS" = "SUCCESS" ]]; then
     echo "✓ Setup completed successfully on existing VM."
   else
-    echo "ERROR: Setup failed or output was truncated. Check full log:"
+    echo "ERROR: Setup failed or output was truncated. Check full log:" >&2
     echo "  ssh azureuser@${VM_IP_CHECK} 'sudo tail -100 /var/log/runner-setup.log'"
     exit 1
   fi

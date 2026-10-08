@@ -3,13 +3,13 @@ set -euo pipefail
 
 # Check if the global-values.yaml file exists
 if [[ ! -f "global-values.yaml" ]]; then
-  echo "Error: global-values.yaml file does not exist!"
+  echo "Error: global-values.yaml file does not exist!" >&2
   exit 1
 fi
 
 # Extract values using yq (YAML processor)
 if ! command -v yq &> /dev/null; then
-  echo "Error: yq is not installed. Please install yq to process YAML files."
+  echo "Error: yq is not installed. Please install yq to process YAML files." >&2
   exit 1
 fi
 
@@ -21,7 +21,7 @@ resource_group_name=$(yq '.global.resource_group_name' global-values.yaml)
 
 # Validate that the values are extracted correctly
 if [[ -z "$building_block" || -z "$environment_name" ]]; then
-  echo "Error: Unable to extract values from global-values.yaml"
+  echo "Error: Unable to extract values from global-values.yaml" >&2
   exit 1
 fi
 

@@ -88,7 +88,7 @@ EOF
   # Check response
   ERROR=$(echo "$RESPONSE" | jq -r '.error // empty')
   if [[ -n "$ERROR" ]]; then
-    echo "[ERROR] Batch $BATCH_NUM failed: $ERROR" | tee -a "$LOG_FILE"
+    echo "[ERROR] Batch $BATCH_NUM failed: $ERROR" | tee -a "$LOG_FILE" >&2
     printf '%s\n' "${BATCH[@]}" >> "$FAILED_FILE"
     ((FAILED+=BATCH_SIZE_ACTUAL))
   else

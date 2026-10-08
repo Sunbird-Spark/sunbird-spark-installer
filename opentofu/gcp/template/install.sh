@@ -141,7 +141,7 @@ function install_service() {
     fi
 
     if [[ ! -d "$bundle" ]]; then
-        echo "Error: bundle '$bundle' not found in helmcharts/"
+        echo "Error: bundle '$bundle' not found in helmcharts/" >&2
         return 1
     fi
 

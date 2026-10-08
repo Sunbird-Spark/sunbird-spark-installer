@@ -18,14 +18,14 @@ deploy_chart() {
     cd "$CHART_DIR"
 
     if [[ -z "$ENV_NAME" ]]; then
-        echo "ERROR: ENV_NAME environment variable is not set. Please export it (e.g., export ENV_NAME=demo) before running this script."
+        echo "ERROR: ENV_NAME environment variable is not set. Please export it (e.g., export ENV_NAME=demo) before running this script." >&2
         exit 1
     fi
     local CLOUD_DIR="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/$ENV_NAME"
 
     # Check for required configuration files
     if [[ ! -f "$CLOUD_DIR/global-values.yaml" ]] || [[ ! -f "$CLOUD_DIR/global-cloud-values.yaml" ]]; then
-        echo "ERROR: OpenTofu global values not found in $CLOUD_DIR. Please run opentofu first."
+        echo "ERROR: OpenTofu global values not found in $CLOUD_DIR. Please run opentofu first." >&2
         exit 1
     fi
 
