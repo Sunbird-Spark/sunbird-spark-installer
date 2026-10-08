@@ -25,10 +25,21 @@ resource "google_project_iam_member" "service_account-roles" {
   member  = "serviceAccount:${google_service_account.service_account.email}"
 }
 
-resource "google_project_iam_member" "storage_admin_role" {
-  project = var.project
-  role    = "roles/storage.admin"
-  member  = "serviceAccount:${google_service_account.service_account.email}"
+# Object-level access on just the buckets this environment owns -- not
+# project-wide roles/storage.admin, which also grants bucket create/delete
+# and IAM-policy changes on every bucket in the project, including ones
+# unrelated to this environment.
+resource "google_storage_bucket_iam_member" "storage_object_admin" {
+  for_each = toset([
+    var.sa_key_store_bucket,
+    var.public_bucket,
+    var.dial_state_bucket,
+    var.velero_bucket,
+  ])
+
+  bucket = each.value
+  role   = "roles/storage.objectAdmin"
+  member = "serviceAccount:${google_service_account.service_account.email}"
 }
 
 # Assign Workload Identity User role to service account (optional)
