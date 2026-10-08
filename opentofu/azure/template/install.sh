@@ -135,7 +135,6 @@ function install_service() {
     local bundle="$1"
     shift
     local target_charts=("$@")
-    local extra_flags=()
 
     local current_directory="$(pwd)"
     if [[ "$(basename "$current_directory")" != "helmcharts" ]]; then
