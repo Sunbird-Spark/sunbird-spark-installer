@@ -80,6 +80,21 @@ function certificate_config() {
         kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
     fi
 }
+function db_backend_flags() {
+    local component="$1"
+    local use_cassandra_postgres
+    use_cassandra_postgres="$(yq '.global.use_cassandra_postgres // false' "../opentofu/azure/$environment/global-values.yaml")"
+    if [ "$component" = "edbb" ]; then
+        if [ "$use_cassandra_postgres" = "true" ]; then
+            echo "--set yugabyte.enabled=false --set cassandra.enabled=true --set postgresql.enabled=true"
+        else
+            echo "--set yugabyte.enabled=true --set cassandra.enabled=false --set postgresql.enabled=false"
+        fi
+    elif [ "$component" = "additional" ] && [ "$use_cassandra_postgres" = "true" ]; then
+        echo "--set yugabyte-backup.enabled=false"
+    fi
+}
+
 function install_component() {
     # We need a dummy cm for configmap to start. Later Lernbb will create real one
     kubectl create configmap keycloak-key -n sunbird 2>/dev/null || true
@@ -117,13 +132,17 @@ function install_component() {
         fi
     fi
 
+    local db_flags
+    db_flags="$(db_backend_flags "$component")"
+
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
         $ed_values_flag \
         $addon_values_flag \
         -f images.yaml \
         -f "global-resources.yaml" \
         -f "../opentofu/azure/$environment/global-values.yaml" \
-        -f "../opentofu/azure/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
+        $db_flags --timeout 30m --debug
 }
 
 function install_service() {
@@ -159,6 +178,9 @@ function install_service() {
         fi
     fi
 
+    local db_flags
+    db_flags="$(db_backend_flags "$bundle")"
+
     if helm status "$bundle" --namespace sunbird &>/dev/null; then
         # Phase B: Release exists — reuse previous values, enable all target charts
         echo -e "\nRelease '$bundle' exists — upgrading '${target_charts[*]}' (Phase B)"
@@ -173,6 +195,7 @@ function install_service() {
             --namespace sunbird \
             --reuse-values \
             $set_flags \
+            $db_flags \
             $ed_values_flag \
             $addon_values_flag \
             -f images.yaml \
@@ -207,6 +230,7 @@ function install_service() {
             -f "../opentofu/azure/$environment/global-values.yaml" \
             -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
             $set_flags \
+            $db_flags \
             --timeout 30m \
             --debug
     fi

@@ -127,7 +127,7 @@ secor:
     create: false
 
 yugabyte: &yugabyte
-  enabled: false
+  enabled: true
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 
@@ -172,10 +172,10 @@ yugabyte: &yugabyte
 # of them *could* be deployed standalone and bring its own DB along, same
 # reasoning as yugabyte), but leave them disabled by default since edbb
 # already provides the shared instance.
-use_cassandra_postgres: &use_cassandra_postgres true
+use_cassandra_postgres: &use_cassandra_postgres false
 
 cassandra: &cassandra
-  enabled: true
+  enabled: false
   nameOverride: "cassandra"
   fullnameOverride: "cassandra"
   host: "cassandra"
@@ -219,7 +219,7 @@ cassandra: &cassandra
     "helm.sh/hook-weight": "-5"
 
 postgresql: &postgresql
-  enabled: true
+  enabled: false
   fullnameOverride: "postgresql"
   host: "postgresql"
   port: 5432

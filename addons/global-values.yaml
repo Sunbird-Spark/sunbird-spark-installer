@@ -12,6 +12,10 @@ global:
     port: 6379
   
   yugabyte:
+    host: "yb-tserver-service"
+    port: 9042
+
+  cassandra:
     host: "cassandra"
     port: 9042
   

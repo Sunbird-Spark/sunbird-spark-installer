@@ -112,7 +112,7 @@ storageBackend:
     backend: "cql"
     ## @param storageBackend.external.hostname Hostname of the external storage backend
     ##
-    hostname: "cassandra"
+    hostname: "yb-tserver-service"
     ## @param storageBackend.external.port Port of the external storage backend
     ##
     port: "9042"

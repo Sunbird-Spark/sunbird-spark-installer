@@ -84,6 +84,7 @@ global:
         adminUser:
           username: admin
           password: *superset-admin-password  
+  use_cassandra_postgres: false  # true = Cassandra + PostgreSQL; false = YugabyteDB
   yugabyte:
     ysql:
       user: "yugabyte"  
