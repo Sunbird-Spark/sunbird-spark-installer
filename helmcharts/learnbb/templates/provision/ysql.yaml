@@ -8,6 +8,16 @@ were written targeting YSQL -- if any of them use Yugabyte-specific DDL
 extensions (e.g. distributed-table hints) rather than plain Postgres SQL,
 those specific statements could still fail against a real Postgres server.
 */ -}}
+{{- if .Values.global.use_cassandra_postgres }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-lern-reports-sql
+  namespace: {{ .Release.Namespace }}
+data:
+{{ (.Files.Glob "files/lern-reports/*.sql").AsConfig | indent 2 }}
+---
+{{- end }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -31,6 +41,11 @@ spec:
       volumes:
       - name: shared-volume
         emptyDir: {}
+      {{- if .Values.global.use_cassandra_postgres }}
+      - name: lern-reports-sql
+        configMap:
+          name: {{ .Chart.Name }}-lern-reports-sql
+      {{- end }}
       initContainers:
       - name: wait-for-yugabytesql
         image: alpine/curl
@@ -82,6 +97,10 @@ spec:
         volumeMounts:
           - name: shared-volume
             mountPath: /opt/shared-volume
+          {{- if .Values.global.use_cassandra_postgres }}
+          - name: lern-reports-sql
+            mountPath: /opt/lern-reports
+          {{- end }}
         args:
         - |
             set -e
@@ -154,7 +173,11 @@ spec:
 
             # Run sunbird-lern specific SQL migrations against sunbird database
             echo "Running sunbird-lern SQL migrations..."
+            {{- if .Values.global.use_cassandra_postgres }}
+            cd /opt/lern-reports
+            {{- else }}
             cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern/reports
+            {{- end }}
             for sql_file in *.sql; do
               echo "Applying $sql_file to sunbird..."
               run_sql_file "$sql_file" "sunbird" || true
