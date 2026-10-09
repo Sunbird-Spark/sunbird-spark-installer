@@ -179,7 +179,7 @@ schema: &schema
   base_path: "https://{{ .Values.global.object_storage_endpoint }}/{{ .Values.global.public_container_name }}/schemas/local"
 
 yugabyte: &yugabyte
-  enabled: true
+  enabled: false
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 

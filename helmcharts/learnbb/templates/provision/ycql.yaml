@@ -37,32 +37,10 @@ spec:
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
-      {{- if .Values.global.use_cassandra_postgres }}
-      - name: prepare-cassandra-migrations
-        image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
-        imagePullPolicy: IfNotPresent
-        resources:
-          requests:
-            cpu: 50m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
-            ephemeral-storage: 512Mi
-        command: ['bash', '-c']
-        args:
-        - |
-          set -ex
-          cp -r /opt/migrations/sunbird-yugabyte-migrations /opt/shared-volume/
-          {{- include "sunbird.cassandraCompatSed" . | nindent 10 }} /opt/shared-volume/sunbird-yugabyte-migrations/*/*.cql
-        volumeMounts:
-        - name: shared-volume
-          mountPath: /opt/shared-volume
-      {{- end }}
       containers:
       - name: migration
         {{- if .Values.global.use_cassandra_postgres }}
-        image: "{{ .Values.global.cassandra.image.registry }}/{{ .Values.global.cassandra.image.repository }}:{{ .Values.global.cassandra.image.tag }}"
+        image: "{{ .Values.cassandra_migration_image.repository }}:{{ .Values.cassandra_migration_image.tag }}"
         {{- else }}
         image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
         {{- end }}
@@ -84,11 +62,14 @@ spec:
           export YCQLSH_PORT={{ include "sunbird.cassandraPort" $ }}
           export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
           export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
+          export CQLSH_HOST=$YCQLSH_HOST
+          export CQLSH_PORT=$YCQLSH_PORT
           {{- if .Values.global.use_cassandra_postgres }}
-          MIGRATIONS_DIR=/opt/shared-volume/sunbird-yugabyte-migrations
-          {{- include "sunbird.ycqlshShim" . | nindent 10 }}
+          MIGRATIONS_DIR=/opt/migrations/sunbird-cassandra-migrations
+          CQL_CLIENT="cqlsh --request-timeout=120"
           {{- else }}
           MIGRATIONS_DIR=/opt/migrations/sunbird-yugabyte-migrations
+          CQL_CLIENT=ycqlsh
           {{- end }}
           # run migrations directly from embedded scripts
           cd $MIGRATIONS_DIR/sunbird-lern
@@ -99,7 +80,7 @@ spec:
           set -e
           # Custom reCAPTCHA site key insertion
           echo "==== Inserting reCAPTCHA site key ===="
-          ycqlsh $YCQLSH_HOST $YCQLSH_PORT -u $YCQLSH_USERNAME -p $YCQLSH_PASSWORD -e "INSERT INTO sunbird.system_settings (field, id, value) VALUES ('portal_google_recaptcha_site_key','portal_google_recaptcha_site_key','{{ .Values.global.sunbird_google_captcha_site_key }}');"
+          $CQL_CLIENT $YCQLSH_HOST $YCQLSH_PORT -u $YCQLSH_USERNAME -p $YCQLSH_PASSWORD -e "INSERT INTO sunbird.system_settings (field, id, value) VALUES ('portal_google_recaptcha_site_key','portal_google_recaptcha_site_key','{{ .Values.global.sunbird_google_captcha_site_key }}');"
                     # Print log file to stdout so errors are visible in kubectl logs
           LOG_FILE=$(ls -t $MIGRATIONS_DIR/sunbird-lern/migration_*.log 2>/dev/null | head -1)
           if [ -n "$LOG_FILE" ]; then

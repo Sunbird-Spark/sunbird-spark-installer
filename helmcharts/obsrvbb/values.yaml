@@ -53,7 +53,7 @@ superset:
   enabled: true
 
 yugabyte: &yugabyte
-  enabled: true
+  enabled: false
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 

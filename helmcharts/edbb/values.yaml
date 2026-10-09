@@ -159,8 +159,8 @@ yugabyte: &yugabyte
   password: "yugabyte"
 
 # Master switch: which database backend is actually in use. Every consumer
-# reads its host/port through the common.dbHost/common.dbPort helpers (see
-# helmcharts/edbb/charts/common/templates/_database.tpl), which check this
+# reads its host/port through the sunbird.cassandraHost/cassandraPort/postgres*
+# helpers (see helmcharts/edbb/templates/_database.tpl), which check this
 # flag and resolve to whichever of yugabyte/{cassandra,postgresql} below is
 # actually enabled -- so switching this one value is enough to repoint every
 # consumer across all 4 building blocks, no per-file changes needed.

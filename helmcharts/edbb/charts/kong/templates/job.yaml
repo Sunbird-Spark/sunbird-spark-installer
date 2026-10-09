@@ -11,7 +11,7 @@ spec:
   template:
     spec:
       initContainers:
-        - name: wait-for-yugabytepostgres
+        - name: wait-for-postgres
           image: busybox
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c"]

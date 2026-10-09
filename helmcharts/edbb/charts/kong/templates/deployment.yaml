@@ -28,7 +28,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
-        - name: wait-for-yugabytepostgres
+        - name: wait-for-postgres
           image: busybox
           command: ["/bin/sh", "-c"]
           args:

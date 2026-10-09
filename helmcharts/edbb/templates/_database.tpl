@@ -54,23 +54,6 @@ flipping that one flag repoints every consumer at once.
 {{- end -}}
 {{- end -}}
 
-{{- define "sunbird.cassandraCompatSed" -}}
-sed -E -i \
-  -e "s/[[:space:]]*AND transactions = \{'enabled': 'true'\}//I" \
-  -e "/^[[:space:]]*AND (dclocal_)?read_repair_chance = [0-9.]+[[:space:]]*$/Id" \
-  -e "s/^([[:space:]]*)AND (dclocal_)?read_repair_chance = [0-9.]+[[:space:]]*;/\1;/I" \
-  -e "s/[[:space:]]+INCLUDE[[:space:]]*\([^)]*\)//I" \
-  -e "/^[[:space:]]*CREATE INDEX/I s/[[:space:]]+WITH CLUSTERING ORDER BY[[:space:]]*\([^)]*\)//I" \
-  -e "s/(ON sunbird_courses\.assessment_aggregator)[[:space:]]*\(user_id,[^)]*\)/\1 (user_id)/I"
-{{- end -}}
-
-{{- define "sunbird.ycqlshShim" -}}
-mkdir -p /tmp/bin
-printf '#!/bin/sh\nexec cqlsh --request-timeout=120 "$@"\n' > /tmp/bin/ycqlsh
-chmod +x /tmp/bin/ycqlsh
-export PATH=/tmp/bin:$PATH
-{{- end -}}
-
 {{- define "sunbird.ysqlshShim" -}}
 mkdir -p /tmp/bin
 printf '#!/bin/sh\nexec psql "$@"\n' > /tmp/bin/ysqlsh
