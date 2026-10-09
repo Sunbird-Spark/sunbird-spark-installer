@@ -46,7 +46,7 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; 10; done'"
+          timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; sleep 10; done'
           # Downloading migration files
           set -e
           export devops_branch={{ .Values.devops_release_branch }}
@@ -62,7 +62,11 @@ spec:
             mountPath: /opt/shared-volume
       containers:
       - name: migration
+        {{- if .Values.global.use_cassandra_postgres }}
+        image: "{{ .Values.global.postgresql.image.registry }}/{{ .Values.global.postgresql.image.repository }}:{{ .Values.global.postgresql.image.tag }}"
+        {{- else }}
         image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
+        {{- end }}
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -85,6 +89,9 @@ spec:
             export PGPORT={{ include "sunbird.postgresPort" $ }}
             export PGUSER={{ include "sunbird.postgresUsername" $ }}
             export PGPASSWORD={{ include "sunbird.postgresPassword" $ }}
+            {{- if .Values.global.use_cassandra_postgres }}
+            {{- include "sunbird.ysqlshShim" . | nindent 12 }}
+            {{- end }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then

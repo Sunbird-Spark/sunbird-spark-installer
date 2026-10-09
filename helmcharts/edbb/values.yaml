@@ -127,7 +127,7 @@ secor:
     create: false
 
 yugabyte: &yugabyte
-  enabled: true
+  enabled: false
   nameOverride: "yugabyte"
   fullnameOverride: "yugabyte"
   host: "yb-tserver-service" 
@@ -172,10 +172,10 @@ yugabyte: &yugabyte
 # of them *could* be deployed standalone and bring its own DB along, same
 # reasoning as yugabyte), but leave them disabled by default since edbb
 # already provides the shared instance.
-use_cassandra_postgres: &use_cassandra_postgres false
+use_cassandra_postgres: &use_cassandra_postgres true
 
 cassandra: &cassandra
-  enabled: false
+  enabled: true
   nameOverride: "cassandra"
   fullnameOverride: "cassandra"
   host: "cassandra"
@@ -184,8 +184,23 @@ cassandra: &cassandra
     registry: docker.io
     repository: cassandra
     tag: 5.0.9-bookworm
+  command:
+    - docker-entrypoint.sh
+    - cassandra
+    - -f
+  podSecurityContext:
+    enabled: true
+    fsGroup: 999
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 999
+    runAsNonRoot: true
   persistence:
     size: 25Gi
+    mountPath: /var/lib/cassandra
+  jvm:
+    maxHeapSize: 2G
+    newHeapSize: 512M
   # Bitnami's chart default (replicaCount: 1) is left as-is -- single node,
   # matching how yugabyte itself only runs one logical cluster per env.
   extraEnvVars:
@@ -197,7 +212,7 @@ cassandra: &cassandra
     "helm.sh/hook-weight": "-5"
 
 postgresql: &postgresql
-  enabled: false
+  enabled: true
   fullnameOverride: "postgresql"
   host: "postgresql"
   port: 5432
@@ -207,6 +222,12 @@ postgresql: &postgresql
     registry: docker.io
     repository: postgres
     tag: 18.6-bookworm
+  securityContext:
+    enabled: true
+    fsGroup: 999
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 999
   persistence:
     size: 25Gi
   databases:

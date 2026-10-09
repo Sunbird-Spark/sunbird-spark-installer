@@ -1,12 +1,3 @@
-{{- /*
-ycqlsh (used by this job) is itself a fork of real Apache Cassandra's own
-cqlsh, and the actual .cql content it runs (scripts/sunbird-yugabyte-migrations)
-is genuine Cassandra syntax -- references real
-org.apache.cassandra.db.compaction.* / io.compress.* class names, SimpleStrategy
-replication, standard CQL DDL. Nothing YCQL-specific found in either the tool
-or the content, so this runs the same way regardless of which backend
-global.use_cassandra_postgres selects.
-*/ -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -46,9 +37,35 @@ spec:
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
+      {{- if .Values.global.use_cassandra_postgres }}
+      - name: prepare-cassandra-migrations
+        image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+            ephemeral-storage: 512Mi
+        command: ['bash', '-c']
+        args:
+        - |
+          set -ex
+          cp -r /opt/migrations/sunbird-yugabyte-migrations /opt/shared-volume/
+          {{- include "sunbird.cassandraCompatSed" . | nindent 10 }} /opt/shared-volume/sunbird-yugabyte-migrations/*/*.cql
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /opt/shared-volume
+      {{- end }}
       containers:
       - name: migration
+        {{- if .Values.global.use_cassandra_postgres }}
+        image: "{{ .Values.global.cassandra.image.registry }}/{{ .Values.global.cassandra.image.repository }}:{{ .Values.global.cassandra.image.tag }}"
+        {{- else }}
         image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
+        {{- end }}
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -56,7 +73,7 @@ spec:
             memory: 128Mi
           limits:
             cpu: 200m
-            memory: 256Mi
+            memory: 512Mi
             ephemeral-storage: 512Mi
         command: ['bash', '-c']
         args:
@@ -67,8 +84,14 @@ spec:
           export YCQLSH_PORT={{ include "sunbird.cassandraPort" $ }}
           export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
           export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
+          {{- if .Values.global.use_cassandra_postgres }}
+          MIGRATIONS_DIR=/opt/shared-volume/sunbird-yugabyte-migrations
+          {{- include "sunbird.ycqlshShim" . | nindent 10 }}
+          {{- else }}
+          MIGRATIONS_DIR=/opt/migrations/sunbird-yugabyte-migrations
+          {{- end }}
           # run migrations directly from embedded scripts
-          cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern
+          cd $MIGRATIONS_DIR/sunbird-lern
           chmod +x execute_migrations.sh || true
           set +e
           ./execute_migrations.sh $ENV
@@ -78,7 +101,7 @@ spec:
           echo "==== Inserting reCAPTCHA site key ===="
           ycqlsh $YCQLSH_HOST $YCQLSH_PORT -u $YCQLSH_USERNAME -p $YCQLSH_PASSWORD -e "INSERT INTO sunbird.system_settings (field, id, value) VALUES ('portal_google_recaptcha_site_key','portal_google_recaptcha_site_key','{{ .Values.global.sunbird_google_captcha_site_key }}');"
                     # Print log file to stdout so errors are visible in kubectl logs
-          LOG_FILE=$(ls -t /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern/migration_*.log 2>/dev/null | head -1)
+          LOG_FILE=$(ls -t $MIGRATIONS_DIR/sunbird-lern/migration_*.log 2>/dev/null | head -1)
           if [ -n "$LOG_FILE" ]; then
             echo "======== MIGRATION LOG ========"
             cat "$LOG_FILE"

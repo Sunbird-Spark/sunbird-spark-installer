@@ -1,10 +1,3 @@
-{{- /*
-This job's migration image is yugabytedb/yugabyte, used for its bundled
-ysqlsh -- but ysqlsh is itself a fork of real PostgreSQL's own psql (per
-YugabyteDB's own docs), and YSQL is genuinely PostgreSQL-wire-compatible.
-Nothing in this job's SQL is Yugabyte-specific, so it runs the same way
-regardless of which backend global.use_cassandra_postgres selects.
-*/ -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -40,7 +33,11 @@ spec:
         - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; sleep 10; done'"
       containers:
       - name: migration
+        {{- if .Values.global.use_cassandra_postgres }}
+        image: "{{ .Values.global.postgresql.image.registry }}/{{ .Values.global.postgresql.image.repository }}:{{ .Values.global.postgresql.image.tag }}"
+        {{- else }}
         image: "{{ .Values.yugabyte_migration_image.registry }}/{{ .Values.yugabyte_migration_image.repository }}:{{ .Values.yugabyte_migration_image.tag }}"
+        {{- end }}
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -61,6 +58,9 @@ spec:
             export PGPORT={{ include "sunbird.postgresPort" $ }}
             export PGUSER={{ include "sunbird.postgresUsername" $ }}
             export PGPASSWORD={{ include "sunbird.postgresPassword" $ }}
+            {{- if .Values.global.use_cassandra_postgres }}
+            {{- include "sunbird.ysqlshShim" . | nindent 12 }}
+            {{- end }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             # Ensure ysqlsh is available in the image

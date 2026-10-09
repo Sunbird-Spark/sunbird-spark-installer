@@ -205,7 +205,7 @@ yugabyte: &yugabyte
 # (mirrors how yugabyte's own StatefulSets live there today); this bundle
 # declares the same two subcharts too (so it could be deployed standalone),
 # but leaves them disabled since edbb already provides the shared instance.
-use_cassandra_postgres: &use_cassandra_postgres false
+use_cassandra_postgres: &use_cassandra_postgres true
 
 cassandra: &cassandra
   enabled: false
