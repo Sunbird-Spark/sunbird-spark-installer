@@ -65,20 +65,19 @@ function certificate_keys() {
 
 function certificate_config() {
     echo "Configuring Certificate keys"
-    if ! kubectl -n sunbird exec deploy/knowledge-mw -- which jq >/dev/null 2>&1; then
-        echo "jq not found in knowledge-mw container, attempting to install..."
-        # Try to install jq using available package manager, fallback if apt fails
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get update || true"
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get install -y jq || true"
-    fi
-
-    CERTKEY=$(kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
-    # Inject cert keys to the service if its not available 
+    local registry_api="/api/v1/namespaces/sunbird/services/registry-service:8081/proxy/api/v1"
+    local body_file
+    body_file=$(mktemp)
+    echo '{ "filters": {}}' > "$body_file"
+    CERTKEY=$(kubectl create --raw "$registry_api/PublicKey/search" -f "$body_file" | jq '.[] | .value')
+    # Inject cert keys to the service if its not available
     if [ -z "$CERTKEY" ]; then
         echo "Certificate RSA public key not available"
         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
+        printf '{"value":"%s"}' "$CERTPUBKEY" > "$body_file"
+        kubectl create --raw "$registry_api/PublicKey" -f "$body_file"
     fi
+    rm -f "$body_file"
 }
 function db_backend_flags() {
     local component="$1"
