@@ -1,3 +1,23 @@
+{{- /*
+This job's migration image bundles ysqlsh -- itself a fork of real
+PostgreSQL's own psql (per YugabyteDB's own docs), and YSQL is genuinely
+PostgreSQL-wire-compatible, so this runs the same way regardless of which
+backend global.use_cassandra_postgres selects. One caveat not fully verified:
+the actual .sql files this job pulls from the external sunbird-devops repo
+were written targeting YSQL -- if any of them use Yugabyte-specific DDL
+extensions (e.g. distributed-table hints) rather than plain Postgres SQL,
+those specific statements could still fail against a real Postgres server.
+*/ -}}
+{{- if .Values.global.use_cassandra_postgres }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-lern-reports-sql
+  namespace: {{ .Release.Namespace }}
+data:
+{{ (.Files.Glob "files/lern-reports/*.sql").AsConfig | indent 2 }}
+---
+{{- end }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -21,6 +41,11 @@ spec:
       volumes:
       - name: shared-volume
         emptyDir: {}
+      {{- if .Values.global.use_cassandra_postgres }}
+      - name: lern-reports-sql
+        configMap:
+          name: {{ .Chart.Name }}-lern-reports-sql
+      {{- end }}
       initContainers:
       - name: wait-for-yugabytesql
         image: alpine/curl
@@ -36,7 +61,7 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte postgres; 10; done'"
+          timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; sleep 10; done'
           # Downloading migration files
           set -e
           export devops_branch={{ .Values.devops_release_branch }}
@@ -52,7 +77,11 @@ spec:
             mountPath: /opt/shared-volume
       containers:
       - name: migration
+        {{- if .Values.global.use_cassandra_postgres }}
+        image: "{{ .Values.global.postgresql.image.registry }}/{{ .Values.global.postgresql.image.repository }}:{{ .Values.global.postgresql.image.tag }}"
+        {{- else }}
         image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
+        {{- end }}
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -68,13 +97,20 @@ spec:
         volumeMounts:
           - name: shared-volume
             mountPath: /opt/shared-volume
+          {{- if .Values.global.use_cassandra_postgres }}
+          - name: lern-reports-sql
+            mountPath: /opt/lern-reports
+          {{- end }}
         args:
         - |
             set -e
-            export PGHOST={{.Values.global.yugabyte.host}}
-            export PGPORT={{.Values.global.postgresql_port}}
-            export PGUSER={{.Values.global.yugabyte.username}}
-            export PGPASSWORD={{.Values.global.yugabyte.password}}
+            export PGHOST={{ include "sunbird.postgresHost" $ }}
+            export PGPORT={{ include "sunbird.postgresPort" $ }}
+            export PGUSER={{ include "sunbird.postgresUsername" $ }}
+            export PGPASSWORD={{ include "sunbird.postgresPassword" $ }}
+            {{- if .Values.global.use_cassandra_postgres }}
+            {{- include "sunbird.ysqlshShim" . | nindent 12 }}
+            {{- end }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then
@@ -137,7 +173,11 @@ spec:
 
             # Run sunbird-lern specific SQL migrations against sunbird database
             echo "Running sunbird-lern SQL migrations..."
+            {{- if .Values.global.use_cassandra_postgres }}
+            cd /opt/lern-reports
+            {{- else }}
             cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern/reports
+            {{- end }}
             for sql_file in *.sql; do
               echo "Applying $sql_file to sunbird..."
               run_sql_file "$sql_file" "sunbird" || true

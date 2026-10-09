@@ -28,11 +28,11 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
-        - name: wait-for-yugabytepostgres
+        - name: wait-for-postgres
           image: busybox
           command: ["/bin/sh", "-c"]
           args:
-          - "timeout 300 sh -c 'until nc -z {{.Values.global.yugabyte.host}} {{.Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabyte; sleep 10; done'"
+          - "timeout 300 sh -c 'until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; sleep 10; done'"
       {{- with .Values.initContainers }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

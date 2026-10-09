@@ -167,7 +167,7 @@ existingConfigmap: ""
 ##
 extraJanusgraphProperties: |
   gremlin.graph=org.janusgraph.core.JanusGraphFactory
-  graph.storage.cql.local-datacenter = "datacenter1" 
+  storage.cql.local-datacenter=datacenter1
   storage.cql.keyspace=janusgraph
   # Transaction Log Configuration (Required for CDC)
   tx.log-tx=true

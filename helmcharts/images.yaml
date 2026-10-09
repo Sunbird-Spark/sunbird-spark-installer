@@ -101,7 +101,7 @@ images:
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v1.1.1-test-cassandra-postgres_2adcfaf"
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
@@ -159,6 +159,10 @@ images:
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
     tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+
+  cassandra_migrations: &cassandra_migrations
+    repository: "ghcr.io/sunbird-spark/sunbird-cassandra-migrations"
+    tag: "spark-v1.1.1-test-cassandra-postgres_2adcfaf"
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
@@ -592,6 +596,7 @@ janusgraph:
 job_cleaner_kubectl_image: *job_cleaner_kubectl_image
 job_wait_image: *job_wait_image
 yugabyte_migration_image: *yugabyte_migration_image
+cassandra_migration_image: *cassandra_migrations
 opensearch_migration_image: *opensearch_migration_image
 
 # envoy/opa/proxy_init are read inside the knowledgemw SUBCHART's own

@@ -19,6 +19,7 @@ jobs:
           - keycloak-postgres-query
           - kong-api-scripts
           - sunbird-yugabyte-migrations
+          - sunbird-cassandra-migrations
           - janusgraph
           - yugabyte-backup
     permissions:

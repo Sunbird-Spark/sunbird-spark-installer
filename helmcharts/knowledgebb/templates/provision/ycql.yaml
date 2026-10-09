@@ -33,13 +33,17 @@ spec:
             memory: 64Mi
         command: ["/bin/sh", "-c"]
         args:
-        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte; sleep 10; done'"
+        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ include "sunbird.cassandraHost" $ }} {{ include "sunbird.cassandraPort" $ }}; do echo waiting for cassandra; sleep 10; done'"
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
       containers:
       - name: migration
+        {{- if .Values.global.use_cassandra_postgres }}
+        image: "{{ .Values.cassandra_migration_image.repository }}:{{ .Values.cassandra_migration_image.tag }}"
+        {{- else }}
         image: {{ .Values.yugabytecql.image.repository }}:{{ .Values.yugabytecql.image.tag }}
+        {{- end }}
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -47,31 +51,40 @@ spec:
             memory: 128Mi
           limits:
             cpu: 200m
-            memory: 256Mi
+            memory: 512Mi
             ephemeral-storage: 512Mi
         command: ['bash', '-c']
         args:
         - |
           set -ex
           export ENV={{ .Values.global.env | default "dev" }}
-          export YCQLSH_HOST={{ .Values.global.yugabyte.host }}
-          export YCQLSH_PORT={{ .Values.global.yugabyte.port }}
+          export YCQLSH_HOST={{ include "sunbird.cassandraHost" $ }}
+          export YCQLSH_PORT={{ include "sunbird.cassandraPort" $ }}
           export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
           export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
+          export CQLSH_HOST=$YCQLSH_HOST
+          export CQLSH_PORT=$YCQLSH_PORT
+          {{- if .Values.global.use_cassandra_postgres }}
+          MIGRATIONS_DIR=/opt/migrations/sunbird-cassandra-migrations
+          CQL_CLIENT="cqlsh --request-timeout=120"
+          {{- else }}
+          MIGRATIONS_DIR=/opt/migrations/sunbird-yugabyte-migrations
+          CQL_CLIENT=ycqlsh
+          {{- end }}
 
           # run migrations for knowledgebb
-          cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-knowlg
+          cd $MIGRATIONS_DIR/sunbird-knowlg
           chmod +x execute_migrations.sh || true
           ./execute_migrations.sh $ENV
           # run migrations for inquirybb
-          cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-inquiry
+          cd $MIGRATIONS_DIR/sunbird-inquiry
           chmod +x execute_migrations.sh || true
           set +e
           ./execute_migrations.sh $ENV
           MIGRATION_EXIT=$?
           set -e
           # Print log file to stdout so errors are visible in kubectl logs
-          LOG_FILE=$(ls -t /opt/migrations/sunbird-yugabyte-migrations/sunbird-knowlg/migration_*.log 2>/dev/null | head -1)
+          LOG_FILE=$(ls -t $MIGRATIONS_DIR/sunbird-knowlg/migration_*.log 2>/dev/null | head -1)
           if [ -n "$LOG_FILE" ]; then
             echo "======== MIGRATION LOG ========"
             cat "$LOG_FILE"
