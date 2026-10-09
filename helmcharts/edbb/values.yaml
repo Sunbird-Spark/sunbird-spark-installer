@@ -201,6 +201,13 @@ cassandra: &cassandra
   jvm:
     maxHeapSize: 2G
     newHeapSize: 512M
+  resources:
+    requests:
+      cpu: "1"
+      memory: 3Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi
   # Bitnami's chart default (replicaCount: 1) is left as-is -- single node,
   # matching how yugabyte itself only runs one logical cluster per env.
   extraEnvVars:
@@ -228,6 +235,13 @@ postgresql: &postgresql
   containerSecurityContext:
     enabled: true
     runAsUser: 999
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: "1"
+      memory: 2Gi
   persistence:
     size: 25Gi
   databases:
