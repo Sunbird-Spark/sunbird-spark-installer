@@ -62,7 +62,7 @@ INSERT INTO standard_reports_meta (
     '["createdFor"]',
     TRUE,
     NULL
-) ON CONFLICT (report_id) DO NOTHING;
+) ON CONFLICT (report_id) DO UPDATE SET query_template = EXCLUDED.query_template, updated_at = NOW();
 
 -- ============================================================
 -- Report: course-assessment-summary
@@ -92,7 +92,7 @@ INSERT INTO standard_reports_meta (
     'SELECT user_id, collection_id, context_id, content_id, attempt_id, total_score, total_max_score, last_attempted_on
   FROM sunbird_courses.assessment_aggregator
   WHERE collection_id = {{courseid}}
-  {{#batchid}}AND context_id = {{batchid}}{{/batchid}}',
+  {{#batchid}}AND context_id = {{batchid}}{{/batchid}} ALLOW FILTERING',
     '["courseid", "batchid"]',
     TRUE,
     '{
@@ -139,7 +139,7 @@ INSERT INTO standard_reports_meta (
         ]
       }
     }'
-) ON CONFLICT (report_id) DO NOTHING;
+) ON CONFLICT (report_id) DO UPDATE SET query_template = EXCLUDED.query_template, updated_at = NOW();
 
 -- ============================================================
 -- Report: course-batch-enrolments
@@ -168,11 +168,11 @@ INSERT INTO standard_reports_meta (
     'SELECT userid, completionpercentage, status, enrolled_date, datetime, issued_certificates
   FROM sunbird_courses.user_enrolments
   WHERE courseid = {{courseid}}
-  {{#batchid}}AND batchid = {{batchid}}{{/batchid}}',
+  {{#batchid}}AND batchid = {{batchid}}{{/batchid}} ALLOW FILTERING',
     '["courseid", "batchid"]',
     TRUE,
     NULL
-) ON CONFLICT (report_id) DO NOTHING;
+) ON CONFLICT (report_id) DO UPDATE SET query_template = EXCLUDED.query_template, updated_at = NOW();
 
 -- ============================================================
 -- Report: org-course-enrolment-summary
@@ -200,7 +200,7 @@ INSERT INTO standard_reports_meta (
     'YUGABYTE_CQL_AGG',
     'SELECT courseid, userid, batchid, status, issued_certificates
   FROM sunbird_courses.user_enrolments
-  WHERE courseid IN ({{courseids}})',
+  WHERE courseid IN ({{courseids}}) ALLOW FILTERING',
     '["courseids"]',
     TRUE,
     '{
@@ -225,7 +225,7 @@ INSERT INTO standard_reports_meta (
         }
       ]
     }'
-) ON CONFLICT (report_id) DO NOTHING;
+) ON CONFLICT (report_id) DO UPDATE SET query_template = EXCLUDED.query_template, updated_at = NOW();
 
 -- ============================================================
 -- Report: user-assessment-summary
@@ -254,11 +254,11 @@ INSERT INTO standard_reports_meta (
     'SELECT collection_id, context_id, content_id, attempt_id, total_score, total_max_score, last_attempted_on
   FROM sunbird_courses.assessment_aggregator
   WHERE user_id = {{userid}}
-  {{#courseid}}AND collection_id = {{courseid}}{{/courseid}}',
+  {{#courseid}}AND collection_id = {{courseid}}{{/courseid}} ALLOW FILTERING',
     '["userid", "courseid"]',
     TRUE,
     NULL
-) ON CONFLICT (report_id) DO NOTHING;
+) ON CONFLICT (report_id) DO UPDATE SET query_template = EXCLUDED.query_template, updated_at = NOW();
 
 -- ============================================================
 -- Report: user-course-enrolments
@@ -286,11 +286,11 @@ INSERT INTO standard_reports_meta (
     'YUGABYTE_CQL',
     'SELECT courseid, completionpercentage, status, enrolled_date, datetime, issued_certificates
   FROM sunbird_courses.user_enrolments
-  WHERE userid = {{userid}}',
+  WHERE userid = {{userid}} ALLOW FILTERING',
     '["userid"]',
     TRUE,
     NULL
-) ON CONFLICT (report_id) DO NOTHING;
+) ON CONFLICT (report_id) DO UPDATE SET query_template = EXCLUDED.query_template, updated_at = NOW();
 
 -- ============================================================
 -- Report: user-creation-count
@@ -319,7 +319,7 @@ INSERT INTO standard_reports_meta (
     '["fromDate", "toDate"]',
     TRUE,
     NULL
-) ON CONFLICT (report_id) DO NOTHING;
+) ON CONFLICT (report_id) DO UPDATE SET query_template = EXCLUDED.query_template, updated_at = NOW();
 
 -- ============================================================
 -- Report: user-consent-summary
@@ -349,4 +349,4 @@ INSERT INTO standard_reports_meta (
     '[]',
     TRUE,
     NULL
-) ON CONFLICT (report_id) DO NOTHING;
+) ON CONFLICT (report_id) DO UPDATE SET query_template = EXCLUDED.query_template, updated_at = NOW();
