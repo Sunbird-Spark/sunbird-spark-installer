@@ -73,6 +73,8 @@ global:
   subscription_id: ""
   cloud_storage_region: ""
   aks_version: "1.35.1" # required — always specify the exact Kubernetes version e.g. "1.35.1". Run: az aks get-versions --location <region> --output table
+  aks_node_size: "Standard_B16as_v2"  # AKS node VM size; change if Azure reports no capacity (e.g. "Standard_D16as_v5", "Standard_D16s_v5")
+  aks_node_count: 2
   vpn_enabled: true  # true = Pritunl VPN on runner VM (direct kubectl from laptop); false = Azure Bastion created by OpenTofu (kubectl inside VM only)
   sunbird_cloud_storage_provider: "azure" # Provide the cloud storage provider
   checkpoint_store_type: "azure"
