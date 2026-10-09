@@ -8,8 +8,6 @@ locals {
   location                = local.global_vars.global.cloud_storage_region
   aks_version             = try(local.global_vars.global.aks_version, null)
   private_cluster_enabled = try(local.global_vars.global.private_cluster_enabled, true)
-  big_node_size           = try(local.global_vars.global.aks_node_size, "Standard_B16as_v2")
-  big_node_count          = try(local.global_vars.global.aks_node_count, 2)
 }
 
 # For local development
@@ -34,6 +32,4 @@ inputs = {
   location                = local.location
   aks_version             = local.aks_version
   private_cluster_enabled = local.private_cluster_enabled
-  big_node_size           = local.big_node_size
-  big_node_count          = local.big_node_count
 }
