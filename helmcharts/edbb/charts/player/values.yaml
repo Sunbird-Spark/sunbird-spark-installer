@@ -124,6 +124,11 @@ sunbird_android_keycloak_client_id: ""
 sunbird_google_android_keycloak_client_id: "google-auth-android"
 sunbird_google_android_keycloak_secret: "google-auth-android"
 android_client_secret: "android"
+dbProxy:
+  image:
+    repository: nginxinc/nginx-unprivileged
+    tag: 1.27-alpine
+
 global:
   azure_private_container_name: ""
   azure_storage_account_name: sunbird

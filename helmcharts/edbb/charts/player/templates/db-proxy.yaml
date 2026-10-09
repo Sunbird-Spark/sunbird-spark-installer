@@ -1,0 +1,101 @@
+{{- if .Values.global.use_cassandra_postgres }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portal-db-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: portal-db-proxy
+data:
+  nginx.conf: |
+    worker_processes 1;
+    pid /tmp/nginx.pid;
+    error_log /dev/stderr warn;
+    events {
+      worker_connections 1024;
+    }
+    stream {
+      server {
+        listen 5432;
+        proxy_pass {{ include "sunbird.postgresHost" $ }}:{{ include "sunbird.postgresPort" $ }};
+      }
+      server {
+        listen 9042;
+        proxy_pass {{ include "sunbird.cassandraHost" $ }}:{{ include "sunbird.cassandraPort" $ }};
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal-db-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: portal-db-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: portal-db-proxy
+  template:
+    metadata:
+      labels:
+        app: portal-db-proxy
+      annotations:
+        checksum/config: {{ printf "%s:%s|%s:%s" (include "sunbird.postgresHost" $) (include "sunbird.postgresPort" $) (include "sunbird.cassandraHost" $) (include "sunbird.cassandraPort" $) | sha256sum }}
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: nginx
+        image: "{{ .Values.dbProxy.image.repository }}:{{ .Values.dbProxy.image.tag }}"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: postgres
+          containerPort: 5432
+        - name: cql
+          containerPort: 9042
+        readinessProbe:
+          tcpSocket:
+            port: 5432
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 5432
+          periodSeconds: 20
+        resources:
+          requests:
+            cpu: 20m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 64Mi
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+        volumeMounts:
+        - name: config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: config
+        configMap:
+          name: portal-db-proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal-db-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: portal-db-proxy
+spec:
+  selector:
+    app: portal-db-proxy
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+  - name: cql
+    port: 9042
+    targetPort: 9042
+{{- end }}
