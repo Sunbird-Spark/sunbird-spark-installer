@@ -9,7 +9,7 @@ urllib3==2.8.0
 PyJWT==2.14.0
 
 # Cryptography for RSA keys and TLS
-cryptography==50.0.1
+cryptography==50.0.2
 
 # YAML parsing (for convert_kong_apis_yaml.py)
 PyYAML==6.0.3
