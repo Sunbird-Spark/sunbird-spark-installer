@@ -62,6 +62,16 @@ resource "azurerm_storage_account" "storage_account" {
       allowed_headers    = ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Origin", "x-ms-meta-qq", "x-ms-blob-type", "x-ms-blob-content-type", "Content-Type"]
 
     }
+
+    # Added: CSPM "soft delete" findings (blobs + containers) -- recovers accidental/malicious
+    # deletes for var.soft_delete_retention_days; no effect on normal reads/writes.
+    delete_retention_policy {
+      days = var.soft_delete_retention_days
+    }
+
+    container_delete_retention_policy {
+      days = var.soft_delete_retention_days
+    }
   }
   tags = merge(
     local.common_tags,
