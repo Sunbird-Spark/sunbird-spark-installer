@@ -1,0 +1,19 @@
+# List of standalone VMs (not managed by this repo's OpenTofu) that
+# fix-compute-hygiene.sh should apply the CSPM compute-hygiene fixes to.
+#
+# Copy this file, fill in your own VM names + resource groups, and point
+# the script at it with --config. Each VM must already exist -- the script
+# does not create VMs, only fixes settings on existing ones.
+
+# false (default) = dry run, only prints what would change. Set to true once
+# you've reviewed a dry run and are ready to actually apply the fixes.
+# Can still be overridden per-run with --apply or --dry-run on the command line.
+apply: false
+
+vms:
+  - name: REPLACE_WITH_VM_NAME       # e.g. coss-jenkins
+    resource_group: REPLACE_WITH_RESOURCE_GROUP   # e.g. ed-coss
+  - name: REPLACE_WITH_VM_NAME
+    resource_group: REPLACE_WITH_RESOURCE_GROUP
+  # - name:
+  #   resource_group: 
