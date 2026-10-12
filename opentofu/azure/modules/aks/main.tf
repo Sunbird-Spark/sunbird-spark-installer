@@ -65,8 +65,46 @@ provider "azurerm" {
     principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
     scope                = var.vnet_subnet_id
     role_definition_name = "Network Contributor"
-    
+
     depends_on = [azurerm_kubernetes_cluster.aks]
+  }
+
+  # Added: CSPM "Kubernetes clusters should have logging enabled" -- destination for the
+  # control-plane audit logs below; doesn't touch app/ingress traffic.
+  resource "azurerm_log_analytics_workspace" "aks_logs" {
+    name                = "${local.environment_name}-logs"
+    location            = var.location
+    resource_group_name = var.resource_group_name
+    sku                 = "PerGB2018"
+    retention_in_days   = var.log_retention_days
+    tags = merge(
+        local.common_tags,
+        var.additional_tags
+        )
+  }
+
+  # Added: routes AKS API-server audit logs to the workspace above -- satisfies the CSPM
+  # logging finding; purely additive visibility, no effect on cluster/app behaviour.
+  resource "azurerm_monitor_diagnostic_setting" "aks_diagnostics" {
+    name                       = "${local.environment_name}-diagnostics"
+    target_resource_id         = azurerm_kubernetes_cluster.aks.id
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_logs.id
+
+    enabled_log {
+      category = "kube-audit"
+    }
+
+    enabled_log {
+      category = "kube-audit-admin"
+    }
+
+    enabled_log {
+      category = "guard"
+    }
+
+    enabled_metric {
+      category = "AllMetrics"
+    }
   }
 
   # resource "azurerm_kubernetes_cluster_node_pool" "small_nodepool" {
