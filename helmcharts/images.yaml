@@ -113,11 +113,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.1.1-svf3_211b106"
+    tag: "spark-v1.1.1-svf4_465a91e"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.1.1-svf3_211b106"
+    tag: "spark-v1.1.1-svf4_465a91e"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
