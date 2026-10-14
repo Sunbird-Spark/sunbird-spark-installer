@@ -17,6 +17,10 @@ spec:
       restartPolicy: Never
       # No kubectl/K8s-API calls in this job -- pure YSQL setup.
       automountServiceAccountToken: false
+      {{- if include "sunbird.yugabyteTLS" . }}
+      volumes:
+        {{- include "sunbird.yugabyteCAVolume" . | nindent 8 }}
+      {{- end }}
       initContainers:
       - name: wait-for-yugabyte-postgres
         image: "{{ .Values.job_wait_image.registry }}/{{ .Values.job_wait_image.repository }}:{{ .Values.job_wait_image.tag }}"
@@ -46,6 +50,10 @@ spec:
         command: ['bash', '-c']
         securityContext:
           runAsUser: 0
+        {{- if include "sunbird.yugabyteTLS" . }}
+        volumeMounts:
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
+        {{- end }}
         args:
         - |
             set -e
@@ -54,6 +62,10 @@ spec:
             export PGPORT={{(include "sunbird.yugabyte" (list $ "postgresql_port"))}}
             export PGUSER={{ (include "sunbird.yugabyte" (list $ "username")) | default "yugabyte" }}
             export PGPASSWORD={{ (include "sunbird.yugabyte" (list $ "password")) | default "yugabyte" }}
+            {{- if include "sunbird.yugabyteTLS" . }}
+            export PGSSLMODE={{ include "sunbird.yugabyteSSLMode" . }}
+            export PGSSLROOTCERT={{ include "sunbird.yugabyteCAFile" . }}
+            {{- end }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             # Ensure ysqlsh is available in the image

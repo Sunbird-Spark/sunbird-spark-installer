@@ -20,6 +20,7 @@ spec:
       volumes:
       - name: shared-volume
         emptyDir: {}
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}
       initContainers:
       - name: wait-for-yugabyte
         image: busybox
@@ -58,6 +59,12 @@ spec:
           export YCQLSH_PORT={{ (include "sunbird.yugabyte" (list $ "port")) }}
           export YCQLSH_USERNAME="{{ (include "sunbird.yugabyte" (list $ "username")) | default "yugabyte" }}"
           export YCQLSH_PASSWORD="{{ (include "sunbird.yugabyte" (list $ "password")) | default "yugabyte" }}"
+          {{- if include "sunbird.yugabyteTLS" . }}
+          export SSL_CERTFILE={{ include "sunbird.yugabyteCAFile" . }}
+          export SSL_VALIDATE=true
+          mkdir -p "$HOME/.cassandra"
+          printf '[connection]\nssl = true\n\n[ssl]\ncertfile = %s\nvalidate = true\n' "$SSL_CERTFILE" > "$HOME/.cassandra/cqlshrc"
+          {{- end }}
           # run migrations directly from embedded scripts
           cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern
           chmod +x execute_migrations.sh || true
@@ -79,4 +86,5 @@ spec:
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
+        {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 8 }}
   backoffLimit: 30

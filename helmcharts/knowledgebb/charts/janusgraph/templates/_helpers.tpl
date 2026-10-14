@@ -222,6 +222,8 @@ Returns the hostname of the configured storage backend
 {{- define "janusgraph.storage.hostname" -}}
 {{- if .Values.storageBackend.cassandra.enabled -}}
 {{- include "common.names.dependency.fullname" (dict "chartName" "cassandra" "chartValues" .Values.cassandra "context" $) -}}
+{{- else if include "sunbird.yugabyteManaged" . -}}
+{{- include "sunbird.yugabyte" (list . "host") -}}
 {{- else if .Values.storageBackend.external.hostname -}}
 {{- print .Values.storageBackend.external.hostname -}}
 {{- end -}}
@@ -233,9 +235,61 @@ Returns the port of the configured storage backend
 {{- define "janusgraph.storage.port" -}}
 {{- if .Values.storageBackend.cassandra.enabled }}
 {{- printf "%d" (int .Values.cassandra.service.ports.cql) -}}
+{{- else if include "sunbird.yugabyteManaged" . -}}
+{{- printf "%d" (int (include "sunbird.yugabyte" (list . "port"))) -}}
 {{- else if .Values.storageBackend.external.port -}}
 {{- printf "%d" (int .Values.storageBackend.external.port) -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+Managed YugabyteDB with TLS: JanusGraph's CQL driver needs a Java truststore,
+so an init container builds one from the mounted root.crt into an emptyDir.
+*/}}
+{{- define "janusgraph.yugabyteTruststore.initContainer" -}}
+{{- if include "sunbird.yugabyteTLS" . }}
+- name: yugabyte-truststore
+  image: {{ include "janusgraph.image" . }}
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  command: ["/bin/bash", "-c"]
+  args:
+    - |
+      set -e
+      rm -f /yugabyte-truststore/truststore.jks
+      /opt/bitnami/java/bin/keytool -importcert -noprompt -alias yugabyte -file {{ include "sunbird.yugabyteCAFile" . }} -keystore /yugabyte-truststore/truststore.jks -storetype JKS -storepass changeit
+  volumeMounts:
+    {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 4 }}
+    - name: yugabyte-truststore
+      mountPath: /yugabyte-truststore
+{{- end }}
+{{- end -}}
+
+{{- define "janusgraph.yugabyteTruststore.volumeMount" -}}
+{{- if include "sunbird.yugabyteTLS" . }}
+- name: yugabyte-truststore
+  mountPath: /opt/bitnami/janusgraph/yugabyte-truststore
+  readOnly: true
+{{- end }}
+{{- end -}}
+
+{{- define "janusgraph.yugabyteTruststore.volumes" -}}
+{{- if include "sunbird.yugabyteTLS" . }}
+{{- include "sunbird.yugabyteCAVolume" . }}
+- name: yugabyte-truststore
+  emptyDir: {}
+{{- end }}
+{{- end -}}
+
+{{- define "janusgraph.yugabyteManaged.properties" -}}
+{{- if include "sunbird.yugabyteManaged" . }}
+storage.username={{ include "sunbird.yugabyte" (list . "username") }}
+storage.password={{ include "sunbird.yugabyte" (list . "password") }}
+{{- end }}
+{{- if include "sunbird.yugabyteTLS" . }}
+storage.cql.ssl.enabled=true
+storage.cql.ssl.truststore.location=/opt/bitnami/janusgraph/yugabyte-truststore/truststore.jks
+storage.cql.ssl.truststore.password=changeit
+{{- end }}
 {{- end -}}
 
 {{/*

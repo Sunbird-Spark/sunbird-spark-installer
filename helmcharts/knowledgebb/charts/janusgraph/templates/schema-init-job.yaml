@@ -47,6 +47,7 @@ spec:
           volumeMounts:
             - name: etc-passwd
               mountPath: /etc
+        {{- include "janusgraph.yugabyteTruststore.initContainer" . | nindent 8 }}
       containers:
         - name: schema-init
           image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -86,6 +87,7 @@ spec:
               mountPath: /etc
             - name: tmp
               mountPath: /tmp
+            {{- include "janusgraph.yugabyteTruststore.volumeMount" . | nindent 12 }}
           env:
             - name: JANUSGRAPH_HOST
               value: {{ include "common.names.fullname" . }}
@@ -116,5 +118,6 @@ spec:
           emptyDir: {}
         - name: tmp
           emptyDir: {}
+        {{- include "janusgraph.yugabyteTruststore.volumes" . | nindent 8 }}
 {{- end }}
 

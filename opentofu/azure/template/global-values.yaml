@@ -115,6 +115,7 @@ global:
     postgresql_port: 5433        # YSQL
     username: ""                 # managed cluster user (YSQL and YCQL)
     password: ""
+    ca_cert: ""                  # managed cluster CA (root.crt from the Aeon console, Connect -> Download CA Cert); when set, services connect over TLS. Paste as a block: ca_cert: |
   yugabyte:
     ysql:
       user: "yugabyte"  

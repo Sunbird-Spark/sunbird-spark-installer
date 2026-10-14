@@ -95,6 +95,12 @@ spec:
               value: {{ (include "sunbird.yugabyte" (list $ "username")) }}
             - name: KONG_PG_SSL
               value: {{ .Values.kong_pg_ssl | quote }}
+            {{- if include "sunbird.yugabyteTLS" . }}
+            - name: KONG_PG_SSL_VERIFY
+              value: "on"
+            - name: KONG_LUA_SSL_TRUSTED_CERTIFICATE
+              value: "system,{{ include "sunbird.yugabyteCAFile" . }}"
+            {{- end }}
             - name: KONG_PROXY_ACCESS_LOG
               value: "/dev/stdout"
             - name: KONG_ADMIN_ACCESS_LOG
@@ -103,5 +109,13 @@ spec:
               value: "/dev/stdout"
             - name: KONG_ADMIN_ERROR_LOG
               value: "/dev/stdout"
+          {{- if include "sunbird.yugabyteTLS" . }}
+          volumeMounts:
+            {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 12 }}
+          {{- end }}
+      {{- if include "sunbird.yugabyteTLS" . }}
+      volumes:
+        {{- include "sunbird.yugabyteCAVolume" . | nindent 8 }}
+      {{- end }}
       restartPolicy: Never
   backoffLimit: 30
