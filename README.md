@@ -138,6 +138,12 @@ The installer has been verified with:
 
 4. To enable DIAL addon integration, set `deployed_dial_addon: true` in `global-values.yaml`.
 
+    To use Apache Cassandra + PostgreSQL instead of YugabyteDB, set `global.use_cassandra_postgres: true` in `global-values.yaml` before the first install. `install.sh` then deploys Cassandra 5 and PostgreSQL 18 in `edbb` (instead of YugabyteDB), runs the Cassandra/Postgres versions of the schema migrations, and disables `yugabyte-backup`. Leave it `false` (the default) for YugabyteDB. Pick one per environment; switching an existing environment does not move data.
+
+    To use a managed YugabyteDB (Aeon) instead of the in-cluster one, set `global.yugabyte_managed.enabled: true` with the managed `host`, ports, user and password under `global.yugabyte_managed`. Every service then connects to the managed cluster, and `install.sh` stops deploying the in-cluster YugabyteDB and `yugabyte-backup`. See [migration/YUGABYTE-TO-MANAGED.md](migration/YUGABYTE-TO-MANAGED.md).
+
+    The Cassandra/Postgres path keeps its own copies of two sets of definitions, so changes to the YugabyteDB versions must be mirrored: CQL schemas in `scripts/sunbird-cassandra-migrations/` (mirror of `scripts/sunbird-yugabyte-migrations/`) and lern report definitions in `helmcharts/learnbb/files/lern-reports/standard_reports_meta.sql` (mirror of `scripts/sunbird-yugabyte-migrations/sunbird-lern/reports/`, with `ALLOW FILTERING` on the CQL queries, which Cassandra requires).
+
 5. To enable asset enrichment, deploy the addon then flip the flag and redeploy knowledgebb:
     ```bash
     # Step 1 — deploy the Flink job

@@ -30,10 +30,14 @@ spec:
             memory: 64Mi
         command: ['sh', '-c']
         args:
-        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'"
+        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ include "sunbird.postgresHost" $ }} {{ include "sunbird.postgresPort" $ }}; do echo waiting for postgres; sleep 10; done'"
       containers:
       - name: migration
+        {{- if .Values.global.use_cassandra_postgres }}
+        image: "{{ .Values.global.postgresql.image.registry }}/{{ .Values.global.postgresql.image.repository }}:{{ .Values.global.postgresql.image.tag }}"
+        {{- else }}
         image: "{{ .Values.yugabyte_migration_image.registry }}/{{ .Values.yugabyte_migration_image.repository }}:{{ .Values.yugabyte_migration_image.tag }}"
+        {{- end }}
         imagePullPolicy: IfNotPresent
         resources:
           requests:
@@ -50,10 +54,13 @@ spec:
         - |
             set -e
             export devops_branch={{ .Values.devops_release_branch }}
-            export PGHOST={{.Values.global.yugabyte.host}}
-            export PGPORT={{.Values.global.yugabyte.postgresql_port}}
-            export PGUSER=yugabyte
-            export PGPASSWORD=yugabyte
+            export PGHOST={{ include "sunbird.postgresHost" $ }}
+            export PGPORT={{ include "sunbird.postgresPort" $ }}
+            export PGUSER={{ include "sunbird.postgresUsername" $ }}
+            export PGPASSWORD={{ include "sunbird.postgresPassword" $ }}
+            {{- if .Values.global.use_cassandra_postgres }}
+            {{- include "sunbird.ysqlshShim" . | nindent 12 }}
+            {{- end }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             # Ensure ysqlsh is available in the image

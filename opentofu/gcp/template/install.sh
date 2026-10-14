@@ -62,21 +62,42 @@ function certificate_keys() {
 }
 
 function certificate_config() {
-    # Check if jq is available in the kn container, install only if missing
     echo "Configuring Certificate keys"
-    if ! kubectl -n sunbird exec deploy/knowledge-mw -- which jq >/dev/null 2>&1; then
-        echo "jq not found in knowledge-mw container, attempting to install..."
-        # Try to install jq using available package manager, fallback if apt fails
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get update || true"
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get install -y jq || true"
-    fi
-
-    CERTKEY=$(kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
-    # Inject cert keys to the service if its not available 
+    local registry_api="/api/v1/namespaces/sunbird/services/registry-service:8081/proxy/api/v1"
+    local body_file
+    body_file=$(mktemp)
+    echo '{ "filters": {}}' > "$body_file"
+    CERTKEY=$(kubectl create --raw "$registry_api/PublicKey/search" -f "$body_file" | jq '.[] | .value')
+    # Inject cert keys to the service if its not available
     if [ -z "$CERTKEY" ]; then
         echo "Certificate RSA public key not available"
         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
+        printf '{"value":"%s"}' "$CERTPUBKEY" > "$body_file"
+        kubectl create --raw "$registry_api/PublicKey" -f "$body_file"
+    fi
+    rm -f "$body_file"
+}
+
+function db_backend_flags() {
+    local component="$1"
+    local use_cassandra_postgres
+    use_cassandra_postgres="$(yq '.global.use_cassandra_postgres // false' "../opentofu/gcp/$environment/global-values.yaml")"
+    local yugabyte_managed="false"
+    if [ "$(yq '.global.yugabyte_managed.enabled' "../opentofu/gcp/$environment/global-values.yaml")" = "true" ]; then
+        yugabyte_managed="true"
+    fi
+    if [ "$component" = "edbb" ]; then
+        if [ "$use_cassandra_postgres" = "true" ]; then
+            echo "--set yugabyte.enabled=false --set cassandra.enabled=true --set postgresql.enabled=true"
+        else
+            local yugabyte_enabled="true"
+            if [ "$yugabyte_managed" = "true" ] || [ "$(yq '.yugabyte.enabled' "../opentofu/gcp/$environment/global-values.yaml")" = "false" ]; then
+                yugabyte_enabled="false"
+            fi
+            echo "--set yugabyte.enabled=$yugabyte_enabled --set cassandra.enabled=false --set postgresql.enabled=false"
+        fi
+    elif [ "$component" = "additional" ] && { [ "$use_cassandra_postgres" = "true" ] || [ "$yugabyte_managed" = "true" ]; }; then
+        echo "--set yugabyte-backup.enabled=false"
     fi
 }
 
@@ -117,12 +138,16 @@ function install_component() {
         fi
     fi
 
+    local db_flags
+    db_flags="$(db_backend_flags "$component")"
+
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
         $ed_values_flag \
         $addon_values_flag \
         -f "global-resources.yaml" \
         -f "../opentofu/gcp/$environment/global-values.yaml" \
-        -f "../opentofu/gcp/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/gcp/$environment/global-cloud-values.yaml" \
+        $db_flags --timeout 30m --debug
 }
 
 function install_service() {
@@ -157,6 +182,9 @@ function install_service() {
         fi
     fi
 
+    local db_flags
+    db_flags="$(db_backend_flags "$bundle")"
+
     if helm status "$bundle" --namespace sunbird &>/dev/null; then
         # Phase B: Release exists — reuse previous values, enable all target charts
         echo -e "\nRelease '$bundle' exists — upgrading '${target_charts[*]}' (Phase B)"
@@ -171,6 +199,7 @@ function install_service() {
             --namespace sunbird \
             --reuse-values \
             $set_flags \
+            $db_flags \
             $ed_values_flag \
             $addon_values_flag \
             -f "global-resources.yaml" \
@@ -203,6 +232,7 @@ function install_service() {
             -f "../opentofu/gcp/$environment/global-values.yaml" \
             -f "../opentofu/gcp/$environment/global-cloud-values.yaml" \
             $set_flags \
+            $db_flags \
             --timeout 30m \
             --debug
     fi

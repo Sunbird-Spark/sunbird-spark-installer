@@ -269,7 +269,7 @@ supersetNode:
   # -- Init containers
   # @default -- a container waiting for postgres
   initContainers:
-    - name: wait-for-yugabytepostgres
+    - name: wait-for-postgres
       image: "{{ .Values.initImage.repository }}:{{ .Values.initImage.tag }}"
       imagePullPolicy: "{{ .Values.initImage.pullPolicy }}"
       envFrom:

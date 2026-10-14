@@ -9,11 +9,6 @@ knowlg:
   enabled: true
   opa_enabled: true
 
-job_cleaner_kubectl_image:
-  registry: "sunbirded.azurecr.io"
-  repository: "kubectl"
-  tag: "1.28.4"
-
 provisioningAnnotations: &provisioningAnnotations
   "helm.sh/hook-weight": "-4"
 
@@ -32,7 +27,8 @@ opensearch: &opensearch
       value: ""
   config:
     opensearch.yml: |
-      plugins.security.disabled: true
+      plugins.security.disabled: t
+      rue
       search.insights.top_queries.latency.enabled: false
       search.insights.top_queries.cpu.enabled: false
       search.insights.top_queries.memory.enabled: false
@@ -202,7 +198,48 @@ yugabyte: &yugabyte
     master: 3
     tserver: 3   
   username: yugabyte
-  password: "yugabyte"    
+  password: "yugabyte"
+
+# Which database backend is actually in use -- see edbb/values.yaml for the
+# full explanation. The real cassandra/postgresql instance lives in edbb
+# (mirrors how yugabyte's own StatefulSets live there today); this bundle
+# declares the same two subcharts too (so it could be deployed standalone),
+# but leaves them disabled since edbb already provides the shared instance.
+use_cassandra_postgres: &use_cassandra_postgres false
+
+cassandra: &cassandra
+  enabled: false
+  nameOverride: "cassandra"
+  fullnameOverride: "cassandra"
+  host: "cassandra"
+  port: 9042
+  image:
+    registry: docker.io
+    repository: cassandra
+    tag: 5.0.9-bookworm
+  persistence:
+    size: 25Gi
+  extraEnvVars:
+    - name: CASSANDRA_AUTHENTICATOR
+      value: AllowAllAuthenticator
+    - name: CASSANDRA_AUTHORIZER
+      value: AllowAllAuthorizer
+  commonAnnotations:
+    "helm.sh/hook-weight": "-5"
+
+postgresql: &postgresql
+  enabled: false
+  fullnameOverride: "postgresql"
+  host: "postgresql"
+  port: 5432
+  postgresqlUsername: postgres
+  postgresqlPassword: postgres
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: 18.6-bookworm
+  persistence:
+    size: 25Gi
 
 yugabytecql:
   image:
@@ -239,4 +276,7 @@ global:
   redis: *redis
   schema: *schema
   yugabyte: *yugabyte
+  cassandra: *cassandra
+  postgresql: *postgresql
+  use_cassandra_postgres: *use_cassandra_postgres
   dialservice: *dialservice

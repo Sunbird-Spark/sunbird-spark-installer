@@ -38,6 +38,14 @@ dependencies:
     repository: https://charts.yugabyte.com
     version: 2025.2.0   # Chart version
     condition: yugabyte.enabled
+  - name: cassandra
+    repository: https://charts.bitnami.com/bitnami
+    version: 10.1.0
+    condition: cassandra.enabled
+  - name: postgresql
+    repository: https://charts.bitnami.com/bitnami
+    version: 10.16.3
+    condition: postgresql.enabled
   - name: router
     version: 0.1.0
     condition: router.enabled

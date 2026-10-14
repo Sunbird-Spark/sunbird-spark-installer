@@ -29,16 +29,16 @@ QUERY_LMS_USER="SELECT id FROM user_entity WHERE realm_id = 'sunbird' AND userna
 
 # Function to execute query
 execute_query() {
-    ysqlsh -h "$YUGABYTE_HOST" -p "$YUGABYTE_PORT" -d "$YUGABYTE_DB" -U "$YUGABYTE_USER" -t -A -c "$1"
+    psql -h "$YUGABYTE_HOST" -p "$YUGABYTE_PORT" -d "$YUGABYTE_DB" -U "$YUGABYTE_USER" -t -A -c "$1"
 }
 
-# Function to check if YugabyteDB is reachable
+# Function to check if PostgreSQL is reachable
 wait_for_yugabyte() {
-    until ysqlsh -h "$YUGABYTE_HOST" -p "$YUGABYTE_PORT" -U "$YUGABYTE_USER" -c '\q' 2>/dev/null; do
-        echo "Waiting for YugabyteDB to become reachable..."
+    until psql -h "$YUGABYTE_HOST" -p "$YUGABYTE_PORT" -U "$YUGABYTE_USER" -c '\q' 2>/dev/null; do
+        echo "Waiting for PostgreSQL to become reachable..."
         sleep 5
     done
-    echo "YugabyteDB is now reachable."
+    echo "PostgreSQL is now reachable."
 }
 
 # Function to check if Keycloak is reachable
@@ -50,7 +50,7 @@ wait_for_keycloak() {
     echo "Keycloak is now reachable."
 }
 
-# Wait for YugabyteDB
+# Wait for PostgreSQL
 wait_for_yugabyte
 
 # Wait for Keycloak

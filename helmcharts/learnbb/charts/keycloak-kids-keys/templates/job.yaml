@@ -20,6 +20,7 @@ spec:
           args:
           - |
             sleep 30
+            export PGPASSWORD="${YUGABYTE_PASSWORD}"
             /usr/local/bin/execute_query.sh
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}

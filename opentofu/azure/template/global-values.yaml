@@ -102,6 +102,14 @@ global:
         adminUser:
           username: admin
           password: *superset-admin-password  
+  use_cassandra_postgres: false  # true = Cassandra + PostgreSQL; false = YugabyteDB
+  yugabyte_managed:              # managed YugabyteDB (Aeon) instead of the in-cluster one; see migration/YUGABYTE-TO-MANAGED.md
+    enabled: false               # true = every service connects to the managed cluster below; the in-cluster YugabyteDB is not deployed
+    host: ""                     # Aeon private service endpoint host, e.g. pse-centralindia.<cluster-id>.azure.yugabyte.cloud
+    port: 9042                   # YCQL
+    postgresql_port: 5433        # YSQL
+    username: ""                 # Aeon admin user (YSQL and YCQL)
+    password: ""
   yugabyte:
     ysql:
       user: "yugabyte"  
