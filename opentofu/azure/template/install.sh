@@ -42,44 +42,77 @@ function create_tf_resources() {
 
 
 function certificate_keys() {
+    # Path to the env folder depends on where this was called from:
+    # install_component() cd's into helmcharts/ first (so ../opentofu/azure/$environment
+    # resolves correctly from there), but this function is also invoked directly as
+    # `bash install.sh certificate_keys` with CWD already at the env folder itself --
+    # in that case ../opentofu/azure/$environment would double up and not exist.
+    local keys_dir
+    if [ "$(basename "$(pwd)")" = "helmcharts" ]; then
+        keys_dir="../opentofu/azure/$environment"
+    else
+        keys_dir="."
+    fi
+
     #  # If keys already present in global-values.yaml → skip writing
-    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/azure/$environment/global-values.yaml 2>/dev/null; then
+    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' "$keys_dir/global-values.yaml" 2>/dev/null; then
         echo "Certificate keys already present — skipping generation and write."
         return
     fi
     # Generate private and public keys using openssl
     echo "Creation of RSA keys for certificate signing"
-    openssl genrsa -out ../opentofu/azure/$environment/certkey.pem;
-    openssl rsa -in ../opentofu/azure/$environment/certkey.pem -pubout -out ../opentofu/azure/$environment/certpubkey.pem;
-    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/azure/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/azure/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../opentofu/azure/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
-    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../opentofu/azure/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
-    printf "\n" >> ../opentofu/azure/$environment/global-values.yaml
-    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> ../opentofu/azure/$environment/global-values.yaml
-    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> ../opentofu/azure/$environment/global-values.yaml
-    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> ../opentofu/azure/$environment/global-values.yaml
-    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> ../opentofu/azure/$environment/global-values.yaml
+    openssl genrsa -out "$keys_dir/certkey.pem";
+    openssl rsa -in "$keys_dir/certkey.pem" -pubout -out "$keys_dir/certpubkey.pem";
+    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' "$keys_dir/certkey.pem" | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' "$keys_dir/certpubkey.pem" | sed 's/-----END/\\n-----END/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' "$keys_dir/certkey.pem" | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk '{printf("%s",$0)}')
+    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' "$keys_dir/certpubkey.pem" | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk '{printf("%s",$0)}')
+    printf "\n" >> "$keys_dir/global-values.yaml"
+    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> "$keys_dir/global-values.yaml"
+    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> "$keys_dir/global-values.yaml"
+    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> "$keys_dir/global-values.yaml"
+    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> "$keys_dir/global-values.yaml"
 }
 
 
 function certificate_config() {
     echo "Configuring Certificate keys"
-    if ! kubectl -n sunbird exec deploy/knowledge-mw -- which jq >/dev/null 2>&1; then
-        echo "jq not found in knowledge-mw container, attempting to install..."
-        # Try to install jq using available package manager, fallback if apt fails
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get update || true"
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get install -y jq || true"
-    fi
+    # registry-service is only reachable inside the cluster. knowledge-mw's image
+    # is distroless (no shell, no curl, no jq at all -- exec'ing into it to run
+    # those tools doesn't work), so port-forward to it from here instead, where
+    # curl/jq are guaranteed to exist (installed by setup-installer-vm.sh).
+    kubectl -n sunbird port-forward svc/registry-service 18081:8081 >/tmp/registry-port-forward.log 2>&1 &
+    local pf_pid=$!
+    trap 'kill $pf_pid 2>/dev/null || true' RETURN
 
-    CERTKEY=$(kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
-    # Inject cert keys to the service if its not available 
+    local retries=0
+    until curl -s -o /dev/null "http://localhost:18081/health" || [ $retries -ge 15 ]; do
+        sleep 1
+        retries=$((retries + 1))
+    done
+
+    CERTKEY=$(curl --location --request POST 'http://localhost:18081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
+    # Inject cert keys to the service if its not available
     if [ -z "$CERTKEY" ]; then
         echo "Certificate RSA public key not available"
         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
+        curl --location --request POST 'http://localhost:18081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
+    fi
+
+    kill $pf_pid 2>/dev/null || true
+}
+function yugabyte_flags() {
+    local component="$1"
+    if [ "$(yq '.global.yugabyte_managed.enabled' "../opentofu/azure/$environment/global-values.yaml")" != "true" ]; then
+        return 0
+    fi
+    if [ "$component" = "edbb" ]; then
+        echo "--set yugabyte.enabled=false"
+    elif [ "$component" = "additional" ]; then
+        echo "--set yugabyte-backup.enabled=false"
     fi
 }
+
 function install_component() {
     # We need a dummy cm for configmap to start. Later Lernbb will create real one
     kubectl create configmap keycloak-key -n sunbird 2>/dev/null || true
@@ -117,13 +150,17 @@ function install_component() {
         fi
     fi
 
+    local yb_flags
+    yb_flags="$(yugabyte_flags "$component")"
+
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
         $ed_values_flag \
         $addon_values_flag \
         -f images.yaml \
         -f "global-resources.yaml" \
         -f "../opentofu/azure/$environment/global-values.yaml" \
-        -f "../opentofu/azure/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
+        $yb_flags --timeout 30m --debug
 }
 
 function install_service() {
@@ -159,6 +196,9 @@ function install_service() {
         fi
     fi
 
+    local yb_flags
+    yb_flags="$(yugabyte_flags "$bundle")"
+
     if helm status "$bundle" --namespace sunbird &>/dev/null; then
         # Phase B: Release exists — reuse previous values, enable all target charts
         echo -e "\nRelease '$bundle' exists — upgrading '${target_charts[*]}' (Phase B)"
@@ -173,6 +213,7 @@ function install_service() {
             --namespace sunbird \
             --reuse-values \
             $set_flags \
+            $yb_flags \
             $ed_values_flag \
             $addon_values_flag \
             -f images.yaml \
@@ -207,6 +248,7 @@ function install_service() {
             -f "../opentofu/azure/$environment/global-values.yaml" \
             -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
             $set_flags \
+            $yb_flags \
             --timeout 30m \
             --debug
     fi

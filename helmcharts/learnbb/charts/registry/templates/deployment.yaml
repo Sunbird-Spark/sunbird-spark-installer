@@ -74,6 +74,7 @@ spec:
           - name: config
             mountPath: {{ .Values.configmap.mountPath }}
           {{- end }}
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
 {{- if .Values.opa_enabled }}
         - args:
           - envoy
@@ -151,6 +152,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       volumes:
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}
       - name: env
         configMap:
           name: {{ include "common.names.fullname" . }}-env

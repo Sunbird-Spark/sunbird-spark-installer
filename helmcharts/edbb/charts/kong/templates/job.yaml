@@ -18,7 +18,7 @@ spec:
           args:
           - |
             timeout 600 sh -c '
-            until nc -z {{.Values.global.yugabyte.host}} {{.Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'
+            until nc -z {{(include "sunbird.yugabyte" (list $ "host"))}} {{(include "sunbird.yugabyte" (list $ "postgresql_port"))}}; do echo waiting for yugabytepostgres; sleep 10; done'
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -86,15 +86,21 @@ spec:
             - name: KONG_PG_DATABASE
               value: {{ .Values.kong_pg_database }}
             - name: KONG_PG_HOST
-              value: {{ .Values.global.yugabyte.host }}
+              value: {{ (include "sunbird.yugabyte" (list $ "host")) }}
             - name: KONG_PG_PORT
-              value: {{ .Values.global.yugabyte.postgresql_port | quote }}
+              value: {{ (include "sunbird.yugabyte" (list $ "postgresql_port")) | quote }}
             - name: KONG_PG_PASSWORD
-              value: {{ .Values.global.yugabyte.password }}
+              value: {{ (include "sunbird.yugabyte" (list $ "password")) }}
             - name: KONG_PG_USER
-              value: {{ .Values.global.yugabyte.username }}
+              value: {{ (include "sunbird.yugabyte" (list $ "username")) }}
             - name: KONG_PG_SSL
               value: {{ .Values.kong_pg_ssl | quote }}
+            {{- if include "sunbird.yugabyteTLS" . }}
+            - name: KONG_PG_SSL_VERIFY
+              value: "on"
+            - name: KONG_LUA_SSL_TRUSTED_CERTIFICATE
+              value: "system,{{ include "sunbird.yugabyteCAFile" . }}"
+            {{- end }}
             - name: KONG_PROXY_ACCESS_LOG
               value: "/dev/stdout"
             - name: KONG_ADMIN_ACCESS_LOG
@@ -103,5 +109,13 @@ spec:
               value: "/dev/stdout"
             - name: KONG_ADMIN_ERROR_LOG
               value: "/dev/stdout"
+          {{- if include "sunbird.yugabyteTLS" . }}
+          volumeMounts:
+            {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 12 }}
+          {{- end }}
+      {{- if include "sunbird.yugabyteTLS" . }}
+      volumes:
+        {{- include "sunbird.yugabyteCAVolume" . | nindent 8 }}
+      {{- end }}
       restartPolicy: Never
   backoffLimit: 30

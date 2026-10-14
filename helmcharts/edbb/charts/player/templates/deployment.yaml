@@ -71,10 +71,12 @@ spec:
           {{- end }}
           - name: keys
             mountPath: /home/sunbird/app_dist/keys/
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
         {{- with .Values.sidecars }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       volumes:
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}
       - name: env
         configMap:
           name: {{ include "common.names.fullname" . }}-env

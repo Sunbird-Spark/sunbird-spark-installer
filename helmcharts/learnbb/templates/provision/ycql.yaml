@@ -20,6 +20,7 @@ spec:
       volumes:
       - name: shared-volume
         emptyDir: {}
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}
       initContainers:
       - name: wait-for-yugabyte
         image: busybox
@@ -33,7 +34,7 @@ spec:
             memory: 64Mi
         command: ["/bin/sh", "-c"]
         args:
-        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z  {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte; sleep 10; done'"
+        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z  {{ (include "sunbird.yugabyte" (list $ "host")) }} {{ (include "sunbird.yugabyte" (list $ "port")) }}; do echo waiting for yugabyte; sleep 10; done'"
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
@@ -54,10 +55,16 @@ spec:
         - |
           set -ex
           export ENV={{ .Values.global.env | default "dev" }}
-          export YCQLSH_HOST={{ .Values.global.yugabyte.host }}
-          export YCQLSH_PORT={{ .Values.global.yugabyte.port }}
-          export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
-          export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
+          export YCQLSH_HOST={{ (include "sunbird.yugabyte" (list $ "host")) }}
+          export YCQLSH_PORT={{ (include "sunbird.yugabyte" (list $ "port")) }}
+          export YCQLSH_USERNAME="{{ (include "sunbird.yugabyte" (list $ "username")) | default "yugabyte" }}"
+          export YCQLSH_PASSWORD="{{ (include "sunbird.yugabyte" (list $ "password")) | default "yugabyte" }}"
+          {{- if include "sunbird.yugabyteTLS" . }}
+          export SSL_CERTFILE={{ include "sunbird.yugabyteCAFile" . }}
+          export SSL_VALIDATE=true
+          mkdir -p "$HOME/.cassandra"
+          printf '[connection]\nssl = true\n\n[ssl]\ncertfile = %s\nvalidate = true\n' "$SSL_CERTFILE" > "$HOME/.cassandra/cqlshrc"
+          {{- end }}
           # run migrations directly from embedded scripts
           cd /opt/migrations/sunbird-yugabyte-migrations/sunbird-lern
           chmod +x execute_migrations.sh || true
@@ -79,4 +86,5 @@ spec:
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
+        {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 8 }}
   backoffLimit: 30

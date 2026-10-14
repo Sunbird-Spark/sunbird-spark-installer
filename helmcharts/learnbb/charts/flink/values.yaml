@@ -74,6 +74,7 @@ serviceAccount:
   create: false
 
 serviceMonitor: &serviceMonitor
+  enabled: true
   jobmanager:
     enabled: true
     interval: 30s
@@ -365,8 +366,8 @@ base_config: |
       enabled = false
     }
     lms-cassandra {
-        host = "{{ .Values.global.yugabyte.host }}"
-        port = "{{ .Values.global.yugabyte.port }}"
+        host = "{{ (include "sunbird.yugabyte" (list $ "host")) }}"
+        port = "{{ (include "sunbird.yugabyte" (list $ "port")) }}"
         isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
     }
     es {
@@ -379,8 +380,8 @@ base_config: |
       }
     }
     ml-cassandra {
-      host = "{{ .Values.global.yugabyte.host }}"
-      port = "{{ .Values.global.yugabyte.port }}"
+      host = "{{ (include "sunbird.yugabyte" (list $ "host")) }}"
+      port = "{{ (include "sunbird.yugabyte" (list $ "port")) }}"
       isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
     }
     ml-mongo {

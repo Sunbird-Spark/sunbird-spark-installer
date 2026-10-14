@@ -171,15 +171,15 @@ base_config: |
     }
   }
   lms-cassandra {
-    host = "{{ .Values.global.yugabyte.host }}"
-    port = "{{ .Values.global.yugabyte.port }}"
+    host = "{{ (include "sunbird.yugabyte" (list $ "host")) }}"
+    port = "{{ (include "sunbird.yugabyte" (list $ "port")) }}"
   }
   janusgraph {
     host = "{{ .Values.global.janusgraph.host }}"
     port = "{{ .Values.global.janusgraph.port }}"
     storage.backend = "cql"
-    storage.host = "{{ .Values.global.yugabyte.host }}"
-    storage.port = "{{ .Values.global.yugabyte.port }}"
+    storage.host = "{{ (include "sunbird.yugabyte" (list $ "host")) }}"
+    storage.port = "{{ (include "sunbird.yugabyte" (list $ "port")) }}"
     graph = "domain"
     storage.cql.read-consistency-level = "ONE"
     storage.cql.write-consistency-level = "ONE"
