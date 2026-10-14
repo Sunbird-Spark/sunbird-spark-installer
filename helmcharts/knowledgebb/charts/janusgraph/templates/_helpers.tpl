@@ -222,7 +222,7 @@ Returns the hostname of the configured storage backend
 {{- define "janusgraph.storage.hostname" -}}
 {{- if .Values.storageBackend.cassandra.enabled -}}
 {{- include "common.names.dependency.fullname" (dict "chartName" "cassandra" "chartValues" .Values.cassandra "context" $) -}}
-{{- else if .Values.global.use_cassandra_postgres -}}
+{{- else if or .Values.global.use_cassandra_postgres (include "sunbird.yugabyteManaged" .) -}}
 {{- include "sunbird.cassandraHost" $ -}}
 {{- else if .Values.storageBackend.external.hostname -}}
 {{- print .Values.storageBackend.external.hostname -}}
@@ -235,7 +235,7 @@ Returns the port of the configured storage backend
 {{- define "janusgraph.storage.port" -}}
 {{- if .Values.storageBackend.cassandra.enabled }}
 {{- printf "%d" (int .Values.cassandra.service.ports.cql) -}}
-{{- else if .Values.global.use_cassandra_postgres -}}
+{{- else if or .Values.global.use_cassandra_postgres (include "sunbird.yugabyteManaged" .) -}}
 {{- include "sunbird.cassandraPort" $ -}}
 {{- else if .Values.storageBackend.external.port -}}
 {{- printf "%d" (int .Values.storageBackend.external.port) -}}

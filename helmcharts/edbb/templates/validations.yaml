@@ -30,3 +30,21 @@ umbrella chart ends up with no database backend actually running at all.
 {{- fail "global.use_cassandra_postgres is true but yugabyte.enabled is still true -- both database backends would be deployed at once. Set yugabyte.enabled: false." }}
 {{- end }}
 {{- end }}
+
+{{- /*
+global.yugabyte_managed.enabled points every consumer at a managed
+YugabyteDB (Aeon) instead of the in-cluster one. It needs the managed host,
+can't be combined with use_cassandra_postgres, and the in-cluster
+YugabyteDB must be off (install.sh sets yugabyte.enabled=false for it).
+*/}}
+{{- if include "sunbird.yugabyteManaged" . }}
+{{- if .Values.global.use_cassandra_postgres }}
+{{- fail "global.yugabyte_managed.enabled and global.use_cassandra_postgres are both true. Choose one database backend." }}
+{{- end }}
+{{- if not .Values.global.yugabyte_managed.host }}
+{{- fail "global.yugabyte_managed.enabled is true but global.yugabyte_managed.host is empty. Set it to the managed cluster's host (the Aeon private service endpoint host)." }}
+{{- end }}
+{{- if .Values.yugabyte.enabled }}
+{{- fail "global.yugabyte_managed.enabled is true but yugabyte.enabled is still true -- the in-cluster YugabyteDB would be deployed too. Set yugabyte.enabled: false (install.sh does this automatically)." }}
+{{- end }}
+{{- end }}

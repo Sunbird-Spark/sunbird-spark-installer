@@ -60,10 +60,12 @@ spec:
           export ENV={{ .Values.global.env | default "dev" }}
           export YCQLSH_HOST={{ include "sunbird.cassandraHost" $ }}
           export YCQLSH_PORT={{ include "sunbird.cassandraPort" $ }}
-          export YCQLSH_USERNAME="${YCQLSH_USERNAME:-yugabyte}"
-          export YCQLSH_PASSWORD="${YCQLSH_PASSWORD:-yugabyte}"
+          export YCQLSH_USERNAME="{{ include "sunbird.cassandraUsername" $ }}"
+          export YCQLSH_PASSWORD="{{ include "sunbird.cassandraPassword" $ }}"
           export CQLSH_HOST=$YCQLSH_HOST
           export CQLSH_PORT=$YCQLSH_PORT
+          export CQLSH_USERNAME=$YCQLSH_USERNAME
+          export CQLSH_PASSWORD=$YCQLSH_PASSWORD
           {{- if .Values.global.use_cassandra_postgres }}
           MIGRATIONS_DIR=/opt/migrations/sunbird-cassandra-migrations
           CQL_CLIENT="cqlsh --request-timeout=120"

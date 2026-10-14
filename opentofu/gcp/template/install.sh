@@ -82,13 +82,21 @@ function db_backend_flags() {
     local component="$1"
     local use_cassandra_postgres
     use_cassandra_postgres="$(yq '.global.use_cassandra_postgres // false' "../opentofu/gcp/$environment/global-values.yaml")"
+    local yugabyte_managed="false"
+    if [ "$(yq '.global.yugabyte_managed.enabled' "../opentofu/gcp/$environment/global-values.yaml")" = "true" ]; then
+        yugabyte_managed="true"
+    fi
     if [ "$component" = "edbb" ]; then
         if [ "$use_cassandra_postgres" = "true" ]; then
             echo "--set yugabyte.enabled=false --set cassandra.enabled=true --set postgresql.enabled=true"
         else
-            echo "--set yugabyte.enabled=true --set cassandra.enabled=false --set postgresql.enabled=false"
+            local yugabyte_enabled="true"
+            if [ "$yugabyte_managed" = "true" ] || [ "$(yq '.yugabyte.enabled' "../opentofu/gcp/$environment/global-values.yaml")" = "false" ]; then
+                yugabyte_enabled="false"
+            fi
+            echo "--set yugabyte.enabled=$yugabyte_enabled --set cassandra.enabled=false --set postgresql.enabled=false"
         fi
-    elif [ "$component" = "additional" ] && [ "$use_cassandra_postgres" = "true" ]; then
+    elif [ "$component" = "additional" ] && { [ "$use_cassandra_postgres" = "true" ] || [ "$yugabyte_managed" = "true" ]; }; then
         echo "--set yugabyte-backup.enabled=false"
     fi
 }
