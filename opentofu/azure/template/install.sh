@@ -101,6 +101,18 @@ function certificate_config() {
 
     kill $pf_pid 2>/dev/null || true
 }
+function yugabyte_flags() {
+    local component="$1"
+    if [ "$(yq '.global.yugabyte_managed.enabled' "../opentofu/azure/$environment/global-values.yaml")" != "true" ]; then
+        return 0
+    fi
+    if [ "$component" = "edbb" ]; then
+        echo "--set yugabyte.enabled=false"
+    elif [ "$component" = "additional" ]; then
+        echo "--set yugabyte-backup.enabled=false"
+    fi
+}
+
 function install_component() {
     # We need a dummy cm for configmap to start. Later Lernbb will create real one
     kubectl create configmap keycloak-key -n sunbird 2>/dev/null || true
@@ -138,13 +150,17 @@ function install_component() {
         fi
     fi
 
+    local yb_flags
+    yb_flags="$(yugabyte_flags "$component")"
+
     helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
         $ed_values_flag \
         $addon_values_flag \
         -f images.yaml \
         -f "global-resources.yaml" \
         -f "../opentofu/azure/$environment/global-values.yaml" \
-        -f "../opentofu/azure/$environment/global-cloud-values.yaml" --timeout 30m --debug
+        -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
+        $yb_flags --timeout 30m --debug
 }
 
 function install_service() {
@@ -180,6 +196,9 @@ function install_service() {
         fi
     fi
 
+    local yb_flags
+    yb_flags="$(yugabyte_flags "$bundle")"
+
     if helm status "$bundle" --namespace sunbird &>/dev/null; then
         # Phase B: Release exists — reuse previous values, enable all target charts
         echo -e "\nRelease '$bundle' exists — upgrading '${target_charts[*]}' (Phase B)"
@@ -194,6 +213,7 @@ function install_service() {
             --namespace sunbird \
             --reuse-values \
             $set_flags \
+            $yb_flags \
             $ed_values_flag \
             $addon_values_flag \
             -f images.yaml \
@@ -228,6 +248,7 @@ function install_service() {
             -f "../opentofu/azure/$environment/global-values.yaml" \
             -f "../opentofu/azure/$environment/global-cloud-values.yaml" \
             $set_flags \
+            $yb_flags \
             --timeout 30m \
             --debug
     fi

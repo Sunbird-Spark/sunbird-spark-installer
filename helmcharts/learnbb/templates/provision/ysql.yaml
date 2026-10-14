@@ -36,7 +36,7 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte postgres; 10; done'"
+          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ (include "sunbird.yugabyte" (list $ "host")) }} {{ (include "sunbird.yugabyte" (list $ "port")) }}; do echo waiting for yugabyte postgres; 10; done'"
           # Downloading migration files
           set -e
           export devops_branch={{ .Values.devops_release_branch }}
@@ -71,10 +71,10 @@ spec:
         args:
         - |
             set -e
-            export PGHOST={{.Values.global.yugabyte.host}}
+            export PGHOST={{(include "sunbird.yugabyte" (list $ "host"))}}
             export PGPORT={{.Values.global.postgresql_port}}
-            export PGUSER={{.Values.global.yugabyte.username}}
-            export PGPASSWORD={{.Values.global.yugabyte.password}}
+            export PGUSER={{(include "sunbird.yugabyte" (list $ "username"))}}
+            export PGPASSWORD={{(include "sunbird.yugabyte" (list $ "password"))}}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then
