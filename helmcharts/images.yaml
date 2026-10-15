@@ -664,9 +664,9 @@ global:
     repository: "sunbird-knowlg/ai-pipeline/wf-transcript"
     tag: "spark-v1.1.1-ai-pipeline-v6_4295cec"
 
-  # Speech-to-text backend for the transcript unit. Not a Restate unit itself (no metadata.json),
-  # built by its own dedicated CI job (ai-pipeline's build.yml) since pipeline units never
-  # discovers it.
+  # Speech-to-text backend for the transcript unit. A real, self-registering Restate unit (has its
+  # own metadata.json), but it's Python (restate_sdk, not a Node package), so `pnpm pipeline units`
+  # can't discover it — built by its own dedicated CI job (ai-pipeline's build.yml) instead.
   whisper:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/whisper"
