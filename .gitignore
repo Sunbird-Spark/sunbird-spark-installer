@@ -14,10 +14,11 @@ terragrunt
 .DS_Store
 *.terrahelpbkp
 
-# Ignoring common charts (both the extracted dir and the versioned .tgz
-# archive helm dependency update actually produces, e.g. common-0.1.0.tgz)
+# Ignoring common (extracted dir) and every fetched/packaged dependency archive
+# helm dependency update produces under charts/, including local file:// subcharts
+# it repackages there too (e.g. core-api-0.1.0.tgz, alongside the real charts/core-api/ source)
 **/charts/common
-**/charts/common-*.tgz
+**/charts/*.tgz
 # Ignoring test directories
 **/kitchen
 
