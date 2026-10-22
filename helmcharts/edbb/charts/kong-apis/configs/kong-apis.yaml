@@ -3252,6 +3252,24 @@ kong_apis:
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
+- name: refreshContentBody
+  uris: "{{ .Values.content_prefix }}/v3/refresh/body"
+  url: "{{ .Values.content_service_url }}/content/v3/refresh/body"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - contentUpdate
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
 - name: updateContentState
   uris: "{{ .Values.course_service_prefix }}/v1/content/state/update"
   url: "{{ .Values.lms_service_url }}/v1/content/state/update"
@@ -8334,6 +8352,24 @@ kong_apis:
 - name: questionSetUpdateV2
   uris: "{{ .Values.questionset_prefix }}/v2/update"
   url: "{{ .Values.assessment_service_url }}/questionset/v5/update"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - contentUpdate
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.medium_request_size_limit }}"
+
+- name: refreshQuestionSetBody
+  uris: "{{ .Values.questionset_prefix }}/v5/refresh/body"
+  url: "{{ .Values.assessment_service_url }}/questionset/v5/refresh/body"
   strip_path: true
   plugins:
   - name: jwt
