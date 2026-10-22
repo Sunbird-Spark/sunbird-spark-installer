@@ -112,7 +112,7 @@ knowlg:
     limits:
       cpu: 1
       memory: 1024Mi
- 
+
 search:
   resources:
     requests:
@@ -195,22 +195,22 @@ kafka:
   broker:
     resources:
       limits:
-        cpu: 1
-        memory: 2048Mi
-      requests:
-        cpu: 750m
+        cpu: 500m
         memory: 1024Mi
+      requests:
+        cpu: 200m
+        memory: 512Mi
     persistence:
-      size: 8Gi
+      size: 6Gi
   controller:
     replicaCount: 3
     resources:
       limits:
-        cpu: 1
-        memory: 2048Mi
-      requests:
-        cpu: 750m
+        cpu: 500m
         memory: 1024Mi
+      requests:
+        cpu: 200m
+        memory: 512Mi
     persistence:
       size: 8Gi
 
@@ -293,10 +293,10 @@ kube-prometheus-stack:
       resources:
         requests:
           cpu: 500m
-          memory: 1Gi
+          memory: 4Gi
         limits:
           cpu: 1
-          memory: 2Gi    
+          memory: 8Gi
 
 kubernetes-dashboard:
   api:
@@ -398,16 +398,6 @@ secor:
       cpu: 512m
       memory: 1Gi
 
-search:
-  resources:
-    requests:
-      cpu: 100m
-      memory: 100Mi
-    limits:
-      cpu: 1
-      memory: 1024Mi
-
-
 velero:
   resources: 
     limits:
@@ -420,10 +410,10 @@ velero:
     resources:
       requests:
         cpu: 100m
-        memory: 512Mi
+        memory: 1Gi
       limits:
         cpu: 500m
-        memory: 1024Mi
+        memory: 4Gi
     
 yugabyte:
   serviceEndpoints:
@@ -466,7 +456,7 @@ yugabyte:
   storage:
     master:
       count: 2
-      size: 10Gi
+      size: 8Gi
     tserver:
       count: 2
       size: 25Gi
