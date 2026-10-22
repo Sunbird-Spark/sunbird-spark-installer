@@ -24,3 +24,5 @@ model:
   provider: "azure/gpt-5-mini"
   apiBase: "https://cossdev-semanticsearch.openai.azure.com/"
   apiVersion: "2024-12-01-preview"
+  # gpt-5-mini reasoning tokens eat the same output budget as the visible answer; cap kept low.
+  reasoningEffort: "minimal"

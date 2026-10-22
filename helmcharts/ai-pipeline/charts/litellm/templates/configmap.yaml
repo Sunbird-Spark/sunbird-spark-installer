@@ -13,6 +13,7 @@ data:
           api_base: {{ .Values.model.apiBase | quote }}
           api_version: {{ .Values.model.apiVersion | quote }}
           api_key: os.environ/OPENAI_API_KEY
+          reasoning_effort: {{ .Values.model.reasoningEffort | quote }}
     litellm_settings:
       telemetry: false
       # gpt-5-mini is a reasoning model and rejects temperature=0 unless unsupported params are dropped.
