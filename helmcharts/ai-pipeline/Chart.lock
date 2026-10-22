@@ -1,0 +1,15 @@
+dependencies:
+- name: common
+  repository: https://nimbushubin.github.io/helmcharts
+  version: 0.1.0
+- name: restate-operator-helm
+  repository: oci://ghcr.io/restatedev
+  version: 3.1.0
+- name: core-api
+  repository: file://./charts/core-api
+  version: 0.1.0
+- name: litellm
+  repository: file://./charts/litellm
+  version: 0.1.0
+digest: sha256:2b5f3805246d12af08dc55445101ef7e0250eda91474c697fec5458169daa329
+generated: "2026-10-01T15:47:11.294887+05:30"

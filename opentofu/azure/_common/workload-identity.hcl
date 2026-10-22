@@ -6,6 +6,29 @@ locals {
   building_block      = local.global_vars.global.building_block
   subscription_id     = local.global_vars.global.subscription_id
   location            = local.global_vars.global.cloud_storage_region
+
+  # ai_pipeline_enabled is root-level (not nested under global:) — see opentofu/azure/template/
+  # global-values.yaml. ai-pipeline's own namespace is created ad-hoc by install.sh (kubectl
+  # create namespace), not by this module's kubernetes_namespace resource, so it's deliberately
+  # excluded from k8s_namespaces below regardless of this flag — adding it there would make
+  # Terraform try to create a namespace that may already exist and fail.
+  ai_pipeline_enabled  = tostring(try(local.global_vars.ai_pipeline_enabled, "false")) == "true"
+  base_service_accounts = {
+    sunbird = {
+      namespace = "sunbird"
+      name      = "azure-managed-identity-sa"
+    }
+    velero = {
+      namespace = "velero"
+      name      = "azure-managed-identity-sa"
+    }
+  }
+  service_accounts = local.ai_pipeline_enabled ? merge(local.base_service_accounts, {
+    "ai-pipeline" = {
+      namespace = "ai-pipeline"
+      name      = "azure-managed-identity-sa"
+    }
+  }) : local.base_service_accounts
 }
 
 terraform {
@@ -54,4 +77,5 @@ inputs = {
   kubernetes_client_certificate      = dependency.aks.outputs.client_certificate
   kubernetes_client_key              = dependency.aks.outputs.client_key
   kubernetes_cluster_ca_certificate  = dependency.aks.outputs.cluster_ca_certificate
+  k8s_service_accounts               = local.service_accounts
 }

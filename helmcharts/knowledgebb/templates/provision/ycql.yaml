@@ -77,7 +77,9 @@ spec:
             cat "$LOG_FILE"
             echo "==============================="
           fi
-          exit $MIGRATION_EXIT
+          if [ $MIGRATION_EXIT -ne 0 ]; then
+            exit $MIGRATION_EXIT
+          fi
         volumeMounts:
         - name: shared-volume
           mountPath: /opt/shared-volume
