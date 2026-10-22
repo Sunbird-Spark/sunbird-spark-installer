@@ -1,8 +1,54 @@
 # cspm-fixes
 
-One-time fixes for CSPM findings that can't be closed through this repo's OpenTofu,
-because the affected resources are created outside this repo's Terraform state
-entirely. Not part of `install.sh` — these are standalone tools run manually.
+One-time fixes for CSPM findings that can't be fully closed through this repo's
+OpenTofu alone — either because the resource is created outside this repo's
+Terraform state entirely, or because Terraform can't safely own enough of it to make
+the change itself. Not part of `install.sh` — these are standalone tools run
+manually.
+
+## enable-storage-service-endpoint.sh
+
+Covers: the subnet half of Step 2 prep in `azure-blocker-fixes.md` (AKS↔storage
+internal access) — specifically the `skip_network_module: true` case (reusing an
+existing VNet). The `skip_network_module: false` case (Terraform creates the VNet)
+already works automatically via `network/main.tf:64` — this script no-ops in that
+case.
+
+**Why this is a script, not a Terraform fix:** when reusing an existing VNet, the
+AKS subnet is referenced via a read-only `data` block, not a `resource` block.
+Service endpoints can only be set by fully owning a subnet via a `resource` block —
+doing that here would make Terraform start enforcing every other undeclared property
+of that subnet too, risking it reverting real configuration it doesn't know about.
+See `azure-blocker-fixes.md` for the full explanation.
+
+**What it does:** reads the environment's own `global-values.yaml`
+(`resource_group_name`, `vnet_name`, `aks_subnet_name`, `skip_network_module`), and
+if reusing an existing VNet, checks whether the subnet already has the
+`Microsoft.Storage` service endpoint. If missing, it adds it — preserving any other
+service endpoints already configured, rather than overwriting the list. If the `az`
+lookup itself fails (bad credentials, wrong names, subnet not found), it fails
+loudly rather than guessing at the current state.
+
+### Usage
+
+Run from inside an environment directory (e.g. `opentofu/azure/<env-name>/`), where
+`global-values.yaml` already exists:
+
+```bash
+./enable-storage-service-endpoint.sh
+```
+
+Or point it at a specific file:
+
+```bash
+./enable-storage-service-endpoint.sh --config /path/to/global-values.yaml
+```
+
+Dry run by default; add `--apply` to actually update the subnet:
+
+```bash
+./enable-storage-service-endpoint.sh --apply
+```
 
 ## review-public-http-nsgs.sh
 
