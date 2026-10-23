@@ -1,10 +1,10 @@
 # cspm-fixes
 
-One-time fixes for CSPM findings that can't be fully closed through this repo's
-OpenTofu alone — either because the resource is created outside this repo's
-Terraform state entirely, or because Terraform can't safely own enough of it to make
-the change itself. Not part of `install.sh` — these are standalone tools run
-manually.
+Fixes for CSPM findings that can't be fully closed through this repo's OpenTofu
+alone — either because the resource is created outside this repo's Terraform state
+entirely, or because Terraform can't safely own enough of it to make the change
+itself. Most of these are standalone tools run manually; `enable-storage-service-endpoint.sh`
+is the exception — it's wired into `install.sh` and runs automatically.
 
 ## enable-storage-service-endpoint.sh
 
@@ -13,6 +13,16 @@ internal access) — specifically the `skip_network_module: true` case (reusing 
 existing VNet). The `skip_network_module: false` case (Terraform creates the VNet)
 already works automatically via `network/main.tf:64` — this script no-ops in that
 case.
+
+**Runs automatically via `install.sh`** — `create_tf_resources()` calls
+`configure_storage_service_endpoint()`, which runs this script with `--apply`,
+positioned right after `deploy_tf_module network` and before `deploy_tf_module
+storage`. Order matters here: Azure requires a subnet to already have the
+`Microsoft.Storage` service endpoint before it can be referenced as a storage
+account network-rule exception, so this has to run before the storage module's
+`apply`. You don't need to run it manually as part of a normal `./install.sh`
+install — it's only useful to run by hand for testing, or against an environment
+that was deployed before this was wired in.
 
 **Why this is a script, not a Terraform fix:** when reusing an existing VNet, the
 AKS subnet is referenced via a read-only `data` block, not a `resource` block.
@@ -27,9 +37,10 @@ if reusing an existing VNet, checks whether the subnet already has the
 `Microsoft.Storage` service endpoint. If missing, it adds it — preserving any other
 service endpoints already configured, rather than overwriting the list. If the `az`
 lookup itself fails (bad credentials, wrong names, subnet not found), it fails
-loudly rather than guessing at the current state.
+loudly rather than guessing at the current state. If `skip_network_module: false`,
+it prints "nothing to do" and exits immediately — no `az` calls at all.
 
-### Usage
+### Manual usage (for testing, or environments deployed before this was wired into `install.sh`)
 
 Run from inside an environment directory (e.g. `opentofu/azure/<env-name>/`), where
 `global-values.yaml` already exists:
