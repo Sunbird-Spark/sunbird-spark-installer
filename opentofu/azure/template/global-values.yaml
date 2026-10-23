@@ -40,7 +40,10 @@ sync-tool:
 
 global:
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
-  skip_network_module: false  # true = reuse existing VNet/subnets (set vnet_name and subnet names below); false = network module creates VNet/subnets
+  skip_network_module: false  
+  # if true = reuse existing VNet/subnets (set vnet_name and subnet names below) 
+  # and runs to configure the endpoint inside /install.sh for the storage service configure_storage_service_endpoint();
+  # false = network module creates VNet/subnets
   vnet_name: ""                  # required when skip_network_module: true — name of existing VNet (e.g. "ed-dev")
   aks_subnet_name: ""            # required when skip_network_module: true — name of existing AKS subnet (e.g. "ed-dev-aks")
   runner_subnet_name: ""         # required when skip_network_module: true — name of existing runner subnet (e.g. "ed-dev-runner")
