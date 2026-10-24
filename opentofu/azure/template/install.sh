@@ -89,6 +89,7 @@ function install_component() {
     fi
     local component="$1"
 
+    # ai-pipeline is opt-in: skip unless explicitly enabled per environment.
     if [ "$component" = "ai-pipeline" ] && [ "$(yq '.ai_pipeline_enabled' "../opentofu/azure/$environment/global-values.yaml")" != "true" ]; then
         echo -e "\nSkipping ai-pipeline (ai_pipeline_enabled is not true in global-values.yaml)"
         return
@@ -127,12 +128,8 @@ function install_component() {
     local namespace="sunbird"
     if [ "$component" = "ai-pipeline" ]; then
         namespace="ai-pipeline"
-        # restate-operator-helm's own CRDs are disabled (installCrds: false); this chart vendors
-        # them into its own crds/ instead. Helm's native crds/ only applies within the same `helm
-        # upgrade --install` run, but that run's own object-kind resolution is built before crds/
-        # is applied, so it still fails to resolve RestateCluster/RestateDeployment on a first-ever
-        # install unless the CRDs already exist before Helm starts — hence this plain kubectl
-        # apply ahead of time. No-op on every later run.
+        # Ensures RestateCluster/RestateDeployment CRDs exist before Helm resolves kinds on a
+        # first-ever install (installCrds: false, see values.yaml). No-op on later runs.
         kubectl apply -f ai-pipeline/crds/
     fi
 
