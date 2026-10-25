@@ -28,4 +28,4 @@ database:
 
 kafka:
   # A name inside Restate, not the environment — must equal every unit's metadata.json `cluster`.
-  clusterName: local
+  clusterName: sunbird
