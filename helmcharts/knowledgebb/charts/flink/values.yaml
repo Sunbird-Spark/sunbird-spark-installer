@@ -376,9 +376,7 @@ flink_jobs:
 
           content {
             enabled = true
-            # artifactUrl is required by ai-pipeline's enrichment_router to
-            # build the transcription-request event.
-            includeFields = ["artifactUrl"]
+            includeFields = []
           }
 
           collection {
