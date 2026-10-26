@@ -63,6 +63,17 @@ resource "azurerm_storage_account" "storage_account" {
 
     }
   }
+
+  # Added: CSPM BLOCKER remediation prep (azure-blocker-fixes.md, Step 2). Pre-registers
+  # the AKS subnet as an allowed exception before the storage account ever denies public
+  # access -- default_action stays "Allow" here, so nothing changes for existing traffic
+  # yet. Only once reads (CDN) and writes (backend-mediated uploads) are off the public
+  # path does default_action flip to "Deny" in a later change.
+  network_rules {
+    default_action             = "Allow"
+    virtual_network_subnet_ids = [var.aks_subnet_id]
+  }
+
   tags = merge(
     local.common_tags,
     var.additional_tags

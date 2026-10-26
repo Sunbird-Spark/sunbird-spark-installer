@@ -42,3 +42,8 @@ variable "subscription_id" {
   type        = string
 }
 
+variable "aks_subnet_id" {
+  type        = string
+  description = "AKS subnet ID to allow through the storage account's network rules."
+}
+

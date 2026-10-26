@@ -26,10 +26,22 @@ function deploy_tf_module() {
     cd ..
 }
 
+# CSPM BLOCKER fix (Step 2, azure-blocker-implementation-steps.md): must run after
+# the network module and before the storage module. Azure requires a subnet to
+# already have the Microsoft.Storage service endpoint before it can be referenced as
+# a storage account network-rule exception -- doing this out of order fails the
+# storage module's apply. No-ops (no az calls) when skip_network_module is false,
+# since Terraform already enables the endpoint itself in that case.
+function configure_storage_service_endpoint() {
+    echo -e "\nConfiguring AKS subnet storage service endpoint"
+    bash ../cspm-fixes/enable-storage-service-endpoint.sh --apply
+}
+
 function create_tf_resources() {
     source tf.sh
     echo -e "\nCreating resources on azure cloud"
     deploy_tf_module network
+    configure_storage_service_endpoint
     deploy_tf_module storage
     deploy_tf_module aks
     deploy_tf_module workload-identity
