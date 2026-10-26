@@ -85,7 +85,7 @@ spec:
             # Check if the database exists
             if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then
               # Database doesn't exist, create it
-              echo "SELECT 'CREATE DATABASE \"{{ .name }}\"' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '\"{{ .name }}\"')\gexec" | ysqlsh
+              echo "SELECT 'CREATE DATABASE \"{{ .name }}\"{{ if include "sunbird.yugabyteManaged" $ }} WITH colocation = true{{ end }}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '\"{{ .name }}\"')\gexec" | ysqlsh
             else
                 echo "Database {{.name}} already exists."
             fi

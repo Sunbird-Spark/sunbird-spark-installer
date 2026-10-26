@@ -66,7 +66,34 @@ spec:
           printf '[connection]\nssl = true\n\n[ssl]\ncertfile = %s\nvalidate = true\n' "$SSL_CERTFILE" > "$HOME/.cassandra/cqlshrc"
           REAL_YCQLSH="$(command -v ycqlsh)"
           mkdir -p /tmp/ycqlsh-ssl
-          printf '#!/bin/sh\nexec %s --ssl "$@"\n' "$REAL_YCQLSH" > /tmp/ycqlsh-ssl/ycqlsh
+          cat > /tmp/ycqlsh-ssl/one_tablet.py <<'PY'
+          import re, sys
+          src = open(sys.argv[1]).read()
+          out = []
+          for stmt in re.split(r';\s*(?:\n|$)', src):
+              s = stmt.strip().rstrip(';').strip()
+              if not s:
+                  continue
+              if re.search(r'^\s*CREATE\s+(UNIQUE\s+)?(TABLE|INDEX)\b', s, re.I | re.M) and 'tablets' not in s.lower():
+                  s += ' AND tablets = 1' if re.search(r'\bWITH\b', s, re.I) else ' WITH tablets = 1'
+              out.append(s + ';')
+          print('\n'.join(out))
+          PY
+          cat > /tmp/ycqlsh-ssl/ycqlsh <<'WRAP'
+          #!/bin/bash
+          args=()
+          while [ $# -gt 0 ]; do
+            if [ "$1" = "-f" ] && [ -n "${2:-}" ]; then
+              out="/tmp/ycqlsh-ssl/$(basename "$2").1tablet.cql"
+              python3 /tmp/ycqlsh-ssl/one_tablet.py "$2" > "$out"
+              args+=("-f" "$out"); shift 2
+            else
+              args+=("$1"); shift
+            fi
+          done
+          exec REAL_YCQLSH_PATH --ssl "${args[@]}"
+          WRAP
+          sed -i "s#REAL_YCQLSH_PATH#$REAL_YCQLSH#" /tmp/ycqlsh-ssl/ycqlsh
           chmod +x /tmp/ycqlsh-ssl/ycqlsh
           export PATH="/tmp/ycqlsh-ssl:$PATH"
           {{- end }}
