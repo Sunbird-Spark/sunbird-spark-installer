@@ -10,6 +10,10 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  {{- if include "sunbird.yugabyteManaged" . }}
+  strategy:
+    type: Recreate
+  {{- end }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ include "common.names.name" . }}
@@ -33,6 +37,26 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
           - "timeout 300 sh -c 'until nc -z {{(include "sunbird.yugabyte" (list $ "host"))}} {{(include "sunbird.yugabyte" (list $ "postgresql_port"))}}; do echo waiting for yugabyte; sleep 10; done'"
+        {{- if include "sunbird.yugabyteManaged" . }}
+        - name: wait-for-migrations
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c"]
+          args:
+          - |
+            until kong migrations list > /tmp/migrations.out 2>&1; do
+              echo "kong migrations pending (exit $?), waiting..."
+              sleep 15
+            done
+            echo "kong migrations up to date"
+          envFrom:
+          - configMapRef:
+              name: {{ include "common.names.fullname" . }}-env
+          {{- if include "sunbird.yugabyteTLS" . }}
+          volumeMounts:
+            {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 12 }}
+          {{- end }}
+        {{- end }}
       {{- with .Values.initContainers }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
