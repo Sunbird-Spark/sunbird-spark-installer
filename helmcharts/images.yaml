@@ -90,7 +90,7 @@ images:
 
   certregistry: &certregistry
     repository: "ghcr.io/sunbird-lern/certificate-registry"
-    tag: "release-8.1.0_rc2_546e8d5_3"
+    tag: "spark-v1.1.1_yb-aeon_v1_2ece3dc_5"
 
   certificateapi: &certificateapi
     repository: "sunbirded.azurecr.io/sunbird-rc-certificate-api"
@@ -110,7 +110,7 @@ images:
 
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-v1.1.1_f18c1d7_114"
+    tag: "spark-v1.1.1_yb-aeon_v1_72e0d65_115"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -632,7 +632,7 @@ global:
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
-    tag: "spark-v1.1.0_f36189f"
+    tag: "spark-v1.1.1_yb-aeon_v1_0787fcb"
 
   # ai-pipeline (PyFlink 1.20) jobs, deployed via the consolidated
   # `py-flink` chart's py_flink_jobs map (helmcharts/knowledgebb/charts/
