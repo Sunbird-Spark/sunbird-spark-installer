@@ -147,6 +147,7 @@ global:
     postgresql_port: 5433
     username: "<aeon-user>"     # from step 4
     password: "<aeon-password>"
+    local_datacenter: "<aeon-region>"  # cluster region, e.g. centralindia
     ca_cert: |                  # contents of root.crt from step 4.11
       -----BEGIN CERTIFICATE-----
       MIID...
@@ -155,6 +156,8 @@ global:
 
 **`ca_cert`:** open `root.crt` in a text editor and paste the **whole** content, including the `BEGIN` and `END` lines, under `ca_cert: |`. Indent every line 2 spaces deeper than `ca_cert`. Aeon requires TLS, so don't leave it empty for Aeon.
 
+**`local_datacenter`:** the Aeon cluster region (the `yugabyte_region` code, e.g. `centralindia`). JanusGraph and the portal use it as the YCQL local data center and refuse to connect if it doesn't match the cluster. Defaults to `centralindia` if empty or missing. Only used when `enabled: true`; the in-cluster YugabyteDB keeps `datacenter1`.
+
 When `enabled: true` **and** `ca_cert` is set, each bundle creates a secret `<bundle>-yugabyte-ca` with the certificate and mounts it at `/etc/yugabyte-tls/root.crt` in:
 
 | Service | How it uses the certificate |
@@ -162,7 +165,7 @@ When `enabled: true` **and** `ca_cert` is set, each bundle creates a secret `<bu
 | Kong (and its migrations job) | `KONG_PG_SSL_VERIFY=on`, `KONG_LUA_SSL_TRUSTED_CERTIFICATE` |
 | Keycloak, registry | JDBC URL `sslmode=verify-ca&sslrootcert=/etc/yugabyte-tls/root.crt` |
 | Superset (web, worker, beat, init) | database URI `sslmode=verify-ca&sslrootcert=…` |
-| Player (portal, SQL) | `PGSSLMODE=verify-ca`, `NODE_EXTRA_CA_CERTS` |
+| Player (portal, YSQL and YCQL) | `SUNBIRD_YUGABYTE_SSL_MODE=verify-ca`, `SUNBIRD_YUGABYTE_SSL_ROOT_CERT_PATH`, `SUNBIRD_YUGABYTE_YCQL_LOCAL_DATACENTER` |
 | keycloak-kids-keys, YSQL migration jobs | `PGSSLMODE=verify-ca`, `PGSSLROOTCERT` |
 | YCQL migration jobs | `ycqlsh` over SSL (`cqlshrc`) |
 | JanusGraph (and its schema-init job) | Java truststore built from the certificate; `storage.cql.ssl.*` plus the Aeon username/password |
@@ -181,7 +184,7 @@ Then redeploy the bundles:
 
 With `enabled: true`, every building block and addon connects to the Aeon host, and `install.sh` doesn't deploy the in-cluster YugabyteDB or `yugabyte-backup`. Set `enabled: false` to go back to the in-cluster YugabyteDB.
 
-**Before this works end to end:** the services in the table above get TLS from the chart. These still connect to YCQL **without TLS or credentials**, because their application code has no option for it: lern, certregistry, the Flink jobs, knowlg, sync-tool, knowledge-mw, the portal's forms and review comments, and the addons. They need code changes before the platform runs fully on Aeon. See part 1 of the migration guide (`migration/YUGABYTE-TO-MANAGED.md` on the `feat/external-cassandra-postgres` branch). Moving existing data into Aeon is covered there too (part 7).
+**Before this works end to end:** the services in the table above get TLS from the chart. These still connect to YCQL **without TLS or credentials**, because their application code has no option for it: lern, certregistry, the Flink jobs, knowlg, sync-tool, knowledge-mw, and the addons. The portal's forms and review comments use YCQL TLS once running a portal image that includes `SUNBIRD_YUGABYTE_SSL_MODE` support. They need code changes before the platform runs fully on Aeon. See part 1 of the migration guide (`migration/YUGABYTE-TO-MANAGED.md` on the `feat/external-cassandra-postgres` branch). Moving existing data into Aeon is covered there too (part 7).
 
 ---
 
