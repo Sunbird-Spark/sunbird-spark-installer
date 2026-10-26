@@ -94,7 +94,7 @@ spec:
             - name: KONG_PG_USER
               value: {{ (include "sunbird.yugabyte" (list $ "username")) }}
             - name: KONG_PG_SSL
-              value: {{ .Values.kong_pg_ssl | quote }}
+              value: {{ if include "sunbird.yugabyteTLS" . }}"on"{{ else }}{{ .Values.kong_pg_ssl | quote }}{{ end }}
             {{- if include "sunbird.yugabyteTLS" . }}
             - name: KONG_PG_SSL_VERIFY
               value: "on"
