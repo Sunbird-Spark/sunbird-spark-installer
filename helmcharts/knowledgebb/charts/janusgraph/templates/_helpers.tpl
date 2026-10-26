@@ -192,6 +192,7 @@ Return the wait-for-storage init container
     - name: storage-backend-credentials
       mountPath: /opt/bitnami/janusgraph/secrets/
     {{- end }}
+    {{- include "janusgraph.yugabyteTruststore.volumeMount" . | nindent 4 }}
 {{- end -}}
 
 {{/*

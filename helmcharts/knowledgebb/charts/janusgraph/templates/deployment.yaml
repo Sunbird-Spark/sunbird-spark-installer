@@ -76,8 +76,8 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
       initContainers:
-        {{- include "janusgraph.waitForStorage" . | nindent 8 }}
         {{- include "janusgraph.yugabyteTruststore.initContainer" . | nindent 8 }}
+        {{- include "janusgraph.waitForStorage" . | nindent 8 }}
         {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
         # Adjust volume permissions
         {{- include "janusgraph.volumePermissionsInitContainer" . | nindent 8 }}
