@@ -70,7 +70,7 @@ images:
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
-    tag: "spark-v1.1.0_dbad626_19"
+    tag: "spark-v1.1.1_yb-aeon_v1_ba96102_20"
     
   nginx_private_ingress: &nginx_private_ingress
     repository: "sunbirded.azurecr.io/proxy"
