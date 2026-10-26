@@ -64,6 +64,11 @@ spec:
           export SSL_VALIDATE=true
           mkdir -p "$HOME/.cassandra"
           printf '[connection]\nssl = true\n\n[ssl]\ncertfile = %s\nvalidate = true\n' "$SSL_CERTFILE" > "$HOME/.cassandra/cqlshrc"
+          REAL_YCQLSH="$(command -v ycqlsh)"
+          mkdir -p /tmp/ycqlsh-ssl
+          printf '#!/bin/sh\nexec %s --ssl "$@"\n' "$REAL_YCQLSH" > /tmp/ycqlsh-ssl/ycqlsh
+          chmod +x /tmp/ycqlsh-ssl/ycqlsh
+          export PATH="/tmp/ycqlsh-ssl:$PATH"
           {{- end }}
 
           # run migrations for knowledgebb
