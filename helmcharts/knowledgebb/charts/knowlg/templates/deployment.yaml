@@ -76,6 +76,8 @@ spec:
           - name: config
             mountPath: {{ .Values.configmap.mountPath }}
           {{- end }}
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
+          {{- include "sunbird.yugabyteTruststoreVolumeMount" . | nindent 10 }}
         {{- with .Values.sidecars }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -133,6 +135,7 @@ spec:
             - name: keycloak-key
               mountPath: /keys/
       initContainers:
+        {{- include "sunbird.yugabyteTruststoreInitContainer" . | nindent 8 }}
         - args:
           - -p
           - "9999"
@@ -151,6 +154,9 @@ spec:
               - NET_ADMIN
             runAsNonRoot: false
             runAsUser: 0
+{{- else if include "sunbird.yugabyteTLS" . }}
+      initContainers:
+        {{- include "sunbird.yugabyteTruststoreInitContainer" . | nindent 8 }}
 {{- end }}
       volumes:
       - name: env
@@ -161,6 +167,8 @@ spec:
         secret:
           secretName: {{ include "common.names.fullname" . }}
       {{- end }}
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}
+      {{- include "sunbird.yugabyteTruststoreVolume" . | nindent 6 }}
 {{- if .Values.opa_enabled }}
       - name: envoy-config
         configMap:
