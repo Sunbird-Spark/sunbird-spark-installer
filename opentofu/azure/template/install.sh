@@ -37,6 +37,9 @@ function create_tf_resources() {
     deploy_tf_module keys
     deploy_tf_module output-file
     deploy_tf_module upload-files
+    # Added: Defender plans + subscription Activity Log (CSPM SAFE findings); subscription-
+    # scoped only, no dependency on anything deployed after it.
+    deploy_tf_module security-baseline
     [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
 }
 
