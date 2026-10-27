@@ -90,12 +90,16 @@ units:
     minReadySeconds: 30
     resources:
       requests:
-        cpu: "1"
+        cpu: "2"
         memory: 2Gi
       limits:
-        cpu: "2"
+        cpu: "4"
         memory: 4Gi
     env:
       WHISPER_MODEL_SIZE: small
       WHISPER_DEVICE: cpu
       WHISPER_COMPUTE_TYPE: int8
+      # Must track resources.limits.cpu above: sizes the model's num_workers/cpu_threads split and
+      # the chunk thread pool so concurrent chunks don't oversubscribe the pod's actual CPU limit.
+      WHISPER_CPU_CORES: "4"
+      WHISPER_MAX_CONCURRENT_CHUNKS: "4"
