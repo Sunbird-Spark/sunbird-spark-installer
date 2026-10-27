@@ -31,19 +31,20 @@ variable "subscription_id" {
 }
 
 # Added: which Microsoft Defender plans to turn on at Standard tier. Defaults cover the
-# CSPM report's 9 Defender/pricing findings (servers, SQL, Key Vault, Kubernetes,
-# Containers, Storage).
+# CSPM report's Defender/pricing findings (servers, SQL, Key Vault, Containers, Storage).
+# "KubernetesService" (the old standalone "Defender for Kubernetes" plan) is deliberately
+# NOT included -- Microsoft merged it into the unified "Containers" plan below in Dec
+# 2021; enabling both on a new subscription is redundant, not two separate protections.
 variable "defender_resource_types" {
   type        = list(string)
   description = "Defender plan resource types to enable at Standard tier."
   default = [
-    "VirtualMachines",   # Defender for servers
-    "SqlServers",        # Defender for Azure SQL Database + SQL Managed Instances
-    "KeyVaults",         # Defender for Key Vault
-    "KubernetesService", # Defender for Kubernetes
-    "Containers",        # Defender for Containers
-    "StorageAccounts",   # Defender for Storage (Classic)
-    "CloudPosture",      # Microsoft Defender CSPM
+    "VirtualMachines", # Defender for servers
+    "SqlServers",      # Defender for Azure SQL Database + SQL Managed Instances
+    "KeyVaults",       # Defender for Key Vault
+    "Containers",      # Defender for Containers (also covers what "Defender for Kubernetes" used to)
+    "StorageAccounts", # Defender for Storage (Classic)
+    "CloudPosture",    # Microsoft Defender CSPM
   ]
 }
 
