@@ -644,7 +644,7 @@ global:
   whisper:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/whisper"
-    tag: "spark-v1.1.1-ai-pipeline-v14_a3a5b07"
+    tag: "spark-v1.1.1-ai-pipeline-v15_df883e3"
 
   # Model gateway for ai-pipeline units.
   litellm:
