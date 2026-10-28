@@ -39,3 +39,7 @@ dependencies:
     repository: https://sunbirded.github.io/helm-charts/
     version: 0.3.5
     condition: superset.enabled
+  # Vendored locally under charts/telemetry -- not fetched from any remote
+  # repo, so no `repository` field, matching how it's actually on disk.
+  - name: telemetry
+    version: 0.1.0

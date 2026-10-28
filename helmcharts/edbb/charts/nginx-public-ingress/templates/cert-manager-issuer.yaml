@@ -1,0 +1,55 @@
+{{- if .Values.global.cert_manager_ssl }}
+{{- if .Capabilities.APIVersions.Has "cert-manager.io/v1" }}
+# Replaces the old certbot cronjob's manual DNS-01 bootstrap + patch-the-Secret
+# renewal flow. cert-manager owns the {{ include "common.names.fullname" . }}
+# Secret exclusively from here on -- the root Secret template skips
+# tls.crt/tls.key entirely when this flag is set, so there's nothing left to
+# fight over ownership of those two keys.
+#
+# Gated on the cert-manager.io/v1 CRDs already being registered: on a
+# brand-new cluster, cert-manager's own CRDs render as ordinary templates in
+# this same release (see edbb/values.yaml's cert-manager.crds.enabled), and
+# Helm validates the *entire* release manifest against the API server's
+# discovery before creating anything. Rendering a ClusterIssuer/Certificate
+# in that same first pass would fail validation and abort the whole install
+# -- nothing would get created, not even cert-manager itself. Skipping these
+# two here on that first pass lets cert-manager and its CRDs install cleanly;
+# a second `helm upgrade` (required, see README) then picks up the
+# now-registered CRDs and creates the Issuer/Certificate.
+#
+# Namespaced Issuer, not a cluster-scoped ClusterIssuer: this chart can be
+# installed more than once in the same cluster (see the PR's own "isolated
+# namespace on ed-dev alongside the live release" test setup) -- a
+# cluster-scoped singleton with a fixed name would collide between releases,
+# and `helm uninstall` of either one would delete it out from under the
+# other.
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-prod
+  namespace: {{ .Release.Namespace }}
+spec:
+  acme:
+    server: {{ .Values.global.cert_manager_acme_server | default "https://acme-v02.api.letsencrypt.org/directory" | quote }}
+    email: {{ (.Values.global.cert_notifications | default dict).email | required "global.cert_notifications.email must be set (used as the ACME account contact) when cert_manager_ssl is enabled" | quote }}
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+      - http01:
+          ingress:
+            ingressClassName: acme-http01-solver
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "common.names.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretName: {{ include "common.names.fullname" . }}
+  dnsNames:
+    - {{ .Values.global.domain }}
+  issuerRef:
+    name: letsencrypt-prod
+    kind: Issuer
+{{- end }}
+{{- end }}
