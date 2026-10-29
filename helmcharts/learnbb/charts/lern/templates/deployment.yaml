@@ -76,6 +76,7 @@ spec:
           {{- end }}
           - name: keys
             mountPath: /keys/
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
 {{- if .Values.opa_enabled }}
         - args:
           - envoy
@@ -179,3 +180,4 @@ spec:
               name: {{ include "common.names.fullname" . }}-access-keys
           - configMap:
               name: {{ .Values.global.keycloak_key_configmap }}
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}

@@ -1,0 +1,22 @@
+{{- if and .Values.metrics.kafkaExporter.enabled .Values.metrics.kafkaExporter.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ printf "%s-exporter" (include "common.names.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels:
+    {{- toYaml .Values.metrics.kafkaExporter.serviceMonitor.labels | nindent 4 }}
+spec:
+  jobLabel: app.kubernetes.io/name
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kafka-exporter
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: {{ .Values.metrics.kafkaExporter.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.metrics.kafkaExporter.serviceMonitor.scrapeTimeout }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "common.names.namespace" . }}
+{{- end }}

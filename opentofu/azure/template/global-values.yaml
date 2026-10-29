@@ -97,11 +97,26 @@ global:
   openai_azure_endpoint: "REPLACE_WITH_OPENAI_AZURE_ENDPOINT"  # e.g. https://<resource>.openai.azure.com/
   openai_azure_deployment: "text-embedding-3-small"
   openai_azure_api_version: "2023-05-15"
+  # Only needed if running the optional yugabyte-managed module (opentofu/azure/modules/yugabyte-managed)
+  # to provision a YugabyteDB Aeon cluster via Azure Private Link, instead of / alongside the self-hosted
+  # YugabyteDB that ships with the learnbb/knowledgebb/edbb bundles.
+  yugabyte_managed_auth_token: "REPLACE_WITH_YUGABYTE_AEON_API_KEY"  # Usage & Billing > API Keys in the Aeon console
+  yugabyte_managed_db_username: "REPLACE_WITH_YUGABYTE_MANAGED_DB_USERNAME"
+  yugabyte_managed_db_password: "REPLACE_WITH_YUGABYTE_MANAGED_DB_PASSWORD"
   superset:
       init:
         adminUser:
           username: admin
           password: *superset-admin-password  
+  yugabyte_managed:              # which YugabyteDB every building block connects to
+    enabled: false               # false = in-cluster YugabyteDB (Helm chart); true = managed YugabyteDB (Aeon) below, in-cluster one not deployed
+    host: ""                     # managed cluster host, e.g. pse-centralindia.<cluster-id>.azure.yugabyte.cloud
+    port: 9042                   # YCQL
+    postgresql_port: 5433        # YSQL
+    username: ""                 # managed cluster user (YSQL and YCQL)
+    password: ""
+    local_datacenter: "centralindia"  # managed cluster region; YCQL local data center for JanusGraph and the portal
+    ca_cert: ""                  # managed cluster CA (root.crt from the Aeon console, Connect -> Download CA Cert); when set, services connect over TLS. Paste as a block: ca_cert: |
   yugabyte:
     ysql:
       user: "yugabyte"  

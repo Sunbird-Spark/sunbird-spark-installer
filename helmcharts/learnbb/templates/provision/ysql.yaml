@@ -21,6 +21,7 @@ spec:
       volumes:
       - name: shared-volume
         emptyDir: {}
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}
       initContainers:
       - name: wait-for-yugabytesql
         image: alpine/curl
@@ -36,7 +37,7 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte postgres; 10; done'"
+          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ (include "sunbird.yugabyte" (list $ "host")) }} {{ (include "sunbird.yugabyte" (list $ "port")) }}; do echo waiting for yugabyte postgres; 10; done'"
           # Downloading migration files
           set -e
           export devops_branch={{ .Values.devops_release_branch }}
@@ -68,18 +69,23 @@ spec:
         volumeMounts:
           - name: shared-volume
             mountPath: /opt/shared-volume
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
         args:
         - |
             set -e
-            export PGHOST={{.Values.global.yugabyte.host}}
-            export PGPORT={{.Values.global.postgresql_port}}
-            export PGUSER={{.Values.global.yugabyte.username}}
-            export PGPASSWORD={{.Values.global.yugabyte.password}}
+            export PGHOST={{(include "sunbird.yugabyte" (list $ "host"))}}
+            export PGPORT={{ include "sunbird.yugabyte" (list $ "postgresql_port") | default .Values.global.postgresql_port }}
+            export PGUSER={{(include "sunbird.yugabyte" (list $ "username"))}}
+            export PGPASSWORD={{(include "sunbird.yugabyte" (list $ "password"))}}
+            {{- if include "sunbird.yugabyteTLS" . }}
+            export PGSSLMODE={{ include "sunbird.yugabyteSSLMode" . }}
+            export PGSSLROOTCERT={{ include "sunbird.yugabyteCAFile" . }}
+            {{- end }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then
               # Database doesn't exist, create it
-              echo "SELECT 'CREATE DATABASE \"{{ .name }}\"' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '\"{{ .name }}\"')\gexec" | ysqlsh
+              echo "SELECT 'CREATE DATABASE \"{{ .name }}\"{{ if and (include "sunbird.yugabyteManaged" $) (ne .name "kong") }} WITH colocation = true{{ end }}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '\"{{ .name }}\"')\gexec" | ysqlsh
             else
                 echo "Database {{.name}} already exists."
             fi
