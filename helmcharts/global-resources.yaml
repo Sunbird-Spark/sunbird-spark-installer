@@ -451,18 +451,18 @@ yugabyte:
   resource:
     master:
       requests:
-        cpu: "2"
-        memory: 2Gi
+        cpu: "1"
+        memory: 3Gi
       limits:
-        cpu: "2"
-        memory: 2Gi
+        cpu: "1"
+        memory: 3Gi
     tserver:
       requests:
-        cpu: "2"
-        memory: 4Gi
+        cpu: "3"
+        memory: 12Gi
       limits:
-        cpu: "2"
-        memory: 4Gi
+        cpu: "3"
+        memory: 12Gi
   storage:
     master:
       count: 2
