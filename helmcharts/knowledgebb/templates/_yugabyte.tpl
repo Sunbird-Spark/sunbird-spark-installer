@@ -67,3 +67,62 @@ true and global.yugabyte_managed.ca_cert holds the cluster's CA certificate
     secretName: {{ .Release.Name }}-yugabyte-ca
 {{- end }}
 {{- end -}}
+
+{{- /*
+Local datacenter name for CQL clients that need one (JanusGraph, via the DataStax 4.x
+driver, refuses to start if it does not match the real datacenter). In-cluster YugabyteDB is
+datacenter1. For managed YugabyteDB set global.yugabyte_managed.local_datacenter to the
+cluster's datacenter (Aeon: shown in the driver log as "Datacenter: <name>").
+*/ -}}
+{{- define "sunbird.yugabyteDatacenter" -}}
+{{- if include "sunbird.yugabyteManaged" . -}}
+{{- (dig "yugabyte_managed" "local_datacenter" "" (.Values.global | default dict)) | default "centralindia" -}}
+{{- else -}}
+datacenter1
+{{- end -}}
+{{- end -}}
+
+{{- /*
+JanusGraph reads its TLS truststore as a JKS file, not PEM. When TLS is on, an init container
+builds one from the mounted root.crt into an emptyDir shared with the app container.
+Image: global.yugabyte_managed.truststore_image (needs bash and keytool).
+*/ -}}
+{{- define "sunbird.yugabyteTruststoreFile" -}}/etc/yugabyte-truststore/truststore.jks{{- end -}}
+
+{{- define "sunbird.yugabyteTruststorePassword" -}}changeit{{- end -}}
+
+{{- define "sunbird.yugabyteTruststoreInitContainer" -}}
+{{- if include "sunbird.yugabyteTLS" . }}
+- name: yugabyte-truststore
+  image: {{ dig "yugabyte_managed" "truststore_image" "" (.Values.global | default dict) | default "eclipse-temurin:11-jre" | quote }}
+  command: ["/bin/bash", "-c"]
+  args:
+    - |
+      set -e
+      rm -f /yugabyte-truststore/truststore.jks
+      # root.crt may hold several certificates; keytool imports one per file
+      awk '/BEGIN CERTIFICATE/{n++} n>0{print > ("/tmp/ca-" n ".crt")}' {{ include "sunbird.yugabyteCAFile" . }}
+      for f in /tmp/ca-*.crt; do
+        keytool -importcert -noprompt -alias "yugabyte-$(basename "$f" .crt)" -file "$f" -keystore /yugabyte-truststore/truststore.jks -storetype JKS -storepass {{ include "sunbird.yugabyteTruststorePassword" . }}
+      done
+  volumeMounts:
+    {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 4 }}
+    - name: yugabyte-truststore
+      mountPath: /yugabyte-truststore
+{{- end }}
+{{- end -}}
+
+{{- define "sunbird.yugabyteTruststoreVolumeMount" -}}
+{{- if include "sunbird.yugabyteTLS" . }}
+- name: yugabyte-truststore
+  mountPath: /etc/yugabyte-truststore
+  readOnly: true
+{{- end }}
+{{- end -}}
+
+{{- define "sunbird.yugabyteTruststoreVolume" -}}
+{{- if include "sunbird.yugabyteTLS" . }}
+- name: yugabyte-truststore
+  emptyDir: {}
+{{- end }}
+{{- end -}}

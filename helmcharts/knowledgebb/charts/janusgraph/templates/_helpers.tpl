@@ -283,7 +283,7 @@ so an init container builds one from the mounted root.crt into an emptyDir.
 
 {{- define "janusgraph.yugabyteManaged.properties" -}}
 {{- if include "sunbird.yugabyteManaged" . }}
-storage.cql.local-datacenter={{ dig "yugabyte_managed" "local_datacenter" "centralindia" (.Values.global | default dict) }}
+storage.cql.local-datacenter={{ include "sunbird.yugabyteDatacenter" . }}
 storage.username={{ include "sunbird.yugabyte" (list . "username") }}
 storage.password={{ include "sunbird.yugabyte" (list . "password") }}
 {{- end }}

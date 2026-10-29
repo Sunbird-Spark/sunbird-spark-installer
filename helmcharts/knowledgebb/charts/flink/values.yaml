@@ -224,6 +224,22 @@ base_config: |
   redis {
   enable: false
   }
+  # Credentials and TLS for every Cassandra connection (read by CassandraSecurity in jobs-core).
+  # Only set when global.yugabyte_managed is on, so the in-cluster database is unchanged.
+  {{- if include "sunbird.yugabyteManaged" $ }}
+  cassandra {
+    auth {
+      username = "{{ include "sunbird.yugabyte" (list $ "username") }}"
+      password = "{{ include "sunbird.yugabyte" (list $ "password") }}"
+    }
+    {{- if include "sunbird.yugabyteTLS" $ }}
+    ssl {
+      enabled = true
+      rootcert = "{{ include "sunbird.yugabyteCAFile" $ }}"
+    }
+    {{- end }}
+  }
+  {{- end }}
   lms-cassandra {
   host = "{{ (include "sunbird.yugabyte" (list $ "host")) }}"
   port = "{{ (include "sunbird.yugabyte" (list $ "port")) }}"
@@ -238,7 +254,16 @@ base_config: |
   graph = "domain"
   storage.cql.read-consistency-level = "ONE"
   storage.cql.write-consistency-level = "ONE"
-  storage.cql.local-datacenter = "datacenter1"
+  storage.cql.local-datacenter = "{{ include "sunbird.yugabyteDatacenter" $ }}"
+  {{- if include "sunbird.yugabyteManaged" $ }}
+  storage.username = "{{ include "sunbird.yugabyte" (list $ "username") }}"
+  storage.password = "{{ include "sunbird.yugabyte" (list $ "password") }}"
+  {{- end }}
+  {{- if include "sunbird.yugabyteTLS" $ }}
+  storage.cql.ssl.enabled = true
+  storage.cql.ssl.truststore.location = "{{ include "sunbird.yugabyteTruststoreFile" $ }}"
+  storage.cql.ssl.truststore.password = "{{ include "sunbird.yugabyteTruststorePassword" $ }}"
+  {{- end }}
   log.learning_graph_events.backend = "default"
 
   }

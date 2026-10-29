@@ -100,6 +100,7 @@ spec:
           - name: flink-config-volume
             mountPath: /opt/flink/conf/log4j-console.properties
             subPath: log4j-console.properties
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
       volumes:
       - name: flink-config-volume
         configMap:
@@ -109,6 +110,7 @@ spec:
             path: flink-conf.yaml
           - key: log4j_console_properties
             path: log4j-console.properties
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}
 {{ $component := "jobmanager" }}
 ---
 apiVersion: apps/v1
@@ -218,6 +220,7 @@ spec:
           - name: flink-config-volume
             mountPath: /opt/flink/conf/log4j-console.properties
             subPath: log4j-console.properties
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
       volumes:
       - name: flink-config-volume
         configMap:
@@ -231,6 +234,7 @@ spec:
             path: {{ $jobName }}.conf
           - key: log4j_console_properties
             path: log4j-console.properties
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}
 {{- end }}
 {{- end}}
 {{- end}}
