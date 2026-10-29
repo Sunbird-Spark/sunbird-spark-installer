@@ -452,17 +452,17 @@ yugabyte:
     master:
       requests:
         cpu: "1"
-        memory: 3Gi
+        memory: 4Gi
       limits:
         cpu: "1"
-        memory: 3Gi
+        memory: 4Gi
     tserver:
       requests:
-        cpu: "3"
-        memory: 12Gi
+        cpu: "7"
+        memory: 26Gi
       limits:
-        cpu: "3"
-        memory: 12Gi
+        cpu: "7"
+        memory: 26Gi
   storage:
     master:
       count: 2
