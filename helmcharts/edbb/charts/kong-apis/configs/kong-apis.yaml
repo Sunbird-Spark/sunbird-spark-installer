@@ -9129,3 +9129,250 @@ kong_apis:
     config.limit_by: credential
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+- name: frameworkPublish
+  uris: "{{ .Values.framework_prefix }}/v3/publish/:identifier"
+  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/publish/:identifier"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: frameworkReview
+  uris: "{{ .Values.framework_prefix }}/v3/review/:identifier"
+  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/review/:identifier"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: frameworkReject
+  uris: "{{ .Values.framework_prefix }}/v3/reject/:identifier"
+  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/reject/:identifier"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: frameworkTermUpdate
+  uris: "{{ .Values.framework_prefix }}/v3/term/update"
+  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/update"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.large_request_size_limit }}"
+
+- name: frameworkTermValidate
+  uris: "{{ .Values.framework_prefix }}/v3/term/validate"
+  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/validate"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.large_request_size_limit }}"
+
+- name: frameworkTermCommit
+  uris: "{{ .Values.framework_prefix }}/v3/term/commit"
+  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/commit"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.large_request_size_limit }}"
+
+- name: frameworkTermDownload
+  uris: "{{ .Values.framework_prefix }}/v3/term/download/:framework"
+  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/download/:framework"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+
+- name: competencyFrameworkCreate
+  uris: "{{ .Values.competency_framework_prefix }}/v3/create"
+  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/create"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: competencyFrameworkRead
+  uris: "{{ .Values.competency_framework_prefix }}/v3/read/:identifier"
+  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/read/:identifier"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+
+- name: competencyFrameworkUpdate
+  uris: "{{ .Values.competency_framework_prefix }}/v3/update/:identifier"
+  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/update/:identifier"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: competencyFrameworkRetire
+  uris: "{{ .Values.competency_framework_prefix }}/v3/retire/:identifier"
+  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/retire/:identifier"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: competencyFrameworkPublish
+  uris: "{{ .Values.competency_framework_prefix }}/v3/publish/:identifier"
+  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/publish/:identifier"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: competencyFrameworkReview
+  uris: "{{ .Values.competency_framework_prefix }}/v3/review/:identifier"
+  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/review/:identifier"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
+- name: competencyFrameworkReject
+  uris: "{{ .Values.competency_framework_prefix }}/v3/reject/:identifier"
+  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/reject/:identifier"
+  strip_path: true
+  plugins:
+  - name: jwt
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: acl
+    config.allow:
+    - courseAccess
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: credential
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
