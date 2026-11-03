@@ -8861,8 +8861,8 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
 - name: competencyFrameworkRead
-  uris: "{{ .Values.competency_prefix }}/v1/framework/read/:id"
-  url: "{{ .Values.viewer_service_url }}/v1/competency/framework/read/:id"
+  uris: "{{ .Values.competency_prefix }}/v1/framework/read"
+  url: "{{ .Values.viewer_service_url }}/v1/competency/framework/read"
   strip_path: true
   plugins:
   - name: jwt
@@ -9130,8 +9130,8 @@ kong_apis:
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 - name: frameworkPublish
-  uris: "{{ .Values.framework_prefix }}/v3/publish/:identifier"
-  url: "{{ .Values.taxonomy_service_url }}/framework/v3/publish/:identifier"
+  uris: "{{ .Values.framework_prefix }}/v3/publish"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/publish"
   strip_path: true
   plugins:
   - name: jwt
@@ -9148,8 +9148,8 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
 - name: frameworkReview
-  uris: "{{ .Values.framework_prefix }}/v3/review/:identifier"
-  url: "{{ .Values.taxonomy_service_url }}/framework/v3/review/:identifier"
+  uris: "{{ .Values.framework_prefix }}/v3/review"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/review"
   strip_path: true
   plugins:
   - name: jwt
@@ -9166,8 +9166,8 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
 - name: frameworkReject
-  uris: "{{ .Values.framework_prefix }}/v3/reject/:identifier"
-  url: "{{ .Values.taxonomy_service_url }}/framework/v3/reject/:identifier"
+  uris: "{{ .Values.framework_prefix }}/v3/reject"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/reject"
   strip_path: true
   plugins:
   - name: jwt
@@ -9238,8 +9238,8 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.large_request_size_limit }}"
 
 - name: frameworkTermDownload
-  uris: "{{ .Values.framework_prefix }}/v3/term/download/:framework"
-  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/download/:framework"
+  uris: "{{ .Values.framework_prefix }}/v3/term/download"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/download"
   strip_path: true
   plugins:
   - name: jwt
@@ -9272,8 +9272,8 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
 - name: competencyFrameworkRead
-  uris: "{{ .Values.competency_framework_prefix }}/v3/read/:identifier"
-  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/read/:identifier"
+  uris: "{{ .Values.competency_framework_prefix }}/v3/read"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/read"
   strip_path: true
   plugins:
   - name: jwt
@@ -9288,8 +9288,8 @@ kong_apis:
     config.limit_by: credential
 
 - name: competencyFrameworkUpdate
-  uris: "{{ .Values.competency_framework_prefix }}/v3/update/:identifier"
-  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/update/:identifier"
+  uris: "{{ .Values.competency_framework_prefix }}/v3/update"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -9306,8 +9306,8 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
 - name: competencyFrameworkRetire
-  uris: "{{ .Values.competency_framework_prefix }}/v3/retire/:identifier"
-  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/retire/:identifier"
+  uris: "{{ .Values.competency_framework_prefix }}/v3/retire"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/retire"
   strip_path: true
   plugins:
   - name: jwt
@@ -9324,8 +9324,8 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
 - name: competencyFrameworkPublish
-  uris: "{{ .Values.competency_framework_prefix }}/v3/publish/:identifier"
-  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/publish/:identifier"
+  uris: "{{ .Values.competency_framework_prefix }}/v3/publish"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/publish"
   strip_path: true
   plugins:
   - name: jwt
@@ -9342,8 +9342,8 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
 - name: competencyFrameworkReview
-  uris: "{{ .Values.competency_framework_prefix }}/v3/review/:identifier"
-  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/review/:identifier"
+  uris: "{{ .Values.competency_framework_prefix }}/v3/review"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/review"
   strip_path: true
   plugins:
   - name: jwt
@@ -9360,8 +9360,8 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
 - name: competencyFrameworkReject
-  uris: "{{ .Values.competency_framework_prefix }}/v3/reject/:identifier"
-  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/reject/:identifier"
+  uris: "{{ .Values.competency_framework_prefix }}/v3/reject"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/reject"
   strip_path: true
   plugins:
   - name: jwt
