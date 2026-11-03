@@ -184,9 +184,9 @@ opensearch:
   resources:
     requests:
       cpu: "1"
-      memory: "2Gi"
+      memory: "3Gi"
     limits:
-      cpu: "2"
+      cpu: "4"
       memory: "4Gi"
   persistence:
     size: 25Gi
@@ -333,8 +333,8 @@ lern:
       cpu: 100m
       memory: 100Mi
     limits:
-      cpu: 1
-      memory: 2Gi
+      cpu: 4
+      memory: 3Gi
 
 loki:
   gateway:

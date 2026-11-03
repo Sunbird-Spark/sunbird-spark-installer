@@ -37,8 +37,8 @@ resources:
     cpu: 100m
     memory: 100Mi
   limits:
-    cpu: 1
-    memory: 2Gi
+    cpu: 4
+    memory: 3Gi
 
 autoscaling:
   enabled: false
@@ -61,8 +61,8 @@ autoscaling:
 livenessProbe:
   initialDelaySeconds: 30
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
+  timeoutSeconds: 10
+  failureThreshold: 10
   successThreshold: 1
   httpGet:
     path: /health
@@ -231,12 +231,17 @@ opa_probes:
   periodSeconds: 15
   timeoutSeconds: 5
 
+# Keep in step with the envoy / opa CPU limits below
+envoy_concurrency: 2
+opa_gomaxprocs: 4
+opa_gogc: 200
+
 envoy_resources:
   requests:
     cpu: "100m"
     memory: "100Mi"
   limits:
-    cpu: "1"
+    cpu: "2"
     memory: "1024Mi"
 
 opa_resources:
@@ -244,7 +249,7 @@ opa_resources:
     cpu: "100m"
     memory: "100Mi"
   limits:
-    cpu: "1"
+    cpu: "4"
     memory: "1024Mi"
 
 init_container_resources:

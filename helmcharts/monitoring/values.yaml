@@ -5,13 +5,15 @@ kube-prometheus-stack:
   prometheus:
     prometheusSpec:
       retention: "30d"
+      # Size cap so heavy traffic cannot fill the volume; keep below storage
+      retentionSize: "45GB"
       storageSpec:
         volumeClaimTemplate:
           spec:
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
-                storage: 25Gi
+                storage: 50Gi
   grafana:
     env:
       GF_SERVER_SERVE_FROM_SUB_PATH: "true"
