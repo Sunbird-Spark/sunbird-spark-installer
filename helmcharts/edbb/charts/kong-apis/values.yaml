@@ -151,9 +151,7 @@ observability_prefix: /observability
 view_prefix: /view
 summary_prefix: /summary
 competency_prefix: /competency
-competency_framework_prefix: /competency-framework
 skill_prefix: /skill
-framework_prefix: /framework
 
 # Service URLs
 knowledge_mw_service_url: "http://knowledge-mw-service:5000"
