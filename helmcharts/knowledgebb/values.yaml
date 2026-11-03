@@ -232,6 +232,9 @@ sync-tool:
 
 search:
   enabled: true
+  replicaCount: 2
+  livenessProbe:
+    timeoutSeconds: 10
 
 flink:
   enabled: true

@@ -10,6 +10,22 @@ certregistry:
 lern:
   enabled: true
   opa_enabled: true
+  replicaCount: 3
+  livenessProbe:
+    timeoutSeconds: 10
+    failureThreshold: 10
+  # Soft rule: prefer one lern pod per node, never blocks scheduling
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: lern
+  # Heap = 40% of the container limit (about 1.2 GB of 3Gi). Actor and dispatcher tuning lives in the mounted application.conf.
+  java_options: "-XX:MaxRAMPercentage=40"
 registry:
   enabled: true
   opa_enabled: false
@@ -156,6 +172,7 @@ opensearch: &opensearch
   host: "opensearch-cluster-master"
   port: 9200
   singleNode: true
+  opensearchJavaOpts: "-Xms2g -Xmx2g"
   extraEnvs:
     - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
       value: ""
