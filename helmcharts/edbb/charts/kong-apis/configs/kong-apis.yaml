@@ -9131,7 +9131,7 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 - name: frameworkPublish
   uris: "{{ .Values.framework_prefix }}/v3/publish/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/publish/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/publish/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9149,7 +9149,7 @@ kong_apis:
 
 - name: frameworkReview
   uris: "{{ .Values.framework_prefix }}/v3/review/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/review/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/review/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9167,7 +9167,7 @@ kong_apis:
 
 - name: frameworkReject
   uris: "{{ .Values.framework_prefix }}/v3/reject/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/reject/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/reject/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9185,7 +9185,7 @@ kong_apis:
 
 - name: frameworkTermUpdate
   uris: "{{ .Values.framework_prefix }}/v3/term/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/update"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -9203,7 +9203,7 @@ kong_apis:
 
 - name: frameworkTermValidate
   uris: "{{ .Values.framework_prefix }}/v3/term/validate"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/validate"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/validate"
   strip_path: true
   plugins:
   - name: jwt
@@ -9221,7 +9221,7 @@ kong_apis:
 
 - name: frameworkTermCommit
   uris: "{{ .Values.framework_prefix }}/v3/term/commit"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/commit"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/commit"
   strip_path: true
   plugins:
   - name: jwt
@@ -9239,7 +9239,7 @@ kong_apis:
 
 - name: frameworkTermDownload
   uris: "{{ .Values.framework_prefix }}/v3/term/download/:framework"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/download/:framework"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/download/:framework"
   strip_path: true
   plugins:
   - name: jwt
@@ -9255,7 +9255,7 @@ kong_apis:
 
 - name: competencyFrameworkCreate
   uris: "{{ .Values.competency_framework_prefix }}/v3/create"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/create"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -9273,7 +9273,7 @@ kong_apis:
 
 - name: competencyFrameworkRead
   uris: "{{ .Values.competency_framework_prefix }}/v3/read/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/read/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/read/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9289,7 +9289,7 @@ kong_apis:
 
 - name: competencyFrameworkUpdate
   uris: "{{ .Values.competency_framework_prefix }}/v3/update/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/update/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/update/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9307,7 +9307,7 @@ kong_apis:
 
 - name: competencyFrameworkRetire
   uris: "{{ .Values.competency_framework_prefix }}/v3/retire/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/retire/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/retire/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9325,7 +9325,7 @@ kong_apis:
 
 - name: competencyFrameworkPublish
   uris: "{{ .Values.competency_framework_prefix }}/v3/publish/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/publish/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/publish/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9343,7 +9343,7 @@ kong_apis:
 
 - name: competencyFrameworkReview
   uris: "{{ .Values.competency_framework_prefix }}/v3/review/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/review/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/review/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9361,7 +9361,7 @@ kong_apis:
 
 - name: competencyFrameworkReject
   uris: "{{ .Values.competency_framework_prefix }}/v3/reject/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/reject/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/reject/:identifier"
   strip_path: true
   plugins:
   - name: jwt
