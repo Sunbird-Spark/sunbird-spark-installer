@@ -2,7 +2,7 @@
 kong_apis:
 - name: acceptContentFlag
   uris: "{{ .Values.content_prefix }}/v1/flag/accept"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/flag/accept"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/flag/accept"
   strip_path: true
   plugins:
   - name: jwt
@@ -197,7 +197,7 @@ kong_apis:
 
 - name: compositeSearch
   uris: "{{ .Values.composite_service_prefix }}/v1/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/search"
+  url: "{{ .Values.taxonomy_service_url }}/v1/search"
   strip_path: true
   plugins:
   - name: jwt
@@ -218,7 +218,7 @@ kong_apis:
 
 - name: compositeSearchv3
   uris: "{{ .Values.composite_service_prefix }}/v3/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/search"
+  url: "{{ .Values.taxonomy_service_url }}/v1/search"
   strip_path: true
   plugins:
   - name: jwt
@@ -237,7 +237,7 @@ kong_apis:
 
 - name: compositePrivateSearch
   uris: "{{ .Values.composite_service_prefix }}/v1/private/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v3/private/search"
+  url: "{{ .Values.taxonomy_service_url }}/v3/private/search"
   strip_path: true
   plugins:
   - name: jwt
@@ -291,7 +291,7 @@ kong_apis:
 
 - name: copyContent
   uris: "{{ .Values.content_prefix }}/v1/copy"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/copy"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/copy"
   strip_path: true
   plugins:
   - name: jwt
@@ -309,7 +309,7 @@ kong_apis:
 
 - name: copyFramework
   uris: "{{ .Values.framework_service_prefix }}/v1/copy"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/copy"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/copy"
   strip_path: true
   plugins:
   - name: jwt
@@ -453,7 +453,7 @@ kong_apis:
 
 - name: createChannel
   uris: "{{ .Values.channel_service_prefix }}/v1/create"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/channel/create"
+  url: "{{ .Values.taxonomy_service_url }}/v1/channel/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -471,7 +471,7 @@ kong_apis:
 
 - name: createContent
   uris: "{{ .Values.content_prefix }}/v1/create"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/create"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -525,7 +525,7 @@ kong_apis:
 
 - name: createFramework
   uris: "{{ .Values.framework_service_prefix }}/v1/create"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/create"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -543,7 +543,7 @@ kong_apis:
 
 - name: createFrameworkCategory
   uris: "{{ .Values.framework_service_prefix }}/v1/category/create"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/category/create"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/category/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -561,7 +561,7 @@ kong_apis:
 
 - name: createFrameworkTerm
   uris: "{{ .Values.framework_service_prefix }}/v1/term/create"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/term/create"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/term/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -579,7 +579,7 @@ kong_apis:
 
 - name: createLock
   uris: "{{ .Values.lock_service_prefix }}/v1/create"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/lock/create"
+  url: "{{ .Values.taxonomy_service_url }}/v1/lock/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -669,7 +669,7 @@ kong_apis:
 
 - name: createPublisher
   uris: "{{ .Values.dialcode_service_prefix }}/v1/publisher/create"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/publisher/create"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/publisher/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -971,7 +971,7 @@ kong_apis:
 
 - name: fetchURLMetaInformation
   uris: "{{ .Values.content_prefix }}/v1/fetchmeta"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/url/fetchmeta"
+  url: "{{ .Values.taxonomy_service_url }}/v1/url/fetchmeta"
   strip_path: true
   plugins:
   - name: jwt
@@ -989,7 +989,7 @@ kong_apis:
 
 - name: flagContent
   uris: "{{ .Values.content_prefix }}/v1/flag"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/flag"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/flag"
   strip_path: true
   plugins:
   - name: jwt
@@ -1025,7 +1025,7 @@ kong_apis:
 
 - name: generateDialcodes
   uris: "{{ .Values.dialcode_service_prefix }}/v1/generate"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/generate"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/generate"
   strip_path: true
   plugins:
   - name: jwt
@@ -1115,7 +1115,7 @@ kong_apis:
 
 - name: getContentUploadUrl
   uris: "{{ .Values.content_prefix }}/v1/upload/url/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/upload/url"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/upload/url"
   strip_path: true
   plugins:
   - name: jwt
@@ -1133,7 +1133,7 @@ kong_apis:
 
 - name: getCourseHierarchy
   uris: "{{ .Values.course_service_prefix }}/v1/hierarchy"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/course/hierarchy"
+  url: "{{ .Values.taxonomy_service_url }}/v1/course/hierarchy"
   strip_path: true
   plugins:
   - name: cors
@@ -1310,7 +1310,7 @@ kong_apis:
 
 - name: ItemSetAPIs
   uris: "{{ .Values.itemset_prefix }}/v1"
-  url: "{{ .Values.knowledge_mw_service_url }}/itemset/v1"
+  url: "{{ .Values.taxonomy_service_url }}/itemset/v1"
   strip_path: true
   plugins:
   - name: jwt
@@ -1364,7 +1364,7 @@ kong_apis:
 
 - name: linkDialcodeContent
   uris: "{{ .Values.dialcode_service_prefix }}/v1/content/link"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/content/link"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/content/link"
   strip_path: true
   plugins:
   - name: jwt
@@ -1400,7 +1400,7 @@ kong_apis:
 
 - name: listChannel
   uris: "{{ .Values.channel_service_prefix }}/v1/list"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/channel/list"
+  url: "{{ .Values.taxonomy_service_url }}/v1/channel/list"
   strip_path: true
   plugins:
   - name: jwt
@@ -1508,7 +1508,7 @@ kong_apis:
 
 - name: listDialcodes
   uris: "{{ .Values.dialcode_service_prefix }}/v1/list"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/list"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/list"
   strip_path: true
   plugins:
   - name: jwt
@@ -1526,7 +1526,7 @@ kong_apis:
 
 - name: listFramework
   uris: "{{ .Values.framework_service_prefix }}/v1/list"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/list"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/list"
   strip_path: true
   plugins:
   - name: jwt
@@ -1544,7 +1544,7 @@ kong_apis:
 
 - name: listLock
   uris: "{{ .Values.lock_service_prefix }}/v1/list"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/lock/list"
+  url: "{{ .Values.taxonomy_service_url }}/v1/lock/list"
   strip_path: true
   plugins:
   - name: jwt
@@ -1562,7 +1562,7 @@ kong_apis:
 
 - name: listOrdinals
   uris: "{{ .Values.meta_service_prefix }}/v1/ordinals/list"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/ordinals/list"
+  url: "{{ .Values.taxonomy_service_url }}/v1/ordinals/list"
   strip_path: true
   plugins:
   - name: jwt
@@ -1598,7 +1598,7 @@ kong_apis:
 
 - name: listResourceBundles
   uris: "{{ .Values.meta_service_prefix }}/v1/resourcebundles/list"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/resourcebundles/list"
+  url: "{{ .Values.taxonomy_service_url }}/v1/resourcebundles/list"
   strip_path: true
   plugins:
   - name: jwt
@@ -1634,7 +1634,7 @@ kong_apis:
 
 - name: listTerms
   uris: "{{ .Values.meta_service_prefix }}/v1/terms/list"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/terms/list"
+  url: "{{ .Values.taxonomy_service_url }}/v1/terms/list"
   strip_path: true
   plugins:
   - name: jwt
@@ -1810,7 +1810,7 @@ kong_apis:
 
 - name: pluginSearch
   uris: "{{ .Values.plugin_service_prefix }}/v1/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/plugins/search"
+  url: "{{ .Values.taxonomy_service_url }}/v1/plugins/search"
   strip_path: true
   plugins:
   - name: jwt
@@ -2044,7 +2044,7 @@ kong_apis:
 
 - name: publishCourse
   uris: "{{ .Values.course_service_prefix }}/v1/publish"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/course/publish"
+  url: "{{ .Values.taxonomy_service_url }}/v1/course/publish"
   strip_path: true
   plugins:
   - name: jwt
@@ -2062,7 +2062,7 @@ kong_apis:
 
 - name: publishDialcode
   uris: "{{ .Values.dialcode_service_prefix }}/v1/publish"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/publish"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/publish"
   strip_path: true
   plugins:
   - name: jwt
@@ -2080,7 +2080,7 @@ kong_apis:
 
 - name: publishFramework
   uris: "{{ .Values.framework_service_prefix }}/v1/publish"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/publish"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/publish"
   strip_path: true
   plugins:
   - name: jwt
@@ -2098,7 +2098,7 @@ kong_apis:
 
 - name: qrCodeBatchProcessRetry
   uris: "{{ .Values.dialcode_service_prefix }}/v1/process/retry"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/process/retry"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/process/retry"
   strip_path: true
   plugins:
   - name: jwt
@@ -2116,7 +2116,7 @@ kong_apis:
 
 - name: qrCodeBatchProcessStatus
   uris: "{{ .Values.dialcode_service_prefix }}/v1/process/status"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/process/status"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/process/status"
   strip_path: true
   plugins:
   - name: jwt
@@ -2170,7 +2170,7 @@ kong_apis:
 
 - name: readChannel
   uris: "{{ .Values.channel_service_prefix }}/v1/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/channel/read"
+  url: "{{ .Values.taxonomy_service_url }}/v1/channel/read"
   strip_path: true
   plugins:
   - name: cors
@@ -2184,7 +2184,7 @@ kong_apis:
 
 - name: readContent
   uris: "{{ .Values.content_prefix }}/v1/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/read"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/read"
   strip_path: true
   plugins:
   - name: cors
@@ -2252,7 +2252,7 @@ kong_apis:
 
 - name: readCourse
   uris: "{{ .Values.course_service_prefix }}/v1/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/course/read"
+  url: "{{ .Values.taxonomy_service_url }}/v1/course/read"
   strip_path: true
   plugins:
   - name: jwt
@@ -2288,7 +2288,7 @@ kong_apis:
 
 - name: readDialcode
   uris: "{{ .Values.dialcode_service_prefix }}/v1/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/read"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/read"
   strip_path: true
   plugins:
   - name: jwt
@@ -2306,7 +2306,7 @@ kong_apis:
 
 - name: readDialcodeV2
   uris: "{{ .Values.dialcode_service_prefix }}/v2/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v2/dialcode/read"
+  url: "{{ .Values.taxonomy_service_url }}/v2/dialcode/read"
   strip_path: true
   plugins:
   - name: cors
@@ -2334,7 +2334,7 @@ kong_apis:
 
 - name: readFramework
   uris: "{{ .Values.framework_service_prefix }}/v1/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/read"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/read"
   strip_path: true
   plugins:
   - name: cors
@@ -2348,7 +2348,7 @@ kong_apis:
 
 - name: readFrameworkCategory
   uris: "{{ .Values.framework_service_prefix }}/v1/category/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/category/read"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/category/read"
   strip_path: true
   plugins:
   - name: jwt
@@ -2366,7 +2366,7 @@ kong_apis:
 
 - name: readFrameworkTerm
   uris: "{{ .Values.framework_service_prefix }}/v1/term/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/term/read"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/term/read"
   strip_path: true
   plugins:
   - name: jwt
@@ -2438,7 +2438,7 @@ kong_apis:
 
 - name: readPublisher
   uris: "{{ .Values.dialcode_service_prefix }}/v1/publisher/read"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/publisher/read"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/publisher/read"
   strip_path: true
   plugins:
   - name: jwt
@@ -2564,7 +2564,7 @@ kong_apis:
 
 - name: refreshLock
   uris: "{{ .Values.lock_service_prefix }}/v1/refresh"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/lock/refresh"
+  url: "{{ .Values.taxonomy_service_url }}/v1/lock/refresh"
   strip_path: true
   plugins:
   - name: jwt
@@ -2762,7 +2762,7 @@ kong_apis:
 
 - name: rejectContent
   uris: "{{ .Values.content_prefix }}/v1/reject"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/reject"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/reject"
   strip_path: true
   plugins:
   - name: jwt
@@ -2780,7 +2780,7 @@ kong_apis:
 
 - name: rejectContentFlag
   uris: "{{ .Values.content_prefix }}/v1/flag/reject"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/flag/reject"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/flag/reject"
   strip_path: true
   plugins:
   - name: jwt
@@ -2798,7 +2798,7 @@ kong_apis:
 
 - name: releaseDialcode
   uris: "{{ .Values.dialcode_service_prefix }}/v1/release"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/release"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/release"
   strip_path: true
   plugins:
   - name: jwt
@@ -2816,7 +2816,7 @@ kong_apis:
 
 - name: reserveDialcode
   uris: "{{ .Values.dialcode_service_prefix }}/v1/reserve"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/reserve"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/reserve"
   strip_path: true
   plugins:
   - name: jwt
@@ -2834,7 +2834,7 @@ kong_apis:
 
 - name: retireContent
   uris: "{{ .Values.content_prefix }}/v1/retire"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/retire"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/retire"
   strip_path: true
   plugins:
   - name: jwt
@@ -2852,7 +2852,7 @@ kong_apis:
 
 - name: retireCourse
   uris: "{{ .Values.course_service_prefix }}/v1/retire"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/course/retire"
+  url: "{{ .Values.taxonomy_service_url }}/v1/course/retire"
   strip_path: true
   plugins:
   - name: jwt
@@ -2870,7 +2870,7 @@ kong_apis:
 
 - name: retireLock
   uris: "{{ .Values.lock_service_prefix }}/v1/retire"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/lock/retire"
+  url: "{{ .Values.taxonomy_service_url }}/v1/lock/retire"
   strip_path: true
   plugins:
   - name: jwt
@@ -2888,7 +2888,7 @@ kong_apis:
 
 - name: searchChannel
   uris: "{{ .Values.channel_service_prefix }}/v1/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/channel/search"
+  url: "{{ .Values.taxonomy_service_url }}/v1/channel/search"
   strip_path: true
   plugins:
   - name: jwt
@@ -2906,7 +2906,7 @@ kong_apis:
 
 - name: searchContent
   uris: "{{ .Values.content_prefix }}/v1/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/search"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/search"
   strip_path: true
   plugins:
   - name: cors
@@ -2920,7 +2920,7 @@ kong_apis:
 
 - name: searchCourse
   uris: "{{ .Values.course_service_prefix }}/v1/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/course/search"
+  url: "{{ .Values.taxonomy_service_url }}/v1/course/search"
   strip_path: true
   plugins:
   - name: jwt
@@ -2938,7 +2938,7 @@ kong_apis:
 
 - name: searchDialcodes
   uris: "{{ .Values.dialcode_service_prefix }}/v1/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/search"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/search"
   strip_path: true
   plugins:
   - name: jwt
@@ -2956,7 +2956,7 @@ kong_apis:
 
 - name: searchFrameworkCategory
   uris: "{{ .Values.framework_service_prefix }}/v1/category/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/category/search"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/category/search"
   strip_path: true
   plugins:
   - name: jwt
@@ -2974,7 +2974,7 @@ kong_apis:
 
 - name: searchFrameworkTerm
   uris: "{{ .Values.framework_service_prefix }}/v1/term/search"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/term/search"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/term/search"
   strip_path: true
   plugins:
   - name: jwt
@@ -3074,7 +3074,7 @@ kong_apis:
 
 - name: submitContentForReview
   uris: "{{ .Values.content_prefix }}/v1/review"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/review"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/review"
   strip_path: true
   plugins:
   - name: jwt
@@ -3092,7 +3092,7 @@ kong_apis:
 
 - name: submitCourseForReview
   uris: "{{ .Values.course_service_prefix }}/v1/review"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/course/review"
+  url: "{{ .Values.taxonomy_service_url }}/v1/course/review"
   strip_path: true
   plugins:
   - name: jwt
@@ -3200,7 +3200,7 @@ kong_apis:
 
 - name: updateChannel
   uris: "{{ .Values.channel_service_prefix }}/v1/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/channel/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/channel/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3218,7 +3218,7 @@ kong_apis:
 
 - name: updateCollaborators
   uris: "{{ .Values.content_prefix }}/v1/collaborator/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/collaborator/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/collaborator/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3236,7 +3236,7 @@ kong_apis:
 
 - name: updateContent
   uris: "{{ .Values.content_prefix }}/v1/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3272,7 +3272,7 @@ kong_apis:
 
 - name: updateCourse
   uris: "{{ .Values.course_service_prefix }}/v1/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/course/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/course/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3326,7 +3326,7 @@ kong_apis:
 
 - name: updateCourseHierarchy
   uris: "{{ .Values.course_service_prefix }}/v1/hierarchy/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/course/hierarchy/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/course/hierarchy/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3362,7 +3362,7 @@ kong_apis:
 
 - name: updateDialcode
   uris: "{{ .Values.dialcode_service_prefix }}/v1/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3380,7 +3380,7 @@ kong_apis:
 
 - name: updateDialcodeV2
   uris: "{{ .Values.dialcode_service_prefix }}/v2/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v2/dialcode/update"
+  url: "{{ .Values.taxonomy_service_url }}/v2/dialcode/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3416,7 +3416,7 @@ kong_apis:
 
 - name: updateFramework
   uris: "{{ .Values.framework_service_prefix }}/v1/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3434,7 +3434,7 @@ kong_apis:
 
 - name: updateFrameworkCategory
   uris: "{{ .Values.framework_service_prefix }}/v1/category/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/category/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/category/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3452,7 +3452,7 @@ kong_apis:
 
 - name: updateFrameworkTerm
   uris: "{{ .Values.framework_service_prefix }}/v1/term/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/framework/term/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/framework/term/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3560,7 +3560,7 @@ kong_apis:
 
 - name: updatePublisher
   uris: "{{ .Values.dialcode_service_prefix }}/v1/publisher/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/dialcode/publisher/update"
+  url: "{{ .Values.taxonomy_service_url }}/v1/dialcode/publisher/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -3596,7 +3596,7 @@ kong_apis:
 
 - name: uploadContent
   uris: "{{ .Values.content_prefix }}/v1/upload"
-  url: "{{ .Values.knowledge_mw_service_url }}/v1/content/upload"
+  url: "{{ .Values.taxonomy_service_url }}/v1/content/upload"
   strip_path: true
   plugins:
   - name: jwt
@@ -9131,7 +9131,7 @@ kong_apis:
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 - name: frameworkPublish
   uris: "{{ .Values.framework_prefix }}/v3/publish/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/publish/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/publish/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9149,7 +9149,7 @@ kong_apis:
 
 - name: frameworkReview
   uris: "{{ .Values.framework_prefix }}/v3/review/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/review/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/review/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9167,7 +9167,7 @@ kong_apis:
 
 - name: frameworkReject
   uris: "{{ .Values.framework_prefix }}/v3/reject/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/reject/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/reject/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9185,7 +9185,7 @@ kong_apis:
 
 - name: frameworkTermUpdate
   uris: "{{ .Values.framework_prefix }}/v3/term/update"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/update"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/update"
   strip_path: true
   plugins:
   - name: jwt
@@ -9203,7 +9203,7 @@ kong_apis:
 
 - name: frameworkTermValidate
   uris: "{{ .Values.framework_prefix }}/v3/term/validate"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/validate"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/validate"
   strip_path: true
   plugins:
   - name: jwt
@@ -9221,7 +9221,7 @@ kong_apis:
 
 - name: frameworkTermCommit
   uris: "{{ .Values.framework_prefix }}/v3/term/commit"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/commit"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/commit"
   strip_path: true
   plugins:
   - name: jwt
@@ -9239,7 +9239,7 @@ kong_apis:
 
 - name: frameworkTermDownload
   uris: "{{ .Values.framework_prefix }}/v3/term/download/:framework"
-  url: "{{ .Values.knowledge_mw_service_url }}/framework/v3/term/download/:framework"
+  url: "{{ .Values.taxonomy_service_url }}/framework/v3/term/download/:framework"
   strip_path: true
   plugins:
   - name: jwt
@@ -9255,7 +9255,7 @@ kong_apis:
 
 - name: competencyFrameworkCreate
   uris: "{{ .Values.competency_framework_prefix }}/v3/create"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/create"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/create"
   strip_path: true
   plugins:
   - name: jwt
@@ -9273,7 +9273,7 @@ kong_apis:
 
 - name: competencyFrameworkRead
   uris: "{{ .Values.competency_framework_prefix }}/v3/read/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/read/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/read/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9289,7 +9289,7 @@ kong_apis:
 
 - name: competencyFrameworkUpdate
   uris: "{{ .Values.competency_framework_prefix }}/v3/update/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/update/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/update/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9307,7 +9307,7 @@ kong_apis:
 
 - name: competencyFrameworkRetire
   uris: "{{ .Values.competency_framework_prefix }}/v3/retire/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/retire/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/retire/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9325,7 +9325,7 @@ kong_apis:
 
 - name: competencyFrameworkPublish
   uris: "{{ .Values.competency_framework_prefix }}/v3/publish/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/publish/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/publish/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9343,7 +9343,7 @@ kong_apis:
 
 - name: competencyFrameworkReview
   uris: "{{ .Values.competency_framework_prefix }}/v3/review/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/review/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/review/:identifier"
   strip_path: true
   plugins:
   - name: jwt
@@ -9361,7 +9361,7 @@ kong_apis:
 
 - name: competencyFrameworkReject
   uris: "{{ .Values.competency_framework_prefix }}/v3/reject/:identifier"
-  url: "{{ .Values.knowledge_mw_service_url }}/competency-framework/v3/reject/:identifier"
+  url: "{{ .Values.taxonomy_service_url }}/competency-framework/v3/reject/:identifier"
   strip_path: true
   plugins:
   - name: jwt
