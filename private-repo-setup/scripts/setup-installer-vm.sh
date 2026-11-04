@@ -427,11 +427,20 @@ else
     --size "$VM_SIZE" \
     --admin-username "$VM_ADMIN_USER" \
     --generate-ssh-keys \
+    --authentication-type ssh \
+    --patch-mode AutomaticByPlatform \
     --assign-identity "$IDENTITY_ID" \
     --custom-data "$CLOUD_INIT_FILE" \
     --vnet-name "$VNET_NAME" \
     --subnet "$RUNNER_SUBNET_NAME" \
     "${PUBLIC_IP_ARGS[@]}" >/dev/null
+
+  # CSPM fix (secure at creation time, not patched after the fact): deny public
+  # network access to the OS disk's snapshot/export endpoint. Doesn't affect the
+  # running VM's app traffic -- only the disk's separate export API.
+  OS_DISK_ID=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
+    --query "storageProfile.osDisk.managedDisk.id" -o tsv)
+  az disk update --ids "$OS_DISK_ID" --network-access-policy DenyAll >/dev/null
 
   rm -f "$SETUP_SCRIPT" "$CLOUD_INIT_FILE"
   echo "✓ VM created: $VM_NAME"
