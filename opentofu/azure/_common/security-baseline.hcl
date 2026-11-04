@@ -28,4 +28,5 @@ inputs = {
   location                   = local.location
   # Added: lets global-values.yaml control the subscription Activity Log retention window.
   log_retention_days         = try(local.global_vars.global.log_retention_days, 30)
+  log_analytics_enabled      = try(local.global_vars.global.log_analytics_enabled, false)
 }

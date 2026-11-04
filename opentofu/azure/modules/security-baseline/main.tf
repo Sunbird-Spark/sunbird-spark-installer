@@ -25,6 +25,7 @@ locals {
 # control-plane log workspace in modules/aks -- this one is subscription-scoped, not
 # tied to a single cluster.
 resource "azurerm_log_analytics_workspace" "activity_logs" {
+  count               = var.log_analytics_enabled ? 1 : 0
   name                = "${local.environment_name}-activity-logs"
   location            = var.location
   resource_group_name = var.resource_group_name
@@ -40,9 +41,10 @@ resource "azurerm_log_analytics_workspace" "activity_logs" {
 # 'Diagnostic Setting' exists for Subscription Activity Logs" -- routes who-changed-what
 # subscription audit trail to Log Analytics; visibility only, no functional impact.
 resource "azurerm_monitor_diagnostic_setting" "activity_log" {
+  count                      = var.log_analytics_enabled ? 1 : 0
   name                       = "${local.environment_name}-activity-log"
   target_resource_id         = "/subscriptions/${var.subscription_id}"
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.activity_logs.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.activity_logs[0].id
 
   enabled_log {
     category = "Administrative"
@@ -59,4 +61,14 @@ resource "azurerm_monitor_diagnostic_setting" "activity_log" {
   enabled_log {
     category = "Alert"
   }
+}
+
+moved {
+  from = azurerm_log_analytics_workspace.activity_logs
+  to   = azurerm_log_analytics_workspace.activity_logs[0]
+}
+
+moved {
+  from = azurerm_monitor_diagnostic_setting.activity_log
+  to   = azurerm_monitor_diagnostic_setting.activity_log[0]
 }

@@ -36,3 +36,9 @@ variable "log_retention_days" {
   description = "Retention window (days) for the subscription Activity Log workspace."
   default     = 30
 }
+
+variable "log_analytics_enabled" {
+  type        = bool
+  description = "Create the Log Analytics workspace and diagnostic settings for audit/activity logs."
+  default     = false
+}

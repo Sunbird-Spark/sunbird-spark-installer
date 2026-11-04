@@ -72,6 +72,7 @@ provider "azurerm" {
   # Added: CSPM "Kubernetes clusters should have logging enabled" -- destination for the
   # control-plane audit logs below; doesn't touch app/ingress traffic.
   resource "azurerm_log_analytics_workspace" "aks_logs" {
+    count               = var.log_analytics_enabled ? 1 : 0
     name                = "${local.environment_name}-logs"
     location            = var.location
     resource_group_name = var.resource_group_name
@@ -86,9 +87,10 @@ provider "azurerm" {
   # Added: routes AKS API-server audit logs to the workspace above -- satisfies the CSPM
   # logging finding; purely additive visibility, no effect on cluster/app behaviour.
   resource "azurerm_monitor_diagnostic_setting" "aks_diagnostics" {
+    count                      = var.log_analytics_enabled ? 1 : 0
     name                       = "${local.environment_name}-diagnostics"
     target_resource_id         = azurerm_kubernetes_cluster.aks.id
-    log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_logs.id
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_logs[0].id
 
     # kube-audit (every read/watch) deliberately excluded -- kube-audit-admin (added)
     enabled_log {
@@ -102,6 +104,16 @@ provider "azurerm" {
     enabled_metric {
       category = "AllMetrics"
     }
+  }
+
+  moved {
+    from = azurerm_log_analytics_workspace.aks_logs
+    to   = azurerm_log_analytics_workspace.aks_logs[0]
+  }
+
+  moved {
+    from = azurerm_monitor_diagnostic_setting.aks_diagnostics
+    to   = azurerm_monitor_diagnostic_setting.aks_diagnostics[0]
   }
 
   # resource "azurerm_kubernetes_cluster_node_pool" "small_nodepool" {

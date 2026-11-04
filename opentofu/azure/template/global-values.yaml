@@ -42,6 +42,7 @@ global:
   skip_storage_module: false  # set to true if global-cloud-values.yaml is provided from private repo; false to create storage and generate the file
   skip_network_module: false  # true = reuse existing VNet/subnets (set vnet_name and subnet names below); false = network module creates VNet/subnets
   soft_delete_retention_days: 7   # days deleted blobs/containers stay recoverable (storage module soft delete) | uncomment to override, defaults to 7 days if not set
+  log_analytics_enabled: false
   log_retention_days: 30          # days AKS audit logs + subscription activity logs are retained in Log Analytics | uncomment to override, defaults to 30 days if not set
   vnet_name: ""                  # required when skip_network_module: true — name of existing VNet (e.g. "ed-dev")
   aks_subnet_name: ""            # required when skip_network_module: true — name of existing AKS subnet (e.g. "ed-dev-aks")
