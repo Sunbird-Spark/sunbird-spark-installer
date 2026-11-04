@@ -27,18 +27,11 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
-          env:
-            - name: LITELLM_LOCAL_MODEL_COST_MAP
-              value: "true"
-            - name: LITELLM_TELEMETRY
-              value: "false"
-            - name: DO_NOT_TRACK
-              value: "1"
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: openai-secret
-                  key: OPENAI_API_KEY
+          envFrom:
+            - configMapRef:
+                name: {{ include "common.names.fullname" . }}-env
+            - secretRef:
+                name: openai-secret
           volumeMounts:
             - name: config
               mountPath: /app/config.yaml
