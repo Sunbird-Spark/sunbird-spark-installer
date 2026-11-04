@@ -1,5 +1,7 @@
 deployed_dial_addon:  &deployed_dial_addon  "false"
 enable_asset_enrichment: &enable_asset_enrichment "false"
+# Only gates the "deploy everything" path; an explicit ai-pipeline call always deploys it.
+ai_pipeline_enabled: "true"
 default_passwords:
   grafana_admin_password: &grafana-admin-password "prom-operator"
   keycloak_password: &keycloak-password "admin"

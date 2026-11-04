@@ -75,6 +75,10 @@ on:
         description: '   ↳ additional'
         type: boolean
         default: false
+      ai_pipeline:
+        description: '   ↳ ai-pipeline'
+        type: boolean
+        default: false
       specific_charts:
         description: '   ↳ specific charts (space-separated, e.g. "kafka yugabyte") — also check one bundle above'
         type: string
@@ -522,6 +526,12 @@ jobs:
           cd $ENV_FOLDER && bash install.sh install_component additional
           echo "✅ additional installed"
 
+      - name: 5️⃣ install_helm — ai-pipeline
+        if: ${{ inputs.install_helm && inputs.helm_mode == 'selective' && inputs.ai_pipeline && inputs.specific_charts == '' }}
+        run: |
+          cd $ENV_FOLDER && bash install.sh install_component ai-pipeline
+          echo "✅ ai-pipeline installed"
+
       - name: 5️⃣ install_helm — specific charts
         if: ${{ inputs.specific_charts != '' }}
         env:
@@ -535,6 +545,7 @@ jobs:
           [ "${{ inputs.knowledgebb }}" == "true" ] && bundle="knowledgebb"
           [ "${{ inputs.obsrvbb }}"     == "true" ] && bundle="obsrvbb"
           [ "${{ inputs.additional }}"  == "true" ] && bundle="additional"
+          [ "${{ inputs.ai_pipeline }}" == "true" ] && bundle="ai-pipeline"
           if [ -z "$bundle" ]; then
             echo "❌ No bundle selected — check one bundle checkbox alongside specific_charts"
             exit 1
@@ -560,6 +571,7 @@ jobs:
               [ "${{ inputs.knowledgebb }}" == "true" ] && echo "       ✅ knowledgebb" || echo "       ⏭️  knowledgebb"
               [ "${{ inputs.obsrvbb }}"     == "true" ] && echo "       ✅ obsrvbb"     || echo "       ⏭️  obsrvbb"
               [ "${{ inputs.additional }}"  == "true" ] && echo "       ✅ additional"  || echo "       ⏭️  additional"
+              [ "${{ inputs.ai_pipeline }}" == "true" ] && echo "       ✅ ai-pipeline" || echo "       ⏭️  ai-pipeline"
             }
           else
             echo "  ⏭️  5️⃣  install_helm (skipped)"
@@ -572,6 +584,7 @@ jobs:
             [ "${{ inputs.knowledgebb }}" == "true" ] && bundle="knowledgebb"
             [ "${{ inputs.obsrvbb }}"     == "true" ] && bundle="obsrvbb"
             [ "${{ inputs.additional }}"  == "true" ] && bundle="additional"
+            [ "${{ inputs.ai_pipeline }}" == "true" ] && bundle="ai-pipeline"
             echo "  ✅ 5️⃣  specific charts in ${bundle:-<no bundle>}: $SPECIFIC_CHARTS"
           fi
           echo "================================================"
