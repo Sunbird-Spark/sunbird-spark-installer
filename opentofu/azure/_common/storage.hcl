@@ -26,5 +26,5 @@ inputs = {
   resource_group_name = dependency.network.outputs.resource_group_name
   subscription_id             = local.subscription_id
   location            = local.location
-  soft_delete_retention_days = local.global_vars.global.soft_delete_retention_days
+  soft_delete_retention_days = try(local.global_vars.global.soft_delete_retention_days, 7)
 }

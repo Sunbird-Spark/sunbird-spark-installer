@@ -90,10 +90,7 @@ provider "azurerm" {
     target_resource_id         = azurerm_kubernetes_cluster.aks.id
     log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_logs.id
 
-    enabled_log {
-      category = "kube-audit"
-    }
-
+    # kube-audit (every read/watch) deliberately excluded -- kube-audit-admin (added)
     enabled_log {
       category = "kube-audit-admin"
     }
