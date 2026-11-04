@@ -42,3 +42,10 @@ variable "subscription_id" {
   type        = string
 }
 
+# Added: retention window for the blob/container soft-delete policies below.
+variable "soft_delete_retention_days" {
+  type        = number
+  description = "Retention window (days) for blob and container soft delete."
+  default     = 7
+}
+

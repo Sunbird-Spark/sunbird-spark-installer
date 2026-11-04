@@ -112,3 +112,16 @@ variable "private_cluster_enabled" {
   description = "When true, AKS API server has no public endpoint. Requires VPN or self-hosted runner inside the VNet."
   default     = true
 }
+
+# Added: retention window for the AKS control-plane audit logs (Log Analytics workspace).
+variable "log_retention_days" {
+  type        = number
+  description = "Retention window (days) for the AKS control-plane audit log workspace."
+  default     = 30
+}
+
+variable "log_analytics_enabled" {
+  type        = bool
+  description = "Create the Log Analytics workspace and diagnostic settings for audit/activity logs."
+  default     = false
+}
