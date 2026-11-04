@@ -6,6 +6,16 @@ locals {
   rsa_script_location = "${var.base_location}/../../../../scripts/rsa-keys.py"
   global_values_jwt_file_location = "${var.base_location}/../../../../scripts/global-values-jwt-tokens.yaml"
   global_values_rsa_file_location = "${var.base_location}/../../../../scripts/global-values-rsa-keys.yaml"
+  global_values_file = "${var.base_location}/../global-values.yaml"
+
+  # Detects whether a prior apply's merge actually landed in global-values.yaml.
+  # Covers the case where this resource is already "created" in state (so its
+  # one-time provisioner won't rerun) but the merge itself never succeeded --
+  # e.g. a prior run failed/was interrupted after generating keys but before
+  # the commit-back step captured them. Stays stable once keys are present,
+  # so this does NOT cause key rotation on normal applies.
+  rsa_keys_present = can(regex("access_v1_private_keys:", file(local.global_values_file)))
+  jwt_keys_present = can(regex("sunbird_admin_api_token:", file(local.global_values_file)))
 }
 resource "random_password" "generated_string" {
   length  = 16          # Length of the string (can be between 12 and 24)
@@ -16,14 +26,12 @@ resource "random_password" "generated_string" {
 }
 
 resource "null_resource" "generate_jwt_keys" {
-  # Run ONCE at create. Do NOT use timestamp() triggers — that regenerates
-  # keys on every `terragrunt apply` and breaks existing services that
-  # validate JWTs against the prior keys.
-  # To force key regeneration: uncomment the triggers block below, run terragrunt apply,
-  # then re-comment to prevent regeneration on future runs.
-  # triggers = {
-  #   script_hash = filemd5(local.jwt_script_location)
-  # }
+  # Reruns (regenerate + re-merge) only while the merge target is missing the
+  # expected keys -- does NOT rotate keys on every apply once they're present,
+  # since local.jwt_keys_present stays "present" forever after a successful merge.
+  triggers = {
+    keys_present = local.jwt_keys_present ? "present" : "missing"
+  }
   provisioner "local-exec" {
     command = <<EOT
       python3 ${local.jwt_script_location} ${random_password.generated_string.result} && \
@@ -35,7 +43,11 @@ resource "null_resource" "generate_jwt_keys" {
 
 
 resource "null_resource" "generate_rsa_keys" {
-  # Run ONCE at create. See note on generate_jwt_keys above.
+  # Reruns (regenerate + re-merge) only while the merge target is missing the
+  # expected keys -- see note on generate_jwt_keys above.
+  triggers = {
+    keys_present = local.rsa_keys_present ? "present" : "missing"
+  }
   provisioner "local-exec" {
     command = <<EOT
       python3 ${local.rsa_script_location} ${var.rsa_keys_count} && \

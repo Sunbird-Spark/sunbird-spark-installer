@@ -153,4 +153,5 @@ GitGuardian `ggshield` (v1.14.5) scans every commit for secrets. Configure via `
 
 - `INFRA_DETAILS.md` — per-component resource breakdown (CPU, memory, disk) for sizing decisions
 - `Adding Support for New Cloud Provider.md` — guide for porting to a new cloud
+- `helmcharts/monitoring/DISABLED_SCRAPE_TARGETS.md` — which Prometheus scrape targets are currently disabled for memory reasons, and how to re-enable each one
 - `private-repo-setup/README.md` — full walkthrough for GitHub Actions CI/CD setup

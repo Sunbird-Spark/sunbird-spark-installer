@@ -24,7 +24,23 @@ data:
 {{ $value.json | indent 6 }}
 {{- end }}
 {{- if hasKey $value "file" }}
-{{ toYaml ( $files.Get $value.file ) | indent 4}}
+{{- $raw := $files.Get $value.file }}
+{{- if eq $value.file "dashboards/secor-consumarlag-kafka.json" }}
+{{- /* This dashboard's $env template var is a hardcoded "dev" constant used to
+   prefix-match kafka topic names (topic=~"$env.*"), but every environment
+   (test, sandbox, uat, stage, ...) names its topics after itself -- so this
+   only ever worked by coincidence on "dev". Swap in the real per-environment
+   name here (same one every other bundle already uses) instead of hardcoding
+   another single environment. Scoped to just this file and plain string
+   substitution (not tpl) since this JSON also uses Grafana's own {{topic}}/
+   {{partition}} legend-format syntax, which tpl would wrongly try to
+   evaluate as Go template expressions. */ -}}
+{{- $env := $.Values.global.environment }}
+{{- $raw = $raw | replace "\"text\": \"dev\",\n          \"value\": \"dev\"" (printf "\"text\": \"%s\",\n          \"value\": \"%s\"" $env $env) }}
+{{- $raw = $raw | replace "\"text\": \"dev\",\n            \"value\": \"dev\"" (printf "\"text\": \"%s\",\n            \"value\": \"%s\"" $env $env) }}
+{{- $raw = $raw | replace "\"query\": \"dev\"," (printf "\"query\": \"%s\"," $env) }}
+{{- end }}
+{{ toYaml $raw | indent 4}}
 {{- end }}
 {{- end }}
 {{- end }}

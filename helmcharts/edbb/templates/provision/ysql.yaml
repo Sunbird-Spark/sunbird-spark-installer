@@ -17,6 +17,10 @@ spec:
       restartPolicy: Never
       # No kubectl/K8s-API calls in this job -- pure YSQL setup.
       automountServiceAccountToken: false
+      {{- if include "sunbird.yugabyteTLS" . }}
+      volumes:
+        {{- include "sunbird.yugabyteCAVolume" . | nindent 8 }}
+      {{- end }}
       initContainers:
       - name: wait-for-yugabyte-postgres
         image: "{{ .Values.job_wait_image.registry }}/{{ .Values.job_wait_image.repository }}:{{ .Values.job_wait_image.tag }}"
@@ -30,7 +34,7 @@ spec:
             memory: 64Mi
         command: ['sh', '-c']
         args:
-        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'"
+        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ (include "sunbird.yugabyte" (list $ "host")) }} {{ (include "sunbird.yugabyte" (list $ "postgresql_port"))}}; do echo waiting for yugabytepostgres; sleep 10; done'"
       containers:
       - name: migration
         image: "{{ .Values.yugabyte_migration_image.registry }}/{{ .Values.yugabyte_migration_image.repository }}:{{ .Values.yugabyte_migration_image.tag }}"
@@ -46,14 +50,22 @@ spec:
         command: ['bash', '-c']
         securityContext:
           runAsUser: 0
+        {{- if include "sunbird.yugabyteTLS" . }}
+        volumeMounts:
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
+        {{- end }}
         args:
         - |
             set -e
             export devops_branch={{ .Values.devops_release_branch }}
-            export PGHOST={{.Values.global.yugabyte.host}}
-            export PGPORT={{.Values.global.yugabyte.postgresql_port}}
-            export PGUSER=yugabyte
-            export PGPASSWORD=yugabyte
+            export PGHOST={{(include "sunbird.yugabyte" (list $ "host"))}}
+            export PGPORT={{(include "sunbird.yugabyte" (list $ "postgresql_port"))}}
+            export PGUSER={{ (include "sunbird.yugabyte" (list $ "username")) | default "yugabyte" }}
+            export PGPASSWORD={{ (include "sunbird.yugabyte" (list $ "password")) | default "yugabyte" }}
+            {{- if include "sunbird.yugabyteTLS" . }}
+            export PGSSLMODE={{ include "sunbird.yugabyteSSLMode" . }}
+            export PGSSLROOTCERT={{ include "sunbird.yugabyteCAFile" . }}
+            {{- end }}
             {{- range .Values.global.yugabyte.databases }}
             # Check if the database exists
             # Ensure ysqlsh is available in the image
@@ -64,7 +76,7 @@ spec:
 
             if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then
               # Database doesn't exist, create it
-              echo "SELECT 'CREATE DATABASE \"{{ .name }}\"' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '\"{{ .name }}\"')\gexec" | ysqlsh
+              echo "SELECT 'CREATE DATABASE \"{{ .name }}\"{{ if and (include "sunbird.yugabyteManaged" $) (ne .name "kong") }} WITH colocation = true{{ end }}' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '\"{{ .name }}\"')\gexec" | ysqlsh
             else
                 echo "Database {{.name}} already exists."
             fi

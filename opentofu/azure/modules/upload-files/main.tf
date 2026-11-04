@@ -155,7 +155,8 @@ resource "null_resource" "build_and_upload_generic_editor" {
         node:18.20.8-bullseye \
         bash -c '
           set -e
-          apt-get update
+          sed -i "s|deb.debian.org/debian|archive.debian.org/debian|g; s|security.debian.org/debian-security|archive.debian.org/debian-security|g; /bullseye-updates/d" /etc/apt/sources.list
+          apt-get -o Acquire::Check-Valid-Until=false update
           apt-get install -y build-essential libpng-dev git
           npm install -g bower@1.8.0
           git clone https://github.com/project-sunbird/sunbird-content-plugins.git plugins -b ${var.sunbird_player_editor_ref}

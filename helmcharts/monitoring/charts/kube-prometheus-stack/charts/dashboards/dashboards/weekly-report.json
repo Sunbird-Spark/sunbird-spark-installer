@@ -38,7 +38,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_DS1",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -142,7 +142,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_DS1",
+      "datasource": "Prometheus",
       "decimals": 4,
       "fill": 1,
       "gridPos": {
@@ -234,7 +234,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_DS1",
+      "datasource": "Prometheus",
       "decimals": 4,
       "fill": 1,
       "gridPos": {
@@ -340,7 +340,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_DS1",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -376,7 +376,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(increase(kong_request_status_count{status_code!~\"2..|3..|5..\"}[5m])) by (api, status_code) / ignoring(api, status_code) group_left sum(increase(kong_request_status_count[5m])))",
+          "expr": "(sum(increase(kong_http_requests_total{code!~\"2..|3..|5..\"}[5m])) by (service, code) / ignoring(service, code) group_left sum(increase(kong_http_requests_total[5m])))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -431,7 +431,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_DS1",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -467,7 +467,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "(sum(increase(kong_request_status_count{status_code!~\"2..|3..|4..\"}[5m])) by (api, status_code) / ignoring(api, status_code) group_left sum(increase(kong_request_status_count[5m])))",
+          "expr": "(sum(increase(kong_http_requests_total{code!~\"2..|3..|4..\"}[5m])) by (service, code) / ignoring(service, code) group_left sum(increase(kong_http_requests_total[5m])))",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -536,7 +536,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_DS1",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -652,7 +652,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_DS1",
+      "datasource": "Prometheus",
       "decimals": 2,
       "editable": true,
       "error": false,
@@ -762,7 +762,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_DS1",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -798,7 +798,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "increase(kong_request_count[5m])",
+          "expr": "increase(kong_http_requests_total[5m])",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -869,7 +869,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus_DS1",
+      "datasource": "Prometheus",
       "fill": 1,
       "gridPos": {
         "h": 7,
@@ -905,7 +905,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "kong_latency_time",
+          "expr": "kong_request_latency_ms",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 2,
@@ -954,802 +954,6 @@
         "align": false,
         "alignLevel": null
       }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 56
-      },
-      "id": 23,
-      "panels": [],
-      "repeat": null,
-      "title": "Publish Pipeline Metrics",
-      "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB_Datapipeline",
-      "editable": true,
-      "error": false,
-      "fill": 1,
-      "grid": {},
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 57
-      },
-      "id": 10,
-      "interval": "> 300s",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "connected",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "dsType": "influxdb",
-          "groupBy": [],
-          "hide": false,
-          "measurement": "pipeline_metrics",
-          "orderByTime": "ASC",
-          "policy": "autogen",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "success"
-                ],
-                "type": "field"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "skipped"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "env",
-              "operator": "=~",
-              "value": "/^$env$/"
-            },
-            {
-              "condition": "AND",
-              "key": "job_name",
-              "operator": "=",
-              "value": "publish-pipeline"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Publish Pipeline Success",
-      "tooltip": {
-        "msResolution": true,
-        "shared": true,
-        "sort": 0,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "pipeline_metrics.error": "#890F02",
-        "pipeline_metrics.failed": "#C15C17"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB_Datapipeline",
-      "editable": true,
-      "error": false,
-      "fill": 1,
-      "grid": {},
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 57
-      },
-      "id": 11,
-      "interval": "> 300s",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "connected",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "dsType": "influxdb",
-          "groupBy": [],
-          "measurement": "pipeline_metrics",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "error"
-                ],
-                "type": "field"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "failed"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "env",
-              "operator": "=~",
-              "value": "/^$env$/"
-            },
-            {
-              "condition": "AND",
-              "key": "job_name",
-              "operator": "=",
-              "value": "publish-pipeline"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Publish Pipeline Failure",
-      "tooltip": {
-        "msResolution": true,
-        "shared": true,
-        "sort": 0,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 64
-      },
-      "id": 24,
-      "panels": [],
-      "repeat": null,
-      "title": "Composite Indexer Metrics",
-      "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB_Datapipeline",
-      "editable": true,
-      "error": false,
-      "fill": 1,
-      "grid": {},
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 65
-      },
-      "id": 12,
-      "interval": "> 300s",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "connected",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "dsType": "influxdb",
-          "groupBy": [],
-          "hide": false,
-          "measurement": "pipeline_metrics",
-          "orderByTime": "ASC",
-          "policy": "autogen",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "success"
-                ],
-                "type": "field"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "skipped"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "env",
-              "operator": "=~",
-              "value": "/^$env$/"
-            },
-            {
-              "condition": "AND",
-              "key": "job_name",
-              "operator": "=",
-              "value": "composite-search-indexer"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Composite Indexer Success",
-      "tooltip": {
-        "msResolution": true,
-        "shared": true,
-        "sort": 0,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "pipeline_metrics.error": "#890F02",
-        "pipeline_metrics.failed": "#C15C17"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB_Datapipeline",
-      "editable": true,
-      "error": false,
-      "fill": 1,
-      "grid": {},
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 65
-      },
-      "id": 13,
-      "interval": "> 300s",
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "total": true,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "connected",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "dsType": "influxdb",
-          "groupBy": [],
-          "measurement": "pipeline_metrics",
-          "policy": "default",
-          "query": "SELECT \"error\", \"failed\" FROM \"pipeline_metrics\" WHERE \"env\" =~ /^$env$/ AND \"job_name\" = 'composite-search-indexer' AND $timeFilter",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "error"
-                ],
-                "type": "field"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "failed"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "env",
-              "operator": "=~",
-              "value": "/^$env$/"
-            },
-            {
-              "condition": "AND",
-              "key": "job_name",
-              "operator": "=",
-              "value": "composite-search-indexer"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Composite Indexer Failure",
-      "tooltip": {
-        "msResolution": true,
-        "shared": true,
-        "sort": 0,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 72
-      },
-      "id": 25,
-      "panels": [],
-      "repeat": null,
-      "title": "Telemetry Metrics",
-      "type": "row"
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB_Datapipeline",
-      "editable": true,
-      "error": false,
-      "fill": 1,
-      "grid": {},
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 0,
-        "y": 73
-      },
-      "id": 14,
-      "interval": ">300s",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": true,
-        "values": true
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "connected",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "dsType": "influxdb",
-          "groupBy": [],
-          "measurement": "pipeline_metrics",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT \"success\", \"skipped\" FROM \"pipeline_metrics\" WHERE \"env\" = 'ntpprod' AND \"job_name\" = 'TelemetryValidator' AND $timeFilter",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "success"
-                ],
-                "type": "field"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "skipped"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "env",
-              "operator": "=",
-              "value": "production"
-            },
-            {
-              "condition": "AND",
-              "key": "job_name",
-              "operator": "=",
-              "value": "TelemetryValidator"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Telemetry Validator Success",
-      "tooltip": {
-        "msResolution": true,
-        "shared": true,
-        "sort": 0,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {
-        "pipeline_metrics.error": "#890F02",
-        "pipeline_metrics.failed": "#E0752D"
-      },
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB_Datapipeline",
-      "editable": true,
-      "error": false,
-      "fill": 1,
-      "grid": {},
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 73
-      },
-      "id": 15,
-      "interval": ">300s",
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 2,
-      "links": [],
-      "nullPointMode": "connected",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "dsType": "influxdb",
-          "groupBy": [],
-          "measurement": "pipeline_metrics",
-          "orderByTime": "ASC",
-          "policy": "autogen",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "error"
-                ],
-                "type": "field"
-              }
-            ],
-            [
-              {
-                "params": [
-                  "failed"
-                ],
-                "type": "field"
-              }
-            ]
-          ],
-          "tags": [
-            {
-              "key": "env",
-              "operator": "=~",
-              "value": "/^$env$/"
-            },
-            {
-              "condition": "AND",
-              "key": "job_name",
-              "operator": "=",
-              "value": "TelemetryValidator"
-            }
-          ]
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Telemetry Validator Failure",
-      "tooltip": {
-        "msResolution": true,
-        "shared": true,
-        "sort": 0,
-        "value_type": "cumulative"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
     }
   ],
   "refresh": "30s",
@@ -1761,34 +965,12 @@
       {
         "allValue": null,
         "current": {
-          "text": "ntpprod",
-          "value": "ntpprod"
-        },
-        "hide": 0,
-        "includeAll": false,
-        "label": "Environment",
-        "multi": false,
-        "name": "env",
-        "options": [
-          {
-            "selected": true,
-            "text": "ntpprod",
-            "value": "ntpprod"
-          }
-        ],
-        "query": "ntpprod",
-        "skipUrlSync": false,
-        "type": "custom"
-      },
-      {
-        "allValue": null,
-        "current": {
           "text": "All",
           "value": [
             "$__all"
           ]
         },
-        "datasource": "Prometheus_DS1",
+        "datasource": "Prometheus",
         "definition": "",
         "hide": 0,
         "includeAll": true,

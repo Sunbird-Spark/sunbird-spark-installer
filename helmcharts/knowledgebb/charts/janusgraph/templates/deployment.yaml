@@ -76,6 +76,7 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- end }}
       initContainers:
+        {{- include "janusgraph.yugabyteTruststore.initContainer" . | nindent 8 }}
         {{- include "janusgraph.waitForStorage" . | nindent 8 }}
         {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
         # Adjust volume permissions
@@ -206,6 +207,7 @@ spec:
             - name: janusgraph-properties
               mountPath: /bitnami/janusgraph/conf/janusgraph.properties
               subPath: janusgraph.properties
+            {{- include "janusgraph.yugabyteTruststore.volumeMount" . | nindent 12 }}
             {{- if .Values.storageBackend.usePasswordFiles }}
             - name: storage-backend-credentials
               mountPath: /opt/bitnami/janusgraph/secrets/
@@ -270,6 +272,7 @@ spec:
           emptyDir: {}
         - name: janusgraph-conf
           emptyDir: {}
+        {{- include "janusgraph.yugabyteTruststore.volumes" . | nindent 8 }}
         - name: janusgraph-properties
           configMap:
             name: {{ include "janusgraph.configmapName" . }}

@@ -19,7 +19,7 @@ data:
   schema-init.groovy: |
 {{ .Files.Get "config/schema_init.groovy" | indent 4 }}
   janusgraph-cql.properties: |
-{{ .Files.Get "config/janusgraph-cql.properties" | indent 4 }}
+{{ tpl (.Files.Get "config/janusgraph-cql.properties") . | indent 4 }}
   cdc-log4j.properties: |
 {{ .Files.Get "config/cdc-log4j.properties" | indent 4 }}
   janusgraph-cql-server.properties: |

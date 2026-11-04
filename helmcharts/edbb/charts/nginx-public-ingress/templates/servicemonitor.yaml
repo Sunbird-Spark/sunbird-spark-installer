@@ -12,7 +12,7 @@ spec:
   - honorLabels: true
     interval: 15s
     path: /metrics
-    port: http
+    port: metrics
     scheme: http
     scrapeTimeout: 10s
   jobLabel: nginx-public-ingress

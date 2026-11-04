@@ -1,0 +1,10 @@
+{{- if include "sunbird.yugabyteTLS" . }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-yugabyte-ca
+  namespace: {{ .Release.Namespace }}
+type: Opaque
+data:
+  root.crt: {{ .Values.global.yugabyte_managed.ca_cert | b64enc }}
+{{- end }}

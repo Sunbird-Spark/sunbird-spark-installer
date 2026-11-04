@@ -26,8 +26,8 @@ service:
   type: ClusterIP
   ports:
     - name: http
-      port: 3030
-      targetPort: 3030
+      port: 9595
+      targetPort: 9595
 
 ingress:
   enabled: false

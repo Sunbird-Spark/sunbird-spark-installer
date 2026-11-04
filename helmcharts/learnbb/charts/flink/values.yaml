@@ -74,6 +74,7 @@ serviceAccount:
   create: false
 
 serviceMonitor: &serviceMonitor
+  enabled: true
   jobmanager:
     enabled: true
     interval: 30s
@@ -365,8 +366,8 @@ base_config: |
       enabled = false
     }
     lms-cassandra {
-        host = "{{ .Values.global.yugabyte.host }}"
-        port = "{{ .Values.global.yugabyte.port }}"
+        host = "{{ (include "sunbird.yugabyte" (list $ "host")) }}"
+        port = "{{ (include "sunbird.yugabyte" (list $ "port")) }}"
         isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
     }
     es {
@@ -378,9 +379,25 @@ base_config: |
         itemset = "2.0"
       }
     }
+    # Credentials and TLS for every Cassandra connection (read by CassandraSecurity in jobs-core).
+    # Only set when global.yugabyte_managed is on, so the in-cluster database is unchanged.
+    {{- if include "sunbird.yugabyteManaged" $ }}
+    cassandra {
+      auth {
+        username = "{{ include "sunbird.yugabyte" (list $ "username") }}"
+        password = "{{ include "sunbird.yugabyte" (list $ "password") }}"
+      }
+      {{- if include "sunbird.yugabyteTLS" $ }}
+      ssl {
+        enabled = true
+        rootcert = "{{ include "sunbird.yugabyteCAFile" $ }}"
+      }
+      {{- end }}
+    }
+    {{- end }}
     ml-cassandra {
-      host = "{{ .Values.global.yugabyte.host }}"
-      port = "{{ .Values.global.yugabyte.port }}"
+      host = "{{ (include "sunbird.yugabyte" (list $ "host")) }}"
+      port = "{{ (include "sunbird.yugabyte" (list $ "port")) }}"
       isMultiDCEnabled = "{{ .Values.cassandra_isMultiDCEnabled }}"
     }
     ml-mongo {

@@ -40,7 +40,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "$cluster",
-      "decimals": 0,
+      "decimals": 2,
       "fieldConfig": {
         "defaults": {
           "custom": {}
@@ -89,7 +89,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(kong_request_count{api=~\"${api}\"}[5m])) by (api)",
+          "expr": "sum(rate(kong_http_requests_total{service=~\"${api}\"}[5m])) by (service)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -120,7 +120,7 @@
       },
       "yaxes": [
         {
-          "decimals": 0,
+          "decimals": 2,
           "format": "none",
           "label": null,
           "logBase": 1,
@@ -198,7 +198,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(increase(kong_request_status_count{api=~\"${api}\",status_code=~\"2..|3..\", status_code!= \"total\"}[5m])) by (api, status_code) / ignoring(api, status_code) group_left sum(increase(kong_request_status_count{api=~\"${api}\", status_code!= \"total\"}[5m]))",
+          "expr": "sum(increase(kong_http_requests_total{service=~\"${api}\",code=~\"2..|3..\"}[5m])) by (service, code) / ignoring(code) group_left sum(increase(kong_http_requests_total{service=~\"${api}\"}[5m])) by (service)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -305,7 +305,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(increase(kong_request_count{api =~ \"$api\"}[$__range])) by (api)",
+          "expr": "sum(increase(kong_http_requests_total{service=~\"$api\"}[$__range])) by (service)",
           "format": "time_series",
           "hide": false,
           "interval": "",
@@ -428,7 +428,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(increase(kong_request_status_count{api=~\"${api}\",status_code!~\"2..|3..|5..|total\"}[5m])) by (api, status_code) / ignoring(api, status_code) group_left  sum(increase(kong_request_status_count{api=~\"${api}\", status_code!= \"total\"}[5m]))",
+          "expr": "sum(increase(kong_http_requests_total{service=~\"${api}\",code!~\"2..|3..|5..\"}[5m])) by (service, code) / ignoring(code) group_left  sum(increase(kong_http_requests_total{service=~\"${api}\"}[5m])) by (service)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -535,7 +535,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(increase(kong_request_status_count{api=~\"${api}\",status_code!~\"2..|3..|4..|total\"}[5m])) by (api, status_code) / ignoring(api, status_code) group_left  sum(increase(kong_request_status_count{api=~\"${api}\", status_code!= \"total\"}[5m]))",
+          "expr": "sum(increase(kong_http_requests_total{service=~\"${api}\",code!~\"2..|3..|4..\"}[5m])) by (service, code) / ignoring(code) group_left  sum(increase(kong_http_requests_total{service=~\"${api}\"}[5m])) by (service)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -657,7 +657,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(kong_latency_time_sum{api=~\"${api}\"}[5m]) / rate(kong_latency_time_count{api=~\"${api}\"}[5m])) by (api)",
+          "expr": "sum(rate(kong_request_latency_ms_sum{service=~\"${api}\"}[5m]) / rate(kong_request_latency_ms_count{service=~\"${api}\"}[5m])) by (service)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -764,7 +764,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(rate(kong_upstream_latency_time_sum{api=~\"${api}\"}[5m])) by (api)  / sum(rate(kong_upstream_latency_time_count{api=~\"${api}\"}[5m])) by (api)",
+          "expr": "sum(rate(kong_upstream_latency_ms_sum{service=~\"${api}\"}[5m])) by (service)  / sum(rate(kong_upstream_latency_ms_count{service=~\"${api}\"}[5m])) by (service)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -885,7 +885,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(increase(kong_request_status_count{api=~\"${api}\",status_code=~\"2..|3..\", status_code!= \"total\"}[5m])) by (api, status_code)",
+          "expr": "sum(increase(kong_http_requests_total{service=~\"${api}\",code=~\"2..|3..\"}[5m])) by (service, code)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -992,7 +992,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(increase(kong_request_status_count{api=~\"${api}\",status_code!~\"2..|3..|5..|total\"}[5m])) by (api, status_code)",
+          "expr": "sum(increase(kong_http_requests_total{service=~\"${api}\",code!~\"2..|3..|5..\"}[5m])) by (service, code)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1099,7 +1099,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(increase(kong_request_status_count{api=~\"${api}\",status_code!~\"2..|3..|4..|total\"}[5m])) by (api, status_code)",
+          "expr": "sum(increase(kong_http_requests_total{service=~\"${api}\",code!~\"2..|3..|4..\"}[5m])) by (service, code)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -1217,7 +1217,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(kong_latency_time_bucket{api=~\"${api}\"}[5m])) by (api,le))",
+              "expr": "histogram_quantile(0.99, sum(rate(kong_request_latency_ms_bucket{service=~\"${api}\"}[5m])) by (service,le))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1324,7 +1324,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.99, sum(rate(kong_upstream_latency_time_bucket{api=~\"${api}\"}[5m])) by (api,le))",
+              "expr": "histogram_quantile(0.99, sum(rate(kong_upstream_latency_ms_bucket{service=~\"${api}\"}[5m])) by (service,le))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1447,7 +1447,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(kong_latency_time_bucket{api=~\"${api}\"}[5m])) by (api,le))",
+              "expr": "histogram_quantile(0.95, sum(rate(kong_request_latency_ms_bucket{service=~\"${api}\"}[5m])) by (service,le))",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1555,7 +1555,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.95, sum(rate(kong_upstream_latency_time_bucket{api=~\"${api}\"}[5m])) by (api,le))",
+              "expr": "histogram_quantile(0.95, sum(rate(kong_upstream_latency_ms_bucket{service=~\"${api}\"}[5m])) by (service,le))",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1678,7 +1678,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum(rate(kong_latency_time_bucket{api=~\"${api}\"}[5m])) by (api,le))",
+              "expr": "histogram_quantile(0.50, sum(rate(kong_request_latency_ms_bucket{service=~\"${api}\"}[5m])) by (service,le))",
               "format": "time_series",
               "hide": false,
               "interval": "",
@@ -1786,7 +1786,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "histogram_quantile(0.50, sum(rate(kong_upstream_latency_time_bucket{api=~\"${api}\"}[5m])) by (api,le))",
+              "expr": "histogram_quantile(0.50, sum(rate(kong_upstream_latency_ms_bucket{service=~\"${api}\"}[5m])) by (service,le))",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -1908,7 +1908,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kong_request_size_sum{api=~\"${api}\"}[5m]) / rate(kong_request_size_count{api=~\"${api}\"}[5m])) by (api)",
+              "expr": "sum(rate(kong_bandwidth_bytes{service=~\"${api}\",direction=\"ingress\"}[5m])) by (service) / sum(rate(kong_http_requests_total{service=~\"${api}\"}[5m])) by (service)",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -2016,7 +2016,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kong_response_size_sum{api=~\"${api}\"}[5m]) / rate(kong_response_size_count{api=~\"${api}\"}[5m])) by (api)",
+              "expr": "sum(rate(kong_bandwidth_bytes{service=~\"${api}\",direction=\"egress\"}[5m])) by (service) / sum(rate(kong_http_requests_total{service=~\"${api}\"}[5m])) by (service)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -2139,7 +2139,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kong_request_size_sum{api=~\"${api}\"}[5m])) by (api)",
+              "expr": "sum(rate(kong_bandwidth_bytes{service=~\"${api}\",direction=\"ingress\"}[5m])) by (service)",
               "format": "time_series",
               "instant": false,
               "interval": "",
@@ -2153,7 +2153,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Total Request Size",
+          "title": "Request Bandwidth (bytes/sec)",
           "tooltip": {
             "shared": true,
             "sort": 2,
@@ -2247,7 +2247,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kong_response_size_sum{api=~\"${api}\"}[5m])) by (api)",
+              "expr": "sum(rate(kong_bandwidth_bytes{service=~\"${api}\",direction=\"egress\"}[5m])) by (service)",
               "format": "time_series",
               "interval": "",
               "intervalFactor": 1,
@@ -2260,7 +2260,7 @@
           "timeFrom": null,
           "timeRegions": [],
           "timeShift": null,
-          "title": "Total Response Size",
+          "title": "Response Bandwidth (bytes/sec)",
           "tooltip": {
             "shared": true,
             "sort": 2,
@@ -2384,7 +2384,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(rate(kong_latency_time_bucket{api=~\"${api}\", le=\"0.05\"}[5m])) by (api) / sum(rate(kong_latency_time_count[5m])) by (api)",
+              "expr": "sum(rate(kong_request_latency_ms_bucket{service=~\"${api}\", le=\"50\"}[5m])) by (service) / sum(rate(kong_request_latency_ms_count{service=~\"${api}\"}[5m])) by (service)",
               "interval": "",
               "intervalFactor": 1,
               "legendFormat": "{{api}}",
@@ -2437,6 +2437,886 @@
       ],
       "title": "Apdex Score",
       "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 45
+      },
+      "id": 1060,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$cluster",
+          "decimals": 0,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 1052,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(increase(kong_http_requests_total{consumer=~\"${username}\",service=~\"$api\"}[$__range])) by (service)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{api}}",
+              "metric": "",
+              "refId": "A",
+              "step": 2
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Total Requests / API",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:145",
+              "decimals": null,
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:146",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$cluster",
+          "decimals": 0,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 1
+          },
+          "hiddenSeries": false,
+          "id": 1053,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(increase(kong_http_requests_total{consumer=~\"${username}\",service=~\"${api}\"}[$__range])) by (consumer)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{username}}",
+              "metric": "",
+              "refId": "A",
+              "step": 2
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Total Requests / Username",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "$$hashKey": "object:145",
+              "decimals": null,
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "$$hashKey": "object:146",
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$cluster",
+          "decimals": 2,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 1054,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "max",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(kong_http_requests_total{consumer=~\"${username}\",service=~\"${api}\"}[1m])) by (service)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{api}}",
+              "metric": "",
+              "refId": "A",
+              "step": 2
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Requests per sec / API",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": 2,
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "decimals": null,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$cluster",
+          "decimals": 2,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 1055,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "max",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(rate(kong_http_requests_total{consumer=~\"${username}\",service=~\"${api}\"}[1m])) by (consumer)",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{username}}",
+              "metric": "",
+              "refId": "A",
+              "step": 2
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Requests per sec / User",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": 2,
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "decimals": null,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$cluster",
+          "decimals": 2,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 16
+          },
+          "hiddenSeries": false,
+          "id": 1056,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "avg",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": true,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(increase(kong_http_requests_total{consumer=~\"${username}\",service=~\"${api}\",code=~\"2..|3..\"}[1m])) by (service, code) / ignoring(code) group_left sum(increase(kong_http_requests_total{consumer=~\"${username}\",service=~\"${api}\"}[1m])) by (service)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{api}}-{{status}}",
+              "refId": "A",
+              "step": 4
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Success %",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": 1,
+              "format": "percentunit",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "decimals": null,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$cluster",
+          "decimals": 2,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 16
+          },
+          "hiddenSeries": false,
+          "id": 1057,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "max",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(increase(kong_http_requests_total{service=~\"${api}\",code!~\"2..|3..\"}[1m])) by (service, code) / ignoring(code) group_left  sum(increase(kong_http_requests_total{service=~\"${api}\"}[1m])) by (service)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{api}}-{{status_code}}",
+              "refId": "A",
+              "step": 4
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Error %",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": 1,
+              "format": "percentunit",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "decimals": null,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$cluster",
+          "decimals": 0,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 24
+          },
+          "hiddenSeries": false,
+          "id": 1058,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "avg",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(increase(kong_http_requests_total{service=~\"${api}\",code=~\"2..|3..\"}[1m])) by (service, code)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{api}}-{{status}}",
+              "refId": "A",
+              "step": 4
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Success Count",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "decimals": null,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "datasource": "$cluster",
+          "decimals": 0,
+          "fieldConfig": {
+            "defaults": {
+              "custom": {}
+            },
+            "overrides": []
+          },
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 24
+          },
+          "hiddenSeries": false,
+          "id": 1059,
+          "legend": {
+            "alignAsTable": true,
+            "avg": true,
+            "current": true,
+            "hideEmpty": true,
+            "hideZero": true,
+            "max": true,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "avg",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "connected",
+          "options": {
+            "dataLinks": []
+          },
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "expr": "sum(increase(kong_http_requests_total{service=~\"${api}\",code!~\"2..|3..\"}[1m])) by (service, code)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{api}}-{{status}}",
+              "refId": "A",
+              "step": 4
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeRegions": [],
+          "timeShift": null,
+          "title": "Error Count",
+          "tooltip": {
+            "shared": true,
+            "sort": 2,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "decimals": null,
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "decimals": null,
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false,
+            "alignLevel": null
+          }
+        }
+      ],
+      "title": "Consumer Level",
+      "type": "row"
     }
   ],
   "refresh": "5m",
@@ -2474,14 +3354,42 @@
           ]
         },
         "datasource": "$cluster",
-        "definition": "label_values(kong_request_count,api)",
+        "definition": "label_values(kong_http_requests_total,service)",
         "hide": 0,
         "includeAll": true,
         "label": null,
         "multi": true,
         "name": "api",
         "options": [],
-        "query": "label_values(kong_request_count,api)",
+        "query": "label_values(kong_http_requests_total,service)",
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": [
+            "$__all"
+          ]
+        },
+        "datasource": "$cluster",
+        "definition": "label_values(kong_http_requests_total,consumer)",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "username",
+        "options": [],
+        "query": "label_values(kong_http_requests_total,consumer)",
         "refresh": 2,
         "regex": "",
         "skipUrlSync": false,

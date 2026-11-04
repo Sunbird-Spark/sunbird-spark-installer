@@ -77,6 +77,9 @@ spec:
                 jobmanager.rpc.port: {{ .Values.jobmanager.rpc_port }}
                 taskmanager.rpc.port: {{ .Values.taskmanager.rpc_port }}
                 taskmanager.numberOfTaskSlots: {{ $jobData.taskSlots | default .Values.taskmanager.numberOfTaskSlots }}
+                metrics.reporters: prom
+                metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+                metrics.reporter.prom.port: {{ $jobData.prom_port | default .Values.prom_port }}
             {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
             - name: AZURE_CLIENT_ID
               value: "{{ .Values.global.azure_client_id }}"
@@ -210,6 +213,9 @@ spec:
                 rest.port: {{ .Values.jobmanager.ui_port }}
                 rest.address: 0.0.0.0
                 parallelism.default: {{ $jobData.config.job.parallelism | default 1 }}
+                metrics.reporters: prom
+                metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+                metrics.reporter.prom.port: {{ $jobData.prom_port | default .Values.prom_port }}
             {{- if and (eq .Values.global.cloud_storage_provider "azure") .Values.global.azure_client_id }}
             - name: AZURE_CLIENT_ID
               value: "{{ .Values.global.azure_client_id }}"

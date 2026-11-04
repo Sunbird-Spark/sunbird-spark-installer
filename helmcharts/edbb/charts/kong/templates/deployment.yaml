@@ -32,7 +32,7 @@ spec:
           image: busybox
           command: ["/bin/sh", "-c"]
           args:
-          - "timeout 300 sh -c 'until nc -z {{.Values.global.yugabyte.host}} {{.Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabyte; sleep 10; done'"
+          - "timeout 300 sh -c 'until nc -z {{(include "sunbird.yugabyte" (list $ "host"))}} {{(include "sunbird.yugabyte" (list $ "postgresql_port"))}}; do echo waiting for yugabyte; sleep 10; done'"
       {{- with .Values.initContainers }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -71,6 +71,7 @@ spec:
           - name: config
             mountPath: {{ .Values.configmap.mountPath }}
           {{- end }}
+          {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 10 }}
         {{- with .Values.sidecars }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -83,3 +84,4 @@ spec:
         configMap:
           name: {{ include "common.names.fullname" . }}
       {{- end }}
+      {{- include "sunbird.yugabyteCAVolume" . | nindent 6 }}

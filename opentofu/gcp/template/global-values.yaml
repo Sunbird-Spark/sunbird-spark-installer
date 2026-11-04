@@ -84,6 +84,15 @@ global:
         adminUser:
           username: admin
           password: *superset-admin-password  
+  yugabyte_managed:              # which YugabyteDB every building block connects to
+    enabled: false               # false = in-cluster YugabyteDB (Helm chart); true = managed YugabyteDB (Aeon) below, in-cluster one not deployed
+    host: ""                     # managed cluster host, e.g. pse-centralindia.<cluster-id>.azure.yugabyte.cloud
+    port: 9042                   # YCQL
+    postgresql_port: 5433        # YSQL
+    username: ""                 # managed cluster user (YSQL and YCQL)
+    password: ""
+    local_datacenter: "asia-south1"  # managed cluster region; YCQL local data center for JanusGraph and the portal
+    ca_cert: ""                  # managed cluster CA (root.crt from the Aeon console, Connect -> Download CA Cert); when set, services connect over TLS. Paste as a block: ca_cert: |
   yugabyte:
     ysql:
       user: "yugabyte"  

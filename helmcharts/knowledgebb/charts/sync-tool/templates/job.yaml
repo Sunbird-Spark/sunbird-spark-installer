@@ -21,6 +21,7 @@ spec:
       {{- end }}
       restartPolicy: Never
       initContainers:
+        {{- include "sunbird.yugabyteTruststoreInitContainer" . | nindent 8 }}
         - name: wait-for-janusgraph
           image: busybox:1.35
           command: ['sh', '-c']
@@ -80,6 +81,8 @@ spec:
           volumeMounts:
             - name: config
               mountPath: {{ .Values.configmap.mountPath }}
+            {{- include "sunbird.yugabyteCAVolumeMount" . | nindent 12 }}
+            {{- include "sunbird.yugabyteTruststoreVolumeMount" . | nindent 12 }}
             {{- if eq .Values.syncMode "file" }}
             - name: identifiers
               mountPath: /data
@@ -102,6 +105,8 @@ spec:
         - name: config
           configMap:
             name: {{ include "common.names.fullname" . }}
+        {{- include "sunbird.yugabyteCAVolume" . | nindent 8 }}
+        {{- include "sunbird.yugabyteTruststoreVolume" . | nindent 8 }}
         {{- if eq .Values.syncMode "file" }}
         - name: identifiers
           configMap:
