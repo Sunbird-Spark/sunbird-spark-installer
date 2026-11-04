@@ -98,7 +98,9 @@ function install_component() {
     # namespaces sunbird and velero are created by workload-identity Terraform module
     kubectl create namespace volume-autoscaler 2>/dev/null || true
     kubectl create namespace nlweb 2>/dev/null || true
-    kubectl create namespace ai-pipeline 2>/dev/null || true
+    if [ "$component" = "ai-pipeline" ]; then
+        kubectl create namespace ai-pipeline 2>/dev/null || true
+    fi
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""

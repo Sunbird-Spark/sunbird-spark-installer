@@ -24,10 +24,7 @@ spec:
         - name: sql
           configMap:
             name: {{ include "common.names.fullname" . }}-catalogue-migration
-      {{- $yugabyteHost := .Values.global.yugabyte.host }}
-      {{- if not (contains "." $yugabyteHost) }}
-      {{- $yugabyteHost = printf "%s.%s.svc.%s" $yugabyteHost .Values.global.yugabyteNamespace .Values.global.clusterDomain }}
-      {{- end }}
+      {{- $yugabyteHost := include "ai-pipeline.qualifyHost" (dict "host" .Values.global.yugabyte.host "namespace" .Values.global.yugabyteNamespace "domain" .Values.global.clusterDomain) }}
       initContainers:
         - name: wait-for-yugabyte
           image: busybox
