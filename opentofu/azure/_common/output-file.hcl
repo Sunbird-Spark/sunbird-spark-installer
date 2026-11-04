@@ -8,6 +8,7 @@ locals {
   building_block         = local.global_vars.global.building_block
   subscription_id        = local.global_vars.global.subscription_id
   cloud_storage_provider = local.global_vars.global.cloud_storage_provider
+  skip_storage_module    = local.global_vars.global.skip_storage_module
   storage_account_name      = local.cloud_vars.global.cloud_storage_access_key
   storage_container_public  = local.cloud_vars.global.public_container_name
   storage_container_private = local.cloud_vars.global.private_container_name
@@ -25,7 +26,8 @@ dependency "aks" {
 }
 
 dependency "storage" {
-    config_path = "../storage"
+    config_path  = "../storage"
+    skip_outputs = local.skip_storage_module
     mock_outputs = {
       azurerm_storage_account_name      = "dummy-storage"
       azurerm_storage_container_private = "dummy-private"

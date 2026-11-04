@@ -3356,6 +3356,88 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "ObjectCategory - Dynamic QuestionSet",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											},
+											{
+												"key": "X-Authenticated-User-token",
+												"value": "{{access_token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Dynamic QuestionSet\",\n            \"description\": \"Dynamic QuestionSet\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategory - Dynamic Course Assessment",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											},
+											{
+												"key": "X-Authenticated-User-token",
+												"value": "{{access_token}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Dynamic Course Assessment\",\n            \"description\": \"Dynamic Course Assessment\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
 								}
 							],
 							"description": "[https://github.com/project-sunbird/knowledge-platform/blob/master/scripts/definition-scripts/master_category_create](https://github.com/project-sunbird/knowledge-platform/blob/master/scripts/definition-scripts/master_category_create)"
@@ -4266,6 +4348,92 @@
 						                      		"mode": "raw",
 						                      		"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            },\n            \"maxAttempts\": {\n              \"type\": \"number\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
 						                       },
+										"url": {
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - Dynamic QuestionSet",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											},
+											{
+												"key": "X-Authenticated-User-token",
+												"value": "",
+												"type": "text",
+												"disabled": true
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:dynamic-questionset\",\n            \"targetObjectType\": \"QuestionSet\",\n            \"objectMetadata\": {\n                \"config\": {\n                    \"sourcingSettings\": {\n                        \"collection\": {\n                            \"maxDepth\": 1,\n                            \"objectType\": \"QuestionSet\",\n                            \"primaryCategory\": \"Dynamic QuestionSet\",\n                            \"isRoot\": true,\n                            \"iconClass\": \"fa fa-book\",\n                            \"children\": {},\n                            \"hierarchy\": {\n                                \"level1\": {\n                                    \"name\": \"Section\",\n                                    \"type\": \"Unit\",\n                                    \"mimeType\": \"application/vnd.sunbird.questionset\",\n                                    \"primaryCategory\": \"Dynamic QuestionSet\",\n                                    \"iconClass\": \"fa fa-folder-o\",\n                                    \"children\": {\n                                        \"Question\": [\n                                            \"Multiple Choice Question\",\n                                            \"Subjective Question\"\n                                        ]\n                                    }\n                                }\n                            }\n                        }\n                    }\n                },\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.sunbird.questionset\"\n                            ]\n                        },\n                        \"primaryCategory\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"Dynamic QuestionSet\"\n                            ]\n                        },\n                        \"skill\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\"\n                            }\n                        },\n                        \"difficultyTarget\": {\n                            \"type\": \"string\"\n                        },\n                        \"minCriteria\": {\n                            \"type\": \"integer\",\n                            \"minimum\": 0\n                        },\n                        \"multiplier\": {\n                            \"type\": \"integer\",\n                            \"minimum\": 1\n                        }\n                    }\n                }\n            },\n            \"forms\": {\n                \"create\": {\n                    \"templateName\": \"\",\n                    \"required\": [],\n                    \"properties\": [\n                        {\n                            \"name\": \"Basic details\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"appIcon\",\n                                    \"name\": \"Icon\",\n                                    \"label\": \"Icon\",\n                                    \"placeholder\": \"Icon\",\n                                    \"description\": \"Icon for the question set\",\n                                    \"dataType\": \"text\",\n                                    \"inputType\": \"appIcon\",\n                                    \"editable\": true,\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    }\n                                },\n                                {\n                                    \"code\": \"name\",\n                                    \"name\": \"Name\",\n                                    \"label\": \"Name\",\n                                    \"placeholder\": \"Name\",\n                                    \"description\": \"Name of the QuestionSet\",\n                                    \"dataType\": \"text\",\n                                    \"inputType\": \"text\",\n                                    \"editable\": true,\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"max\",\n                                            \"value\": \"120\",\n                                            \"message\": \"Input is Exceeded\"\n                                        },\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"Name is required\"\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"code\": \"description\",\n                                    \"name\": \"Description\",\n                                    \"label\": \"Description\",\n                                    \"placeholder\": \"Description\",\n                                    \"description\": \"Description of the content\",\n                                    \"dataType\": \"text\",\n                                    \"inputType\": \"textarea\",\n                                    \"editable\": true,\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"description is required\"\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"code\": \"primaryCategory\",\n                                    \"name\": \"Type\",\n                                    \"label\": \"Type\",\n                                    \"placeholder\": \"\",\n                                    \"description\": \"Type or Category of the Question Set\",\n                                    \"dataType\": \"text\",\n                                    \"inputType\": \"text\",\n                                    \"editable\": false,\n                                    \"required\": false,\n                                    \"visible\": true,\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    }\n                                }\n                            ]\n                        },\n                        {\n                            \"name\": \"Framework details\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"board\",\n                                    \"name\": \"Board/Syllabus\",\n                                    \"label\": \"Board/Syllabus\",\n                                    \"placeholder\": \"Select Board/Syllabus\",\n                                    \"description\": \"Board or Syllabus of the Question Set\",\n                                    \"default\": \"\",\n                                    \"dataType\": \"text\",\n                                    \"inputType\": \"select\",\n                                    \"editable\": true,\n                                    \"required\": false,\n                                    \"visible\": true,\n                                    \"depends\": [],\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"Board is required\"\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"code\": \"medium\",\n                                    \"name\": \"Medium\",\n                                    \"label\": \"Medium\",\n                                    \"placeholder\": \"Select Medium\",\n                                    \"description\": \"Medium of Instruction for the Question Set\",\n                                    \"default\": \"\",\n                                    \"dataType\": \"list\",\n                                    \"inputType\": \"select\",\n                                    \"editable\": true,\n                                    \"required\": false,\n                                    \"visible\": true,\n                                    \"depends\": [\n                                        \"board\"\n                                    ],\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"Medium is required\"\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"code\": \"gradeLevel\",\n                                    \"name\": \"Class\",\n                                    \"label\": \"Class\",\n                                    \"placeholder\": \"Select Class\",\n                                    \"description\": \"Class of the Question Set\",\n                                    \"default\": \"\",\n                                    \"dataType\": \"list\",\n                                    \"inputType\": \"select\",\n                                    \"editable\": true,\n                                    \"required\": false,\n                                    \"visible\": true,\n                                    \"depends\": [\n                                        \"board\",\n                                        \"medium\"\n                                    ],\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"Class is required\"\n                                        }\n                                    ]\n                                },\n                                {\n                                    \"code\": \"subject\",\n                                    \"name\": \"Subject\",\n                                    \"label\": \"Subject\",\n                                    \"placeholder\": \"Select Subject\",\n                                    \"description\": \"Subject of the Question Set\",\n                                    \"default\": \"\",\n                                    \"dataType\": \"list\",\n                                    \"inputType\": \"select\",\n                                    \"editable\": true,\n                                    \"required\": false,\n                                    \"visible\": true,\n                                    \"depends\": [\n                                        \"board\",\n                                        \"medium\",\n                                        \"gradeLevel\"\n                                    ],\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1 required\"\n                                    },\n                                    \"validations\": [\n                                        {\n                                            \"type\": \"required\",\n                                            \"message\": \"Subject is required\"\n                                        }\n                                    ]\n                                }\n                            ]\n                        },\n                        {\n                            \"name\": \"Question set behaviour\",\n                            \"fields\": [\n                                {\n                                    \"code\": \"skill\",\n                                    \"name\": \"Skill\",\n                                    \"label\": \"Skill\",\n                                    \"placeholder\": \"Select Skill\",\n                                    \"description\": \"Skill tags used to select matching questions from the pool\",\n                                    \"dataType\": \"list\",\n                                    \"inputType\": \"multiSelect\",\n                                    \"editable\": true,\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    }\n                                },\n                                {\n                                    \"code\": \"difficultyTarget\",\n                                    \"name\": \"Difficulty Target\",\n                                    \"label\": \"Difficulty Target\",\n                                    \"placeholder\": \"\",\n                                    \"description\": \"Easy/Medium/Difficult question counts to select from the pool\",\n                                    \"dataType\": \"text\",\n                                    \"inputType\": \"difficultyTarget\",\n                                    \"editable\": true,\n                                    \"required\": true,\n                                    \"visible\": true,\n                                    \"renderingHints\": {\n                                        \"class\": \"sb-g-col-lg-1\"\n                                    }\n                                }\n                            ]\n                        }\n                    ]\n                }\n            }\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - Dynamic Course Assessment",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											},
+											{
+												"key": "X-Authenticated-User-token",
+												"value": "",
+												"type": "text",
+												"disabled": true
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:dynamic-course-assessment\",\n            \"targetObjectType\": \"Content\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"trackable\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"enabled\": {\n                                    \"type\": \"string\",\n                                    \"enum\": [\n                                        \"Yes\",\n                                        \"No\"\n                                    ],\n                                    \"default\": \"No\"\n                                },\n                                \"autoBatch\": {\n                                    \"type\": \"string\",\n                                    \"enum\": [\n                                        \"Yes\",\n                                        \"No\"\n                                    ],\n                                    \"default\": \"No\"\n                                }\n                            },\n                            \"additionalProperties\": false\n                        },\n                        \"primaryCategory\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"Dynamic Course Assessment\"\n                            ]\n                        },\n                        \"skill\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\"\n                            }\n                        },\n                        \"difficultyTarget\": {\n                            \"type\": \"string\"\n                        },\n                        \"minCriteria\": {\n                            \"type\": \"integer\",\n                            \"minimum\": 0\n                        },\n                        \"multiplier\": {\n                            \"type\": \"integer\",\n                            \"minimum\": 1\n                        }\n                    }\n                }\n            }\n        }\n    }\n}"
+										},
 										"url": {
 											"raw": "{{host}}/api/object/category/definition/v1/create",
 											"host": [
@@ -9892,6 +10060,76 @@
 															"language": "json"
 														}
 													}
+												},
+												"url": {
+													"raw": "{{host}}/api/data/v1/form/create",
+													"host": [
+														"{{host}}"
+													],
+													"path": [
+														"api",
+														"data",
+														"v1",
+														"form",
+														"create"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "11 - Dynamic Course Assessment Save",
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{apikey}}",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"request\": {\n        \"action\": \"save\",\n        \"subType\": \"Dynamic Course Assessment\",\n        \"framework\": \"*\",\n        \"rootOrgId\": \"*\",\n        \"type\": \"content\",\n        \"popup\": true,\n        \"editMode\": true,\n        \"data\": {\n            \"templateName\": \"defaultTemplate\",\n            \"action\": \"save\",\n            \"fields\": [\n                {\n                    \"code\": \"name\",\n                    \"visible\": true,\n                    \"editable\": true,\n                    \"dataType\": \"text\",\n                    \"renderingHints\": {},\n                    \"name\": \"Title\",\n                    \"description\": \"Title of the content\",\n                    \"index\": 1,\n                    \"inputType\": \"text\",\n                    \"label\": \"Title\",\n                    \"placeholder\": \"Enter Title\",\n                    \"required\": true\n                },\n                {\n                    \"code\": \"description\",\n                    \"visible\": true,\n                    \"editable\": true,\n                    \"dataType\": \"text\",\n                    \"renderingHints\": {},\n                    \"name\": \"Description\",\n                    \"description\": \"Brief description\",\n                    \"index\": 2,\n                    \"inputType\": \"textarea\",\n                    \"label\": \"Description\",\n                    \"placeholder\": \"Brief description\",\n                    \"required\": false\n                },\n                {\n                    \"code\": \"skill\",\n                    \"dataType\": \"text\",\n                    \"name\": \"Skill\",\n                    \"inputType\": \"multiSelect\",\n                    \"required\": true,\n                    \"visible\": true,\n                    \"editable\": true,\n                    \"index\": 3\n                },\n                {\n                    \"code\": \"difficultyTarget\",\n                    \"dataType\": \"text\",\n                    \"name\": \"Difficulty Target\",\n                    \"inputType\": \"difficultyTarget\",\n                    \"required\": true,\n                    \"visible\": true,\n                    \"editable\": true,\n                    \"index\": 4\n                }\n            ]\n        }\n    }\n}"
+												},
+												"url": {
+													"raw": "{{host}}/api/data/v1/form/create",
+													"host": [
+														"{{host}}"
+													],
+													"path": [
+														"api",
+														"data",
+														"v1",
+														"form",
+														"create"
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "12 - Dynamic Course Assessment Review",
+											"request": {
+												"method": "POST",
+												"header": [
+													{
+														"key": "Content-Type",
+														"value": "application/json"
+													},
+													{
+														"key": "Authorization",
+														"value": "Bearer {{apikey}}",
+														"type": "text"
+													}
+												],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"request\": {\n        \"action\": \"review\",\n        \"subType\": \"Dynamic Course Assessment\",\n        \"framework\": \"*\",\n        \"rootOrgId\": \"*\",\n        \"type\": \"content\",\n        \"popup\": true,\n        \"editMode\": true,\n        \"data\": {\n            \"templateName\": \"defaultTemplate\",\n            \"action\": \"review\",\n            \"fields\": [\n                {\n                    \"code\": \"name\",\n                    \"visible\": true,\n                    \"editable\": true,\n                    \"dataType\": \"text\",\n                    \"renderingHints\": {},\n                    \"name\": \"Title\",\n                    \"description\": \"Title of the content\",\n                    \"index\": 1,\n                    \"inputType\": \"text\",\n                    \"label\": \"Title\",\n                    \"placeholder\": \"Enter Title\",\n                    \"required\": true\n                },\n                {\n                    \"code\": \"description\",\n                    \"visible\": true,\n                    \"editable\": true,\n                    \"dataType\": \"text\",\n                    \"renderingHints\": {},\n                    \"name\": \"Description\",\n                    \"description\": \"Brief description\",\n                    \"index\": 2,\n                    \"inputType\": \"textarea\",\n                    \"label\": \"Description\",\n                    \"placeholder\": \"Brief description\",\n                    \"required\": false\n                },\n                {\n                    \"code\": \"skill\",\n                    \"dataType\": \"text\",\n                    \"name\": \"Skill\",\n                    \"inputType\": \"multiSelect\",\n                    \"required\": true,\n                    \"visible\": true,\n                    \"editable\": true,\n                    \"index\": 3\n                },\n                {\n                    \"code\": \"difficultyTarget\",\n                    \"dataType\": \"text\",\n                    \"name\": \"Difficulty Target\",\n                    \"inputType\": \"difficultyTarget\",\n                    \"required\": true,\n                    \"visible\": true,\n                    \"editable\": true,\n                    \"index\": 4\n                }\n            ]\n        }\n    }\n}"
 												},
 												"url": {
 													"raw": "{{host}}/api/data/v1/form/create",
