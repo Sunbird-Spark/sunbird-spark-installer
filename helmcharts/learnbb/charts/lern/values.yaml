@@ -208,6 +208,9 @@ sunbird_cassandra_notification_keyspace: sunbird_notifications
 # Yugabytesql Values
 sunbird_postgres_db: "sunbird"
 
+unirest_max_total_connections: "200"
+unirest_max_connections_per_route: "40"
+
 # OPA / Envoy
 opa_enabled: false
 
