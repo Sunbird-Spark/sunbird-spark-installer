@@ -21,15 +21,6 @@ locals {
   environment_name = "${var.building_block}-${var.environment}"
 }
 
-# Added: CSPM "Defender for X should be enabled" + "Security center pricing should be set
-# to standard" findings -- subscription-wide threat-detection add-ons (monitoring only,
-# no effect on how any resource runs or serves traffic).
-resource "azurerm_security_center_subscription_pricing" "defender" {
-  for_each      = toset(var.defender_resource_types)
-  tier          = "Standard"
-  resource_type = each.value
-}
-
 # Added: destination for the subscription Activity Log below. Separate from the AKS
 # control-plane log workspace in modules/aks -- this one is subscription-scoped, not
 # tied to a single cluster.

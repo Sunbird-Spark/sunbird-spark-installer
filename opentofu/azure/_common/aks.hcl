@@ -8,7 +8,7 @@ locals {
   location                = local.global_vars.global.cloud_storage_region
   aks_version             = try(local.global_vars.global.aks_version, null)
   private_cluster_enabled = try(local.global_vars.global.private_cluster_enabled, true)
-  log_retention_days      = local.global_vars.global.log_retention_days
+  log_retention_days      = try(local.global_vars.global.log_retention_days, 30)
 }
 
 # For local development
