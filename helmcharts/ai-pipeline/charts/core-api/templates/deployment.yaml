@@ -32,29 +32,15 @@ spec:
             - secretRef:
                 name: {{ include "common.names.fullname" . }}
           resources: {{- toYaml .Values.resources | nindent 12 }}
-          # The Host header is set because kubelet otherwise sends the pod IP, which ALLOWED_HOSTS
-          # refuses with a 403.
-          #
-          # core-api waits for Postgres and Restate before it listens (up to ~5 minutes), so the
-          # startup probe gives it that long before liveness can restart it.
+          {{- if .Values.startupProbe }}
           startupProbe:
-            httpGet:
-              path: /health/live
-              port: http
-              httpHeaders: [{ name: Host, value: localhost }]
-            periodSeconds: 5
-            failureThreshold: 60
-          # Postgres and Restate both answering: units can register through it.
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe }}
           readinessProbe:
-            httpGet:
-              path: /health/ready
-              port: http
-              httpHeaders: [{ name: Host, value: localhost }]
-            periodSeconds: 5
-          # The process answers; a Restate or Postgres outage must not restart it.
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe }}
           livenessProbe:
-            httpGet:
-              path: /health/live
-              port: http
-              httpHeaders: [{ name: Host, value: localhost }]
-            periodSeconds: 10
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          {{- end }}
