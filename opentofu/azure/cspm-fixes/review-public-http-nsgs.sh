@@ -1,30 +1,34 @@
 #!/usr/bin/env bash
 #
 # Fix for the CSPM "HTTP(S) access from the Internet should be restricted" finding.
-# Auto-discovers every NSG (no need to list names manually), skips the ones you've
-# marked as intentionally public (e.g. the one fronting nginx-public-ingress), and
-# flags/optionally removes any rule on the rest that allows port 80/443 from anyone.
+# Standalone version of the same check that also runs automatically inside
+# install.sh (opentofu/azure/template/install.sh:review_http_nsgs) -- use this one
+# for a manual, one-time run against a live subscription.
 #
-# Why not auto-detect the ingress NSG too: tracing "which NSG backs the ingress
-# public IP" through the load balancer/NIC chain is fragile and AKS-networking-setup
-# dependent (differs by CNI plugin, LB SKU, whether AKS even attaches a per-NIC NSG
-# vs. managing one internally). Telling the script explicitly via --ignore is more
-# reliable than guessing wrong and skipping (or worse, not skipping) the real ingress.
+# Auto-discovers every NSG (no need to list names manually). Tries to auto-detect
+# the real public ingress NSG by tracing its actual network path -- ingress
+# Service's public IP -> matching Azure Public IP -> Load Balancer -> backend NIC
+# -> NSG (falling back to the subnet's NSG if the NIC itself has none). This only
+# works if the ingress is already deployed and has a public IP assigned (requires
+# kubectl pointed at the right cluster) -- if detection fails, pass --ignore
+# yourself instead of guessing.
 #
 # Dry run by default -- only reports. Deleting a flagged rule requires --apply AND
-# typing the NSG name to confirm, one NSG at a time, same reasoning as why
-# fix-compute-hygiene.sh gates SSH/patching behind a confirmation: we can't know for
-# certain nothing else depends on that open rule.
+# typing the NSG name to confirm, one NSG at a time -- never in bulk, since nothing
+# here can verify that no other legitimate traffic depends on that open rule.
 #
 # Prerequisites: `az login` and `az account set --subscription <id>` already done.
 #                `jq` available on PATH.
+#                `kubectl` pointed at the right cluster, if relying on auto-detection.
 #
 # Usage:
 #   ./review-public-http-nsgs.sh [--resource-group <rg>] [--ignore <nsg-name>]... [--apply]
 #
 # Examples:
-#   ./review-public-http-nsgs.sh --ignore nginx-public-ingress-nsg
-#   ./review-public-http-nsgs.sh --resource-group ed-coss --ignore nginx-public-ingress-nsg --apply
+#   ./review-public-http-nsgs.sh                                  # auto-detect ingress, report only
+#   ./review-public-http-nsgs.sh --apply                           # auto-detect ingress, fix everything else
+#   ./review-public-http-nsgs.sh --ignore nginx-public-ingress-nsg --apply
+#   ./review-public-http-nsgs.sh --resource-group ed-coss --ignore nginx-public-ingress-nsg
 
 set -euo pipefail
 
@@ -41,10 +45,54 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+# Traces the real public ingress NSG instead of guessing by name. Fails silently
+# (empty stdout, non-zero exit) at any broken hop -- caller must treat that as
+# "unknown", not "none".
+detect_ingress_nsg() {
+  local ingress_ip public_ip_id lb_id nic_id nsg_id subnet_id
+
+  ingress_ip=$(kubectl get svc -n sunbird nginx-public-ingress \
+    -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null) || true
+  [ -z "$ingress_ip" ] && return 1
+
+  public_ip_id=$(az network public-ip list \
+    --query "[?ipAddress=='$ingress_ip'].id | [0]" -o tsv 2>/dev/null) || true
+  [ -z "$public_ip_id" ] && return 1
+
+  lb_id=$(az network public-ip show --ids "$public_ip_id" \
+    --query "ipConfiguration.id" -o tsv 2>/dev/null | sed -E 's#(/loadBalancers/[^/]+)/.*#\1#') || true
+  [ -z "$lb_id" ] && return 1
+
+  nic_id=$(az network lb show --ids "$lb_id" \
+    --query "backendAddressPools[0].backendIPConfigurations[0].id" -o tsv 2>/dev/null \
+    | sed -E 's#(/networkInterfaces/[^/]+)/.*#\1#') || true
+  [ -z "$nic_id" ] && return 1
+
+  nsg_id=$(az network nic show --ids "$nic_id" --query "networkSecurityGroup.id" -o tsv 2>/dev/null) || true
+  if [ -z "$nsg_id" ]; then
+    subnet_id=$(az network nic show --ids "$nic_id" --query "ipConfigurations[0].subnet.id" -o tsv 2>/dev/null) || true
+    [ -z "$subnet_id" ] && return 1
+    nsg_id=$(az network vnet subnet show --ids "$subnet_id" --query "networkSecurityGroup.id" -o tsv 2>/dev/null) || true
+    [ -z "$nsg_id" ] && return 1
+  fi
+
+  basename "$nsg_id"
+}
+
+DETECTED_NSG=""
+if DETECTED_NSG=$(detect_ingress_nsg); then
+  echo "Auto-detected ingress NSG: $DETECTED_NSG -- adding to ignore list."
+  IGNORE_LIST+=("$DETECTED_NSG")
+else
+  echo "Could not auto-detect the ingress NSG (kubectl not pointed at the cluster, or"
+  echo "the ingress isn't deployed yet)."
+fi
+
 if [ "${#IGNORE_LIST[@]}" -eq 0 ]; then
-  echo "Warning: no --ignore given. If your ingress NSG isn't excluded, it will be"
-  echo "reviewed (and, with --apply, have its public rule removed) like any other --"
-  echo "that would take the platform offline. Re-run with --ignore <ingress-nsg-name>."
+  echo "Warning: no ingress NSG known (auto-detect failed, no --ignore given). If your"
+  echo "ingress NSG isn't excluded, it will be reviewed (and, with --apply, have its"
+  echo "public rule removed) like any other -- that would take the platform offline."
+  echo "Re-run with --ignore <ingress-nsg-name>."
   echo
 fi
 
@@ -109,7 +157,7 @@ for i in $(seq 0 $((nsg_count - 1))); do
   rg=$(echo "$nsgs_json" | jq -r ".[$i].resourceGroup")
 
   if is_ignored "$name"; then
-    echo "Skipping $name (resource group $rg) -- in --ignore list."
+    echo "Skipping $name (resource group $rg) -- in ignore list."
     continue
   fi
 
