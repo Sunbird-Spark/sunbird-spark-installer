@@ -44,7 +44,7 @@ images:
 
   player: &player
     repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "spark-v1.1.1_7d1d506"
+    tag: "spark-v1.1.2-beta-2_5742316"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -113,7 +113,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.1.1_adca974"
+    tag: "spark-v1.1.2-beta-1_5aa76a4"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -130,14 +130,6 @@ images:
   superset: &superset
     repository: "sanketikahub/superset"
     tag: "4.1.1"
-
-  nlweb: &nlweb
-    repository: "sanketikahub/nlweb"
-    tag: "0.0.1"
-
-  nlwebflink: &nlwebflink
-    repository: "sunbirded.azurecr.io/flink-nlweb-job"
-    tag: "0.0.3"
 
   yugabyte: &yugabyte
     repository: "yugabytedb/yugabyte"
@@ -441,15 +433,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"    
 
-  nlweb:
-    image: *nlweb
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  nlwebflink:
-    image: *nlwebflink
-    imagePullSecrets:
-      - name: "registry-secret-name"
   yugabyte:
     Image: *yugabyte
     imagePullSecrets:
@@ -617,7 +600,7 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.1.1_b20f070"
+    tag: "spark-v1.1.2-beta-1_226ec13"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"

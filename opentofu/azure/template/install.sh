@@ -37,6 +37,7 @@ function create_tf_resources() {
     deploy_tf_module keys
     deploy_tf_module output-file
     deploy_tf_module upload-files
+    deploy_tf_module security-baseline
     [[ -f ~/.kube/config ]] && chmod 600 ~/.kube/config || true
 }
 
@@ -91,7 +92,6 @@ function install_component() {
     local component="$1"
     # namespaces sunbird and velero are created by workload-identity Terraform module
     kubectl create namespace volume-autoscaler 2>/dev/null || true
-    kubectl create namespace nlweb 2>/dev/null || true
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
