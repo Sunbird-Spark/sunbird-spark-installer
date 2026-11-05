@@ -473,14 +473,12 @@ if [[ "$VPN_ENABLED" = "true" ]]; then
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
       --name "allow-pritunl-vpn" --priority 100 --protocol Udp \
-      --source-address-prefixes "*" \
-      --destination-port-ranges 1194 --access Allow >/dev/null
+      --destination-port-range 1194 --access Allow 2>/dev/null || true
 
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
       --name "allow-pritunl-ui" --priority 110 --protocol Tcp \
-      --source-address-prefixes "*" \
-      --destination-port-ranges 443 --access Allow >/dev/null
+      --destination-port-range 443 --access Allow 2>/dev/null || true
 
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
