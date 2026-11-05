@@ -28,4 +28,5 @@ inputs = {
   subscription_id             = local.subscription_id
   location            = local.location
   aks_subnet_id        = dependency.network.outputs.aks_subnet_id
+  soft_delete_retention_days = try(local.global_vars.global.soft_delete_retention_days, 7)
 }
