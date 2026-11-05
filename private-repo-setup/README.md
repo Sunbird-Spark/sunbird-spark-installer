@@ -160,6 +160,7 @@ LOCATION=""               # Azure region (e.g. "Central India")
 GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # Leave empty for org-level runner
 GITHUB_RUNNER_TOKEN=""    # GitHub → Settings → Actions → Runners → New runner → copy token
+ADMIN_IPS=""              # Comma-separated admin IPs/CIDRs for SSH and the Pritunl UI (your current public IP is always added)
 ```
 
 Then run:
@@ -172,7 +173,7 @@ bash $INSTALLER_PATH/private-repo-setup/scripts/setup-installer-vm.sh
 - Ubuntu 22.04 VM (`Standard_B2s`) with public IP
 - User-assigned managed identity with least-privilege custom role
 - AKS Cluster Admin role on resource group
-- NSG rules: UDP 1194 (VPN) + TCP 443 (Pritunl UI)
+- NSG rules: UDP 1194 (VPN) from any; TCP 443 (Pritunl UI) and TCP 22 (SSH) only from `ADMIN_IPS` + your current public IP
 
 **cloud-init runs automatically on VM boot (~5 min):**
 - Installs: Pritunl, WireGuard, kubectl, helm, opentofu, terragrunt, az CLI, jq, yq, rclone, Docker
@@ -231,10 +232,13 @@ Developers connect to the Pritunl VPN to access the private AKS cluster.
 
 Required firewall/NSG ports (already opened by the setup script, listed here for reference):
 
-| Port | Protocol | Purpose |
-|------|----------|---------|
-| 443  | TCP      | Pritunl admin/user web UI (`https://<vm-public-ip>`) |
-| 1194 | UDP      | WireGuard VPN tunnel traffic |
+| Port | Protocol | Source | Purpose |
+|------|----------|--------|---------|
+| 22   | TCP      | `ADMIN_IPS` + setup laptop IP | SSH |
+| 443  | TCP      | `ADMIN_IPS` + setup laptop IP | Pritunl admin/user web UI (`https://<vm-public-ip>`) |
+| 1194 | UDP      | Any | WireGuard VPN tunnel traffic |
+
+To allow another admin IP later, add it to the `allow-ssh-admin` and `allow-pritunl-ui` rules on the VM's NSG. Users who download their VPN profile from the Pritunl UI need their IP in this list too.
 
 **Add a new VPN user (full flow):**
 
