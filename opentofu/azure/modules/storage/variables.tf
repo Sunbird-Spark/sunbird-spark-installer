@@ -42,11 +42,6 @@ variable "subscription_id" {
   type        = string
 }
 
-variable "aks_subnet_id" {
-  type        = string
-  description = "AKS subnet ID to allow through the storage account's network rules."
-}
-
 # Added: retention window for the blob/container soft-delete policies below.
 variable "soft_delete_retention_days" {
   type        = number

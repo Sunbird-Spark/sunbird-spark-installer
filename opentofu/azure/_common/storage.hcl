@@ -17,7 +17,6 @@ dependency "network" {
     config_path = "../network"
     mock_outputs = {
       resource_group_name = "dummy-rg"
-      aks_subnet_id       = "dummy-subnet-id"
     }
 }
 
@@ -27,6 +26,5 @@ inputs = {
   resource_group_name = dependency.network.outputs.resource_group_name
   subscription_id             = local.subscription_id
   location            = local.location
-  aks_subnet_id        = dependency.network.outputs.aks_subnet_id
   soft_delete_retention_days = try(local.global_vars.global.soft_delete_retention_days, 7)
 }
