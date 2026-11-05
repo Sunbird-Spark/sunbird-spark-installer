@@ -65,8 +65,55 @@ provider "azurerm" {
     principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
     scope                = var.vnet_subnet_id
     role_definition_name = "Network Contributor"
-    
+
     depends_on = [azurerm_kubernetes_cluster.aks]
+  }
+
+  # Added: CSPM "Kubernetes clusters should have logging enabled" -- destination for the
+  # control-plane audit logs below; doesn't touch app/ingress traffic.
+  resource "azurerm_log_analytics_workspace" "aks_logs" {
+    count               = var.log_analytics_enabled ? 1 : 0
+    name                = "${local.environment_name}-logs"
+    location            = var.location
+    resource_group_name = var.resource_group_name
+    sku                 = "PerGB2018"
+    retention_in_days   = var.log_retention_days
+    tags = merge(
+        local.common_tags,
+        var.additional_tags
+        )
+  }
+
+  # Added: routes AKS API-server audit logs to the workspace above -- satisfies the CSPM
+  # logging finding; purely additive visibility, no effect on cluster/app behaviour.
+  resource "azurerm_monitor_diagnostic_setting" "aks_diagnostics" {
+    count                      = var.log_analytics_enabled ? 1 : 0
+    name                       = "${local.environment_name}-diagnostics"
+    target_resource_id         = azurerm_kubernetes_cluster.aks.id
+    log_analytics_workspace_id = azurerm_log_analytics_workspace.aks_logs[0].id
+
+    # kube-audit (every read/watch) deliberately excluded -- kube-audit-admin (added)
+    enabled_log {
+      category = "kube-audit-admin"
+    }
+
+    enabled_log {
+      category = "guard"
+    }
+
+    enabled_metric {
+      category = "AllMetrics"
+    }
+  }
+
+  moved {
+    from = azurerm_log_analytics_workspace.aks_logs
+    to   = azurerm_log_analytics_workspace.aks_logs[0]
+  }
+
+  moved {
+    from = azurerm_monitor_diagnostic_setting.aks_diagnostics
+    to   = azurerm_monitor_diagnostic_setting.aks_diagnostics[0]
   }
 
   # resource "azurerm_kubernetes_cluster_node_pool" "small_nodepool" {
