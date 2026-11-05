@@ -26,7 +26,7 @@ GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # GitHub repo name for repo-level runner, or leave empty for org-level
 GITHUB_RUNNER_TOKEN=""    # GitHub -> Settings -> Actions -> Runners -> New runner -> copy token (expires in 1 hour)
 VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "false" = Azure Bastion (no public IP on VM)
-ADMIN_IPS=""              # Comma-separated IPs/CIDRs allowed to reach SSH (22) and the Pritunl UI (443), e.g. "203.0.113.10,198.51.100.0/24". This laptop's public IP is always added.
+ADMIN_IPS=""              # Optional. Extra IPs/CIDRs allowed to reach SSH (22) and the Pritunl UI (443) during setup. This laptop's public IP is always added.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Validate inputs ────────────────────────────────────────────────────────
@@ -529,4 +529,12 @@ if [[ "$VPN_ENABLED" = "true" ]]; then
   else
     echo "Pritunl password: ssh azureuser@${VM_IP} 'sudo pritunl default-password'"
   fi
+  VM_PRIVATE_IP=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
+    --show-details --query privateIps -o tsv)
+  echo ""
+  echo "After Pritunl is set up and you are connected to the VPN, close public SSH and Pritunl UI:"
+  echo "  az network nsg rule delete -g ${RESOURCE_GROUP} --nsg-name ${VM_NSG:-<nsg>} -n allow-ssh-admin"
+  echo "  az network nsg rule delete -g ${RESOURCE_GROUP} --nsg-name ${VM_NSG:-<nsg>} -n allow-pritunl-ui"
+  echo "Then use the VPN: ssh azureuser@${VM_PRIVATE_IP}  /  https://${VM_PRIVATE_IP}"
+  echo "If the VPN is down: az vm run-command invoke -g ${RESOURCE_GROUP} -n ${VM_NAME} --command-id RunShellScript --scripts '<command>'"
 fi

@@ -160,7 +160,7 @@ LOCATION=""               # Azure region (e.g. "Central India")
 GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # Leave empty for org-level runner
 GITHUB_RUNNER_TOKEN=""    # GitHub → Settings → Actions → Runners → New runner → copy token
-ADMIN_IPS=""              # Comma-separated admin IPs/CIDRs for SSH and the Pritunl UI (your current public IP is always added)
+ADMIN_IPS=""              # Optional. Extra IPs/CIDRs for SSH and the Pritunl UI during setup (your current public IP is always added)
 ```
 
 Then run:
@@ -238,7 +238,17 @@ Required firewall/NSG ports (already opened by the setup script, listed here for
 | 443  | TCP      | `ADMIN_IPS` + setup laptop IP | Pritunl admin/user web UI (`https://<vm-public-ip>`) |
 | 1194 | UDP      | Any | WireGuard VPN tunnel traffic |
 
-To allow another admin IP later, add it to the `allow-ssh-admin` and `allow-pritunl-ui` rules on the VM's NSG. Users who download their VPN profile from the Pritunl UI need their IP in this list too.
+The 22 and 443 rules are only needed for the first Pritunl setup. Once you are connected to the VPN, delete them (the setup script prints the exact commands) so only UDP 1194 stays public:
+
+```bash
+az network nsg rule delete -g <resource-group> --nsg-name <vm-nsg> -n allow-ssh-admin
+az network nsg rule delete -g <resource-group> --nsg-name <vm-nsg> -n allow-pritunl-ui
+```
+
+After that:
+- SSH and the Pritunl UI work over the VPN using the VM's private IP (`ssh azureuser@<vm-private-ip>`, `https://<vm-private-ip>`).
+- New VPN users: an admin downloads the user's profile from the Pritunl UI and sends it to them.
+- If the VPN is down: `az vm run-command invoke -g <resource-group> -n <vm-name> --command-id RunShellScript --scripts '<command>'` (no open ports needed).
 
 **Add a new VPN user (full flow):**
 
