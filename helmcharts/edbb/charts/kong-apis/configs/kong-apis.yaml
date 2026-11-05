@@ -9044,7 +9044,7 @@ kong_apis:
 
 - name: competencyFrameworkReadNew
   uris: "{{ .Values.competency_prefix }}/v1/role/list"
-  url: "{{ .Values.viewer_service_url }}/v1/competency/role/list
+  url: "{{ .Values.viewer_service_url }}/v1/competency/role/list"
   strip_path: true
   plugins:
   - name: jwt
