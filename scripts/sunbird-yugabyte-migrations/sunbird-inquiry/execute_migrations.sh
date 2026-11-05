@@ -112,7 +112,7 @@ execute_cql_file() {
     # Clean up temp file
     rm -f "${temp_file}"
 
-    if [ $exit_code -eq 0 ]; then
+    if [[ $exit_code -eq 0 ]]; then
         print_message "${GREEN}" "✓ SUCCESS: ${filename} executed successfully"
         SUCCESSFUL_FILES=$((SUCCESSFUL_FILES + 1))
     else
@@ -171,9 +171,9 @@ print_header "Starting CQL File Execution"
 for cql_file in "${CQL_FILES[@]}"; do
     full_path="${SCRIPT_DIR}/${cql_file}"
     
-    if [ -f "${full_path}" ]; then
+    if [[ -f "${full_path}" ]]; then
         TOTAL_FILES=$((TOTAL_FILES + 1))
-        if [ "${cql_file}" = "question_store_add_pairs.cql" ] && column_exists "${ENVIRONMENT}_question_store" "question_data" "pairs"; then
+        if [[ "${cql_file}" = "question_store_add_pairs.cql" ]] && column_exists "${ENVIRONMENT}_question_store" "question_data" "pairs"; then
             print_message "${GREEN}" "✓ SKIPPED: ${cql_file} (column 'pairs' already exists)"
             SUCCESSFUL_FILES=$((SUCCESSFUL_FILES + 1))
         else
@@ -193,7 +193,7 @@ echo "Successful: ${SUCCESSFUL_FILES}"
 echo "Failed: ${FAILED_FILES}"
 echo ""
 
-if [ ${FAILED_FILES} -gt 0 ]; then
+if [[ ${FAILED_FILES} -gt 0 ]]; then
     print_message "${RED}" "Failed Files:"
     for failed_file in "${FAILED_FILE_LIST[@]}"; do
         echo "  - ${failed_file}"
