@@ -312,7 +312,7 @@ if [[ "\$VPN_ENABLED" = "true" ]]; then
   curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x7568D9BB55FF9E5287D586017AE645C0CF8E292A" | gpg --dearmor -o /usr/share/keyrings/pritunl.gpg
   echo "deb [signed-by=/usr/share/keyrings/pritunl.gpg] https://repo.pritunl.com/stable/apt jammy main" > /etc/apt/sources.list.d/pritunl.list
   curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-6.0.gpg
-  echo "deb [[ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ]] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list
+  echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-6.0.list
   apt-get update -qq 2>&1 | tee /tmp/pritunl-apt-update.log
   apt-get install -y pritunl mongodb-org 2>&1 | tee /tmp/pritunl-install.log
   PRITUNL_INSTALL_STATUS=\$?
