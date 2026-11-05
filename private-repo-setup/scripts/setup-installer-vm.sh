@@ -26,7 +26,7 @@ GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # GitHub repo name for repo-level runner, or leave empty for org-level
 GITHUB_RUNNER_TOKEN=""    # GitHub -> Settings -> Actions -> Runners -> New runner -> copy token (expires in 1 hour)
 VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "false" = Azure Bastion (no public IP on VM)
-ADMIN_IPS=""              # Optional. Extra IPs/CIDRs allowed to reach SSH (22) and the Pritunl UI (443) during setup. This laptop's public IP is always added.
+ADMIN_IPS=""              # Optional. Extra IPs/CIDRs allowed to SSH (22) from the internet. This laptop's public IP is always added; others can SSH over the VPN.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Validate inputs ────────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ for var in TENANT_ID SUBSCRIPTION_ID BUILDING_BLOCK ENVIRONMENT RESOURCE_GROUP L
   fi
 done
 
-# ── Admin source IPs for SSH / Pritunl UI ──────────────────────────────────
+# ── Admin source IPs for SSH ───────────────────────────────────────
 ADMIN_SOURCES=()
 if [[ "$VPN_ENABLED" = "true" ]]; then
   MY_IP=$(curl -fsS --max-time 10 https://api.ipify.org || true)
@@ -47,7 +47,7 @@ if [[ "$VPN_ENABLED" = "true" ]]; then
     echo "❌ ERROR: Could not detect this laptop's public IP and ADMIN_IPS is empty. Set ADMIN_IPS." >&2
     exit 1
   fi
-  echo "✓ SSH and Pritunl UI will be allowed only from: ${ADMIN_SOURCES[*]}"
+  echo "✓ SSH will be allowed only from: ${ADMIN_SOURCES[*]} (and over the VPN)"
 fi
 
 # ── VM config ──────────────────────────────────────────────────────────────
@@ -479,7 +479,7 @@ if [[ "$VPN_ENABLED" = "true" ]]; then
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
       --name "allow-pritunl-ui" --priority 110 --protocol Tcp \
-      --source-address-prefixes "${ADMIN_SOURCES[@]}" \
+      --source-address-prefixes "*" \
       --destination-port-ranges 443 --access Allow >/dev/null
 
     az network nsg rule create \
@@ -488,9 +488,9 @@ if [[ "$VPN_ENABLED" = "true" ]]; then
       --source-address-prefixes "${ADMIN_SOURCES[@]}" \
       --destination-port-ranges 22 --access Allow >/dev/null
 
-    echo "✓ NSG $VM_NSG: UDP 1194 from any, TCP 443 and 22 only from ${ADMIN_SOURCES[*]}"
+    echo "✓ NSG $VM_NSG: UDP 1194 and TCP 443 from any, TCP 22 only from ${ADMIN_SOURCES[*]}"
   else
-    echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 1194 from any, TCP 443 and 22 from ${ADMIN_SOURCES[*]}"
+    echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 1194 and TCP 443 from any, TCP 22 from ${ADMIN_SOURCES[*]}"
   fi
 else
   echo "✓ VPN disabled - no public NSG rules added (VM has no public IP; access via Azure Bastion)"
@@ -526,12 +526,4 @@ if [[ "$VPN_ENABLED" = "true" ]]; then
   else
     echo "Pritunl password: ssh azureuser@${VM_IP} 'sudo pritunl default-password'"
   fi
-  VM_PRIVATE_IP=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
-    --show-details --query privateIps -o tsv)
-  echo ""
-  echo "After Pritunl is set up and you are connected to the VPN, close public SSH and Pritunl UI:"
-  echo "  az network nsg rule delete -g ${RESOURCE_GROUP} --nsg-name ${VM_NSG:-<nsg>} -n allow-ssh-admin"
-  echo "  az network nsg rule delete -g ${RESOURCE_GROUP} --nsg-name ${VM_NSG:-<nsg>} -n allow-pritunl-ui"
-  echo "Then use the VPN: ssh azureuser@${VM_PRIVATE_IP}  /  https://${VM_PRIVATE_IP}"
-  echo "If the VPN is down: az vm run-command invoke -g ${RESOURCE_GROUP} -n ${VM_NAME} --command-id RunShellScript --scripts '<command>'"
 fi
