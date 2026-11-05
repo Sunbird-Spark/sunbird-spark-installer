@@ -470,9 +470,6 @@ if [[ "$VPN_ENABLED" = "true" ]]; then
   if [[ -n "$NSG_ID" ]]; then
     VM_NSG=$(basename "$NSG_ID")
 
-    az network nsg rule delete --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
-      --name "default-allow-ssh" 2>/dev/null || true
-
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
       --name "allow-pritunl-vpn" --priority 100 --protocol Udp \
