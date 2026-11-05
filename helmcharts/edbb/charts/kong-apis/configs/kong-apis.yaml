@@ -9042,7 +9042,7 @@ kong_apis:
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
-- name: competencyFrameworkReadNew
+- name: competencyRoleList
   uris: "{{ .Values.competency_prefix }}/v1/role/list"
   url: "{{ .Values.viewer_service_url }}/v1/competency/role/list"
   strip_path: true
