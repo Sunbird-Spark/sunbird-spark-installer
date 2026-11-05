@@ -48,7 +48,7 @@ HELM_TIMEOUT="${HELM_TIMEOUT:-60m}"
 log() { echo -e "\n\033[1;36m[migrate] $*\033[0m"; }
 die() { echo -e "\033[1;31m[migrate ERROR] $*\033[0m" >&2; exit 1; }
 
-[ -d "$IMPORT_DIR" ] || die "IMPORT_DIR not found: $IMPORT_DIR"
+[[ -d "$IMPORT_DIR" ]] || die "IMPORT_DIR not found: $IMPORT_DIR"
 command -v helm    >/dev/null 2>&1 || die "helm not found in PATH"
 command -v kubectl >/dev/null 2>&1 || die "kubectl not found in PATH"
 
@@ -96,7 +96,7 @@ run_step() {
   esac
 }
 
-if [ $# -eq 0 ]; then
+if [[ $# -eq 0 ]]; then
   run_step all
 else
   for arg in "$@"; do

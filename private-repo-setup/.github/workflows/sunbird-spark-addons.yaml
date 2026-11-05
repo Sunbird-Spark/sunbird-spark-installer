@@ -8,8 +8,8 @@ on:
         required: true
         type: choice
         options:
-          - your-env   # Replace this with your environment name (e.g. dev, prod, staging)
-        default: your-env
+          - <env>   # Replace with your environment name (e.g. dev, prod, staging)
+        default: <env>
       config_branch:
         description: 'Config repository branch (your private repo)'
         required: true
@@ -49,24 +49,24 @@ on:
         type: boolean
         default: false
 
-      # ── UNINSTALL ADDONS ─────────────────────────────────────────────
-      run_addon_uninstall:
-        description: '3️⃣ Uninstall addon components'
+      # ── REMOVE ADDONS ────────────────────────────────────────────────
+      run_remove_addon_components:
+        description: '3️⃣ Remove addon components (uninstall)'
         type: boolean
         default: false
-      uninstall_dial:
+      remove_addon_dial:
         description: '   ↳ DIAL'
         type: boolean
         default: false
-      uninstall_discussion_forum:
+      remove_addon_discussion_forum:
         description: '   ↳ Discussion Forum'
         type: boolean
         default: false
-      uninstall_video_stream_generator:
+      remove_addon_video_stream_generator:
         description: '   ↳ Video Stream Generator'
         type: boolean
         default: false
-      uninstall_asset_enrichment:
+      remove_addon_asset_enrichment:
         description: '   ↳ Asset Enrichment'
         type: boolean
         default: false
@@ -85,15 +85,14 @@ jobs:
   infra-addons:
     name: "1 — Infra Addons (DIAL OpenTofu)"
     if: ${{ inputs.run_dial_infra }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
     permissions:
-      id-token: write   # azure/login
       contents: write   # Encrypt and Commit Addon Configs pushes to the config repo
 
     steps:
       - name: Checkout Configuration Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.config_branch }}
 
@@ -105,20 +104,12 @@ jobs:
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
           echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
-      - name: Azure Login (Infra)
-        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
-        with:
-          client-id: ${{ secrets.AZURE_INFRA_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           pip install --only-binary :all: ansible==14.3.1
 
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -190,10 +181,8 @@ jobs:
           echo "✅ DIAL addon OpenTofu completed"
 
       - name: Encrypt and Commit Addon Configs
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
           ADDON_CLOUD="sunbird-spark-installer/addons/global-cloud-values.yaml"
           if [ -f "$ADDON_CLOUD" ]; then
@@ -231,15 +220,12 @@ jobs:
     name: "2 — Deploy Addons"
     if: ${{ always() && inputs.run_addon_components }}
     needs: [infra-addons]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
-    permissions:
-      contents: read
-      id-token: write   # azure/login
 
     steps:
       - name: Checkout Configuration Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.config_branch }}
 
@@ -251,20 +237,12 @@ jobs:
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
           echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
-      - name: Azure Login (Deploy)
-        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
-        with:
-          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           pip install --only-binary :all: ansible==14.3.1
 
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -385,21 +363,18 @@ jobs:
           echo "================================================"
 
 # ════════════════════════════════════════════════════════════════════════════
-# JOB 3 — UNINSTALL ADDONS
+# JOB 3 — REMOVE ADDONS (DIAL, Discussion Forum, Video Stream Generator)
 # ════════════════════════════════════════════════════════════════════════════
-  uninstall-addons:
-    name: "3 — Uninstall Addons"
-    if: ${{ always() && inputs.run_addon_uninstall }}
-    needs: [deploy-addons]
-    runs-on: ubuntu-latest
+  remove-addons:
+    name: "3 — Remove Addons"
+    if: ${{ always() && inputs.run_remove_addon_components }}
+    needs: [infra-addons, deploy-addons]
+    runs-on: [self-hosted, azure]
     environment: ${{ inputs.environment }}
-    permissions:
-      contents: read
-      id-token: write   # azure/login
 
     steps:
       - name: Checkout Configuration Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           ref: ${{ inputs.config_branch }}
 
@@ -411,20 +386,12 @@ jobs:
             https://github.com/Sunbird-Spark/sunbird-spark-installer.git sunbird-spark-installer
           echo "✅ Cloned source repository (branch: $SOURCE_BRANCH)"
 
-      - name: Azure Login (Uninstall)
-        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1
-        with:
-          client-id: ${{ secrets.AZURE_DEPLOY_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Decrypt Config Files
-        env:
-          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: |
           pip install --only-binary :all: ansible==14.3.1
 
-          echo "$ANSIBLE_VAULT_PASSWORD" > /tmp/vault_pass.txt
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > /tmp/vault_pass.txt
 
           ansible-vault decrypt $CONFIG_PATH/global-values.yaml \
             --vault-password-file=/tmp/vault_pass.txt
@@ -434,6 +401,23 @@ jobs:
             ansible-vault decrypt $CONFIG_PATH/global-cloud-values.yaml \
               --vault-password-file=/tmp/vault_pass.txt
             echo "✅ global-cloud-values.yaml decrypted"
+          fi
+
+          if [ -f "$CONFIG_PATH/addons/global-cloud-values.yaml" ]; then
+            ansible-vault decrypt $CONFIG_PATH/addons/global-cloud-values.yaml \
+              --vault-password-file=/tmp/vault_pass.txt
+            if [ -f "sunbird-spark-installer/addons/global-cloud-values.yaml" ]; then
+              yq eval-all 'select(fileIndex==0) * select(fileIndex==1)' \
+                sunbird-spark-installer/addons/global-cloud-values.yaml \
+                $CONFIG_PATH/addons/global-cloud-values.yaml \
+                > /tmp/merged-addon-cloud.yaml
+              cp /tmp/merged-addon-cloud.yaml sunbird-spark-installer/addons/global-cloud-values.yaml
+              echo "✅ Addon cloud values merged"
+            else
+              cp $CONFIG_PATH/addons/global-cloud-values.yaml \
+                sunbird-spark-installer/addons/global-cloud-values.yaml
+              echo "✅ Addon cloud values copied"
+            fi
           fi
 
           rm /tmp/vault_pass.txt
@@ -486,43 +470,43 @@ jobs:
           kubectl get nodes
           echo "✅ AKS credentials configured (cluster: $CLUSTER_NAME)"
 
-      - name: 3️⃣ uninstall — DIAL
-        if: ${{ inputs.uninstall_dial }}
+      - name: 3️⃣ remove — DIAL
+        if: ${{ inputs.remove_addon_dial }}
         run: |
           export ENV_NAME="${{ inputs.environment }}"
           bash sunbird-spark-installer/addons/dial/script/addon.sh uninstall azure
           echo "✅ DIAL uninstalled"
 
-      - name: 3️⃣ uninstall — Discussion Forum
-        if: ${{ inputs.uninstall_discussion_forum }}
+      - name: 3️⃣ remove — Discussion Forum
+        if: ${{ inputs.remove_addon_discussion_forum }}
         run: |
           export ENV_NAME="${{ inputs.environment }}"
           bash sunbird-spark-installer/addons/discussion-forum/script/addon.sh uninstall azure
           echo "✅ Discussion Forum uninstalled"
 
-      - name: 3️⃣ uninstall — Video Stream Generator
-        if: ${{ inputs.uninstall_video_stream_generator }}
+      - name: 3️⃣ remove — Video Stream Generator
+        if: ${{ inputs.remove_addon_video_stream_generator }}
         run: |
           export ENV_NAME="${{ inputs.environment }}"
           bash sunbird-spark-installer/addons/video-stream-generator/script/addon.sh uninstall azure
           echo "✅ Video Stream Generator uninstalled"
 
-      - name: 3️⃣ uninstall — Asset Enrichment
-        if: ${{ inputs.uninstall_asset_enrichment }}
+      - name: 3️⃣ remove — Asset Enrichment
+        if: ${{ inputs.remove_addon_asset_enrichment }}
         run: |
           export ENV_NAME="${{ inputs.environment }}"
           bash sunbird-spark-installer/addons/asset-enrichment/script/addon.sh uninstall azure
           echo "✅ Asset Enrichment uninstalled"
 
-      - name: Uninstall Addons Summary
+      - name: Remove Addons Summary
         if: always()
         run: |
           echo "================================================"
-          echo "     UNINSTALL ADDONS SUMMARY"
+          echo "     REMOVE ADDONS SUMMARY"
           echo "================================================"
           echo "Environment : ${{ inputs.environment }}"
-          [ "${{ inputs.uninstall_dial }}"                   == "true" ] && echo "  ✅ DIAL"                   || echo "  ⏭️  DIAL (skipped)"
-          [ "${{ inputs.uninstall_discussion_forum }}"       == "true" ] && echo "  ✅ Discussion Forum"       || echo "  ⏭️  Discussion Forum (skipped)"
-          [ "${{ inputs.uninstall_video_stream_generator }}" == "true" ] && echo "  ✅ Video Stream Generator" || echo "  ⏭️  Video Stream Generator (skipped)"
-          [ "${{ inputs.uninstall_asset_enrichment }}"       == "true" ] && echo "  ✅ Asset Enrichment"       || echo "  ⏭️  Asset Enrichment (skipped)"
+          [ "${{ inputs.remove_addon_dial }}"                   == "true" ] && echo "  ✅ DIAL"                   || echo "  ⏭️  DIAL (skipped)"
+          [ "${{ inputs.remove_addon_discussion_forum }}"       == "true" ] && echo "  ✅ Discussion Forum"       || echo "  ⏭️  Discussion Forum (skipped)"
+          [ "${{ inputs.remove_addon_video_stream_generator }}" == "true" ] && echo "  ✅ Video Stream Generator" || echo "  ⏭️  Video Stream Generator (skipped)"
+          [ "${{ inputs.remove_addon_asset_enrichment }}"       == "true" ] && echo "  ✅ Asset Enrichment"       || echo "  ⏭️  Asset Enrichment (skipped)"
           echo "================================================"

@@ -62,6 +62,25 @@ variable "sa_key_store_bucket" {
   type        = string
   default     = ""
 }
+
+variable "public_bucket" {
+  description = "The name of the public GCS content bucket, for scoping the service account's storage access."
+  type        = string
+  default     = ""
+}
+
+variable "dial_state_bucket" {
+  description = "The name of the DIAL state GCS bucket, for scoping the service account's storage access."
+  type        = string
+  default     = ""
+}
+
+variable "velero_bucket" {
+  description = "The name of the Velero backup GCS bucket, for scoping the service account's storage access."
+  type        = string
+  default     = ""
+}
+
 variable "service_account_bindings" {
   description = "Map of Kubernetes namespace/serviceAccountName pairs to bind to the GCP service account"
   type        = map(bool)
