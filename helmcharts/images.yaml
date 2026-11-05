@@ -131,14 +131,6 @@ images:
     repository: "sanketikahub/superset"
     tag: "4.1.1"
 
-  nlweb: &nlweb
-    repository: "sanketikahub/nlweb"
-    tag: "0.0.1"
-
-  nlwebflink: &nlwebflink
-    repository: "sunbirded.azurecr.io/flink-nlweb-job"
-    tag: "0.0.3"
-
   yugabyte: &yugabyte
     repository: "yugabytedb/yugabyte"
     tag: "2025.2.0.0-b131"
@@ -441,15 +433,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"    
 
-  nlweb:
-    image: *nlweb
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  nlwebflink:
-    image: *nlwebflink
-    imagePullSecrets:
-      - name: "registry-secret-name"
   yugabyte:
     Image: *yugabyte
     imagePullSecrets:
