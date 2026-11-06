@@ -63,16 +63,23 @@ resource "azurerm_storage_account" "storage_account" {
 
     }
 
-    # Added: CSPM "soft delete" findings (blobs + containers) -- recovers accidental/malicious
-    # deletes for var.soft_delete_retention_days; no effect on normal reads/writes.
-    delete_retention_policy {
-      days = var.soft_delete_retention_days
+    # Off by default: blob soft delete makes the dfs endpoint reject the ABFS driver on
+    # non-HNS accounts, which breaks Flink checkpoints stored in this account.
+    dynamic "delete_retention_policy" {
+      for_each = var.soft_delete_enabled ? [1] : []
+      content {
+        days = var.soft_delete_retention_days
+      }
     }
 
-    container_delete_retention_policy {
-      days = var.soft_delete_retention_days
+    dynamic "container_delete_retention_policy" {
+      for_each = var.soft_delete_enabled ? [1] : []
+      content {
+        days = var.soft_delete_retention_days
+      }
     }
   }
+
   tags = merge(
     local.common_tags,
     var.additional_tags
