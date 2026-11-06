@@ -26,6 +26,7 @@ GITHUB_ORG=""             # GitHub org name (e.g. "Sunbird-Spark")
 GITHUB_REPO=""            # GitHub repo name for repo-level runner, or leave empty for org-level
 GITHUB_RUNNER_TOKEN=""    # GitHub -> Settings -> Actions -> Runners -> New runner -> copy token (expires in 1 hour)
 VPN_ENABLED="true"        # "true" = install Pritunl VPN (VM gets public IP); "false" = Azure Bastion (no public IP on VM)
+ADMIN_IPS=""              # Optional. Extra IPs/CIDRs allowed to SSH (22) from the internet. This laptop's public IP is always added; others can SSH over the VPN.
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Validate inputs ────────────────────────────────────────────────────────
@@ -35,6 +36,19 @@ for var in TENANT_ID SUBSCRIPTION_ID BUILDING_BLOCK ENVIRONMENT RESOURCE_GROUP L
     exit 1
   fi
 done
+
+# ── Admin source IPs for SSH ───────────────────────────────────────
+ADMIN_SOURCES=()
+if [[ "$VPN_ENABLED" = "true" ]]; then
+  MY_IP=$(curl -fsS --max-time 10 https://api.ipify.org || true)
+  IFS=', ' read -r -a ADMIN_SOURCES <<< "${ADMIN_IPS}"
+  [[ -n "$MY_IP" ]] && ADMIN_SOURCES+=("$MY_IP")
+  if [[ ${#ADMIN_SOURCES[@]} -eq 0 ]]; then
+    echo "❌ ERROR: Could not detect this laptop's public IP and ADMIN_IPS is empty. Set ADMIN_IPS." >&2
+    exit 1
+  fi
+  echo "✓ SSH will be allowed only from: ${ADMIN_SOURCES[*]} (and over the VPN)"
+fi
 
 # ── VM config ──────────────────────────────────────────────────────────────
 VM_NAME="${BUILDING_BLOCK}-${ENVIRONMENT}-runner"
@@ -433,6 +447,7 @@ else
     --custom-data "$CLOUD_INIT_FILE" \
     --vnet-name "$VNET_NAME" \
     --subnet "$RUNNER_SUBNET_NAME" \
+    --nsg-rule NONE \
     "${PUBLIC_IP_ARGS[@]}" >/dev/null
 
   # CSPM fix (secure at creation time, not patched after the fact): deny public
@@ -446,25 +461,15 @@ else
   echo "✓ VM created: $VM_NAME"
 fi
 
-# ── Open NSG ports (VPN only) ─────────────────────────────────────────────
+# ── NSG rules (VPN only) ───────────────────────────────────────────────────
 if [[ "$VPN_ENABLED" = "true" ]]; then
-  # Azure auto-creates NSG named <VM_NAME>NSG
-  VM_NSG="${VM_NAME}NSG"
+  NIC_ID=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
+    --query "networkProfile.networkInterfaces[0].id" -o tsv)
+  NSG_ID=$(az network nic show --ids "$NIC_ID" --query "networkSecurityGroup.id" -o tsv 2>/dev/null || true)
 
-  # Fallback: look up via NIC if default name doesn't exist
-  if ! az network nsg show --resource-group "$RESOURCE_GROUP" --name "$VM_NSG" &>/dev/null; then
-    NIC_ID=$(az vm show --resource-group "$RESOURCE_GROUP" --name "$VM_NAME" \
-      --query "networkProfile.networkInterfaces[0].id" -o tsv)
-    NSG_ID=$(az network nic show --ids "$NIC_ID" --query "networkSecurityGroup.id" -o tsv 2>/dev/null || true)
-    if [[ -n "$NSG_ID" ]]; then
-      VM_NSG=$(basename "$NSG_ID")
-    else
-      echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 1194, TCP 443"
-      VM_NSG=""
-    fi
-  fi
+  if [[ -n "$NSG_ID" ]]; then
+    VM_NSG=$(basename "$NSG_ID")
 
-  if [[ -n "$VM_NSG" ]]; then
     az network nsg rule create \
       --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
       --name "allow-pritunl-vpn" --priority 100 --protocol Udp \
@@ -475,10 +480,18 @@ if [[ "$VPN_ENABLED" = "true" ]]; then
       --name "allow-pritunl-ui" --priority 110 --protocol Tcp \
       --destination-port-range 443 --access Allow 2>/dev/null || true
 
-    echo "✓ NSG rules added (UDP 1194, TCP 443)"
+    az network nsg rule create \
+      --resource-group "$RESOURCE_GROUP" --nsg-name "$VM_NSG" \
+      --name "allow-ssh-admin" --priority 120 --protocol Tcp \
+      --source-address-prefixes "${ADMIN_SOURCES[@]}" \
+      --destination-port-ranges 22 --access Allow >/dev/null
+
+    echo "✓ NSG $VM_NSG: UDP 1194 and TCP 443 from any, TCP 22 only from ${ADMIN_SOURCES[*]}"
+  else
+    echo "WARNING: Could not find NSG for VM. Add NSG rules manually: UDP 1194 and TCP 443 from any, TCP 22 from ${ADMIN_SOURCES[*]}"
   fi
 else
-  echo "✓ VPN disabled - no NSG rules added (VM has no public IP; access via Azure Bastion)"
+  echo "✓ VPN disabled - no public NSG rules added (VM has no public IP; access via Azure Bastion)"
 fi
 
 # ── Done ───────────────────────────────────────────────────────────────────
