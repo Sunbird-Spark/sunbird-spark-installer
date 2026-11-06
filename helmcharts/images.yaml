@@ -633,18 +633,18 @@ global:
   core_api:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/core-api"
-    tag: "spark-v1.1.1-ai-pipeline-v17_8fe0c02"
+    tag: "spark-v1.1.1-ai-pipeline-v18_83f096c"
 
   wf_transcript:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/wf-transcript"
-    tag: "spark-v1.1.1-ai-pipeline-v17_8fe0c02"
+    tag: "spark-v1.1.1-ai-pipeline-v18_83f096c"
 
   # Speech-to-text backend for transcript.
   whisper:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/ai-pipeline/whisper"
-    tag: "spark-v1.1.1-ai-pipeline-v17_8fe0c02"
+    tag: "spark-v1.1.1-ai-pipeline-v18_83f096c"
 
   # Model gateway for ai-pipeline units.
   litellm:
