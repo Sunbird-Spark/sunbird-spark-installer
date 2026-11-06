@@ -103,3 +103,9 @@ units:
       # the chunk thread pool so concurrent chunks don't oversubscribe the pod's actual CPU limit.
       WHISPER_CPU_CORES: "4"
       WHISPER_MAX_CONCURRENT_CHUNKS: "4"
+      # One whole-file job at a time: a single transcription already fans out across all 4 CPU
+      # cores above (WHISPER_MAX_CONCURRENT_CHUNKS). The default of 2 would double that demand.
+      WHISPER_MAX_CONCURRENT_TRANSCRIPTIONS: "1"
+      # Without this, artifactUrl is accepted from any https host -- a blind SSRF into whatever
+      # this pod can reach. Knowlg's artifactUrl is always an Azure Blob Storage URL.
+      WHISPER_ALLOWED_ARTIFACT_HOST_SUFFIXES: "blob.core.windows.net"
