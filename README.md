@@ -111,6 +111,9 @@ The installer has been verified with:
 
 - **OpenTofu**: v1.11.4
 - **Terragrunt**: v0.77.5
+- **Helm**: v3.21.4
+- **kubectl**: matches the AKS cluster's Kubernetes version (`global.aks_version` in `global-values.yaml`), within [kubectl's version skew policy](https://kubernetes.io/releases/version-skew-policy/#kubectl) (±1 minor version of the server)
+- **ggshield** (pre-commit secret scanning): v1.14.5
 
 ---
 

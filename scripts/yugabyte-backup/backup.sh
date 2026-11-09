@@ -51,7 +51,7 @@ python3 /ycql_backup.py \
     echo "  ✓ YCQL backup complete" || echo "  ✗ YCQL backup failed"
 
 for ks_dir in "$YCQL_DIR"/*/; do
-    [ -d "$ks_dir" ] || continue
+    [[ -d "$ks_dir" ]] || continue
     ks=$(basename "$ks_dir")
     tar -czf "$YCQL_DIR/${ks}.tar.gz" -C "$YCQL_DIR" "$ks"
     echo "  ✓ $ks archived"
@@ -64,7 +64,7 @@ echo "--- Uploading to $CLOUD_SERVICE ---"
 # The az CLI keeps its own session cache and doesn't auto-discover workload
 # identity — unlike SDK-based tools (DefaultAzureCredential), it needs one
 # explicit login exchanging the federated token for a real AAD token first.
-if [ "$CLOUD_SERVICE" == "azure" ] && [ "$CLOUD_STORAGE_AUTH_TYPE" == "OIDC" ]; then
+if [[ "$CLOUD_SERVICE" == "azure" ]] && [[ "$CLOUD_STORAGE_AUTH_TYPE" == "OIDC" ]]; then
     az login --service-principal \
         -u "$AZURE_CLIENT_ID" \
         -t "$AZURE_TENANT_ID" \
@@ -77,8 +77,8 @@ upload_file() {
     local local_file="$1"
     local remote_path="$2"
 
-    if [ "$CLOUD_SERVICE" == "azure" ]; then
-        if [ "$CLOUD_STORAGE_AUTH_TYPE" == "OIDC" ]; then
+    if [[ "$CLOUD_SERVICE" == "azure" ]]; then
+        if [[ "$CLOUD_STORAGE_AUTH_TYPE" == "OIDC" ]]; then
             az storage blob upload \
                 --account-name "$AZURE_STORAGE_ACCOUNT" \
                 --container-name "$AZURE_CONTAINER" \
@@ -96,20 +96,20 @@ upload_file() {
                 --overwrite
         fi
 
-    elif [ "$CLOUD_SERVICE" == "gcp" ]; then
-        if [ "$CLOUD_STORAGE_AUTH_TYPE" != "OIDC" ]; then
+    elif [[ "$CLOUD_SERVICE" == "gcp" ]]; then
+        if [[ "$CLOUD_STORAGE_AUTH_TYPE" != "OIDC" ]]; then
             export GOOGLE_APPLICATION_CREDENTIALS="/secrets/gcp-sa.json"
         fi
         gsutil cp "$local_file" "gs://${GCS_BUCKET}/${remote_path}"
 
-    elif [ "$CLOUD_SERVICE" == "aws" ]; then
+    elif [[ "$CLOUD_SERVICE" == "aws" ]]; then
         aws s3 cp "$local_file" "s3://${S3_BUCKET}/${remote_path}"
     fi
 }
 
 # Upload YSQL dumps: ysql/<db-name>/<timestamp>.sql.gz
 for f in "$YSQL_DIR"/*.sql.gz; do
-    [ -f "$f" ] || continue
+    [[ -f "$f" ]] || continue
     db=$(basename "$f" .sql.gz)
     remote="yugabyte-backups/ysql/${db}/${BACKUP_DATE}.sql.gz"
     upload_file "$f" "$remote" && echo "  ✓ uploaded $db"
@@ -117,7 +117,7 @@ done
 
 # Upload YCQL archives: ycql/<keyspace-name>/<timestamp>.tar.gz
 for f in "$YCQL_DIR"/*.tar.gz; do
-    [ -f "$f" ] || continue
+    [[ -f "$f" ]] || continue
     ks=$(basename "$f" .tar.gz)
     remote="yugabyte-backups/ycql/${ks}/${BACKUP_DATE}.tar.gz"
     upload_file "$f" "$remote" && echo "  ✓ uploaded $ks"
@@ -129,9 +129,9 @@ echo "--- Cleaning backups older than $RETENTION_DAYS days ---"
 CUTOFF_DATE=$(date -d "-${RETENTION_DAYS} days" +%Y-%m-%d 2>/dev/null || \
               date -v-${RETENTION_DAYS}d +%Y-%m-%d 2>/dev/null)
 
-if [ "$CLOUD_SERVICE" == "azure" ]; then
+if [[ "$CLOUD_SERVICE" == "azure" ]]; then
     AUTH_ARGS="--auth-mode login"
-    [ "$CLOUD_STORAGE_AUTH_TYPE" != "OIDC" ] && \
+    [[ "$CLOUD_STORAGE_AUTH_TYPE" != "OIDC" ]] && \
         AUTH_ARGS="--account-key $AZURE_KEY"
 
     az storage blob delete-batch \
@@ -141,7 +141,7 @@ if [ "$CLOUD_SERVICE" == "azure" ]; then
         --if-unmodified-since "${CUTOFF_DATE}T00:00:00Z" \
         $AUTH_ARGS 2>/dev/null || true
 
-elif [ "$CLOUD_SERVICE" == "gcp" ]; then
+elif [[ "$CLOUD_SERVICE" == "gcp" ]]; then
     # Backup objects live at yugabyte-backups/ysql/<db>/<ts>.sql.gz and
     # yugabyte-backups/ycql/<ks>/<ts>.tar.gz — the date is nested two levels
     # deep, not a prefix of "yugabyte-backups/", so match by object
@@ -154,19 +154,19 @@ elif [ "$CLOUD_SERVICE" == "gcp" ]; then
             *) continue ;;
         esac
         obj_epoch=$(date -d "$mtime" +%s 2>/dev/null) || continue
-        if [ "$obj_epoch" -lt "$CUTOFF_EPOCH" ]; then
+        if [[ "$obj_epoch" -lt "$CUTOFF_EPOCH" ]]; then
             gsutil rm "$url" 2>/dev/null || true
         fi
     done || true
 
-elif [ "$CLOUD_SERVICE" == "aws" ]; then
+elif [[ "$CLOUD_SERVICE" == "aws" ]]; then
     # Same reasoning as GCP above — match by LastModified, not a date-string glob.
     CUTOFF_ISO=$(date -u -d "-${RETENTION_DAYS} days" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || \
                  date -u -v-${RETENTION_DAYS}d +%Y-%m-%dT%H:%M:%SZ 2>/dev/null)
     aws s3api list-objects-v2 --bucket "$S3_BUCKET" --prefix "yugabyte-backups/" \
         --query "Contents[?LastModified<='${CUTOFF_ISO}'].Key" --output text 2>/dev/null | \
         tr '\t' '\n' | while read -r key; do
-            [ -n "$key" ] || continue
+            [[ -n "$key" ]] || continue
             aws s3 rm "s3://${S3_BUCKET}/${key}" 2>/dev/null || true
         done || true
 fi

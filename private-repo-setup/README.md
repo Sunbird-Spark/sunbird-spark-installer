@@ -355,7 +355,7 @@ cd opentofu/azure/<env-name>
 | `learnbb` | `kafka` `elasticsearch` `yugabyte` `lern` `keycloak` `keycloak-kids-keys` `flink` `adminutil` `cert` `certificateapi` `certificatesign` `certregistry` `registry` |
 | `knowledgebb` | `elasticsearch` `kafka` `yugabyte` `janusgraph` `knowlg` `search` `flink` |
 | `obsrvbb` | `yugabyte` `superset` |
-| `additional` | `volume-autoscaler` `nlweb` `nlwebflink` `kafka` |
+| `additional` | `volume-autoscaler` `kafka` |
 
 ---
 
