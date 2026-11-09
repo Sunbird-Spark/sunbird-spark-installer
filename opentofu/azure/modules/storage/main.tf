@@ -61,23 +61,7 @@ resource "azurerm_storage_account" "storage_account" {
       exposed_headers    = ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods"]
       allowed_headers    = ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Origin", "x-ms-meta-qq", "x-ms-blob-type", "x-ms-blob-content-type", "Content-Type"]
 
-    }
-
-    # Off by default: blob soft delete makes the dfs endpoint reject the ABFS driver on
-    # non-HNS accounts, which breaks Flink checkpoints stored in this account.
-    dynamic "delete_retention_policy" {
-      for_each = var.soft_delete_enabled ? [1] : []
-      content {
-        days = var.soft_delete_retention_days
-      }
-    }
-
-    dynamic "container_delete_retention_policy" {
-      for_each = var.soft_delete_enabled ? [1] : []
-      content {
-        days = var.soft_delete_retention_days
-      }
-    }
+    }  
   }
 
   tags = merge(
