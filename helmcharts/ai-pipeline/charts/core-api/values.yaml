@@ -1,0 +1,56 @@
+nameOverride: ""
+fullnameOverride: ""
+
+commonLabels: {}
+commonAnnotations: {}
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+replicaCount: 1
+globalImageKey: core_api
+service:
+  port: 3000
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# core-api waits for Postgres and Restate before it listens (up to ~5 minutes), so the startup
+# probe gives it that long before liveness can restart it. Host header set because kubelet
+# otherwise sends the pod IP, which ALLOWED_HOSTS refuses with a 403.
+startupProbe:
+  httpGet:
+    path: /health/live
+    port: http
+    httpHeaders: [{ name: Host, value: localhost }]
+  periodSeconds: 5
+  failureThreshold: 60
+# Postgres and Restate both answering: units can register through it.
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: http
+    httpHeaders: [{ name: Host, value: localhost }]
+  periodSeconds: 5
+# The process answers; a Restate or Postgres outage must not restart it.
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: http
+    httpHeaders: [{ name: Host, value: localhost }]
+  periodSeconds: 10
+
+# Reuses the cluster's existing yugabyte superuser (global.yugabyte.user/password) rather than a
+# dedicated ai_pipeline role — see scripts/sunbird-yugabyte-migrations/sunbird-knowlg/
+# ai_pipeline_catalogue.sql, which creates only the database, owned by yugabyte.
+database:
+  name: ai_pipeline_catalogue
+
+kafka:
+  # A name inside Restate, not the environment — must equal every unit's metadata.json `cluster`.
+  clusterName: sunbird

@@ -1,0 +1,82 @@
+{{- range $name, $unit := .Values.units }}
+{{- if $unit.enabled }}
+{{- $rsdName := printf "%s-%s" (include "common.names.fullname" $) $name }}
+{{- $coreApiSvc := include "common.names.dependency.fullname" (dict "chartName" "core-api" "chartValues" (index $.Values "core-api") "context" $) }}
+# One RestateDeployment per unit. Both the operator and the unit itself register the same
+# endpoint URL with Restate, so a version always resolves to one deployment.
+apiVersion: restate.dev/v1beta1
+kind: RestateDeployment
+metadata:
+  name: {{ $rsdName }}
+  namespace: {{ include "common.names.namespace" $ | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" $.Values.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: {{ $name }}
+spec:
+  replicas: {{ $unit.replicas | default 1 }}
+  # Delay before the operator treats a new version as ready to receive invocations.
+  minReadySeconds: {{ ternary $unit.minReadySeconds 30 (hasKey $unit "minReadySeconds") }}
+  restate:
+    register:
+      cluster: {{ $.Values.global.restateClusterName }}
+  selector:
+    matchLabels:
+      app: {{ $rsdName }}
+  template:
+    metadata:
+      labels:
+        app: {{ $rsdName }}
+        # Allows Restate to reach this pod to dispatch invocations.
+        {{ printf "allow.restate.dev/%s" $.Values.global.restateClusterName }}: "true"
+        {{- if and (eq $.Values.global.cloud_storage_provider "azure") $.Values.global.workload_identity_service_account_name }}
+        azure.workload.identity/use: "true"
+        {{- end }}
+    spec:
+      {{- if $.Values.global.workload_identity_service_account_name }}
+      serviceAccountName: {{ $.Values.global.workload_identity_service_account_name }}
+      {{- end }}
+      {{- if $.Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml $.Values.image.pullSecrets | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ $name }}
+          image: "{{ (index $.Values.global $unit.globalImageKey).registry }}/{{ (index $.Values.global $unit.globalImageKey).repository }}:{{ (index $.Values.global $unit.globalImageKey).tag }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ $unit.port | default 9080 }}
+              name: restate
+          env:
+            - name: PORT
+              value: {{ $unit.port | default 9080 | quote }}
+            # URL the unit calls to self-register on boot.
+            - name: CORE_API_URL
+              # Port must match charts/core-api/values.yaml's service.port.
+              value: {{ printf "http://%s:3000" $coreApiSvc | quote }}
+            - name: POD_TEMPLATE_HASH
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['pod-template-hash']
+            # URL the operator registers for this pod version.
+            - name: ADVERTISED_ENDPOINT
+              value: {{ printf "http://%s-$(POD_TEMPLATE_HASH).%s.svc.%s:9080/" $rsdName (include "common.names.namespace" $) $.Values.global.clusterDomain | quote }}
+            - name: DEPLOYMENT_MODE
+              value: "immutable"
+            {{- if and (eq $.Values.global.cloud_storage_provider "azure") $.Values.global.azure_client_id }}
+            - name: AZURE_CLIENT_ID
+              value: "{{ $.Values.global.azure_client_id }}"
+            {{- end }}
+            {{- range $key, $value := $unit.env }}
+            - name: {{ $key }}
+              value: {{ tpl (toString $value) $ | quote }}
+            {{- end }}
+            {{- range $unit.secretEnv }}
+            - name: {{ .envName }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ tpl (toString .secretName) $ }}
+                  key: {{ .secretKey }}
+            {{- end }}
+          resources: {{- toYaml $unit.resources | nindent 12 }}
+---
+{{- end }}
+{{- end }}

@@ -1,7 +1,7 @@
 {{- if .Values.serviceMonitor.enabled }}
-{{- $currentScope := .}}
+{{- $currentScope := . }}
 {{- range $jobName, $jobData := .Values.flink_jobs }}
-{{- if $jobData.enabled}}
+{{- if $jobData.enabled }}
 {{- range $key, $smData := $jobData.serviceMonitor }}
 {{- if and (ne $key "enabled") $smData.enabled }}
 {{- with $currentScope }}
@@ -29,9 +29,9 @@ spec:
     interval: {{ $smData.interval }}
     scrapeTimeout: {{ $smData.scrapeTimeout }}
     honorLabels: {{ $smData.honorLabels }}
-{{- end}}
-{{- end}}
-{{- end}}
-{{- end}}
-{{- end}}
-{{- end}}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

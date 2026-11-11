@@ -7,7 +7,7 @@ metadata:
     app: {{ .Chart.Name }}-opensearch-migration
     scope: provisioning
   annotations:
-    {{.Values.global.opensearch.provisioning.annotations | toYaml }}
+    {{ .Values.global.opensearch.provisioning.annotations | toYaml }}
 spec:
   template:
     metadata:
@@ -54,7 +54,7 @@ spec:
             [ -e "$file" ] || continue
             index_name="${file%.json}"
             echo "Applying index: ${index_name}"
-            curl -X PUT http://{{.Values.global.opensearch.host}}:{{.Values.global.opensearch.port}}/${index_name} \
+            curl -X PUT http://{{ .Values.global.opensearch.host }}:{{ .Values.global.opensearch.port }}/${index_name} \
               -H 'Content-Type: application/json' \
               -d @${file} || true
           done
@@ -65,7 +65,7 @@ spec:
             [ -e "$file" ] || continue
             index_name="${file%-mapping.json}"
             echo "Applying mapping: ${index_name}"
-            curl -X PUT http://{{.Values.global.opensearch.host}}:{{.Values.global.opensearch.port}}/${index_name}/_mapping \
+            curl -X PUT http://{{ .Values.global.opensearch.host }}:{{ .Values.global.opensearch.port }}/${index_name}/_mapping \
               -H 'Content-Type: application/json' \
               -d @${file} || true
           done
@@ -76,7 +76,7 @@ spec:
             [ -e "$file" ] || continue
             pipeline_name="${file%-ingest-pipeline.json}"
             echo "Applying pipeline: ${pipeline_name}-ingest-pipeline"
-            curl -X PUT http://{{.Values.global.opensearch.host}}:{{.Values.global.opensearch.port}}/_ingest/pipeline/${pipeline_name}-ingest-pipeline \
+            curl -X PUT http://{{ .Values.global.opensearch.host }}:{{ .Values.global.opensearch.port }}/_ingest/pipeline/${pipeline_name}-ingest-pipeline \
               -H 'Content-Type: application/json' \
               -d @${file} || true
           done
