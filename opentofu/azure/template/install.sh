@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 environment=$(basename "$(pwd)")
+readonly AI_PIPELINE_COMPONENT="ai-pipeline"
 
 function create_tf_backend() {
     echo -e "Creating opentofu state backend"
@@ -90,8 +91,18 @@ function install_component() {
         cd ../../../helmcharts 2>/dev/null || true
     fi
     local component="$1"
+
+    # ai-pipeline is opt-in: skip unless explicitly enabled per environment.
+    if [[ "$component" = "$AI_PIPELINE_COMPONENT" ]] && [[ "$(yq '.ai_pipeline_enabled' "../opentofu/azure/$environment/global-values.yaml")" != "true" ]]; then
+        echo -e "\nSkipping ai-pipeline (ai_pipeline_enabled is not true in global-values.yaml)"
+        return
+    fi
+
     # namespaces sunbird and velero are created by workload-identity Terraform module
     kubectl create namespace volume-autoscaler 2>/dev/null || true
+    if [[ "$component" = "$AI_PIPELINE_COMPONENT" ]]; then
+        kubectl create namespace "$AI_PIPELINE_COMPONENT" 2>/dev/null || true
+    fi
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
@@ -116,7 +127,15 @@ function install_component() {
         addon_values_flag="-f ../addons/global-cloud-values.yaml"
     fi
 
-    helm upgrade --install "$component" "$component" --namespace sunbird -f "$component/values.yaml" \
+    local namespace="sunbird"
+    if [[ "$component" = "$AI_PIPELINE_COMPONENT" ]]; then
+        namespace="$AI_PIPELINE_COMPONENT"
+        # Ensures RestateCluster/RestateDeployment CRDs exist before Helm resolves kinds on a
+        # first-ever install (installCrds: false, see values.yaml). No-op on later runs.
+        kubectl apply -f ai-pipeline/crds/
+    fi
+
+    helm upgrade --install "$component" "$component" --namespace "$namespace" -f "$component/values.yaml" \
         $ed_values_flag \
         $addon_values_flag \
         -f images.yaml \
@@ -218,7 +237,8 @@ function install_helm_components() {
         install_component "$bundle_name"
     else
         # No args: deploy all bundles in order (original behavior)
-        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional")
+        # install_component itself skips ai-pipeline if ai_pipeline_enabled is not true.
+        local components=("monitoring" "edbb" "learnbb" "knowledgebb" "obsrvbb" "additional" "$AI_PIPELINE_COMPONENT")
         for component in "${components[@]}"; do
             install_component "$component"
         done
