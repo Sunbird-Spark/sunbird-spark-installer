@@ -354,7 +354,15 @@ flink_jobs:
         groupId = "{{ .Values.global.env }}-knowlg-publish-group"
         content_metadata.topic = "dv.telemetry.coss"
         enriched_metadata.topic = "{{ .Values.global.env }}.knowlg.enriched.content.metadata"
+        content_published.topic = "{{ .Values.global.env }}.content.published"
         zookeeper = ""
+      }
+
+      service {
+        search.basePath = "http://search-service:9000"
+        questionset.basePath = "http://knowlg-service:9000"
+        question.basePath = "http://knowlg-service:9000"
+        framework.basePath = "http://knowlg-service:9000"
       }
 
       enriched {
@@ -375,9 +383,7 @@ flink_jobs:
 
           content {
             enabled = true
-            # artifactUrl is required by ai-pipeline's enrichment_router to
-            # build the transcription-request event.
-            includeFields = ["artifactUrl"]
+            includeFields = []
           }
 
           collection {

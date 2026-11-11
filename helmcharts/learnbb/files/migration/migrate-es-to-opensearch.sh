@@ -101,18 +101,18 @@ require() {
 # list non-system indices on a cluster ("es" or "os")
 list_indices() {
   local who="$1" raw
-  if [ "$who" = os ]; then raw=$(os "/_cat/indices?format=json"); else raw=$(es "/_cat/indices?format=json"); fi
+  if [[ "$who" = os ]]; then raw=$(os "/_cat/indices?format=json"); else raw=$(es "/_cat/indices?format=json"); fi
   echo "$raw" | jq -r '.[].index' 2>/dev/null \
     | grep -vE "$SYSTEM_PREFIX_SKIP" \
     | grep -v -- '-tmp7-' \
-    | { if [ -n "$INCLUDE" ]; then grep -xE "$(echo "$INCLUDE" | tr ', ' '|' | sed 's/|$//')"; else cat; fi; } \
+    | { if [[ -n "$INCLUDE" ]]; then grep -xE "$(echo "$INCLUDE" | tr ', ' '|' | sed 's/|$//')"; else cat; fi; } \
     | sort
 }
 
 # index major version on ES7 cluster (created_version)
 es_major() {
   local v; v=$(es "/$1/_settings" | jq -r ".\"$1\".settings.index.version.created // empty")
-  [ -z "$v" ] && { echo 0; return; }
+  [[ -z "$v" ]] && { echo 0; return; }
   echo $(( v / 1000000 ))
 }
 
@@ -132,8 +132,8 @@ derive_es7_body() {
                               elif . == \"standard\" then \"lowercase\" else . end))
         else . end")
   mappings=$(es "/$src/_mapping" | jq ".\"$src\".mappings")
-  [ -z "$settings" ] || [ "$settings" = null ] && return 1
-  [ -z "$mappings" ] || [ "$mappings" = null ] && return 1
+  [[ -z "$settings" ]] || [[ "$settings" = null ]] && return 1
+  [[ -z "$mappings" ]] || [[ "$mappings" = null ]] && return 1
   jq -n --argjson s "$settings" --argjson m "$mappings" '{settings:{index:$s}, mappings:$m}'
 }
 
@@ -148,10 +148,10 @@ create_es7_index() {
   local idxfile="$ES7_FILES_DIR/indices/$defname.json"
   local mapfile="$ES7_FILES_DIR/mappings/$defname-mapping.json"
   local r
-  if [ -f "$idxfile" ]; then
+  if [[ -f "$idxfile" ]]; then
     r=$(es "/$target" -X PUT -H 'Content-Type: application/json' --data-binary "@$idxfile")
     echo "$r" | acked || { echo "$r" | jq . | tee -a "$LOG_FILE"; return 1; }
-    if [ -f "$mapfile" ]; then
+    if [[ -f "$mapfile" ]]; then
       r=$(es "/$target/_mapping" -X PUT -H 'Content-Type: application/json' --data-binary "@$mapfile")
       echo "$r" | acked || { echo "$r" | jq . | tee -a "$LOG_FILE"; return 1; }
     fi
@@ -168,7 +168,7 @@ es_reindex() { # src dest -> 0 if no failures
   r=$(es "/_reindex?wait_for_completion=true&refresh=true" -X POST -H 'Content-Type: application/json' \
         -d "{\"source\":{\"index\":\"$1\"},\"dest\":{\"index\":\"$2\"}}")
   f=$(echo "$r" | jq -r '.failures | length' 2>/dev/null)
-  [ "$f" = 0 ] && return 0
+  [[ "$f" = 0 ]] && return 0
   echo "$r" | jq '.failures[0:3]' 2>/dev/null | tee -a "$LOG_FILE"; return 1
 }
 
@@ -187,9 +187,9 @@ phase_restore() {
 
   # pick snapshot
   local snap="$SNAPSHOT_NAME"
-  if [ -z "$snap" ]; then
+  if [[ -z "$snap" ]]; then
     snap=$(es "/_snapshot/$SNAPSHOT_REPO/_all" | jq -r '.snapshots | sort_by(.start_time_in_millis) | last | .snapshot')
-    [ -z "$snap" ] || [ "$snap" = null ] && die "no snapshots found in repo $SNAPSHOT_REPO"
+    [[ -z "$snap" ]] || [[ "$snap" = null ]] && die "no snapshots found in repo $SNAPSHOT_REPO"
   fi
   log "restoring snapshot: $snap"
 
@@ -198,7 +198,7 @@ phase_restore() {
   state=$(es "/_snapshot/$SNAPSHOT_REPO/$snap" | jq -r '.snapshots[0].state')
   failed=$(es "/_snapshot/$SNAPSHOT_REPO/$snap" | jq -r '.snapshots[0].shards.failed')
   log "snapshot state=$state failed_shards=$failed"
-  [ "$state" = SUCCESS ] || die "snapshot $snap not SUCCESS (state=$state)"
+  [[ "$state" = SUCCESS ]] || die "snapshot $snap not SUCCESS (state=$state)"
 
   # restore everything except system indices; don't clobber cluster state
   r=$(es "/_snapshot/$SNAPSHOT_REPO/$snap/_restore?wait_for_completion=true" -X POST \
@@ -222,10 +222,10 @@ phase_es7() {
   for idx in $(list_indices es); do
     log "--- $idx"
     mj=$(es_major "$idx")
-    if [ "$mj" -ge 7 ]; then log "  skip: already v$mj"; ((skip++)); continue; fi
+    if [[ "$mj" -ge 7 ]]; then log "  skip: already v$mj"; ((skip++)); continue; fi
 
     orig=$(es_count "$idx")
-    [ "$orig" = null ] && { fail "$idx"; ((errs++)); log "  ERROR: no count"; continue; }
+    [[ "$orig" = null ]] && { fail "$idx"; ((errs++)); log "  ERROR: no count"; continue; }
     log "  v$mj, docs=$orig"
 
     tmp="${idx}-tmp7-$TS"
@@ -237,7 +237,7 @@ phase_es7() {
     # 2. reindex into temp + verify
     es_reindex "$idx" "$tmp" || { fail "$idx"; ((errs++)); es "/$tmp" -X DELETE >/dev/null 2>&1; log "  ERROR: reindex to temp"; continue; }
     tc=$(es_count "$tmp")
-    [ "$tc" = "$orig" ] || { fail "$idx"; ((errs++)); es "/$tmp" -X DELETE >/dev/null 2>&1; log "  ERROR: temp count $tc != $orig"; continue; }
+    [[ "$tc" = "$orig" ]] || { fail "$idx"; ((errs++)); es "/$tmp" -X DELETE >/dev/null 2>&1; log "  ERROR: temp count $tc != $orig"; continue; }
 
     # 3. replace original
     es "/$idx" -X DELETE | acked || { fail "$idx"; ((errs++)); log "  ERROR: delete src (data safe in $tmp)"; continue; }
@@ -249,7 +249,7 @@ phase_es7() {
 
     # 4. verify + cleanup
     fc=$(es_count "$idx")
-    if [ "$fc" = "$orig" ]; then
+    if [[ "$fc" = "$orig" ]]; then
       es "/$tmp" -X DELETE >/dev/null 2>&1
       log "  OK: $idx now v$(es_major "$idx"), docs=$fc"; ((ok++))
     else
@@ -278,7 +278,7 @@ phase_opensearch() {
   for idx in $(list_indices es); do
     log "--- $idx"
     orig=$(es_count "$idx")
-    [ "$orig" = null ] && { fail "$idx"; ((errs++)); log "  ERROR: no source count"; continue; }
+    [[ "$orig" = null ]] && { fail "$idx"; ((errs++)); log "  ERROR: no source count"; continue; }
 
     # 1. create OS index from curated v2.19.5 files (or auto-create on reindex)
     if os "/$idx" -o /dev/null -w '%{http_code}' | grep -q 200; then
@@ -286,10 +286,10 @@ phase_opensearch() {
     else
       local idxfile="$OS_FILES_DIR/indices/$idx.json"
       local mapfile="$OS_FILES_DIR/mappings/$idx-mapping.json"
-      if [ -f "$idxfile" ]; then
+      if [[ -f "$idxfile" ]]; then
         os "/$idx" -X PUT -H 'Content-Type: application/json' --data-binary "@$idxfile" | acked \
           || { fail "$idx"; ((errs++)); log "  ERROR: create OS index"; continue; }
-        [ -f "$mapfile" ] && os "/$idx/_mapping" -X PUT -H 'Content-Type: application/json' --data-binary "@$mapfile" >/dev/null
+        [[ -f "$mapfile" ]] && os "/$idx/_mapping" -X PUT -H 'Content-Type: application/json' --data-binary "@$mapfile" >/dev/null
         log "  created OS index from v2.19.5 files"
       else
         log "  no curated OS file; reindex will auto-create"
@@ -298,12 +298,12 @@ phase_opensearch() {
 
     # 2. empty source: nothing to copy. Ensure the index simply exists
     #    (a 0-doc remote reindex auto-creates nothing), then it's done.
-    if [ "$orig" = 0 ]; then
+    if [[ "$orig" = 0 ]]; then
       if ! os "/$idx" -o /dev/null -w '%{http_code}' | grep -q 200; then
         os "/$idx" -X PUT -H 'Content-Type: application/json' -d '{}' >/dev/null 2>&1
       fi
       local dc0; dc0=$(os_count "$idx")
-      if [ "$dc0" = 0 ]; then log "  OK: $idx -> OpenSearch, docs=0 (empty)"; ((ok++)); else fail "$idx"; ((errs++)); log "  ERROR: empty index not created (count=$dc0)"; fi
+      if [[ "$dc0" = 0 ]]; then log "  OK: $idx -> OpenSearch, docs=0 (empty)"; ((ok++)); else fail "$idx"; ((errs++)); log "  ERROR: empty index not created (count=$dc0)"; fi
       continue
     fi
 
@@ -313,14 +313,14 @@ phase_opensearch() {
     local r f
     r=$(os "/_reindex?wait_for_completion=true&refresh=true" -X POST -H 'Content-Type: application/json' -d "$body")
     f=$(echo "$r" | jq -r '.failures | length' 2>/dev/null)
-    if [ "$f" != 0 ] || [ -z "$f" ]; then
+    if [[ "$f" != 0 ]] || [[ -z "$f" ]]; then
       echo "$r" | jq '.failures[0:3] // .' 2>/dev/null | tee -a "$LOG_FILE"
       fail "$idx"; ((errs++)); log "  ERROR: remote reindex"; continue
     fi
 
     # 4. verify counts
     local dc; dc=$(os_count "$idx")
-    if [ "$dc" = "$orig" ]; then
+    if [[ "$dc" = "$orig" ]]; then
       log "  OK: $idx -> OpenSearch, docs=$dc"; ((ok++))
     else
       fail "$idx"; ((errs++)); log "  ERROR: OS count $dc != source $orig"
@@ -328,9 +328,9 @@ phase_opensearch() {
   done
 
   # 4. ingest pipelines (from curated OS files)
-  if [ -d "$OS_FILES_DIR/pipelines" ]; then
+  if [[ -d "$OS_FILES_DIR/pipelines" ]]; then
     for pf in "$OS_FILES_DIR/pipelines/"*.json; do
-      [ -e "$pf" ] || continue
+      [[ -e "$pf" ]] || continue
       local pname; pname=$(basename "$pf" .json)
       os "/_ingest/pipeline/$pname" -X PUT -H 'Content-Type: application/json' --data-binary "@$pf" >/dev/null \
         && log "pipeline applied: $pname"
@@ -359,7 +359,7 @@ main() {
   esac
 
   log "###### migration end : rc=$rc ######"
-  if [ -s "$FAILED_FILE" ]; then
+  if [[ -s "$FAILED_FILE" ]]; then
     log "FAILED indices (see $FAILED_FILE):"; sort -u "$FAILED_FILE" | tee -a "$LOG_FILE"
   fi
   log "log: $LOG_FILE"

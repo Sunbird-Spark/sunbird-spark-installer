@@ -44,7 +44,7 @@ images:
 
   player: &player
     repository: "ghcr.io/sunbird-spark/sunbird-spark-portal"
-    tag: "spark-v1.1.1_7d1d506"
+    tag: "spark-v1.1.2_6da1126"
 
   router: &router
     repository: "sunbirded.azurecr.io/router"
@@ -57,11 +57,11 @@ images:
 
   kong_apis: &kong_apis
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v1.1.2-test-pin-cli-versions_d0f3ef0"
 
   kong_consumers: &kong_consumers
     repository: "ghcr.io/sunbird-spark/kong-api-scripts"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v1.1.2-test-pin-cli-versions_d0f3ef0"
 
   knowledge_mw: &knowledge_mw
     repository: "ghcr.io/sunbird-knowlg/knowledge-mw-service"
@@ -97,7 +97,7 @@ images:
 
   keycloak: &keycloak
     repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v1.1.2-test-pin-cli-versions_d0f3ef0"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
@@ -113,11 +113,11 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.1.1_adca974"
+    tag: "spark-v1.1.2_2a9b4df"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
-    tag: "spark-v1.1.0_4a35a67"
+    tag: "spark-v1.1.2_2a9b4df"
 
   telemetry: &telemetry
     repository: "ghcr.io/project-sunbird/sunbird-telemetry-service"
@@ -130,14 +130,6 @@ images:
   superset: &superset
     repository: "sanketikahub/superset"
     tag: "4.1.1"
-
-  nlweb: &nlweb
-    repository: "sanketikahub/nlweb"
-    tag: "0.0.1"
-
-  nlwebflink: &nlwebflink
-    repository: "sunbirded.azurecr.io/flink-nlweb-job"
-    tag: "0.0.3"
 
   yugabyte: &yugabyte
     repository: "yugabytedb/yugabyte"
@@ -154,15 +146,15 @@ images:
 
   sync_tool: &sync_tool
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/sync-tool"
-    tag: "spark-v1.0.2_448714d"
+    tag: "spark-v1.1.2_2a9b4df"
 
   yugabytecql: &yugabytecql
     repository: "ghcr.io/sunbird-spark/sunbird-yugabyte-migrations"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v1.1.1-restate-wf_078f31d"
 
   yugabyte_backup: &yugabyte_backup
     repository: "ghcr.io/sunbird-spark/yugabyte-backup"
-    tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
+    tag: "spark-v1.1.2-test-pin-cli-versions_d0f3ef0"
 
   # kube-prometheus-stack's own bundled images — previously entirely
   # untracked here, running whatever that chart's own defaults were.
@@ -441,15 +433,6 @@ internal: &internal
     imagePullSecrets:
       - name: "registry-secret-name"    
 
-  nlweb:
-    image: *nlweb
-    imagePullSecrets:
-      - name: "registry-secret-name"
-
-  nlwebflink:
-    image: *nlwebflink
-    imagePullSecrets:
-      - name: "registry-secret-name"
   yugabyte:
     Image: *yugabyte
     imagePullSecrets:
@@ -617,31 +600,37 @@ global:
   knowledgeflink:
     registry: "ghcr.io"
     repository: "sunbird-knowlg/knowledge-platform-jobs"
-    tag: "spark-v1.1.1_b20f070"
+    tag: "spark-v1.1.2_e73c21f"
 
   learnflink:
     registry: "ghcr.io/sunbird-lern"
     repository: "data-pipeline"
     tag: "spark-v1.1.0_f36189f"
 
-  # ai-pipeline (PyFlink 1.20) jobs, deployed via the consolidated
-  # `py-flink` chart's py_flink_jobs map (helmcharts/knowledgebb/charts/
-  # py-flink) — each job entry there points at one of these anchors via
-  # its own `globalImageKey`, since (unlike knowledgeflink/learnflink
-  # above, which are one shared JVM image per building block selected via
-  # --job-classname) each PyFlink job ships its own dedicated image. See
-  # ai-pipeline/docker/Dockerfile.enrichment-router and
-  # Dockerfile.caption-generator.
-  #
-  # Built and pushed by ai-pipeline's .github/workflows/build.yaml on tag
-  # push — tag format is <git-tag>_<short-sha> (see knowlg-service.yml for
-  # the same convention).
-  enrichment_router:
-    registry: "ghcr.io"
-    repository: "sunbird-knowlg/ai-pipeline/enrichment-router"
-    tag: "spark-v1.1.0_93887dd"
+  # Restate-based ai-pipeline, replaces old PyFlink enrichment-router/caption-generator jobs.
+  restate_server:
+    registry: "docker.restate.dev"
+    repository: "restatedev/restate"
+    tag: "1.7.10"
 
-  caption_generator:
+  core_api:
     registry: "ghcr.io"
-    repository: "sunbird-knowlg/ai-pipeline/caption-generator"
-    tag: "spark-v1.1.0_93887dd"
+    repository: "sunbird-knowlg/ai-pipeline/core-api"
+    tag: "spark-v1.1.2_45703b1"
+
+  wf_transcript:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/wf-transcript"
+    tag: "spark-v1.1.2_45703b1"
+
+  # Speech-to-text backend for transcript.
+  whisper:
+    registry: "ghcr.io"
+    repository: "sunbird-knowlg/ai-pipeline/whisper"
+    tag: "spark-v1.1.2_45703b1"
+
+  # Model gateway for ai-pipeline units.
+  litellm:
+    registry: "ghcr.io"
+    repository: "berriai/litellm"
+    tag: "v1.101.0"

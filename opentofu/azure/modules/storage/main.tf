@@ -60,9 +60,9 @@ resource "azurerm_storage_account" "storage_account" {
       allowed_methods    = ["GET", "HEAD", "OPTIONS", "PUT"]
       exposed_headers    = ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods"]
       allowed_headers    = ["Access-Control-Allow-Origin", "Access-Control-Allow-Methods", "Origin", "x-ms-meta-qq", "x-ms-blob-type", "x-ms-blob-content-type", "Content-Type"]
-
     }
   }
+
   tags = merge(
     local.common_tags,
     var.additional_tags

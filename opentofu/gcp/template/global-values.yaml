@@ -1,9 +1,9 @@
 deployed_dial_addon:  &deployed_dial_addon  "false"
 enable_asset_enrichment: &enable_asset_enrichment "false"
 default_passwords:
-  grafana_admin_password: &grafana-admin-password "prom-operator"
-  superset_admin_password: &superset-admin-password "admin"
-  keycloak_password: &keycloak-password "admin"
+  grafana_admin_password: &grafana-admin-password "REPLACE_WITH_GRAFANA_ADMIN_PASSWORD"
+  superset_admin_password: &superset-admin-password "REPLACE_WITH_SUPERSET_ADMIN_PASSWORD"
+  keycloak_password: &keycloak-password "REPLACE_WITH_KEYCLOAK_PASSWORD"
   opensearch_admin_password: &opensearch-admin-password "REPLACE_WITH_OPENSEARCH_ADMIN_PASSWORD"
 kube-prometheus-stack:
   grafana:
