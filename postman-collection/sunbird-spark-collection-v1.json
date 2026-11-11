@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "e83de2f7-8dc3-4c1e-858a-37b401043620",
+		"_postman_id": "b5a73015-dc76-4c06-9822-9cbdb6ef0cd1",
 		"name": "Oneclick Installer - Sunbird Spark - Daylight Release",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "37164806"
+		"_exporter_id": "43139549"
 	},
 	"item": [
 		{
@@ -2003,201 +2003,6 @@
 			"name": "2 - Knowlg",
 			"item": [
 				{
-					"name": "7-Create Framework Categories Instance - USF",
-					"item": [
-						{
-							"name": "Create Framework Categories - Industry",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "accept",
-										"value": "application/json"
-									},
-									{
-										"key": "X-Channel-Id",
-										"value": "{{channel_id}}"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{apikey}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Industry\",\n            \"code\": \"industry\"\n        }\n    }\n}"
-								},
-								"url": {
-									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
-									"host": [
-										"{{host}}"
-									],
-									"path": [
-										"api",
-										"framework",
-										"v1",
-										"category",
-										"create"
-									],
-									"query": [
-										{
-											"key": "",
-											"value": "",
-											"disabled": true
-										},
-										{
-											"key": "framework",
-											"value": "{{default_Course_Framework}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create Framework Categories - Domain",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "accept",
-										"value": "application/json"
-									},
-									{
-										"key": "X-Channel-Id",
-										"value": "{{channel_id}}"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{apikey}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Domain\",\n            \"code\": \"domain\"\n        }\n    }\n}"
-								},
-								"url": {
-									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
-									"host": [
-										"{{host}}"
-									],
-									"path": [
-										"api",
-										"framework",
-										"v1",
-										"category",
-										"create"
-									],
-									"query": [
-										{
-											"key": "framework",
-											"value": "{{default_Course_Framework}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Create Framework Categories - Skills",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "X-Channel-Id",
-										"value": "{{channel_id}}"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{apikey}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"request\": {\n        \"category\": {\n            \"name\": \"Skill\",\n            \"description\": \"Skill\",\n            \"code\": \"skill\",\n            \"targetIdFieldName\": \"targetSkillIds\",\n            \"searchLabelFieldName\": \"se_skills\",\n            \"searchIdFieldName\": \"se_skillIds\",\n            \"orgIdFieldName\": \"skillIds\"\n        }\n    }\n}"
-								},
-								"url": {
-									"raw": "{{host}}/api/framework/v1/category/create?framework={{default_Course_Framework}}",
-									"host": [
-										"{{host}}"
-									],
-									"path": [
-										"api",
-										"framework",
-										"v1",
-										"category",
-										"create"
-									],
-									"query": [
-										{
-											"key": "framework",
-											"value": "{{default_Course_Framework}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Read Framework Categories - Industry",
-							"request": {
-								"method": "GET",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "X-Channel-Id",
-										"value": "{{channel_id}}"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{apikey}}",
-										"type": "text"
-									}
-								],
-								"url": {
-									"raw": "{{host}}/api/framework/v1/category/read/industry?framework={{default_Course_Framework}}",
-									"host": [
-										"{{host}}"
-									],
-									"path": [
-										"api",
-										"framework",
-										"v1",
-										"category",
-										"read",
-										"industry"
-									],
-									"query": [
-										{
-											"key": "framework",
-											"value": "{{default_Course_Framework}}"
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
 					"name": "1-Create Default License",
 					"item": [
 						{
@@ -3012,36 +2817,36 @@
 									"request": {
 										"method": "POST",
 										"header": [
-										{
-											"key": "Content-Type",
-											"value": "application/json"
-										},
-										{
-											"key": "Authorization",
-											"value": "Bearer {{apikey}}",
-											"type": "text"
-										}
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}",
+												"type": "text"
+											}
 										],
 										"body": {
-										"mode": "raw",
-										"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Boolean Question\",\n            \"description\": \"Boolean Question\"\n        }\n    }\n}"
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Boolean Question\",\n            \"description\": \"Boolean Question\"\n        }\n    }\n}"
 										},
 										"url": {
-										"raw": "{{host}}/api/object/category/v1/create",
-										"host": [
-											"{{host}}"
-										],
-										"path": [
-											"api",
-											"object",
-											"category",
-											"v1",
-											"create"
-										]
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
 										}
 									},
 									"response": []
-          					    },
+								},
 								{
 									"name": "ObjectCategory - Subjective Question",
 									"request": {
@@ -3422,6 +3227,49 @@
 										"body": {
 											"mode": "raw",
 											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Dynamic Course Assessment\",\n            \"description\": \"Dynamic Course Assessment\"\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategory - Transcript",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "X-Authenticated-User-token",
+												"value": "{{access_token}}"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategory\": {\n            \"name\": \"Transcript\",\n            \"description\": \"Transcript\"\n        }\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "text"
+												}
+											}
 										},
 										"url": {
 											"raw": "{{host}}/api/object/category/v1/create",
@@ -4009,32 +3857,32 @@
 									"request": {
 										"method": "POST",
 										"header": [
-										{
-											"key": "Authorization",
-											"value": "Bearer {{apikey}}"
-										},
-										{
-											"key": "Content-Type",
-											"value": "application/json"
-										}
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											}
 										],
 										"body": {
-										"mode": "raw",
-										"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:boolean-question\",\n            \"targetObjectType\": \"Question\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.sunbird.question\"\n                            ]\n                        },\n                        \"interactionTypes\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"choice\"\n                                ]\n                            }\n                        }\n                    }\n                }\n            },\n            \"forms\": {}\n        }\n    }\n}"
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:boolean-question\",\n            \"targetObjectType\": \"Question\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"mimeType\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"application/vnd.sunbird.question\"\n                            ]\n                        },\n                        \"interactionTypes\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"enum\": [\n                                    \"choice\"\n                                ]\n                            }\n                        }\n                    }\n                }\n            },\n            \"forms\": {}\n        }\n    }\n}"
 										},
 										"url": {
-										"raw": "{{host}}/api/object/category/definition/v1/create",
-										"host": [
-											"{{host}}"
-										],
-										"path": [
-											"api",
-											"object",
-											"category",
-											"definition",
-											"v1",
-											"create"
-										]
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
 										}
 									},
 									"response": []
@@ -4345,9 +4193,9 @@
 											}
 										],
 										"body": {
-						                      		"mode": "raw",
-						                      		"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            },\n            \"maxAttempts\": {\n              \"type\": \"number\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
-						                       },
+											"mode": "raw",
+											"raw": "{\n  \"request\": {\n    \"objectCategoryDefinition\": {\n      \"categoryId\": \"obj-cat:scorm-content\",\n      \"targetObjectType\": \"Content\",\n      \"objectMetadata\": {\n        \"config\": {},\n        \"schema\": {\n          \"properties\": {\n            \"launchFile\": {\n              \"type\": \"string\"\n            },\n            \"scormVersion\": {\n              \"type\": \"string\"\n            },\n            \"scoList\": {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"object\",\n                \"properties\": {\n                  \"identifier\": { \"type\": \"string\" },\n                  \"title\": { \"type\": \"string\" },\n                  \"href\": { \"type\": \"string\" },\n                  \"parameters\": { \"type\": \"string\" }\n                }\n              }\n            },\n            \"maxAttempts\": {\n              \"type\": \"number\"\n            }\n          }\n        }\n      }\n    }\n  }\n}"
+										},
 										"url": {
 											"raw": "{{host}}/api/object/category/definition/v1/create",
 											"host": [
@@ -4433,6 +4281,51 @@
 										"body": {
 											"mode": "raw",
 											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:dynamic-course-assessment\",\n            \"targetObjectType\": \"Content\",\n            \"objectMetadata\": {\n                \"config\": {},\n                \"schema\": {\n                    \"properties\": {\n                        \"trackable\": {\n                            \"type\": \"object\",\n                            \"properties\": {\n                                \"enabled\": {\n                                    \"type\": \"string\",\n                                    \"enum\": [\n                                        \"Yes\",\n                                        \"No\"\n                                    ],\n                                    \"default\": \"No\"\n                                },\n                                \"autoBatch\": {\n                                    \"type\": \"string\",\n                                    \"enum\": [\n                                        \"Yes\",\n                                        \"No\"\n                                    ],\n                                    \"default\": \"No\"\n                                }\n                            },\n                            \"additionalProperties\": false\n                        },\n                        \"primaryCategory\": {\n                            \"type\": \"string\",\n                            \"enum\": [\n                                \"Dynamic Course Assessment\"\n                            ]\n                        },\n                        \"skill\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\"\n                            }\n                        },\n                        \"difficultyTarget\": {\n                            \"type\": \"string\"\n                        },\n                        \"minCriteria\": {\n                            \"type\": \"integer\",\n                            \"minimum\": 0\n                        },\n                        \"multiplier\": {\n                            \"type\": \"integer\",\n                            \"minimum\": 1\n                        }\n                    }\n                }\n            }\n        }\n    }\n}"
+										},
+										"url": {
+											"raw": "{{host}}/api/object/category/definition/v1/create",
+											"host": [
+												"{{host}}"
+											],
+											"path": [
+												"api",
+												"object",
+												"category",
+												"definition",
+												"v1",
+												"create"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "ObjectCategoryDefinition - Transcript",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json"
+											},
+											{
+												"key": "Authorization",
+												"value": "Bearer {{apikey}}"
+											},
+											{
+												"key": "X-Authenticated-User-token",
+												"value": "",
+												"disabled": true
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"request\": {\n        \"objectCategoryDefinition\": {\n            \"categoryId\": \"obj-cat:transcript\",\n            \"targetObjectType\": \"EnrichmentObject\",\n            \"channel\": \"all\",\n            \"objectMetadata\": {\n                \"schema\": {\n                    \"properties\": {\n                        \"languageCode\": {\n                            \"type\": \"string\",\n                            \"description\": \"ISO 639-1 language code, e.g. en, hi, ta\"\n                        },\n                        \"language\": {\n                            \"type\": \"string\"\n                        },\n                        \"sourceLanguage\": {\n                            \"type\": \"boolean\",\n                            \"default\": false\n                        },\n                        \"artifactUrl\": {\n                            \"type\": \"string\",\n                            \"format\": \"uri\"\n                        },\n                        \"captionsUrl\": {\n                            \"type\": \"string\",\n                            \"format\": \"uri\"\n                        }\n                    },\n                    \"required\": []\n                },\n                \"config\": {\n                    \"uniqueOn\": [\n                        {\n                            \"field\": \"sourceLanguage\",\n                            \"matchValue\": true\n                        },\n                        {\n                            \"field\": \"languageCode\"\n                        }\n                    ]\n                }\n            }\n        }\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "text"
+												}
+											}
 										},
 										"url": {
 											"raw": "{{host}}/api/object/category/definition/v1/create",
