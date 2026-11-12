@@ -4743,6 +4743,20 @@ kong_apis:
   - name: request-size-limiting
     config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
 
+- name: listEnrichmentObject
+  uris: "{{ .Values.object_enrichment_prefix }}/v4/list"
+  url: "{{ .Values.content_service_url }}/object/enrichment/v4/list"
+  strip_path: true
+  plugins:
+  - name: cors
+  - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
+  - name: rate-limiting
+    config.policy: local
+    config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
+    config.limit_by: ip
+  - name: request-size-limiting
+    config.allowed_payload_size: "{{ .Values.small_request_size_limit }}"
+
 - name: createAsset
   uris: "{{ .Values.asset_prefix }}/v1/create"
   url: "{{ .Values.content_service_url }}/asset/v4/create"
