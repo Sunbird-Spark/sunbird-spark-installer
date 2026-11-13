@@ -21,9 +21,9 @@ resource "null_resource" "generate_jwt_keys" {
   # validate JWTs against the prior keys.
   # To force key regeneration: uncomment the triggers block below, run terragrunt apply,
   # then re-comment to prevent regeneration on future runs.
-  # triggers = {
-  #   script_hash = filemd5(local.jwt_script_location)
-  # }
+  triggers = {
+    script_hash = filemd5(local.jwt_script_location)
+  }
   provisioner "local-exec" {
     command = <<EOT
       python3 ${local.jwt_script_location} ${random_password.generated_string.result} && \
@@ -36,6 +36,9 @@ resource "null_resource" "generate_jwt_keys" {
 
 resource "null_resource" "generate_rsa_keys" {
   # Run ONCE at create. See note on generate_jwt_keys above.
+  triggers = {
+    script_hash = filemd5(local.rsa_script_location)
+  }
   provisioner "local-exec" {
     command = <<EOT
       python3 ${local.rsa_script_location} ${var.rsa_keys_count} && \
