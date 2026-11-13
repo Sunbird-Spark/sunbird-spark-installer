@@ -152,7 +152,7 @@ resource "null_resource" "build_and_upload_generic_editor" {
         -e build_number=$build_sha \
         -v "$tmpdir/generic-editor":/work \
         -w /work \
-        node:18.20.8-bullseye \
+        node:18.20.8-bookworm \
         bash -c '
           set -e
           apt-get update
