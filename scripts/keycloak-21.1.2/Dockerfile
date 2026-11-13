@@ -3,7 +3,7 @@
 FROM quay.io/keycloak/keycloak:21.1.2@sha256:3408c186dde4a95c2b99ef1290721bf1d253d64ba3a1de0a46c667b8288051f0 AS source
 
 # Stage 2: Create a patched base image using UBI 9 Minimal (pinned to a stable version)
-FROM registry.access.redhat.com/ubi9/ubi-minimal:9.4@sha256:c0e70387664f30cd9cf2795b547e4a9a51002c44a4a86aa9335ab030134bf392 AS patched_base
+FROM registry.access.redhat.com/ubi9/ubi-minimal:9.9@sha256:baafce2d34783a28b4a472779f304e97e00f9d35c99553bc53b068b14344d9a9 AS patched_base
 USER root
 # Fix OS vulnerabilities (glibc, java, etc.) and install Java 17
 RUN microdnf update -y && \
