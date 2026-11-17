@@ -34,6 +34,12 @@ function create_tf_resources() {
     deploy_tf_module network
     deploy_tf_module storage
     deploy_tf_module aks
+    # ai_pipeline_enabled is true. Pre-create it here so that apply doesn't fail
+    # with "namespaces \"ai-pipeline\" not found" before install_component ever
+    # gets a chance to create it ad-hoc later in the pipeline.
+    if [[ "$(yq '.ai_pipeline_enabled' global-values.yaml)" == "true" ]]; then
+        kubectl create namespace "$AI_PIPELINE_COMPONENT" --dry-run=client -o yaml | kubectl apply -f -
+    fi
     deploy_tf_module workload-identity
     deploy_tf_module random_passwords
     deploy_tf_module keys
