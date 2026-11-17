@@ -36,7 +36,7 @@ spec:
         command: ['sh', '-c']
         args:
         - |
-          "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte postgres; 10; done'"
+          timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.port }}; do echo waiting for yugabyte postgres; sleep 10; done'
           # Downloading migration files
           set -e
           export devops_branch={{ .Values.devops_release_branch }}
@@ -143,4 +143,3 @@ spec:
               run_sql_file "$sql_file" "sunbird" || true
             done
             echo "Sunbird-lern SQL migrations completed."
-  backoffLimit: 30
