@@ -67,23 +67,29 @@ function certificate_keys() {
 }
 
 
-function certificate_config() {
-    echo "Configuring Certificate keys"
-    if ! kubectl -n sunbird exec deploy/knowledge-mw -- which jq >/dev/null 2>&1; then
-        echo "jq not found in knowledge-mw container, attempting to install..."
-        # Try to install jq using available package manager, fallback if apt fails
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get update || true"
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get install -y jq || true"
-    fi
+# Certificate public-key registration with registry-service now runs as a
+# Helm post-install/post-upgrade hook Job in the registry chart itself
+# (helmcharts/learnbb/charts/registry/templates/publickey-config-job.yaml),
+# since knowledge-mw's DHI runtime image has no bash/curl to exec into and
+# had no actual functional role in this step. Kept here, commented out, for
+# reference/history rather than deleted outright.
+#
+#
+# function certificate_config() {
+#     echo "Configuring Certificate keys"
+#     CERTKEY=$(_run_curl_job "certcfg-search-$RANDOM" \
+#         curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' \
+#         --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
+#     # Inject cert keys to the service if its not available
+#     if [[ -z "$CERTKEY" ]]; then
+#         echo "Certificate RSA public key not available"
+#         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
+#         _run_curl_job "certcfg-register-$RANDOM" \
+#             curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' \
+#             --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}" >/dev/null
+#     fi
+# }
 
-    CERTKEY=$(kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
-    # Inject cert keys to the service if its not available 
-    if [[ -z "$CERTKEY" ]]; then
-        echo "Certificate RSA public key not available"
-        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
-    fi
-}
 function install_component() {
     # We need a dummy cm for configmap to start. Later Lernbb will create real one
     kubectl create configmap keycloak-key -n sunbird 2>/dev/null || true
@@ -394,7 +400,7 @@ if [[ $# -eq 0 ]]; then
     install_helm_components
     cd ../opentofu/azure/$environment
     restart_workloads_using_keys
-    certificate_config
+    # certificate_config
     dns_mapping
     generate_postman_env
     run_post_install
@@ -433,9 +439,9 @@ else
     "destroy_tf_resources")
         destroy_tf_resources
         ;;
-    "certificate_config")
-        certificate_config
-        ;;
+    # "certificate_config")
+    #     certificate_config
+    #     ;;
     *)
         invoke_functions "$@"
         ;;
