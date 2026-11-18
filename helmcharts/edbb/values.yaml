@@ -140,9 +140,17 @@ yugabyte: &yugabyte
       - name: "portal"
       - name: "sunbird"
   gflags:
-    tserver: 
+    master:
+      raft_heartbeat_interval_ms: "1000"
+      leader_lease_duration_ms: "4000"
+      ht_lease_duration_ms: "4000"
+    tserver:
       cdc_enable_replicate_intents: "true"
       ysql_enable_read_committed_isolation: "true"
+      raft_heartbeat_interval_ms: "1000"
+      leader_lease_duration_ms: "4000"
+      ht_lease_duration_ms: "4000"
+      heartbeat_interval_ms: "2000"
   image:
     registry: yugabytedb
     repository: yugabyte
