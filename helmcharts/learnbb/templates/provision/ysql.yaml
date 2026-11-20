@@ -9,7 +9,7 @@ metadata:
   annotations:
     {{- .Values.global.yugabyte.provisioning.annotations | toYaml | nindent 4 }}
 spec:
-  backoffLimit: 0
+  backoffLimit: 30
   template:
     metadata:
       labels:

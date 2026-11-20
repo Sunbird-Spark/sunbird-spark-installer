@@ -83,8 +83,9 @@ function certificate_keys() {
 function certificate_config() {
     echo "Configuring Certificate keys"
 
+    local local_port=8081
     local pf_log="/tmp/certcfg-pf-$$.log"
-    kubectl -n sunbird port-forward svc/registry-service 8081:8081 >"$pf_log" 2>&1 &
+    kubectl -n sunbird port-forward svc/registry-service "${local_port}:8081" >"$pf_log" 2>&1 &
     local pf_pid=$!
     trap 'kill $pf_pid 2>/dev/null; wait $pf_pid 2>/dev/null' RETURN
 
@@ -95,7 +96,7 @@ function certificate_config() {
             echo "port-forward process died early:"; cat "$pf_log"
             return 1
         fi
-        if curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:8081 2>/dev/null | grep -qE "^[2-4][0-9][0-9]$"; then
+        if grep -q "Forwarding from" "$pf_log" 2>/dev/null; then
             ready=true
             break
         fi
@@ -106,13 +107,13 @@ function certificate_config() {
         return 1
     fi
 
-    CERTKEY=$(curl -sf --location --request POST 'http://localhost:8081/api/v1/PublicKey/search' \
+    CERTKEY=$(curl -sf --location --request POST "http://localhost:${local_port}/api/v1/PublicKey/search" \
         --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq -r '.[] | .value')
 
     if [[ -z "$CERTKEY" ]]; then
         echo "Certificate RSA public key not available — registering"
         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        if ! curl -sf --location --request POST 'http://localhost:8081/api/v1/PublicKey' \
+        if ! curl -sf --location --request POST "http://localhost:${local_port}/api/v1/PublicKey" \
             --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"; then
             echo "Failed to register public key with registry-service"
             return 1
