@@ -46,7 +46,7 @@ function create_tf_resources() {
     deploy_tf_module keys
     deploy_tf_module output-file
     deploy_tf_module upload-files
-    [ -f ~/.kube/config ] && chmod 600 ~/.kube/config || true
+    [[ -f ~/.kube/config ]] && chmod 600 ~/.kube/config || true
 }
 
 function certificate_keys() {
@@ -100,7 +100,6 @@ function install_component() {
     local component="$1"
     # namespaces sunbird and velero are created by workload-identity Terraform module
     kubectl create namespace volume-autoscaler 2>/dev/null || true
-    kubectl create namespace nlweb 2>/dev/null || true
 
     echo -e "\nInstalling $component"
     local ed_values_flag=""
@@ -266,7 +265,8 @@ function generate_postman_env() {
         cd ../opentofu/gcp/$environment 2>/dev/null || true
     fi
     domain_name=$(kubectl get cm -n sunbird cert-env -ojsonpath='{.data.sunbird_cert_domain_url}')
-    blob_store_path=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$|/|')
+    blob_store_path=$(kubectl get cm -n sunbird lern-env -o jsonpath='{.data.cloud_storage_base_url}' | sed 's|/*$||')
+    public_container_name=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_content_cloud_storage_container}')
     api_key=$(kubectl get secret -n sunbird lern-secrets -ojsonpath='{.data.sunbird_authorization}' | base64 -d)
     keycloak_secret=$(kubectl get secret -n sunbird player-secrets -ojsonpath='{.data.SUNBIRD_SESSION_SECRET}' | base64 -d)
     keycloak_admin=$(kubectl get cm -n sunbird lern-env -ojsonpath='{.data.sunbird_sso_username}')
@@ -283,6 +283,7 @@ function generate_postman_env() {
         -e "s|REPLACE_WITH_KEYCLOAK_PASSWORD|${keycloak_password}|g" \
         -e "s|GENERATE_UUID|${generated_uuid}|g" \
         -e "s|BLOB_STORE_PATH|${blob_store_path}|g" \
+        -e "s|PUBLIC_CONTAINER_NAME|${public_container_name}|g" \
         -e "s|REPLACE_WITH_GOOGLE_OAUTH_CLIENT_ID|${google_oauth_client_id}|g" \
         -e "s|REPLACE_WITH_CAPTCHA_SITE_KEY|${google_captcha_site_key}|g" \
         "${temp_file}" >"env.json"
@@ -320,20 +321,6 @@ function migrate_forms() {
         --collection sunbird-spark-collection-v1.json \
         --env env.json
 }
-
-function create_client_forms() {
-    local current_directory="$(pwd)"
-    if [[ "$(basename $current_directory)" != "$environment" ]]; then
-        cd ../opentofu/gcp/$environment 2>/dev/null || true
-    fi
-    cp -rf ../../../postman-collection/ED-${RELEASE}  .
-    check_pod_status
-    #loop through files inside collection folder
-    for FILES in ED-${RELEASE}/*.json; do
-     echo "Creating client forms in.. $FILES"
-      postman collection run $FILES --environment env.json --delay-request 500 --bail --insecure
-    done 
-   }
 
 function cleanworkspace() {
         rm  certkey.pem certpubkey.pem
@@ -382,8 +369,6 @@ function check_pod_status() {
     echo "All pods are running successfully."
 }
 
-RELEASE="release700"  # used by create_client_forms() for the postman-collection/ED-${RELEASE} path
-
 if [[ $# -eq 0 ]]; then
     create_tf_backend
     backup_configs
@@ -396,7 +381,6 @@ if [[ $# -eq 0 ]]; then
     dns_mapping
     generate_postman_env
     run_post_install
-    create_client_forms
 else
     case "$1" in
     "create_tf_backend")
@@ -434,9 +418,6 @@ else
         ;;
     "certificate_config")
         certificate_config
-        ;;
-    "create_client_forms")
-        create_client_forms
         ;;
     *)
         invoke_functions "$@"
