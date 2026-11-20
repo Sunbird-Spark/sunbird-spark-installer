@@ -7,10 +7,10 @@ terraform {
   }
 }
 provider "azurerm" {
-  subscription_id                 = var.subscription_id
+  subscription_id = var.subscription_id
   features {}                              # Always include the features block for Azure provider
   resource_provider_registrations = "none" # Optional
-  storage_use_azuread              = true
+  storage_use_azuread             = true
 }
 data "azurerm_subscription" "current" {}
 
@@ -54,6 +54,15 @@ resource "azurerm_storage_account" "storage_account" {
   }
 
   blob_properties {
+    versioning_enabled = true
+
+    delete_retention_policy {
+      days = 7
+    }
+    container_delete_retention_policy {
+      days = 7
+    }
+
     cors_rule {
       max_age_in_seconds = 200
       allowed_origins    = ["*"]

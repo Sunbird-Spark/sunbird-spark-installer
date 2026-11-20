@@ -1,32 +1,40 @@
 variable "storage_account_name" {
-    type        = string
-    description = "Storage account name."
+  type        = string
+  description = "Storage account name (used in object URL)."
 }
 
 variable "storage_container_public" {
-    type        = string
-    description = "Public storage container name with blob access."
+  type        = string
+  description = "Public bucket name."
 }
 
-variable "storage_account_primary_access_key" {
-    type        = string
-    description = "Storage account primary access key."
+variable "public_artifacts_path" {
+  type        = string
+  description = "Absolute path to the public-artifacts directory. Pass get_repo_root()/public-artifacts from Terragrunt."
 }
 
-variable "sunbird_public_artifacts_account" {
-    type        = string
-    description = "The public account name where storage artifacts are published for this release."
-    default     = "downloadableartifacts"
+variable "sunbird_player_editor_ref" {
+  type        = string
+  description = "Git tag for Sunbird-Knowlg repos: sunbird-content-plugins, sunbird-content-editor, sunbird-generic-editor, sunbird-content-player."
+  default     = "master"
+
+  # Interpolated unquoted into local-exec git/docker commands below -- restrict
+  # to characters valid in a git ref to close off shell injection via this
+  # operator-editable global-values.yaml value.
+  validation {
+    condition     = can(regex("^[A-Za-z0-9._/-]+$", var.sunbird_player_editor_ref))
+    error_message = "sunbird_player_editor_ref must only contain letters, numbers, dots, underscores, hyphens, and slashes (a valid git branch/tag name)."
+  }
 }
 
-variable "sunbird_public_artifacts_account_sas_url" {
-    type        = string
-    description = "The readonly sas token url for the sunbird public account."
-    default     = "https://downloadableartifacts.blob.core.windows.net/?sv=2022-11-02&ss=bf&srt=co&sp=rlitfx&se=2026-08-30T20:37:29Z&st=2024-07-10T12:37:29Z&spr=https&sig=hcXksbrbR%2BJgCB0EKxiwHCSsQ6r2eSlyOVnqnjxFOH0%3D"
-}
+variable "knowledge_platform_ref" {
+  type        = string
+  description = "Git branch or tag for the knowledge-platform repo (schemas/local upload)."
+  default     = "master"
 
-variable "sunbird_public_artifacts_container" {
-    type        = string
-    description = "The container name dedicated for this release which holds the storage artifatcs."
-    default     = "release700"
+  # Same reasoning as sunbird_player_editor_ref above.
+  validation {
+    condition     = can(regex("^[A-Za-z0-9._/-]+$", var.knowledge_platform_ref))
+    error_message = "knowledge_platform_ref must only contain letters, numbers, dots, underscores, hyphens, and slashes (a valid git branch/tag name)."
+  }
 }

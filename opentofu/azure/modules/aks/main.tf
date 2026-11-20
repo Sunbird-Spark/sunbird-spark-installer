@@ -31,12 +31,22 @@ provider "azurerm" {
     oidc_issuer_enabled       = true
     workload_identity_enabled = true
     default_node_pool {
-      name           = var.big_nodepool_name
-      node_count     = var.big_node_count
-      vm_size        = var.big_node_size
-      vnet_subnet_id = var.vnet_subnet_id
-      max_pods       = 250
+      name                 = var.big_nodepool_name
+      vm_size              = var.big_node_size
+      vnet_subnet_id       = var.vnet_subnet_id
+      max_pods             = 250
       orchestrator_version = var.aks_version
+      auto_scaling_enabled = true
+      min_count            = var.min_big_nodepool_nodes
+      max_count            = var.max_big_nodepool_nodes
+    }
+
+    lifecycle {
+      # Once auto_scaling_enabled = true, the autoscaler owns the live node
+      # count -- without this, every apply fights it back to whatever
+      # min_count/max_count computed at plan time, causing needless scale
+      # thrashing.
+      ignore_changes = [default_node_pool[0].node_count]
     }
 
     network_profile {

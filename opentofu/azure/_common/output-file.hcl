@@ -41,6 +41,7 @@ dependency "workload_identity" {
     mock_outputs = {
       client_id                    = "00000000-0000-0000-0000-000000000000"
       managed_identity_principal_id = "00000000-0000-0000-0000-000000000000"
+      k8s_service_account_names    = { sunbird = "dummy-sa" }
     }
     mock_outputs_allowed_terraform_commands = ["init", "plan", "apply", "validate", "output"]
     mock_outputs_merge_strategy_with_state  = "shallow"
@@ -69,6 +70,6 @@ inputs = {
   cloud_storage_provider             = local.cloud_storage_provider
   azure_client_id                    = dependency.workload_identity.outputs.client_id
   managed_identity_principal_id      = dependency.workload_identity.outputs.managed_identity_principal_id
-  k8s_service_account_name           = "azure-managed-identity-sa"
+  k8s_service_account_name           = dependency.workload_identity.outputs.k8s_service_account_names["sunbird"]
   sunbird_encryption_key             = local.sunbird_encryption_key
 }

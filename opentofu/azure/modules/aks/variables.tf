@@ -32,10 +32,16 @@ variable "big_nodepool_name" {
   default     = "bigpool"
 }
 
-variable "big_node_count" {
+variable "min_big_nodepool_nodes" {
   type        = number
-  description = "Big node pool node count."
+  description = "Minimum node count for the big node pool's autoscaler."
   default     = 2
+}
+
+variable "max_big_nodepool_nodes" {
+  type        = number
+  description = "Maximum node count for the big node pool's autoscaler."
+  default     = 4
 }
 
 variable "big_node_size" {
@@ -96,9 +102,9 @@ variable "max_small_nodepool_nodes" {
 }
 
 variable "private_ingressgateway_ip" {
-    type        = string
-    description = "Nginx private ingress ip."
-    default = "10.0.0.10"
+  type        = string
+  description = "Nginx private ingress ip."
+  default     = "10.0.0.10"
 }
 
 
