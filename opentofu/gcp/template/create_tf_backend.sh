@@ -3,18 +3,18 @@ set -euo pipefail
 
 # Check if the global-values.yaml file exists
 if [[ ! -f "global-values.yaml" ]]; then
-  echo "Error: global-values.yaml file does not exist!"
+  echo "Error: global-values.yaml file does not exist!" >&2
   exit 1
 fi
 
 # Check if required tools are installed
 if ! command -v yq &> /dev/null; then
-  echo "Error: yq is not installed. Please install yq to process YAML files."
+  echo "Error: yq is not installed. Please install yq to process YAML files." >&2
   exit 1
 fi
 
 if ! command -v gcloud &> /dev/null; then
-  echo "Error: gcloud CLI is not installed."
+  echo "Error: gcloud CLI is not installed." >&2
   exit 1
 fi
 
@@ -32,26 +32,26 @@ BUCKET_NAME="${environment_name}tfstate"
 # Validate location
 VALID_LOCATIONS=("africa-south1" "asia-east1" "asia-east2" "asia-northeast1" "asia-northeast2" "asia-northeast3" "asia-south1" "asia-south2" "asia-southeast1" "asia-southeast2" "australia-southeast1" "australia-southeast2" "europe-central2" "europe-north1" "europe-north2" "europe-southwest1" "europe-west1" "europe-west10" "europe-west12" "europe-west2" "europe-west3" "europe-west4" "europe-west6" "europe-west8" "europe-west9" "me-central1" "me-central2" "me-west1" "northamerica-northeast1" "northamerica-northeast2" "northamerica-south1" "southamerica-east1" "southamerica-west1" "us-central1" "us-east1" "us-east4" "us-east5" "us-south1" "us-west1" "us-west2" "us-west3" "us-west4")
 if [[ ! " ${VALID_LOCATIONS[*]} " =~ " $region " ]]; then
-  echo "Error: The specified location '$region' is not valid. Please provide a valid GCP location."
+  echo "Error: The specified location '$region' is not valid. Please provide a valid GCP location." >&2
   exit 1
 fi
 
 # Validate required values
 if [[ -z "$building_block" || -z "$environment_name" || -z "$region" ]]; then
-  echo "Error: Unable to extract values from global-values.yaml"
+  echo "Error: Unable to extract values from global-values.yaml" >&2
   exit 1
 fi
 
 # Get current GCP project
 GCP_PROJECT=$(gcloud config get-value project)
 if [[ -z "$GCP_PROJECT" ]]; then
-  echo "Error: GCP project is not set in gcloud CLI."
+  echo "Error: GCP project is not set in gcloud CLI." >&2
   exit 1
 fi
 
 # Validate bucket name
 if [[ ! "$BUCKET_NAME" =~ ^[a-z0-9._-]+$ ]]; then
-  echo "Error: Bucket name '$BUCKET_NAME' is invalid. It must contain only lowercase letters, numbers, dots, underscores, or hyphens."
+  echo "Error: Bucket name '$BUCKET_NAME' is invalid. It must contain only lowercase letters, numbers, dots, underscores, or hyphens." >&2
   exit 1
 fi
 

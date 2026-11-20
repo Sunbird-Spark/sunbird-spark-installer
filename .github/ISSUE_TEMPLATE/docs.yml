@@ -1,0 +1,69 @@
+name: "\U0001F4DA Documentation"
+description: Something in the docs is wrong, missing, or hard to follow
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This repository leans on its documentation more than most — there's no application
+        to explore, so the README is what an operator works from. A wrong version number or
+        a missing step here can cost someone an afternoon and a half-provisioned cluster.
+
+  - type: dropdown
+    id: location
+    attributes:
+      label: Where is it?
+      options:
+        - README — infrastructure overview and sizing
+        - README — prerequisites and required CLI tools
+        - README — installing on AWS or GCP
+        - README — SSL certificates, Kong or upgrades
+        - INFRA_DETAILS.md
+        - private-repo-setup/README.md
+        - opentofu/azure/README.md
+        - CONTRIBUTING.md or SECURITY.md
+        - Comments inside modules, charts or scripts
+        - Somewhere else
+    validations:
+      required: true
+
+  - type: input
+    id: link
+    attributes:
+      label: Link or file path
+      placeholder: README.md, or opentofu/azure/README.md#private-cluster--access-options
+    validations:
+      required: true
+
+  - type: dropdown
+    id: problem-type
+    attributes:
+      label: What's the problem?
+      options:
+        - It's wrong or out of date
+        - Something is missing
+        - The steps didn't work when I followed them
+        - A version number doesn't match what's required
+        - It's confusing or hard to follow
+        - Broken link or formatting
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: What needs changing?
+      description: What the docs say now, and what they should say instead. If a step failed, include your cloud provider, tool versions and the error — with identifiers redacted.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contributing
+    attributes:
+      label: Would you like to fix this?
+      options:
+        - I'd like to submit the fix myself
+        - I'd like guidance before trying
+        - I'm only reporting it
+    validations:
+      required: true

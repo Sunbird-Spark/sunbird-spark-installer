@@ -3,13 +3,13 @@ set -euo pipefail
 
 # Check if the global-values.yaml file exists
 if [[ ! -f "global-values.yaml" ]]; then
-  echo "Error: global-values.yaml file does not exist!"
+  echo "Error: global-values.yaml file does not exist!" >&2
   exit 1
 fi
 
 # Extract values using yq (YAML processor)
 if ! command -v yq &> /dev/null; then
-  echo "Error: yq is not installed. Please install yq to process YAML files."
+  echo "Error: yq is not installed. Please install yq to process YAML files." >&2
   exit 1
 fi
 
@@ -21,7 +21,7 @@ resource_group_name=$(yq '.global.resource_group_name' global-values.yaml)
 
 # Validate that the values are extracted correctly
 if [[ -z "$building_block" || -z "$environment_name" ]]; then
-  echo "Error: Unable to extract values from global-values.yaml"
+  echo "Error: Unable to extract values from global-values.yaml" >&2
   exit 1
 fi
 
@@ -69,7 +69,7 @@ az storage container create --name "$CONTAINER_NAME" --account-name "$STORAGE_AC
 # installer VM (setup-installer-vm.sh already added Microsoft.Storage to its
 # subnet), so that subnet already exists at this point.
 VM_RESOURCE_ID=$(curl -s -H "Metadata:true" "http://169.254.169.254/metadata/instance/compute?api-version=2021-02-01" 2>/dev/null | jq -r '.resourceId // empty')
-if [ -n "$VM_RESOURCE_ID" ]; then
+if [[ -n "$VM_RESOURCE_ID" ]]; then
   NIC_ID=$(az vm show --ids "$VM_RESOURCE_ID" --query "networkProfile.networkInterfaces[0].id" -o tsv)
   SUBNET_ID=$(az network nic show --ids "$NIC_ID" --query "ipConfigurations[0].subnet.id" -o tsv)
   SUBNET_NAME=$(echo "$SUBNET_ID" | awk -F'/' '{print $NF}')

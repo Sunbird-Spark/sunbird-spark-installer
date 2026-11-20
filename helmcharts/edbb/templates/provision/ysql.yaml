@@ -7,7 +7,7 @@ metadata:
     app: {{ .Chart.Name }}-yugabyte-postgres-migration
     scope: provisioning
   annotations:
-    {{.Values.global.yugabyte.provisioning.annotations | toYaml }}
+    {{ .Values.global.yugabyte.provisioning.annotations | toYaml }}
 spec:
   template:
     metadata:
@@ -30,7 +30,7 @@ spec:
             memory: 64Mi
         command: ['sh', '-c']
         args:
-        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'"
+        - "timeout {{ .Values.migration.yugabyte.waitTime }} sh -c 'until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port }}; do echo waiting for yugabytepostgres; sleep 10; done'"
       containers:
       - name: migration
         image: "{{ .Values.yugabyte_migration_image.registry }}/{{ .Values.yugabyte_migration_image.repository }}:{{ .Values.yugabyte_migration_image.tag }}"
@@ -50,8 +50,8 @@ spec:
         - |
             set -e
             export devops_branch={{ .Values.devops_release_branch }}
-            export PGHOST={{.Values.global.yugabyte.host}}
-            export PGPORT={{.Values.global.yugabyte.postgresql_port}}
+            export PGHOST={{ .Values.global.yugabyte.host }}
+            export PGPORT={{ .Values.global.yugabyte.postgresql_port }}
             export PGUSER=yugabyte
             export PGPASSWORD=yugabyte
             {{- range .Values.global.yugabyte.databases }}
@@ -62,11 +62,11 @@ spec:
               exit 1
             fi
 
-            if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{.name}}; then
+            if ! ysqlsh -lqt | cut -d \| -f 1 | grep -qw {{ .name }}; then
               # Database doesn't exist, create it
               echo "SELECT 'CREATE DATABASE \"{{ .name }}\"' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '\"{{ .name }}\"')\gexec" | ysqlsh
             else
-                echo "Database {{.name}} already exists."
+                echo "Database {{ .name }} already exists."
             fi
             {{- end }}
 

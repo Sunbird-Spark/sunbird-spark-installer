@@ -22,7 +22,7 @@ metadata:
 {{ include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
   {{- end }}
 data:
-{{- $currentScope := .}}
+{{- $currentScope := . }}
 {{- range $path, $_ := .Files.Glob "configs/*" }}
   {{- if ne $path "configs/env.yaml" }}
     {{ base $path | nindent 2 }}: |-

@@ -21,7 +21,7 @@ spec:
         alerttype: lag
       annotations:
         message: The secor job {{ .Release.Name }} lag is above threshold {{ get (get $.Values.secor_jobs $.Release.Name) "lag_threshold_critical" }}
-        lag: {{`({{ humanize $value }})`}}
+        lag: {{ `({{ humanize $value }})` }}
         job_id: {{ .Release.Name }}
         alertname: SecorJobsLag
 
@@ -34,7 +34,7 @@ spec:
         alerttype: lag
       annotations:
         message: The secor job {{ .Release.Name }} lag is above threshold {{ get (get $.Values.secor_jobs $.Release.Name) "lag_threshold_warning" }}
-        lag: {{`({{ humanize $value }})`}}
+        lag: {{ `({{ humanize $value }})` }}
         job_id: {{ .Release.Name }}
         alertname: SecorJobsLag
 
@@ -47,7 +47,7 @@ spec:
         alerttype: lag
       annotations:
         message: The secor job {{ .Release.Name }} lag is above threshold {{ get (get $.Values.secor_jobs $.Release.Name) "lag_threshold_critical" }}
-        lag: {{`({{ humanize $value }})`}}
+        lag: {{ `({{ humanize $value }})` }}
         job_id: {{ .Release.Name }}
         alertname: SecorJobsLag
 
@@ -60,7 +60,7 @@ spec:
         alerttype: lag
       annotations:
         message: The secor job {{ .Release.Name }} lag is above threshold {{ get (get $.Values.secor_jobs $.Release.Name) "lag_threshold_warning" }}
-        lag: {{`({{ humanize $value }})`}}
+        lag: {{ `({{ humanize $value }})` }}
         job_id: {{ .Release.Name }}
         alertname: SecorJobsLag
 {{- end }}

@@ -122,6 +122,7 @@ analytics_report_service_prefix: /report/jobs
 auth_service_prefix: /auth
 object_category_prefix: /object/category
 object_category_definition_prefix: /object/category/definition
+object_enrichment_prefix: /object/enrichment
 dataset_service_prefix: /dataset
 asset_prefix: /asset
 collection_prefix: /collection

@@ -40,7 +40,7 @@ spec:
       initContainers:
         {{- if .Values.global.kafka.provisioning.waitForKafka }}
         - name: wait-for-available-kafka
-          image: "{{ .Values.global.kafka.image.registry }}/{{.Values.global.kafka.image.repository}}:{{.Values.global.kafka.image.tag}}"
+          image: "{{ .Values.global.kafka.image.registry }}/{{ .Values.global.kafka.image.repository }}:{{ .Values.global.kafka.image.tag }}"
           imagePullPolicy: IfNotPresent
           command:
             - /bin/bash
@@ -48,7 +48,7 @@ spec:
             - -ec
             - |
               wait-for-port \
-                --host={{.Values.global.kafka.host}} \
+                --host={{ .Values.global.kafka.host }} \
                 --state=inuse \
                 --timeout=120 \
                 {{ .Values.global.kafka.port | int64 }};
@@ -57,7 +57,7 @@ spec:
       {{- end }}
       containers:
         - name: kafka-provisioning
-          image: "{{ .Values.global.kafka.image.registry }}/{{.Values.global.kafka.image.repository}}:{{.Values.global.kafka.image.tag}}"
+          image: "{{ .Values.global.kafka.image.registry }}/{{ .Values.global.kafka.image.repository }}:{{ .Values.global.kafka.image.tag }}"
           imagePullPolicy: IfNotPresent
           command:
             - /bin/bash
@@ -69,7 +69,7 @@ spec:
               export CLIENT_CONF="/tmp/client.properties"
               touch $CLIENT_CONF
               kafka_common_conf_set "$CLIENT_CONF" security.protocol {{ .Values.global.kafka.clientProtocol | quote }}
-              KAFKA_SERVICE="{{.Values.global.kafka.host}}:{{.Values.global.kafka.port}}"
+              KAFKA_SERVICE="{{ .Values.global.kafka.host }}:{{ .Values.global.kafka.port }}"
               kafka_provisioning_commands=(
               {{- range $topic := .Values.global.kafka.provisioning.topics }}
               {{- $topicName := include "common.tplvalues.render" (dict "value" $topic.name "context" $) }}

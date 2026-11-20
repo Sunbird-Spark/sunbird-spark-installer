@@ -16,38 +16,38 @@ CLOUD_PROVIDER="${2:-azure}" # Default to azure if not provided
 SERVICES=("discussion-forum-apis" "discussion-forum-consumers" "discussionmw" "nodebb" "groups")
 
 deploy_service() {
-    local SERVICE_NAME="$1"
-    local CHART_DIR="$HELMCHARTS_DIR/$SERVICE_NAME"
+    local service_name="$1"
+    local chart_dir="$HELMCHARTS_DIR/$service_name"
     
-    echo "Deploying $SERVICE_NAME Helm chart..."
-    cd "$CHART_DIR"
+    echo "Deploying $service_name Helm chart..."
+    cd "$chart_dir"
     
-    if [ -z "$ENV_NAME" ]; then
-        echo "ERROR: ENV_NAME environment variable is not set. Please export it (e.g., export ENV_NAME=demo) before running this script."
+    if [[ -z "$ENV_NAME" ]]; then
+        echo "ERROR: ENV_NAME environment variable is not set. Please export it (e.g., export ENV_NAME=demo) before running this script." >&2
         exit 1
     fi
-    local CLOUD_DIR="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/$ENV_NAME"
+    local cloud_dir="$REPO_ROOT/opentofu/$CLOUD_PROVIDER/$ENV_NAME"
     
     # Check for required configuration files
-    if [ ! -f "$CLOUD_DIR/global-values.yaml" ] || [ ! -f "$CLOUD_DIR/global-cloud-values.yaml" ]; then
-        echo "ERROR: OpenTofu global values not found in $CLOUD_DIR. Please run opentofu first."
+    if [[ ! -f "$cloud_dir/global-values.yaml" ]] || [[ ! -f "$cloud_dir/global-cloud-values.yaml" ]]; then
+        echo "ERROR: OpenTofu global values not found in $cloud_dir. Please run opentofu first." >&2
         exit 1
     fi
     
     # Standard values layering
-    HELM_ARGS="-f $CLOUD_DIR/global-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $CLOUD_DIR/global-cloud-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/global-values.yaml"
-    HELM_ARGS="$HELM_ARGS -f $REPO_ROOT/addons/images.yaml"
-    
-    helm upgrade --install "$SERVICE_NAME" . --namespace "$NAMESPACE" $HELM_ARGS
-    echo "$SERVICE_NAME deployed successfully"
+    local helm_args="-f $cloud_dir/global-values.yaml"
+    helm_args="$helm_args -f $cloud_dir/global-cloud-values.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/global-values.yaml"
+    helm_args="$helm_args -f $REPO_ROOT/addons/images.yaml"
+
+    helm upgrade --install "$service_name" . --namespace "$NAMESPACE" $helm_args
+    echo "$service_name deployed successfully"
 }
 
 uninstall_service() {
-    local SERVICE_NAME="$1"
-    echo "Uninstalling $SERVICE_NAME Helm chart..."
-    helm uninstall "$SERVICE_NAME" --namespace "$NAMESPACE" || echo "Helm release $SERVICE_NAME not found, skipping."
+    local service_name="$1"
+    echo "Uninstalling $service_name Helm chart..."
+    helm uninstall "$service_name" --namespace "$NAMESPACE" || echo "Helm release $service_name not found, skipping."
 }
 
 post_install_nodebb_plugins() {

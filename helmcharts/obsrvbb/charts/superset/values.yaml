@@ -99,13 +99,13 @@ extraEnvRaw: []
   #       key: password
 
 # -- Extra environment variables to pass as secrets
-extraSecretEnv:
+extraSecretEnv: {}
   # MAPBOX_API_KEY: ...
   # # Google API Keys: https://console.cloud.google.com/apis/credentials
   # GOOGLE_KEY: ...
   # GOOGLE_SECRET: ...
-  #   # Generate your own secret key for encryption. Use openssl rand -base64 42 to generate a good key
-  SUPERSET_SECRET_KEY: 'vF04kROkU08BGeW90pWlnVb6lu+8KH8WpX9pgKvjQk1ynjBpQKzkUcWz'
+  # SUPERSET_SECRET_KEY: ... # leave unset -- templates/secret-env.yaml auto-generates
+  #   # and persists one across upgrades if you don't provide your own here
 
 # -- Extra files to be mounted as ConfigMap on the path specified in `extraConfigMountPath`
 extraConfigs: {}

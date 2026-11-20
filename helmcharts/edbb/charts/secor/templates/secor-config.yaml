@@ -1,4 +1,4 @@
-{{- $currentScope := .}}
+{{- $currentScope := . }}
 {{- range $jobName, $jobData := .Values.secor_jobs }}
 {{- if $jobData.enabled }}
 {{- with $currentScope }}
@@ -20,8 +20,8 @@ data:
       {{- with $currentScope }}
       {{- $var := .Files.Get $path }}
       {{- $localRender := include "common.tplvalues.render" (dict "value" $var "context" $ "scope" $jobData) }}
-      {{- tpl $localRender $ | nindent 4}}
-      {{/* {{- include "common.tplvalues.render" (dict "value" $localRender "context" $ ) | nindent 4}} */}}
+      {{- tpl $localRender $ | nindent 4 }}
+      {{/* {{- include "common.tplvalues.render" (dict "value" $localRender "context" $ ) | nindent 4 }} */}}
       {{- end }}
 {{- end }}
 {{- end }}

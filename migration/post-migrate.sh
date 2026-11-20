@@ -38,7 +38,7 @@ HELM_TIMEOUT="${HELM_TIMEOUT:-30m}"
 log() { echo -e "\n\033[1;36m[post-migrate] $*\033[0m"; }
 die() { echo -e "\033[1;31m[post-migrate ERROR] $*\033[0m" >&2; exit 1; }
 
-[ -d "$IMPORT_DIR" ] || die "IMPORT_DIR not found: $IMPORT_DIR"
+[[ -d "$IMPORT_DIR" ]] || die "IMPORT_DIR not found: $IMPORT_DIR"
 command -v helm    >/dev/null 2>&1 || die "helm not found in PATH"
 command -v kubectl >/dev/null 2>&1 || die "kubectl not found in PATH"
 
@@ -48,7 +48,7 @@ check_deployment_ready() {
   local ready
   ready=$(kubectl get deployment -n "$TARGET_NS" "$name" \
     -o jsonpath='{.status.readyReplicas}' 2>/dev/null || true)
-  if [ -z "${ready:-}" ] || [ "$ready" -lt 1 ]; then
+  if [[ -z "${ready:-}" ]] || [[ "$ready" -lt 1 ]]; then
     die "Deployment '$name' in ns '$TARGET_NS' has no ready replicas (got: '$ready'). Phase 5 must complete + services must be healthy before running post-migrate."
   fi
   log "  ✓ $name ready ($ready replica(s))"
@@ -94,7 +94,7 @@ run_step() {
 
 preflight
 
-if [ $# -eq 0 ]; then
+if [[ $# -eq 0 ]]; then
   run_step all
 else
   for arg in "$@"; do

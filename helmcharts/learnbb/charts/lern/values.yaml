@@ -198,6 +198,9 @@ assessment_direct_aggregation_enabled: "true"
 viewer_enabled: "true"
 deployment_mode: "monolith"
 viewer_summary_upload_path: "viewer-summary"
+viewer_context_mode: "strict"
+viewer_carry_scope: "content"
+viewer_carry_forward_rules: ''
 
 # Notification Specific
 sunbird_cassandra_notification_keyspace: sunbird_notifications

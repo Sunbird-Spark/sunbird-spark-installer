@@ -31,7 +31,7 @@ def get_apis(kong_admin_api_url, managed_by=None):
     total_services = services_response.get("total", len(data))
 
     if(total_services > max_page_size):
-        raise Exception("There are {} services existing in system which is more than max_page_size={}. Please increase max_page_size if this is expected".format(total_services, max_page_size))
+        raise ValueError("There are {} services existing in system which is more than max_page_size={}. Please increase max_page_size if this is expected".format(total_services, max_page_size))
     else:
        return data
 
@@ -81,7 +81,7 @@ def retrying_urlopen(url, retry_count=0, data=None):
             error_body = ""
             try:
                 error_body = e.read().decode('utf-8')
-            except:
+            except Exception:
                 pass
             
             # Print error details on first attempt or final failure
@@ -90,7 +90,7 @@ def retrying_urlopen(url, retry_count=0, data=None):
                 print(f"URL: {e.url}", flush=True)
                 if error_body:
                     print(f"Kong error response: {error_body}", flush=True)
-                print(f"==================\n", flush=True)
+                print("==================\n", flush=True)
             
             # Don't retry 4xx client errors (except 429 Too Many Requests)
             # These indicate bad request data, not transient failures

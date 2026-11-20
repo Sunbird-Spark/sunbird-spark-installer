@@ -56,7 +56,7 @@ Installation order matters — each bundle builds on the previous:
 | 3 | `learnbb` | Lern service, Keycloak, YugabyteDB, Elasticsearch, Redis, Flink jobs, cert services |
 | 4 | `knowledgebb` | Knowlg service, Search, JanusGraph (on YugabyteDB), Flink jobs |
 | 5 | `obsrvbb` | Telemetry service, Superset dashboards |
-| 6 | `additional` | cert-ng, NL web, volume autoscaler |
+| 6 | `additional` | cert-ng, volume autoscaler |
 
 Each bundle is an umbrella Helm chart in `helmcharts/<bundle>/` with subcharts in `helmcharts/<bundle>/charts/`. All `helm upgrade --install` calls use `--timeout 30m --debug`.
 
@@ -79,7 +79,7 @@ Subcharts in `Chart.yaml` have `condition: <chart>.enabled` flags. To redeploy a
 ### Namespace Management
 
 - `sunbird` and `velero` — created by the `workload-identity` Terraform module, not by `install.sh`
-- `volume-autoscaler` and `nlweb` — created by `install_component` on every run (`kubectl create namespace … || true`)
+- `volume-autoscaler` — created by `install_component` on every run (`kubectl create namespace … || true`)
 
 ### RSA Certificate Key Lifecycle
 

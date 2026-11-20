@@ -11,7 +11,7 @@ metadata:
 {{ include "common.tplvalues.render" (dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
   {{- end }}
 data:
-{{- $currentScope := .}}
+{{- $currentScope := . }}
 {{- range $path, $_ := .Files.Glob "configs/*" }} # Take only root level files (configs/*) for configmaps
   {{- if and (ne $path "configs/env.yaml") (ne $path "configs/secrets.yaml") }} # Skip env.yaml and secrets.yaml as configmap, as they're env/secret files
     {{ base $path | nindent 2 }}: |-

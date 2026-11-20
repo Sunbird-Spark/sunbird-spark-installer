@@ -18,7 +18,7 @@ spec:
           args:
           - |
             timeout 600 sh -c '
-            until nc -z {{.Values.global.yugabyte.host}} {{.Values.global.yugabyte.postgresql_port}}; do echo waiting for yugabytepostgres; sleep 10; done'
+            until nc -z {{ .Values.global.yugabyte.host }} {{ .Values.global.yugabyte.postgresql_port }}; do echo waiting for yugabytepostgres; sleep 10; done'
       containers:
         - name: {{ .Chart.Name }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}

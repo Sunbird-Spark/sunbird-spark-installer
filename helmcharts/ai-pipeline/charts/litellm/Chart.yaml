@@ -1,0 +1,10 @@
+apiVersion: v2
+name: litellm
+description: Model gateway for units that call an LLM.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+dependencies:
+  - name: common
+    repository: https://nimbushubin.github.io/helmcharts
+    version: 0.1.0

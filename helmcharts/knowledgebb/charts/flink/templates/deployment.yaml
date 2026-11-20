@@ -246,5 +246,5 @@ spec:
           - key: log4j_console_properties
             path: log4j-console.properties
 {{- end }}
-{{- end}}
-{{- end}}
+{{- end }}
+{{- end }}
