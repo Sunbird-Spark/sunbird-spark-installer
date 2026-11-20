@@ -7,6 +7,7 @@ echo "Press Enter to continue..."
 read -r
 
 environment=$(basename "$(pwd)")
+readonly ENV_DIR="$(pwd)"
 
 function create_tf_backend() {
     echo -e "Creating opentofu state backend"
@@ -42,42 +43,75 @@ function create_tf_resources() {
 
 function certificate_keys() {
      #  # If keys already present in global-values.yaml → skip writing
-    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' ../opentofu/gcp/$environment/global-values.yaml 2>/dev/null; then
+    if grep -q -E '^[[:space:]]*CERTIFICATE_PRIVATE_KEY:' "$ENV_DIR/global-values.yaml" 2>/dev/null; then
         echo "Certificate keys already present — skipping generation and write."
         return
     fi
     # Generate private and public keys using openssl
     echo "Creation of RSA keys for certificate signing"
-    openssl genrsa -out ../opentofu/gcp/$environment/certkey.pem;
-    openssl rsa -in ../opentofu/gcp/$environment/certkey.pem -pubout -out ../opentofu/gcp/$environment/certpubkey.pem
+    openssl genrsa -out "$ENV_DIR/certkey.pem";
+    openssl rsa -in "$ENV_DIR/certkey.pem" -pubout -out "$ENV_DIR/certpubkey.pem"
     local awk_join_lines='{printf("%s",$0)}'
-    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/gcp/$environment/certkey.pem | sed 's/-----END/\\n-----END/g' | awk "$awk_join_lines")
-    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' ../opentofu/gcp/$environment/certpubkey.pem | sed 's/-----END/\\n-----END/g' | awk "$awk_join_lines")
-    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' ../opentofu/gcp/$environment/certkey.pem | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk "$awk_join_lines")
-    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' ../opentofu/gcp/$environment/certpubkey.pem | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk "$awk_join_lines")
-    printf "\n" >> ../opentofu/gcp/$environment/global-values.yaml
-    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
-    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
-    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
-    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> ../opentofu/gcp/$environment/global-values.yaml
+    CERTPRIVATEKEY=$(sed 's/KEY-----/KEY-----\\n/g' "$ENV_DIR/certkey.pem" | sed 's/-----END/\\n-----END/g' | awk "$awk_join_lines")
+    CERTPUBLICKEY=$(sed 's/KEY-----/KEY-----\\n/g' "$ENV_DIR/certpubkey.pem" | sed 's/-----END/\\n-----END/g' | awk "$awk_join_lines")
+    CERTIFICATESIGNPRKEY=$(sed 's/BEGIN PRIVATE KEY-----/BEGIN PRIVATE KEY-----\\\\n/g' "$ENV_DIR/certkey.pem" | sed 's/-----END PRIVATE KEY/\\\\n-----END PRIVATE KEY/g' | awk "$awk_join_lines")
+    CERTIFICATESIGNPUKEY=$(sed 's/BEGIN PUBLIC KEY-----/BEGIN PUBLIC KEY-----\\\\n/g' "$ENV_DIR/certpubkey.pem" | sed 's/-----END PUBLIC KEY/\\\\n-----END PUBLIC KEY/g' | awk "$awk_join_lines")
+    printf "\n" >> "$ENV_DIR/global-values.yaml"
+    echo "  CERTIFICATE_PRIVATE_KEY: \"$CERTPRIVATEKEY\"" >> "$ENV_DIR/global-values.yaml"
+    echo "  CERTIFICATE_PUBLIC_KEY: \"$CERTPUBLICKEY\"" >> "$ENV_DIR/global-values.yaml"
+    echo "  CERTIFICATESIGN_PRIVATE_KEY: \"$CERTIFICATESIGNPRKEY\"" >> "$ENV_DIR/global-values.yaml"
+    echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> "$ENV_DIR/global-values.yaml"
 }
 
+# Certificate public-key registration with registry-service. registry-service
+# is ClusterIP-only (not reachable outside the cluster), and no app pod can
+# be reliably exec'd into anymore for this (knowledge-mw's DHI runtime image
+# has no shell at all; of 11 images checked via podman, only cert/
+# certregistry/certificatesign have curl, none have bash, and registry's own
+# pod has neither) -- so this port-forwards to the Service and runs
+# curl/jq on the host instead of depending on any app container's tooling.
 function certificate_config() {
-    # Check if jq is available in the kn container, install only if missing
     echo "Configuring Certificate keys"
-    if ! kubectl -n sunbird exec deploy/knowledge-mw -- which jq >/dev/null 2>&1; then
-        echo "jq not found in knowledge-mw container, attempting to install..."
-        # Try to install jq using available package manager, fallback if apt fails
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get update || true"
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get install -y jq || true"
+
+    local local_port=8081
+    local pf_log="/tmp/certcfg-pf-$$.log"
+    kubectl -n sunbird port-forward svc/registry-service "${local_port}:8081" >"$pf_log" 2>&1 &
+    local pf_pid=$!
+    trap 'kill $pf_pid 2>/dev/null; wait $pf_pid 2>/dev/null || true; rm -f "$pf_log"; trap - RETURN' RETURN
+
+    # Fail fast if port-forward itself died (bad RBAC, service missing, etc.)
+    local ready=false
+    for i in {1..30}; do
+        if ! kill -0 "$pf_pid" 2>/dev/null; then
+            echo "port-forward process died early:"; cat "$pf_log"
+            return 1
+        fi
+        if grep -q "Forwarding from" "$pf_log" 2>/dev/null; then
+            ready=true
+            break
+        fi
+        sleep 1
+    done
+    if [[ "$ready" != "true" ]]; then
+        echo "registry-service not reachable via port-forward after 30s"
+        return 1
     fi
 
-    CERTKEY=$(kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
-    # Inject cert keys to the service if its not available 
+    CERTKEY=$(curl -sf --location --request POST "http://localhost:${local_port}/api/v1/PublicKey/search" \
+        --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq -r '.[] | .value') \
+        || { echo "registry-service PublicKey search failed"; return 1; }
+
     if [[ -z "$CERTKEY" ]]; then
-        echo "Certificate RSA public key not available"
-        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
+        echo "Certificate RSA public key not available — registering"
+        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' "$ENV_DIR/global-values.yaml")
+        [[ -n "$CERTPUBKEY" ]] || { echo "CERTIFICATE_PUBLIC_KEY not found in global-values.yaml"; return 1; }
+        if ! curl -sf --location --request POST "http://localhost:${local_port}/api/v1/PublicKey" \
+            --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"; then
+            echo "Failed to register public key with registry-service"
+            return 1
+        fi
+    else
+        echo "Certificate public key already registered — skipping"
     fi
 }
 
@@ -104,6 +138,8 @@ function install_component() {
             echo "Deleting existing job keycloak-kids-keys..."
             kubectl delete job keycloak-kids-keys -n sunbird
         fi
+        
+        kubectl delete job learnbb-yugabytesql-migration-job -n sunbird --ignore-not-found
 
         if [[ -f "certkey.pem" ]] && [[ -f "certpubkey.pem" ]]; then
             echo "Certificate keys are already created. Skipping the keys creation..."
