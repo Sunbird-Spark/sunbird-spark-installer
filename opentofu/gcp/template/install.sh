@@ -98,7 +98,8 @@ function certificate_config() {
     fi
 
     CERTKEY=$(curl -sf --location --request POST "http://localhost:${local_port}/api/v1/PublicKey/search" \
-        --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq -r '.[] | .value')
+        --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq -r '.[] | .value') \
+        || { echo "registry-service PublicKey search failed"; return 1; }
 
     if [[ -z "$CERTKEY" ]]; then
         echo "Certificate RSA public key not available — registering"
@@ -137,6 +138,8 @@ function install_component() {
             echo "Deleting existing job keycloak-kids-keys..."
             kubectl delete job keycloak-kids-keys -n sunbird
         fi
+        
+        kubectl delete job learnbb-yugabytesql-migration-job -n sunbird --ignore-not-found
 
         if [[ -f "certkey.pem" ]] && [[ -f "certpubkey.pem" ]]; then
             echo "Certificate keys are already created. Skipping the keys creation..."

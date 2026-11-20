@@ -34,6 +34,9 @@ function create_tf_resources() {
     deploy_tf_module network
     deploy_tf_module storage
     deploy_tf_module aks
+    # ai-pipeline's namespace is deliberately excluded from workload-identity's
+    # k8s_namespaces (see _common/workload-identity.hcl) so Terraform doesn't own
+    # it, but the module still creates a service account inside it when
     # ai_pipeline_enabled is true. Pre-create it here so that apply doesn't fail
     # with "namespaces \"ai-pipeline\" not found" before install_component ever
     # gets a chance to create it ad-hoc later in the pipeline.
@@ -108,7 +111,8 @@ function certificate_config() {
     fi
 
     CERTKEY=$(curl -sf --location --request POST "http://localhost:${local_port}/api/v1/PublicKey/search" \
-        --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq -r '.[] | .value')
+        --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq -r '.[] | .value') \
+        || { echo "registry-service PublicKey search failed"; return 1; }
 
     if [[ -z "$CERTKEY" ]]; then
         echo "Certificate RSA public key not available — registering"
@@ -156,6 +160,8 @@ function install_component() {
             echo "Deleting existing job keycloak-kids-keys..."
             kubectl delete job keycloak-kids-keys -n sunbird
         fi
+        
+        kubectl delete job learnbb-yugabytesql-migration-job -n sunbird --ignore-not-found
 
         if [[ -f "certkey.pem" ]] && [[ -f "certpubkey.pem" ]]; then
             echo "Certificate keys are already created. Skipping the keys creation..."
