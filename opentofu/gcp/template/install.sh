@@ -63,22 +63,54 @@ function certificate_keys() {
     echo "  CERTIFICATESIGN_PUBLIC_KEY: \"$CERTIFICATESIGNPUKEY\"" >> "$ENV_DIR/global-values.yaml"
 }
 
+# Certificate public-key registration with registry-service. registry-service
+# is ClusterIP-only (not reachable outside the cluster), and no app pod can
+# be reliably exec'd into anymore for this (knowledge-mw's DHI runtime image
+# has no shell at all; of 11 images checked via podman, only cert/
+# certregistry/certificatesign have curl, none have bash, and registry's own
+# pod has neither) -- so this port-forwards to the Service and runs
+# curl/jq on the host instead of depending on any app container's tooling.
 function certificate_config() {
-    # Check if jq is available in the kn container, install only if missing
     echo "Configuring Certificate keys"
-    if ! kubectl -n sunbird exec deploy/knowledge-mw -- which jq >/dev/null 2>&1; then
-        echo "jq not found in knowledge-mw container, attempting to install..."
-        # Try to install jq using available package manager, fallback if apt fails
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get update || true"
-        kubectl -n sunbird exec deploy/knowledge-mw -- bash -c "apt-get install -y jq || true"
+
+    local local_port=8081
+    local pf_log="/tmp/certcfg-pf-$$.log"
+    kubectl -n sunbird port-forward svc/registry-service "${local_port}:8081" >"$pf_log" 2>&1 &
+    local pf_pid=$!
+    trap 'kill $pf_pid 2>/dev/null; wait $pf_pid 2>/dev/null || true; rm -f "$pf_log"; trap - RETURN' RETURN
+
+    # Fail fast if port-forward itself died (bad RBAC, service missing, etc.)
+    local ready=false
+    for i in {1..30}; do
+        if ! kill -0 "$pf_pid" 2>/dev/null; then
+            echo "port-forward process died early:"; cat "$pf_log"
+            return 1
+        fi
+        if grep -q "Forwarding from" "$pf_log" 2>/dev/null; then
+            ready=true
+            break
+        fi
+        sleep 1
+    done
+    if [[ "$ready" != "true" ]]; then
+        echo "registry-service not reachable via port-forward after 30s"
+        return 1
     fi
 
-    CERTKEY=$(kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
-    # Inject cert keys to the service if its not available 
+    CERTKEY=$(curl -sf --location --request POST "http://localhost:${local_port}/api/v1/PublicKey/search" \
+        --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq -r '.[] | .value')
+
     if [[ -z "$CERTKEY" ]]; then
-        echo "Certificate RSA public key not available"
-        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-        kubectl -n sunbird exec deploy/knowledge-mw -- curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"
+        echo "Certificate RSA public key not available — registering"
+        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' "$ENV_DIR/global-values.yaml")
+        [[ -n "$CERTPUBKEY" ]] || { echo "CERTIFICATE_PUBLIC_KEY not found in global-values.yaml"; return 1; }
+        if ! curl -sf --location --request POST "http://localhost:${local_port}/api/v1/PublicKey" \
+            --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"; then
+            echo "Failed to register public key with registry-service"
+            return 1
+        fi
+    else
+        echo "Certificate public key already registered — skipping"
     fi
 }
 

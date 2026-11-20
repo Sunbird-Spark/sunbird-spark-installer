@@ -87,7 +87,7 @@ function certificate_config() {
     local pf_log="/tmp/certcfg-pf-$$.log"
     kubectl -n sunbird port-forward svc/registry-service "${local_port}:8081" >"$pf_log" 2>&1 &
     local pf_pid=$!
-    trap 'kill $pf_pid 2>/dev/null; wait $pf_pid 2>/dev/null' RETURN
+    trap 'kill $pf_pid 2>/dev/null; wait $pf_pid 2>/dev/null || true; rm -f "$pf_log"; trap - RETURN' RETURN
 
     # Fail fast if port-forward itself died (bad RBAC, service missing, etc.)
     local ready=false
@@ -112,7 +112,8 @@ function certificate_config() {
 
     if [[ -z "$CERTKEY" ]]; then
         echo "Certificate RSA public key not available — registering"
-        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
+        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' "$ENV_DIR/global-values.yaml")
+        [[ -n "$CERTPUBKEY" ]] || { echo "CERTIFICATE_PUBLIC_KEY not found in global-values.yaml"; return 1; }
         if ! curl -sf --location --request POST "http://localhost:${local_port}/api/v1/PublicKey" \
             --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"; then
             echo "Failed to register public key with registry-service"
