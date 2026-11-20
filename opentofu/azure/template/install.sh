@@ -73,28 +73,54 @@ function certificate_keys() {
 }
 
 
-# Certificate public-key registration with registry-service now runs as a
-# Helm post-install/post-upgrade hook Job in the registry chart itself
-# (helmcharts/learnbb/charts/registry/templates/publickey-config-job.yaml),
-# since knowledge-mw's DHI runtime image has no bash/curl to exec into and
-# had no actual functional role in this step. Kept here, commented out, for
-# reference/history rather than deleted outright.
-#
-#
-# function certificate_config() {
-#     echo "Configuring Certificate keys"
-#     CERTKEY=$(_run_curl_job "certcfg-search-$RANDOM" \
-#         curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey/search' \
-#         --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq '.[] | .value')
-#     # Inject cert keys to the service if its not available
-#     if [[ -z "$CERTKEY" ]]; then
-#         echo "Certificate RSA public key not available"
-#         CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
-#         _run_curl_job "certcfg-register-$RANDOM" \
-#             curl --location --request POST 'http://registry-service:8081/api/v1/PublicKey' \
-#             --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}" >/dev/null
-#     fi
-# }
+# Certificate public-key registration with registry-service. registry-service
+# is ClusterIP-only (not reachable outside the cluster), and no app pod can
+# be reliably exec'd into anymore for this (knowledge-mw's DHI runtime image
+# has no shell at all; of 11 images checked via podman, only cert/
+# certregistry/certificatesign have curl, none have bash, and registry's own
+# pod has neither) -- so this port-forwards to the Service and runs
+# curl/jq on the host instead of depending on any app container's tooling.
+function certificate_config() {
+    echo "Configuring Certificate keys"
+
+    local pf_log="/tmp/certcfg-pf-$$.log"
+    kubectl -n sunbird port-forward svc/registry-service 8081:8081 >"$pf_log" 2>&1 &
+    local pf_pid=$!
+    trap 'kill $pf_pid 2>/dev/null; wait $pf_pid 2>/dev/null' RETURN
+
+    # Fail fast if port-forward itself died (bad RBAC, service missing, etc.)
+    local ready=false
+    for i in {1..30}; do
+        if ! kill -0 "$pf_pid" 2>/dev/null; then
+            echo "port-forward process died early:"; cat "$pf_log"
+            return 1
+        fi
+        if curl -s -o /dev/null -w "%{http_code}" --max-time 2 http://localhost:8081 2>/dev/null | grep -qE "^[2-4][0-9][0-9]$"; then
+            ready=true
+            break
+        fi
+        sleep 1
+    done
+    if [[ "$ready" != "true" ]]; then
+        echo "registry-service not reachable via port-forward after 30s"
+        return 1
+    fi
+
+    CERTKEY=$(curl -sf --location --request POST 'http://localhost:8081/api/v1/PublicKey/search' \
+        --header 'Content-Type: application/json' --data-raw '{ "filters": {}}' | jq -r '.[] | .value')
+
+    if [[ -z "$CERTKEY" ]]; then
+        echo "Certificate RSA public key not available — registering"
+        CERTPUBKEY=$(awk -F'"' '/CERTIFICATE_PUBLIC_KEY/{print $2}' global-values.yaml)
+        if ! curl -sf --location --request POST 'http://localhost:8081/api/v1/PublicKey' \
+            --header 'Content-Type: application/json' --data-raw "{\"value\":\"$CERTPUBKEY\"}"; then
+            echo "Failed to register public key with registry-service"
+            return 1
+        fi
+    else
+        echo "Certificate public key already registered — skipping"
+    fi
+}
 
 function install_component() {
     # We need a dummy cm for configmap to start. Later Lernbb will create real one
@@ -406,7 +432,7 @@ if [[ $# -eq 0 ]]; then
     install_helm_components
     cd ../opentofu/azure/$environment
     restart_workloads_using_keys
-    # certificate_config
+    certificate_config
     dns_mapping
     generate_postman_env
     run_post_install
@@ -445,9 +471,9 @@ else
     "destroy_tf_resources")
         destroy_tf_resources
         ;;
-    # "certificate_config")
-    #     certificate_config
-    #     ;;
+    "certificate_config")
+        certificate_config
+        ;;
     *)
         invoke_functions "$@"
         ;;
