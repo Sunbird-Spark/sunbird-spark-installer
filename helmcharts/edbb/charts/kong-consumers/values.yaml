@@ -143,6 +143,7 @@ kong_all_consumer_groups: &kong_all_consumer_groups
   - channelAccess
   - channelCreate
   - channelUpdate
+  - competencyAdmin
   - contentAccess
   - contentAdmin
   - contentCreate
@@ -231,6 +232,7 @@ kong_admin_groups:
   - channelCreate
   - channelUpdate
   - cloudUrlsCreate
+  - competencyAdmin
   - contentAccess
   - contentAdmin
   - contentCreate

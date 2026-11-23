@@ -552,7 +552,7 @@ kong_apis:
   - name: acl
     config.allow:
     - frameworkCreate
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.large_rate_limit_per_hour }}"
@@ -8132,6 +8132,7 @@ kong_apis:
   - name: acl
     config.allow:
     - masterCategoriesAdmin
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.small_rate_limit_per_hour }}"
@@ -9102,7 +9103,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9120,7 +9121,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9138,7 +9139,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9156,7 +9157,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9173,7 +9174,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9191,7 +9192,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9209,7 +9210,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9227,7 +9228,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9245,7 +9246,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9263,7 +9264,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9297,7 +9298,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9331,7 +9332,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9349,7 +9350,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9367,7 +9368,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9385,7 +9386,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
@@ -9403,7 +9404,7 @@ kong_apis:
   - {{ .Values.statsd_pulgin | toYaml | nindent 4 | trim }}
   - name: acl
     config.allow:
-    - courseAccess
+    - competencyAdmin
   - name: rate-limiting
     config.policy: local
     config.hour: "{{ .Values.medium_rate_limit_per_hour }}"
