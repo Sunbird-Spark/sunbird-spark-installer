@@ -97,7 +97,7 @@ images:
 
   keycloak: &keycloak
     repository: "ghcr.io/sunbird-spark/keycloak-21.1.2"
-    tag: "spark-v1.1.2-test-pin-cli-versions_d0f3ef0"
+    tag: "spark-v1.1.3-java4shell-test_38ebaf3"
 
   keycloak-kids-keys: &keycloak-kids-keys
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
