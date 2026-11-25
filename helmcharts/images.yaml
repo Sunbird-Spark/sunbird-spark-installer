@@ -21,7 +21,7 @@ images:
   kafka: &kafka
     registry: "docker.io"
     repository: sanketikahub/kafka
-    tag: "4.0.0"
+    tag: "2.2.1"
 
   redis: &redis
     registry: "sunbirded.azurecr.io"
