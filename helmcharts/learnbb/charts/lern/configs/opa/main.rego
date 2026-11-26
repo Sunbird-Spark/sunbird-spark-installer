@@ -16,7 +16,11 @@ urls[keys] { policy.urls_to_action_mapping[keys]}
 regex_urls := [url | url := regex.find_n(urls[_], http_request.path, 1)[0]]
 matching_urls := [url | some i; startswith(http_request.path, regex_urls[i]); url := regex_urls[i]]
 identified_url := max(matching_urls)
-identified_action := policy.urls_to_action_mapping[identified_url]
+identified_action = action {
+  action := policy.urls_to_action_mapping[http_request.path]
+} else = action {
+  action := policy.urls_to_action_mapping[identified_url]
+}
 
 # Desktop app is not sending x-authenticated-for header due to which managed user flow is breaking
 # This is a temporary fix till the desktop app issue is fixed

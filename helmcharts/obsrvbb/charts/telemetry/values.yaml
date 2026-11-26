@@ -65,8 +65,8 @@ autoscaling:
 livenessProbe:
   initialDelaySeconds: 10
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
+  timeoutSeconds: 10
+  failureThreshold: 10
   successThreshold: 1
   httpGet:
     path: /health
@@ -74,8 +74,8 @@ livenessProbe:
 readinessProbe:
   initialDelaySeconds: 10
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
+  timeoutSeconds: 10
+  failureThreshold: 10
   successThreshold: 1
   httpGet:
     path: /health
@@ -83,7 +83,15 @@ readinessProbe:
 
 nodeSelector: {}
 tolerations: []
-affinity: {}
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchLabels:
+              app: telemetry
 
 configmap:
   enabled: true
@@ -106,7 +114,7 @@ kafka: &kafka
   port: 9092
 
 sunbird_telemetry_service:
-  telemetry_service_threads: 2
+  telemetry_service_threads: 4
   telemetry_local_storage_enabled: "true"
   telemetry_local_storage_type: kafka
   # telemetry_kafka_topic: "{{ .Values.global.env }}.telemetry.ingest"
@@ -117,3 +125,11 @@ sunbird_telemetry_service:
 
 global:
   kafka: *kafka
+# Benchmark tuning: spread replicas across nodes (hostname only, no node labels)
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app: telemetry

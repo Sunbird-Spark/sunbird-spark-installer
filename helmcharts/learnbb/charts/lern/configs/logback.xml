@@ -63,11 +63,11 @@
 
   </appender>
 
-  <logger name="play" level="INFO" />
-  <logger name="defaultLoggerAppender" level="INFO" />
+  <logger name="play" level="WARN" />
+  <logger name="defaultLogger" level="WARN" />
   
   <!-- Noise Reduction -->
-  <logger name="org.sunbird.logging.PrintEntryExitLog" level="WARN" />
+  <logger name="util.PrintEntryExitLog" level="WARN" />
   <logger name="org.sunbird.cassandra.CassandraUtil" level="WARN" />
   <logger name="org.sunbird.cassandra.CassandraDACImpl" level="WARN" />
   <logger name="org.sunbird.keycloak.impl.KeyCloakServiceImpl" level="WARN" />
@@ -77,15 +77,13 @@
   <logger name="org.sunbird.common.CassandraUtil" level="WARN" />
   
   <!-- Telemetry Loggers-->
-  <logger name="TelemetryEventLogger" level="INFO">
+  <logger name="TelemetryEventLogger" level="INFO" additivity="false">
     <appender-ref ref="kafka-appender" />
   </logger>
 
-  <logger name="queryLogger" level="DEBUG">
-    <appender-ref ref="defaultLoggerAppender" />
-  </logger>
+  <logger name="queryLogger" level="WARN" />
 
-  <root level="INFO">
+  <root level="WARN">
     <appender-ref ref="ASYNCJSONSTDOUT" />
   </root>
 

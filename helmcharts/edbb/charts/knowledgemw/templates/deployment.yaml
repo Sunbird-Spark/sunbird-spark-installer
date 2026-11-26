@@ -19,6 +19,22 @@ spec:
       annotations:
         checksum/config: {{ .Files.Glob "files/*" | toYaml | sha256sum }}
     spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if .Values.serviceAccount.create }}
       serviceAccountName: {{ include "common.names.fullname" . }}
       {{- end }}
@@ -77,6 +93,10 @@ spec:
           - envoy
           - --config-path
           - /config/config.yaml
+          {{- with .Values.envoy_concurrency }}
+          - --concurrency
+          - {{ . | quote }}
+          {{- end }}
           env:
           - name: ENVOY_UID
             value: "1111"
@@ -93,26 +113,32 @@ spec:
             - mountPath: /config
               name: envoy-config
               readOnly: true
-        - command: ["/bin/sh", "-c"]
-          args:
-          - |
-            KID=$(cat /keys/KEYCLOAK_PUBLIC_KEY_KID) && PUBLIC_KEY=$(cat /keys/KEYCLOAK_PUBLIC_KEY) && \
-            PUBLIC_KEY_PEM=$(echo "$PUBLIC_KEY" | sed -e 's/.\{64\}/&\\\\n/g' -e '1s/^/-----BEGIN PUBLIC KEY-----\\\\n/' -e '$s/$/\\\\n-----END PUBLIC KEY-----/') && \
-            mkdir /policies && cp -Lr /opa-policies/*.rego /policies && \
-            sed -i "s|KEYCLOAK_KID|$KID|g" /policies/common.rego && \
-            sed -i "s|KEYCLOAK_PUBLIC_KEY|$PUBLIC_KEY_PEM|g" /policies/common.rego && \
-            /app/opa run --server /policies \
-              --addr=localhost:8181 \
-              --diagnostic-addr=0.0.0.0:8282 \
-              --set=plugins.envoy_ext_authz_grpc.addr=:9191 \
-              --set=plugins.envoy_ext_authz_grpc.path=main/allow \
-              --set=decision_logs.plugin=print_decision_logs_on_failure \
-              --set=plugins.print_decision_logs_on_failure.stdout=true \
-              --log-level=error \
-              --ignore=.*
+        - name: opa
           image: "{{ .Values.opa_image.registry }}/{{ .Values.opa_image.repository }}:{{ .Values.opa_image.tag }}"
           imagePullPolicy: IfNotPresent
-          name: opa
+          # Policies and the Keycloak key are rendered once by the opa-render
+          # init container, so OPA starts directly. Decision logging
+          # (print_decision_logs_on_failure) is off: it cost CPU on every
+          # denied request under load.
+          command: ["/opa"]
+          args:
+          - run
+          - --server
+          - /policies
+          - --v0-compatible
+          - --addr=localhost:8181
+          - --diagnostic-addr=0.0.0.0:8282
+          - --set=plugins.envoy_ext_authz_grpc.addr=:9191
+          - --set=plugins.envoy_ext_authz_grpc.path=main/allow
+          - --log-level=error
+          - --ignore=.*
+          {{- with .Values.opa_env }}
+          env:
+          {{- range $name, $value := . }}
+          - name: {{ $name }}
+            value: {{ $value | quote }}
+          {{- end }}
+          {{- end }}
           livenessProbe:
             {{- toYaml .Values.opa_probes | nindent 12 }}
           readinessProbe:
@@ -125,6 +151,9 @@ spec:
               readOnly: true
             - name: keycloak-key
               mountPath: /keys/
+            - mountPath: /policies
+              name: opa-rendered
+              readOnly: true
       initContainers:
         - args:
           - -p
@@ -144,6 +173,28 @@ spec:
               - NET_ADMIN
             runAsNonRoot: false
             runAsUser: 0
+        - name: opa-render
+          image: "{{ .Values.opa_render_image.registry }}/{{ .Values.opa_render_image.repository }}:{{ .Values.opa_render_image.tag }}"
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+          - |
+            KID=$(cat /keys/KEYCLOAK_PUBLIC_KEY_KID) && PUBLIC_KEY=$(cat /keys/KEYCLOAK_PUBLIC_KEY) && \
+            PUBLIC_KEY_PEM=$(echo "$PUBLIC_KEY" | sed -e 's/.\{64\}/&\\\\n/g' -e '1s/^/-----BEGIN PUBLIC KEY-----\\\\n/' -e '$s/$/\\\\n-----END PUBLIC KEY-----/') && \
+            cp -Lr /opa-policies/*.rego /policies && \
+            sed -i "s|KEYCLOAK_KID|$KID|g" /policies/common.rego && \
+            sed -i "s|KEYCLOAK_PUBLIC_KEY|$PUBLIC_KEY_PEM|g" /policies/common.rego
+          resources:
+            {{- toYaml .Values.opa_render_resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /opa-policies
+              name: opa-policy
+              readOnly: true
+            - name: keycloak-key
+              mountPath: /keys/
+              readOnly: true
+            - mountPath: /policies
+              name: opa-rendered
 {{- end }}
         {{- with .Values.sidecars }}
         {{- toYaml . | nindent 8 }}
@@ -168,6 +219,10 @@ spec:
       - name: keycloak-key
         configMap:
           name: {{ .Values.global.keycloak_kid_keys_configmap }}
+      - name: opa-rendered
+        emptyDir:
+          medium: Memory
+          sizeLimit: 16Mi
 {{- end }}
       - name: keys
         projected:

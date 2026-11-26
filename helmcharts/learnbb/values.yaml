@@ -155,7 +155,14 @@ opensearch: &opensearch
   fullnameOverride: "opensearch"
   host: "opensearch-cluster-master"
   port: 9200
-  singleNode: true
+  # Benchmark tuning: 3-node cluster (all nodes cluster-manager eligible),
+  # one pod per node, 3g heap. Resources are in global-resources.yaml.
+  singleNode: false
+  replicas: 3
+  opensearchJavaOpts: "-Xms3g -Xmx3g"
+  antiAffinity: "hard"
+  tolerations:
+    - {key: dedicated, operator: Equal, value: yb, effect: NoSchedule}
   extraEnvs:
     - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
       value: ""

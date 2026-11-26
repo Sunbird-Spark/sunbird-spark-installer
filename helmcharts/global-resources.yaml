@@ -1,3 +1,7 @@
+# Sized from the 23k req/s gateway benchmark (Nov 2026): knowledgemw, kong,
+# nginx-public-ingress, knowlg, search, opensearch, kafka, telemetry, lern,
+# kube-prometheus-stack (Prometheus), yugabyte tserver and alloy. Per-pod
+# values only; replica counts are sized per load tier.
 adminutil:
   resources:
     requests:
@@ -49,20 +53,20 @@ knowledgebb:
 knowledgemw:
   resources:
     requests:
-      cpu: 100m
+      cpu: 750m
       memory: 100Mi
     limits:
-      cpu: 1
-      memory: 1G    
+      cpu: 2
+      memory: 1G
 
 kong:
   resources:
     requests:
-      cpu: 100m
-      memory: 100Mi
+      cpu: 1500m
+      memory: 512Mi
     limits:
-      cpu: 1
-      memory: 1G  
+      cpu: 4
+      memory: 2Gi
 
 learnbb:
   flink: *flink  
@@ -79,11 +83,11 @@ nginx-private-ingress:
 nginx-public-ingress:
   resources:
     requests:
-      cpu: 100m
+      cpu: 1
       memory: 100Mi
     limits:
-      cpu: 1
-      memory: 1G  
+      cpu: 2
+      memory: 1G
 
 player:
   resources:
@@ -107,20 +111,20 @@ janusgraph:
 knowlg:
   resources:
     requests:
-      cpu: 100m
+      cpu: 1
       memory: 100Mi
     limits:
-      cpu: 1
-      memory: 1024Mi
+      cpu: 3
+      memory: 3Gi
  
 search:
   resources:
     requests:
-      cpu: 100m
+      cpu: 1
       memory: 100Mi
     limits:
-      cpu: 1
-      memory: 1024Mi
+      cpu: 2
+      memory: 2Gi
 
 # Resource specifications for ai-pipeline (PyFlink) jobs.
 py-flink:
@@ -183,11 +187,11 @@ certregistry:
 opensearch:
   resources:
     requests:
-      cpu: "1"
-      memory: "2Gi"
+      cpu: "3"
+      memory: "6Gi"
     limits:
-      cpu: "2"
-      memory: "4Gi"
+      cpu: "6"
+      memory: "8Gi"
   persistence:
     size: 25Gi
 
@@ -211,8 +215,9 @@ kafka:
       requests:
         cpu: 750m
         memory: 1024Mi
+    # Benchmark tuning: 20Gi per broker (8Gi filled up under telemetry load)
     persistence:
-      size: 8Gi
+      size: 20Gi
 
 # keycloak:
 #   resources:
@@ -244,14 +249,19 @@ superset:
 telemetry:
   resources:
     requests:
-      cpu: 100m
+      cpu: 1
       memory: 100Mi
     limits:
-      cpu: 1
-      memory: 1024Mi
+      cpu: 2
+      memory: 2Gi
 
 #monitoring
 alloy:
+ # Run the log collector on every node, including tainted database-only
+ # nodes (dedicated=yb), which otherwise send no logs.
+ controller:
+    tolerations:
+      - operator: Exists
  alloy:
     resources:
       limits:
@@ -283,20 +293,30 @@ kube-prometheus-stack:
   prometheus:
     prometheusSpec:
       retention: "7d"
+      # Benchmark tuning: 50Gi with a size cap (10Gi filled up and Prometheus
+      # crash-looped), 8/16Gi memory, and the Go runtime kept under the limit.
+      retentionSize: "45GB"
       storageSpec:
         volumeClaimTemplate:
           spec:
             accessModes: ["ReadWriteOnce"]
             resources:
               requests:
-                storage: 10Gi
+                storage: 50Gi
       resources:
         requests:
-          cpu: 500m
-          memory: 4Gi
-        limits:
           cpu: 1
           memory: 8Gi
+        limits:
+          cpu: 2
+          memory: 16Gi
+      containers:
+        - name: prometheus
+          env:
+            - name: GOMEMLIMIT
+              value: 12GiB
+            - name: GOMAXPROCS
+              value: "2"
 
 kubernetes-dashboard:
   api:
@@ -330,11 +350,11 @@ kubernetes-dashboard:
 lern:
   resources:
     requests:
-      cpu: 100m
+      cpu: 1200m
       memory: 100Mi
     limits:
-      cpu: 1
-      memory: 2Gi
+      cpu: 4
+      memory: 3Gi
 
 loki:
   gateway:
@@ -401,11 +421,11 @@ secor:
 search:
   resources:
     requests:
-      cpu: 100m
+      cpu: 1
       memory: 100Mi
     limits:
-      cpu: 1
-      memory: 1024Mi
+      cpu: 2
+      memory: 2Gi
 
 
 velero:
@@ -456,13 +476,16 @@ yugabyte:
       limits:
         cpu: "1"
         memory: 4Gi
+    # Benchmark tuning: 12 vCPU / 32Gi per tserver (one tserver per 16-vCPU
+    # node). The chart derives --num_cpus and --memory_limit_hard_bytes from
+    # these limits.
     tserver:
       requests:
-        cpu: "7"
-        memory: 26Gi
+        cpu: "12"
+        memory: 32Gi
       limits:
-        cpu: "7"
-        memory: 26Gi
+        cpu: "12"
+        memory: 32Gi
   storage:
     master:
       count: 2

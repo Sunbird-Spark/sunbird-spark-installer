@@ -108,9 +108,12 @@ images:
     repository: "ghcr.io/sunbird-spark/keycloak-postgres-query"
     tag: "spark-v1.1.1-test-openssf-scorecard_bb74aa0"
 
+  # spark-fucp-3 = PRs #68 + #69 (batch-participants index-only scan, no
+  # response bodies in exit logs). Move to the PR #70 build (perf/lern-update-path)
+  # once it is merged and published; the benchmark ran a pre-release PR #70 image.
   lern: &lern
     repository: "ghcr.io/sunbird-lern/lern-service"
-    tag: "spark-fucp-1_f287e60_119"
+    tag: "spark-fucp-3_c536d2d_123"
     
   registry: &registry
     repository: "sunbirded.azurecr.io/sunbird-rc-core"
@@ -118,7 +121,7 @@ images:
 
   knowlg: &knowlg
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/knowlg-service"
-    tag: "spark-v1.1.1_yb-aeon_v1_d8f3506"
+    tag: "spark-v1.1.1_yb-aeon_v2_296d418"
 
   search: &search
     repository: "ghcr.io/sunbird-knowlg/knowledge-platform/search-api"
@@ -293,10 +296,19 @@ images:
     repository: "envoyproxy/envoy"
     tag: "v1.20.0"
 
+  # OPA 1.x for the lern/knowledge-mw/knowlg authorisation sidecar (run with
+  # --v0-compatible, so the existing Rego policies work unchanged). Pinned by
+  # digest; mirror into sunbirded.azurecr.io if docker.io pulls are restricted.
   opa_image: &opa_image
-    registry: "sunbirded.azurecr.io"
-    repository: "opa"
-    tag: "0.34.2-envoy"
+    registry: "docker.io"
+    repository: "openpolicyagent/opa"
+    tag: "1.22.3-envoy@sha256:6ce6563695665a4c06338832e0a532c4dbf16f7beea05386ad0a6eb91d9e8593"
+
+  # opa-render init container: renders the Rego policies + Keycloak key once
+  opa_render_image: &opa_render_image
+    registry: "docker.io"
+    repository: "library/busybox"
+    tag: "1.36.1@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662"
 
   proxy_init_image: &proxy_init_image
     registry: "docker.io"
@@ -343,7 +355,11 @@ internal: &internal
   knowlg:
     image: *knowlg
     imagePullSecrets:
-      - name: "registry-secret-name"      
+      - name: "registry-secret-name"
+    envoy_image: *envoy_image
+    opa_image: *opa_image
+    proxy_init_image: *proxy_init_image
+    opa_render_image: *opa_render_image
 
   echo:
     image: *echo
@@ -430,6 +446,10 @@ internal: &internal
     image: *lern
     imagePullSecrets:
       - name: "registry-secret-name"
+    envoy_image: *envoy_image
+    opa_image: *opa_image
+    proxy_init_image: *proxy_init_image
+    opa_render_image: *opa_render_image
   
   registry:
     image: *registry
@@ -614,6 +634,7 @@ knowledgemw:
   envoy_image: *envoy_image
   opa_image: *opa_image
   proxy_init_image: *proxy_init_image
+  opa_render_image: *opa_render_image
 
 # Flink images
 global:
