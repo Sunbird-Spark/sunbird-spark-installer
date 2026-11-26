@@ -62,8 +62,8 @@ autoscaling:
 livenessProbe:
   initialDelaySeconds: 30
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
+  timeoutSeconds: 10
+  failureThreshold: 10
   successThreshold: 1
   httpGet:
     path: /health
@@ -71,8 +71,8 @@ livenessProbe:
 readinessProbe:
   initialDelaySeconds: 30
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
+  timeoutSeconds: 10
+  failureThreshold: 10
   successThreshold: 1
   httpGet:
     path: /health
@@ -80,7 +80,15 @@ readinessProbe:
 
 nodeSelector: {}
 tolerations: []
-affinity: {}
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: knowlg
 
 configmap:
   enabled: true
@@ -186,7 +194,7 @@ inquiry:
   
 
 javaenv:
-  javaoptions: -Xms500m -Xmx500m
+  javaoptions: -Xms1200m -Xmx1200m
   _javaoptions: -Dlog4j2.formatMsgNoLookups=true
 # Example values.yaml structure
 initContainers: {}
@@ -225,16 +233,16 @@ envoy_resources:
     cpu: "100m"
     memory: "100Mi"
   limits:
-    cpu: "1"
-    memory: "1024Mi"
+    cpu: "2"
+    memory: "1Gi"
 
 opa_resources:
   requests:
     cpu: "100m"
     memory: "100Mi"
   limits:
-    cpu: "1"
-    memory: "1024Mi"
+    cpu: "2"
+    memory: "1Gi"
 
 init_container_resources:
   requests:
@@ -247,3 +255,47 @@ init_container_resources:
 opa:
   enabled: true
 
+# Envoy worker threads; match the envoy CPU limit
+envoy_concurrency: 2
+
+# Go runtime for OPA: GOMAXPROCS = OPA CPU limit, GOGC=200 trades memory for less GC CPU
+opa_env:
+  GOMAXPROCS: "2"
+  GOGC: "200"
+
+opa_render_resources:
+  requests:
+    cpu: "10m"
+    memory: "16Mi"
+  limits:
+    cpu: "200m"
+    memory: "64Mi"
+
+envoy_image:
+  registry: "docker.io"
+  repository: "envoyproxy/envoy"
+  tag: "v1.20.0"
+
+opa_image:
+  registry: "docker.io"
+  repository: "openpolicyagent/opa"
+  tag: "1.22.3-envoy@sha256:6ce6563695665a4c06338832e0a532c4dbf16f7beea05386ad0a6eb91d9e8593"
+
+proxy_init_image:
+  registry: "docker.io"
+  repository: "openpolicyagent/proxy_init"
+  tag: "v5"
+
+# Renders the OPA policies + Keycloak key before OPA starts (see deployment.yaml)
+opa_render_image:
+  registry: "docker.io"
+  repository: "library/busybox"
+  tag: "1.36.1@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662"
+# Benchmark tuning: spread replicas across nodes (hostname only, no node labels)
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: knowlg

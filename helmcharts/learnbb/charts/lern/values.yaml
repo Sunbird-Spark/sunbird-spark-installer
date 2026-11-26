@@ -61,8 +61,8 @@ autoscaling:
 livenessProbe:
   initialDelaySeconds: 30
   periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 6
+  timeoutSeconds: 10
+  failureThreshold: 10
   successThreshold: 1
   httpGet:
     path: /health
@@ -80,7 +80,15 @@ readinessProbe:
 
 nodeSelector: {}
 tolerations: []
-affinity: {}
+# Benchmark tuning: at most one lern pod per node (lern is CPU-bound; two on
+# one node starve each other). Replicas are therefore capped by node count.
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - topologyKey: kubernetes.io/hostname
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/name: lern
 
 configmap:
   enabled: true
@@ -150,7 +158,8 @@ keys_basepath: "/keys/"
 PORTAL_SERVICE_PORT: "http://player:3000"
 sunbird_installation_display_name_for_sms: "Sunbird"
 isMultiDCEnabled: "false"
-JAVA_OPTIONS: -Xmx1024m
+# JVM options are set with java_options (see "Benchmark tuning" below);
+# env.yaml renders JAVA_OPTIONS from that key, not from here.
 _JAVA_OPTIONS: "-Dlog4j2.formatMsgNoLookups=true"
 enable_captcha: "false"
 user-deletion-broadcast-topic: "local.delete.user"
@@ -208,8 +217,28 @@ sunbird_cassandra_notification_keyspace: sunbird_notifications
 # Yugabytesql Values
 sunbird_postgres_db: "sunbird"
 
-unirest_max_total_connections: "200"
-unirest_max_connections_per_route: "40"
+# Benchmark tuning: HTTP connection pool to downstream services
+unirest_max_total_connections: "400"
+unirest_max_connections_per_route: "200"
+# Read by lern-service PR #70 (perf/lern-update-path); ignored by older images
+viewer_aggregation_debounce_ms: "2000"
+course_batch_cache_ttl_seconds: "60"
+
+# Rendered into lern-env as JAVA_OPTIONS. Actor/dispatcher sizing must be set
+# here: the image never reads the mounted application.conf. -Dlogger.file
+# points at the mounted (quiet, root WARN) configs/logback.xml.
+java_options: >-
+  -XX:MaxRAMPercentage=40
+  -Dpekko.actor.deployment./content-consumption-actor.nr-of-instances=48
+  -Dpekko.actor.deployment./content-consumption-actor/*.dispatcher=pekko.actor.tracking-dispatcher
+  -Dpekko.actor.deployment./view-consumption-actor.nr-of-instances=48
+  -Dpekko.actor.deployment./view-consumption-actor/*.dispatcher=pekko.actor.viewer-dispatcher
+  -Dpekko.actor.deployment./course-enrolment-actor.nr-of-instances=32
+  -Dpekko.actor.deployment./course-enrolment-actor/*.dispatcher=pekko.actor.tracking-dispatcher
+  -Dpekko.actor.tracking-dispatcher.fork-join-executor.parallelism-max=128
+  -Dpekko.actor.deployment./course-batch-management-actor.nr-of-instances=32
+  -Dpekko.actor.deployment./course-batch-management-actor/*.dispatcher=pekko.actor.rr-dispatcher
+  -Dlogger.file=/home/sunbird/lern-service-impl-1.0-SNAPSHOT/conf/logback.xml
 
 # OPA / Envoy
 opa_enabled: false
@@ -239,16 +268,16 @@ envoy_resources:
     cpu: "100m"
     memory: "100Mi"
   limits:
-    cpu: "1"
-    memory: "1024Mi"
+    cpu: "2"
+    memory: "1Gi"
 
 opa_resources:
   requests:
-    cpu: "100m"
+    cpu: "1500m"
     memory: "100Mi"
   limits:
-    cpu: "1"
-    memory: "1024Mi"
+    cpu: "4"
+    memory: "1Gi"
 
 init_container_resources:
   requests:
@@ -262,3 +291,41 @@ global:
   keycloak_kid_keys_configmap: keycloak-kids-keys
   keycloak_key_configmap: keycloak-key
   kong_desktop_device_consumer_names_for_opa: '["portal", "desktop"]'
+
+# Envoy worker threads; match the envoy CPU limit
+envoy_concurrency: 2
+
+# Go runtime for OPA: GOMAXPROCS = OPA CPU limit, GOGC=200 trades memory for less GC CPU
+opa_env:
+  GOMAXPROCS: "4"
+  GOGC: "200"
+
+opa_render_resources:
+  requests:
+    cpu: "10m"
+    memory: "16Mi"
+  limits:
+    cpu: "200m"
+    memory: "64Mi"
+
+envoy_image:
+  registry: "docker.io"
+  repository: "envoyproxy/envoy"
+  tag: "v1.20.0"
+
+opa_image:
+  registry: "docker.io"
+  repository: "openpolicyagent/opa"
+  tag: "1.22.3-envoy@sha256:6ce6563695665a4c06338832e0a532c4dbf16f7beea05386ad0a6eb91d9e8593"
+
+proxy_init_image:
+  registry: "docker.io"
+  repository: "openpolicyagent/proxy_init"
+  tag: "v5"
+
+# Renders the OPA policies + Keycloak key before OPA starts (see deployment.yaml)
+opa_render_image:
+  registry: "docker.io"
+  repository: "library/busybox"
+  tag: "1.36.1@sha256:73aaf090f3d85aa34ee199857f03fa3a95c8ede2ffd4cc2cdb5b94e566b11662"
+topologySpreadConstraints: []

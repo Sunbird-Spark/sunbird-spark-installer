@@ -272,6 +272,9 @@ CREATE TABLE IF NOT EXISTS sunbird_courses.user_enrolments (
     AND speculative_retry = '99PERCENTILE'
     AND transactions = {'enabled': 'true'};
 CREATE INDEX IF NOT EXISTS user_enrolments_by_course ON sunbird_courses.user_enrolments (courseid) INCLUDE (status, completionpercentage, enrolled_date, datetime);
+-- Covering index for batch-participant lookups: lets lern (PR #68) answer
+-- "participants of a batch" with an index-only scan instead of reading user_enrolments.
+CREATE INDEX IF NOT EXISTS user_enrolments_by_batch ON sunbird_courses.user_enrolments (batchid) INCLUDE (active);
 
 CREATE TABLE IF NOT EXISTS sunbird_courses.bulk_upload_process (
     id text PRIMARY KEY,

@@ -182,3 +182,23 @@ small_cache_inactive: 10m
 apple_universal_links: '{"applinks":{"apps":[],"details":[{"appID":"123456.dev.sunbird.app","paths":["/explore","/dial/*","/get/dial","/play/content","/play/collection","/learn/course","/explore-course/course","/explore-course","/search","/search/Library","/faq","/profile","/play/quiz","/explore","/learn","/resources"]}]}}'
 
 storageClassName: "default"
+# Benchmark tuning: spread replicas across nodes (hostname only, no node labels)
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        app.kubernetes.io/name: nginx-public-ingress
+
+# Benchmark tuning (23k req/s through the gateway)
+# worker_processes must match the container CPU limit; "auto" = all node CPUs
+worker_processes: 2
+
+keepalive_requests: 10000
+
+access_log_buffer_options: "buffer=256k flush=5s"
+
+ssl_session_cache: "shared:SSL:50m"
+
+ssl_session_timeout: "1h"

@@ -57,6 +57,10 @@ secor_jobs:
     base_path: "telemetry-data-store/telemetry/ingest"
     topic: "{{ .Values.global.env }}.telemetry.ingest"
     consumer_group: "{{ .Values.global.env }}-telemetry-ingest-backup"
+    # 10Gi filled up during the benchmark (the PVC was auto-expanded to 50Gi);
+    # telemetry volume grows with traffic
+    storage:
+      size: 50Gi
 
 namespace: ""
 

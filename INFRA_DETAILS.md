@@ -18,13 +18,15 @@ All databases run as Kubernetes workloads inside the cluster.
 
 ### YugabyteDB
 
-Primary distributed database used across all building blocks. Deployed as **6 pods** (3 masters + 3 tservers).
+Primary distributed database used across all building blocks. Deployed as **6 pods** (3 masters + 3 tservers) by default; tservers scale with load (the 23k req/s benchmark ran 7).
 
 | Component | Pods | CPU req / limit | Memory req / limit | Disk per pod | Total Disk |
 |-----------|------|-----------------|--------------------|--------------|------------|
-| Master | 3 | 2 / 2 | 2 Gi / 2 Gi | 20 Gi (2 PVCs × 10 Gi) | 60 Gi |
-| TServer | 3 | 2 / 2 | 4 Gi / 4 Gi | 20 Gi (2 PVCs × 10 Gi) | 60 Gi |
-| **YugabyteDB Total** | **6** | | | | **120 Gi** |
+| Master | 3 | 1 / 1 | 4 Gi / 4 Gi | 20 Gi (2 PVCs × 10 Gi) | 60 Gi |
+| TServer | 3 | 12 / 12 | 32 Gi / 32 Gi | 50 Gi (2 PVCs × 25 Gi) | 150 Gi |
+| **YugabyteDB Total** | **6** | | | | **210 Gi** |
+
+One master and one tserver per node (required anti-affinity); a tserver needs a 16-vCPU node. `--num_cpus` and `--memory_limit_hard_bytes` follow the limits.
 
 | Port | Usage |
 |------|-------|
@@ -56,11 +58,11 @@ Used by KnowledgeBB and LearnBB.
 
 | Parameter | Value |
 |-----------|-------|
-| Pods | 1 master node |
-| CPU request / limit | 1 / 2 |
-| Memory request / limit | 2 Gi / 4 Gi |
-| JVM Heap | 2 G |
-| Disk | 25 Gi |
+| Pods | 3 (cluster mode, all cluster-manager eligible, one per node) |
+| CPU request / limit | 3 / 6 |
+| Memory request / limit | 6 Gi / 8 Gi |
+| JVM Heap | 3 G |
+| Disk | 25 Gi per pod |
 | Port | 9200 |
 
 ### JanusGraph
@@ -113,7 +115,19 @@ Each Flink job runs with a **JobManager** pod and a **TaskManager** pod (2 pods 
 
 ## Application Services
 
-All services run with **1 replica** by default. Most services use CPU 100m / 1 core and memory 100 Mi / 1–2 Gi.
+All services run with **1 replica** by default (scale replicas per load tier). Services tuned in the 23k req/s gateway benchmark use larger pods:
+
+| Service | CPU req / limit | Memory limit | Sidecars (OPA / Envoy CPU limit) |
+|---------|-----------------|--------------|----------------------------------|
+| lern | 1.2 / 4 | 3 Gi | 4 / 2 |
+| knowledge-mw | 0.75 / 2 | 1 G | 2 / 2 |
+| knowlg | 1 / 3 | 3 Gi | 2 / 2 |
+| search | 1 / 2 | 2 Gi | — |
+| telemetry | 1 / 2 | 2 Gi | — |
+| kong | 1.5 / 4 | 2 Gi | — |
+| nginx-public-ingress | 1 / 2 | 1 G | — |
+
+Other services use CPU 100m / 1 core and memory 100 Mi / 1–2 Gi.
 
 | Building Block | Services | Count |
 |----------------|----------|-------|
@@ -133,7 +147,7 @@ Runs in KRaft mode. **3 controller pods** (each acts as broker + controller).
 | Pods | 3 (controllers) |
 | CPU request / limit | 750m / 1 |
 | Memory request / limit | 1024 Mi / 2048 Mi |
-| Disk per pod | 8 Gi |
+| Disk per pod | 20 Gi |
 | Port | 9092 |
 
 ### Velero (Backup & Disaster Recovery)
@@ -148,6 +162,8 @@ Runs as a deployment + node-agent daemonset (1 pod per node).
 ---
 
 ## Total Resource Summary (Base Platform)
+
+> These totals predate the benchmark tuning above (larger YugabyteDB, OpenSearch, sidecars and services) and are not recomputed here. For sizing by load level see the benchmarking sizing documents.
 
 | Category | CPU Request | CPU Limit | Memory Request | Memory Limit | Disk |
 |----------|-------------|-----------|----------------|--------------|------|

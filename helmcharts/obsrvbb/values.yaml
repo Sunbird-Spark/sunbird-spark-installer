@@ -29,7 +29,11 @@ kafka: &kafka
     numPartitions: 1
     topics:
     - name: "{{ .Values.global.env }}.nlweb.ingest"
+    # Benchmark tuning: 3 partitions so telemetry consumers can scale out;
+    # replication factor 3 so one broker loss loses no events.
     - name: "{{ .Values.global.env }}.telemetry.ingest"
+      partitions: 3
+      replicationFactor: 3
     parallel: 1
   listeners:
     client:
