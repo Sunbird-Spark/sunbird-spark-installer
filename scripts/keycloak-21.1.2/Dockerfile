@@ -13,6 +13,11 @@ RUN microdnf update -y && \
     microdnf remove -y shadow-utils && \
     microdnf clean all
 
+ARG MIN_JAVA_VERSION=17.0.21.1
+RUN JAVA_VERSION_FOUND=$(java -XshowSettings:properties -version 2>&1 | sed -n 's/^ *java.version = //p') && \
+    printf '%s\n%s\n' "$MIN_JAVA_VERSION" "$JAVA_VERSION_FOUND" | sort -V -C || \
+    { echo "Java $JAVA_VERSION_FOUND is older than $MIN_JAVA_VERSION (CVE-2026-114938)"; exit 1; }
+
 # Stage 3: Final Image
 FROM patched_base
 COPY --from=source --chown=keycloak:keycloak /opt/keycloak/ /opt/keycloak/
