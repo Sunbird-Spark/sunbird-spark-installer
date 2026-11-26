@@ -158,7 +158,8 @@ keys_basepath: "/keys/"
 PORTAL_SERVICE_PORT: "http://player:3000"
 sunbird_installation_display_name_for_sms: "Sunbird"
 isMultiDCEnabled: "false"
-JAVA_OPTIONS: -Xmx1024m
+# JVM options are set with java_options (see "Benchmark tuning" below);
+# env.yaml renders JAVA_OPTIONS from that key, not from here.
 _JAVA_OPTIONS: "-Dlog4j2.formatMsgNoLookups=true"
 enable_captcha: "false"
 user-deletion-broadcast-topic: "local.delete.user"
