@@ -12,7 +12,7 @@ PyJWT==2.15.1
 cryptography==50.0.2
 
 # YAML parsing (for convert_kong_apis_yaml.py)
-PyYAML==6.0.3
+PyYAML==6.0.4
 
 # Note: argparse and logging are built-in Python 3 modules
 # retry functionality implemented directly in common.py
